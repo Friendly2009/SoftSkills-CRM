@@ -14,7 +14,7 @@ app.listen(3000, async () => {
     try {
         const users = await GetUsers(); 
         console.table(users);
-    } catch (err) { //new branch
+    } catch (err) {
         console.error("Ошибка при загрузке данных:", err);
     }
 });
