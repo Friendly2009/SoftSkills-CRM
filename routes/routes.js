@@ -4,4 +4,6 @@ const controller = require('../controllers/IndexController');
 
 router.get('/', controller.index);
 
+router.get('/register', controller.register);
+
 module.exports = router;

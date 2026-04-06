@@ -1,0 +1,152 @@
+:root {
+    --primary-color: #3366ff;
+    --text-dark: #333;
+    --bg-light: #f4f7ff;
+    --white: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    background: var(--white);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    min-height: 80vh;
+}
+
+/* Левая часть */
+.info-side {
+    flex: 1;
+    background-color: #eef2ff;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 24px;
+    margin-bottom: 40px;
+}
+
+.info-side h1 {
+    font-size: 32px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.info-side p {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.highlight {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.promo-badge {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-top: 30px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Правая часть (Форма) */
+.form-side {
+    flex: 1.2;
+    padding: 60px;
+}
+
+.back-link {
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 30px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: var(--primary-color);
+}
+
+.checkbox-group {
+    margin: 20px 0;
+    font-size: 13px;
+    color: #666;
+}
+
+.checkbox-group label {
+    display: block;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 18px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-btn:hover {
+    background-color: #2555e0;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(51, 102, 255, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Адаптивность */
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+    }
+    .info-side {
+        padding: 40px;
+    }
+}
