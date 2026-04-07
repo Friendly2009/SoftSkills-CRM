@@ -6,4 +6,5 @@ router.get('/', controller.index);
 
 router.get('/register', controller.register);
 
+router.get('/registration', controller.registration);
 module.exports = router;

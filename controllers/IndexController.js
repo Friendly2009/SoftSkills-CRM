@@ -6,3 +6,6 @@ exports.index = (req,res) => {
 exports.register = (req,res) =>{
     res.sendFile(path.join(__dirname,"..","views","register.html"));
 };
+exports.registration = (req,res) =>{
+     res.sendFile(path.join(__dirname, "..", "views", "user", "dashboard.html"));
+};

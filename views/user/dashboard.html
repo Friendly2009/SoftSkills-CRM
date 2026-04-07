@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheap CRM Dashboard Layout</title>
+    <style>
+        :root {
+            --sidebar-bg: #f8f9fa;
+            --sidebar-text: #333;
+            --border-color: #dee2e6;
+            --accent-color: #00bcd4;
+            --danger-color: #ff5252;
+            --primary-color: #2196f3;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #fff;
+        }
+
+        .sidebar {
+            width: 180px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding-top: 10px;
+        }
+
+        .sidebar-item {
+            padding: 10px 15px;
+            font-size: 14px;
+            color: var(--sidebar-text);
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background-color: #eceff1;
+        }
+
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 6px 15px;
+            border-radius: 4px;
+            border: none;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-add { background-color: var(--primary-color); }
+        .btn-check { background-color: #4caf50; }
+        .btn-delete { background-color: var(--danger-color); }
+        .btn-grey { background-color: #b0bec5; }
+        
+        .btn-workspace {
+            margin-left: auto;
+            background-color: var(--accent-color);
+        }
+
+        .workspace {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #555;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
+            padding: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .workspace h2 {
+            color: var(--danger-color);
+            font-weight: 400;
+            margin-bottom: 10px;
+        }
+
+        .workspace p {
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-item">📊 Аналитика</div>
+        <div class="sidebar-item">🎓 Уроки</div>
+        <div class="sidebar-item">📝 Задачи</div>
+        <div class="sidebar-item">👥 Клиенты</div>
+        <div class="sidebar-item">🏫 Группы</div>
+        <div class="sidebar-item">👩‍🏫 Педагоги</div>
+        <div class="sidebar-item">💰 Финансы</div>
+        <div class="sidebar-item">🎫 Абонементы</div>
+    </div>
+
+    <div class="main-container">
+        <div class="toolbar">
+            <button class="btn btn-add">➕ Добавить</button>
+            <button class="btn btn-check">✔ Принять</button>
+            <button class="btn btn-delete">🗑 Удалить</button>
+            <button class="btn btn-grey">Другое ▾</button>
+            
+            <button class="btn btn-workspace btn-workspace">Личный рабочий стол ▾</button>
+        </div>
+
+        <div class="workspace">
+            <div class="empty-icon">F2<br>03</div>
+            <h2>На рабочем столе нет виджетов</h2>
+            <p>Используйте кнопку «Добавить» для формирования рабочего стола</p>
+        </div>
+    </div>
+
+</body>
+</html>
