@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cheap CRM Dashboard Layout</title>
     <link rel="stylesheet" href="/style/dashboard/custom.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
   </head>
   <body>
     <header class="alfa-header">
       <div class="header-left">
-        <button class="burger-menu">
+        <button class="burger-menu" id="burger-button">
           <span></span>
           <span></span>
           <span></span>
@@ -25,25 +21,25 @@
 
       <div class="header-center">
         <div class="icon-box">
-          <img src="/img/user/dashboard/plus-icon.png" alt="" />
+          <img src="/img/user/dashboard/plus-solid.png" alt="" class="nav-icon"/>
         </div>
         <div class="icon-box">
-          <img src="/img/user/dashboard/settings-icon.png" alt="" />
+          <img src="/img/user/dashboard/wrench-solid.png" alt="" class="nav-icon"/>
         </div>
         <div class="icon-box">
-          <img src="/img/user/dashboard/email-icon.png" alt="" />
+          <img src="/img/user/dashboard/envelope-solid.png" alt="" class="nav-icon"/>
         </div>
         <div class="icon-box">
-          <img src="/img/user/dashboard/phone-icon.png" alt="" />
+          <img src="/img/user/dashboard/mobile-solid.png" alt="" class="nav-icon"/>
         </div>
         <div class="icon-box">
-          <img src="/img/user/dashboard/telegram-icon.png" alt="" />
+          <img src="/img/user/dashboard/telegram-brands-solid.png" alt="" class="nav-icon"/>
         </div>
         <div class="icon-box">
-          <img src="/img/user/dashboard/shop-icon.png" alt="" />
+          <img src="/img/user/dashboard/cart-shopping-solid.png" alt="" class="nav-icon"/>
         </div>
         <div class="icon-box">
-          <img src="/img/user/dashboard/notification-icon.png" alt="" />
+          <img src="/img/user/dashboard/bell-regular.png" alt="" class="nav-icon"/>
         </div>
         <div class="search-container">
           <input type="text" placeholder="Поиск клиента" />
@@ -57,7 +53,7 @@
       </div>
     </header>
     <main class="alfa-container">
-      <aside class="sidebar">
+      <aside class="sidebar" id="burger-menu">
         <nav class="sidebar-nav">
           <div class="nav-item">
             <img
@@ -152,5 +148,6 @@
         </div>
       </section>
     </main>
+    <script src="/script/dashboard/burger-menu.js"></script>
   </body>
 </html>
