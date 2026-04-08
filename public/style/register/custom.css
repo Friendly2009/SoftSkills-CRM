@@ -41,7 +41,6 @@ body {
     min-height: 80vh;
 }
 
-/* Левая часть */
 .info-side {
     flex: 1;
     background-color: #eef2ff;
@@ -83,7 +82,6 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-/* Правая часть (Форма) */
 .form-side {
     flex: 1.2;
     padding: 60px;
@@ -151,7 +149,6 @@ body {
     transform: translateY(0);
 }
 
-/* Адаптивность */
 @media (max-width: 900px) {
     .container {
         flex-direction: column;

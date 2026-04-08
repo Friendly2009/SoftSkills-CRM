@@ -64,12 +64,6 @@ body, button, input, select, textarea p h1 h2 h3 h4 h5 h6{
     cursor: pointer;
 }
 
-.icon-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 .search-container {
     margin-left: 15px;
 }
@@ -152,7 +146,7 @@ body, button, input, select, textarea p h1 h2 h3 h4 h5 h6{
     width: 16px;
     height: 16px;
     margin-right: 10px;
-    background-color: #ccc; 
+    background-color: transparent; 
 }
 
 .main-content {
