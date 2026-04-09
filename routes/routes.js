@@ -4,7 +4,10 @@ const controller = require('../controllers/IndexController');
 
 router.get('/', controller.index);
 
-router.get('/register', controller.register);
+router.get('/signup', controller.signup);
+router.get('/api/signup', controller.APIsignup);
 
-router.get('/registration', controller.registration);
+router.get('/signin',controller.signin);
+router.get('/api/signin',controller.APIsignin);
+
 module.exports = router;

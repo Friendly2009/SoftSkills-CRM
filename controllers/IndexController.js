@@ -1,11 +1,16 @@
-const path = require('path');
-
-exports.index = (req,res) => {
-    res.sendFile(path.join(__dirname,"..","views","index.html"));
+const path = require("path");
+exports.index = (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "views", "index.html"));
 };
-exports.register = (req,res) =>{
-    res.sendFile(path.join(__dirname,"..","views","register.html"));
+exports.signup = (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "views", "signuppage.html"));
 };
-exports.registration = (req,res) =>{
-     res.sendFile(path.join(__dirname, "..", "views", "user", "dashboard.html"));
+exports.APIsignup = (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "views", "user", "dashboard.html"));
+};
+exports.signin = (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "views", "signinpage.html"));
+};
+exports.APIsignin = (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "views", "signinpage.html"));
 };
