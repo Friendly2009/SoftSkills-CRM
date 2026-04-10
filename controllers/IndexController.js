@@ -9,6 +9,7 @@ exports.signup = (req,res) => {
   res.sendFile(path.join(__dirname,"..","views","signuppage.html"));
 };
 exports.APIsignup = async (req, res) => {
+  console.log('its work');
   const { fullName, email, phone, companyName, adminKey } = req.body;
 
   const userKey = crypto.randomBytes(4).toString("hex");
