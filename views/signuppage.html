@@ -33,7 +33,7 @@
 
           <form action="/api/signup" id="registrationForm">
             <div class="input-group">
-              <input type="text" name="name" placeholder="Ваше имя*" required />
+              <input type="text" name="fullName" placeholder="Ваше имя*" required />
             </div>
             <div class="input-group">
               <input type="email" name="email" placeholder="E-mail*" required />
@@ -44,7 +44,7 @@
             <div class="input-group">
               <input
                 type="text"
-                name="center_name"
+                name="companyName"
                 placeholder="Название центра*"
                 required
               />
@@ -52,8 +52,8 @@
             <div class="input-group">
               <input
                 type="text"
-                name="subdomain"
-                placeholder="Адрес системы*"
+                name="adminKey"
+                placeholder="Ключ администратора (случайный)"
                 required
               />
             </div>
