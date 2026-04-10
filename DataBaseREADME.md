@@ -29,3 +29,20 @@ npm install eslint --save-dev
 
 npx eslint --init
 ESLint 
+
+const [compResult] = await connection.query(
+      "INSERT INTO companies (name, access_key_admin, access_key_user) VALUES (?, ?, ?)",
+      [companyName, adminKey, userKey],
+    );
+    const companyId = compResult.insertId;
+
+    const [userResult] = await connection.query(
+      "INSERT INTO users (full_name, email, phone) VALUES (?, ?, ?)",
+      [fullName, email, phone],
+    );
+    const userId = userResult.insertId;
+
+    await connection.query(
+      "INSERT INTO company_members (user_id, company_id, role) VALUES (?, ?, 'admin')",
+      [userId, companyId],
+    );
