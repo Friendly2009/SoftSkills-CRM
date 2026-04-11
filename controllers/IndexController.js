@@ -78,33 +78,41 @@ exports.APIsignin = async (req, res) => {
       if (row[0].access_key_admin === key) {
         console.log("user is an admin");
         res.cookie("role", "admin", {
-          maxAge: 3600000,
+          maxAge: 86400000,
           httpOnly: false,
           path: "/",
         });
       } else {
         console.log("default user");
-        res.json({ role: "user" });
+        res.cookie("role", "user", {
+          maxAge: 86400000,
+          httpOnly: false,
+          path: "/",
+        });
       }
 
-      return res.sendFile(
-        path.join(__dirname, "..", "views", "user", "dashboard.html"),
-      );
+      return res.redirect("/dashboard");
     }
 
     await connection.commit();
 
-    res.sendFile(path.join(__dirname, "..", "views", "signinpage.html"));
+    return redirect("/signin");
   } catch (ex) {
     if (connection) {
       await connection.rollback();
     }
 
     console.log("error when trying to sign in " + ex);
-    res.status(500).send("server error");
+    return res.status(500).send("server error");
   } finally {
     if (connection) {
       connection.release();
     }
   }
+};
+
+exports.dashboard = (req, res) => { //ДОРАБОТАТЬ БЕЗОПАСНОСТЬ 
+  return res.sendFile(
+      path.join(__dirname, "..", "views", "user", "dashboard.html")
+    );
 };

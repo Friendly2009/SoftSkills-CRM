@@ -12,4 +12,6 @@ router.post('/api/signup', controller.APIsignup);
 router.get('/signin',controller.signin);
 router.post('/api/signin',controller.APIsignin);
 
+router.get("/dashboard", controller.dashboard);
+
 module.exports = router;
