@@ -91,14 +91,14 @@
     <div class="login-card">
       <h2>Авторизация в систему</h2>
 
-      <form action="/api/signin" method="get">
+      <form action="/api/signin" method="post">
         <div class="input-group">
-          <label for="company">Название компании</label>
+          <label for="name">Название компании</label>
           <input
             type="text"
-            id="company"
-            name="company"
-            placeholder="Введите название..."
+            id="name"
+            name="name"
+            placeholder="Введите название компании..."
             required
           />
         </div>
@@ -116,11 +116,13 @@
 
         <button type="submit">Войти</button>
       </form>
-
-      <a href="/support" class="support-link"
-        >Нужна помощь? Напишите в поддержку</a
-      >
+      <p>Забыли ключ?</p>
+      <p>
+        Обратитесь к администрации компании или
+        <a href="/support" class="support-link"
+          > Напишите в поддержку</a
+        >
+      </p>
     </div>
   </body>
 </html>
-  

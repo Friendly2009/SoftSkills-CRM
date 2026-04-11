@@ -10,6 +10,6 @@ router.get('/signup', controller.signup);
 router.post('/api/signup', controller.APIsignup);
 
 router.get('/signin',controller.signin);
-router.get('/api/signin',controller.APIsignin);
+router.post('/api/signin',controller.APIsignin);
 
 module.exports = router;
