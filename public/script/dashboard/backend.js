@@ -8,3 +8,5 @@ function getCookie(name) {
   );
   return matches ? decodeURIComponent(matches[1]) : undefined;
 }
+
+const db = require("./../data_base_connect.js");

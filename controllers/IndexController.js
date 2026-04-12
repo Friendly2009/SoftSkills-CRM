@@ -42,8 +42,14 @@ exports.APIsignup = async (req, res) => {
 
     await connection.commit();
 
-    res.sendFile(path.join(__dirname, "..", "views", "user", "dashboard.html"));
+    res.cookie("role", "admin", {
+      maxAge: 86400000,
+      httpOnly: false,
+      path: "/",
+    });
     console.log(`user ${fullName} has be registered`);
+
+    return res.redirect("/dashboard");
   } catch (error) {
     if (connection) await connection.rollback();
     console.error("Ошибка при регистрации:", error);
@@ -90,6 +96,7 @@ exports.APIsignin = async (req, res) => {
           path: "/",
         });
       }
+      
 
       return res.redirect("/dashboard");
     }
@@ -111,8 +118,9 @@ exports.APIsignin = async (req, res) => {
   }
 };
 
-exports.dashboard = (req, res) => { //ДОРАБОТАТЬ БЕЗОПАСНОСТЬ 
+exports.dashboard = (req, res) => {
+  //ДОРАБОТАТЬ БЕЗОПАСНОСТЬ
   return res.sendFile(
-      path.join(__dirname, "..", "views", "user", "dashboard.html")
-    );
+    path.join(__dirname, "..", "views", "user", "dashboard.html"),
+  );
 };
