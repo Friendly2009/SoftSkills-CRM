@@ -1,12 +1,22 @@
 const express = require('express');
 const path = require('path');
+const session = require('express-session');
 const routes = require('./routes/routes.js');
+
 const app = express();
+console.log("init objects");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+console.log("use json");
 
-
+app.use(session({
+    secret: "mysecretkey",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false}
+}));
+console.log("use session");
 app.use('/', routes); 
 
 app.use(express.static(path.join(__dirname, "public")));

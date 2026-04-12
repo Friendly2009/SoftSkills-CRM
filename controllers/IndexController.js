@@ -11,7 +11,7 @@ exports.signup = (req, res) => {
   res.sendFile(path.join(__dirname, "..", "views", "signuppage.html"));
 };
 exports.APIsignup = async (req, res) => {
-  //функция добавления нового аккаунта в бд + мнгновенная авторизация
+  //функция добавления нового аккаунта в бд + мгновенная авторизация
 
   const { fullName, email, phone, companyName, adminKey } = req.body;
 
@@ -42,11 +42,7 @@ exports.APIsignup = async (req, res) => {
 
     await connection.commit();
 
-    res.cookie("role", "admin", {
-      maxAge: 86400000,
-      httpOnly: false,
-      path: "/",
-    });
+    req.session.role = "admin";
     console.log(`user ${fullName} has be registered`);
 
     return res.redirect("/dashboard");
@@ -83,21 +79,13 @@ exports.APIsignin = async (req, res) => {
 
       if (row[0].access_key_admin === key) {
         console.log("user is an admin");
-        res.cookie("role", "admin", {
-          maxAge: 86400000,
-          httpOnly: false,
-          path: "/",
-        });
+        req.session.role = "admin";
       } else {
         console.log("default user");
-        res.cookie("role", "user", {
-          maxAge: 86400000,
-          httpOnly: false,
-          path: "/",
-        });
+        res.session.role = "user";
       }
       
-
+      req.session.companyid = row[0].id;
       return res.redirect("/dashboard");
     }
 

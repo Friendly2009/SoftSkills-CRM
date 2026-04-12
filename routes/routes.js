@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/IndexController.js');
-
+const data = require('../controllers/dataController.js');
  
 
 router.get('/', controller.index);
@@ -14,4 +14,6 @@ router.post('/api/signin',controller.APIsignin);
 
 router.get("/dashboard", controller.dashboard);
 
+//----------------------------data require----------------------------//
+router.get('/data/getUser', data.getUser);
 module.exports = router;
