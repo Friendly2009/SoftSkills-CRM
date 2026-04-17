@@ -11,10 +11,9 @@ exports.signup = (req, res) => {
   res.sendFile(path.join(__dirname, "..", "views", "signuppage.html"));
 };
 exports.APIsignup = async (req, res) => {
-  // Функция добавления новой компании и администратора в одну таблицу
+  // Функция добавления новой компании и администратора
   const { fullName, email, phone, companyName, adminKey } = req.body;
 
-  // Генерируем ключ для обычных пользователей
   const userKey = crypto.randomBytes(4).toString("hex");
 
   let connection;
@@ -23,26 +22,34 @@ exports.APIsignup = async (req, res) => {
     connection = await db.getConnection();
     await connection.beginTransaction();
 
-    // 1. Создаем компанию (согласно структуре: id, name, access_key_admin, access_key_user)
     const [compResult] = await connection.query(
       `INSERT INTO company (name, access_key_admin, access_key_user) VALUES (?, ?, ?)`,
       [companyName, adminKey, userKey]
     );
     const companyId = compResult.insertId;
 
-    // 2. Создаем пользователя, привязывая его к компании и назначая роль
-    // ВАЖНО: Добавьте колонки email и phone в таблицу users, если их там нет, 
-    // так как на скриншоте видны только: id, company_id, full_name, role, description
-    await connection.query(
+    const userDescription = `Phone: ${phone}, Email: ${email}`;
+    const [userResult] = await connection.query(
       `INSERT INTO users (company_id, full_name, role, description) VALUES (?, ?, ?, ?)`,
-      [companyId, fullName, "admin", `Phone: ${phone}, Email: ${email}`] // Пример записи доп. данных в description
+      [companyId, fullName, "admin", userDescription]
     );
+    const userId = userResult.insertId;
+
+    const [[dbCompany]] = await connection.query("SELECT * FROM company WHERE id = ?", [companyId]);
+    const [[dbUser]] = await connection.query("SELECT * FROM users WHERE id = ?", [userId]);
 
     await connection.commit();
 
-    // Сохраняем данные в сессию
-    req.session.role = "admin";
-    req.session.companyId = companyId;
+    
+    req.session.company_id = dbCompany.id;
+    req.session.company_name = dbCompany.name;
+    req.session.key_admin = dbCompany.access_key_admin;
+    req.session.key_user = dbCompany.access_key_user;
+
+    req.session.user_id = dbUser.id;
+    req.session.user_full_name = dbUser.full_name;
+    req.session.role = dbUser.role; // Устанавливаем 'admin'
+    req.session.user_description = dbUser.description;
 
     console.log(`Администратор ${fullName} и компания ${companyName} успешно созданы`);
     return res.redirect("/dashboard");
@@ -56,22 +63,20 @@ exports.APIsignup = async (req, res) => {
   }
 };
 
+
 exports.signin = (req, res) => {
   //страница авторизации
   res.sendFile(path.join(__dirname, "..", "views", "signinpage.html"));
 };
 
 exports.APIsignin = async (req, res) => {
-  // функция авторизации
   const { name, key } = req.body;
   let connection;
 
   try {
     connection = await db.getConnection();
-    // Для простого SELECT транзакция (beginTransaction) обычно не требуется, 
-    // но оставим структуру для единообразия
 
-    // Ищем компанию по имени и одному из ключей
+    // 1. Ищем компанию
     const [companies] = await connection.query(
       "SELECT * FROM company WHERE name = ? AND (access_key_admin = ? OR access_key_user = ?)",
       [name, key, key]
@@ -79,22 +84,33 @@ exports.APIsignin = async (req, res) => {
 
     if (companies.length > 0) {
       const currentCompany = companies[0];
-      console.log(`Компания ${name} найдена`);
 
-      // Проверяем, какой именно ключ подошел, чтобы выставить роль
-      if (currentCompany.access_key_admin === key) {
-        console.log("Вход как: admin");
-        req.session.role = "admin";
-      } else {
-        console.log("Вход как: user");
-        req.session.role = "user";
+      const userRole = currentCompany.access_key_admin === key ? "admin" : "user";
+      req.session.role = userRole;
+
+      req.session.company_id = currentCompany.id;
+      req.session.company_name = currentCompany.name;
+      req.session.key_admin = currentCompany.access_key_admin;
+      req.session.key_user = currentCompany.access_key_user;
+
+      const [users] = await connection.query(
+        "SELECT * FROM users WHERE company_id = ? AND role = ? LIMIT 1",
+        [currentCompany.id, userRole]
+      );
+
+      if (users.length > 0) {
+        const currentUser = users[0];
+
+        req.session.user_id = currentUser.id;
+        req.session.user_full_name = currentUser.full_name;
+        req.session.user_description = currentUser.description;
+        req.session.db_user_role = currentUser.role;
       }
 
-      req.session.companyid = currentCompany.id;
+      console.log(`Вход выполнен: ${name} (${req.session.role})`);
       return res.redirect("/dashboard");
     }
 
-    // Если ничего не нашли
     console.log("Неверное имя компании или ключ");
     return res.redirect("/signin");
 
@@ -105,6 +121,7 @@ exports.APIsignin = async (req, res) => {
     if (connection) connection.release();
   }
 };
+
 
 
 exports.dashboard = (req, res) => {

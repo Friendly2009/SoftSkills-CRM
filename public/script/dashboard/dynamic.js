@@ -1,5 +1,4 @@
 const burger_btn = document.getElementById("burger-button");
-
 burger_btn.addEventListener("click", function () {
   var burger_menu = document.getElementById("burger-menu");
 
@@ -39,4 +38,3 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
-

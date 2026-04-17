@@ -1,6 +1,21 @@
-const db = require("./../data_base_connect.js");
-const responseOfUser = await fetch('data/getUser');
+async function updateUI() {
+    try {
+        const responseOfUser = await fetch('/data/getUser');
 
-let name_infoHTML = document.getElementById('name_info');
-let user_data = await responseOfUser.json();
-name_infoHTML.textContent = user_data.role 
+        if (!responseOfUser.ok) {
+            throw new Error('Не удалось получить данные');
+        }
+        let user_data = await responseOfUser.json();
+
+        let name_infoHTML = document.getElementById('name_info');
+        if (name_infoHTML) {
+            name_infoHTML.textContent = user_data.role + "|" + user_data.company_name;
+        }
+
+        console.log("Данные получены:", user_data);
+    } catch (ex) {
+        console.error("Ошибка на клиенте:", ex);
+    }
+}
+
+updateUI();
