@@ -1,15 +1,22 @@
-async function updateUI() {
+async function loadUserData() {
     try {
         const responseOfUser = await fetch('/data/getUser');
 
         if (!responseOfUser.ok) {
             throw new Error('Не удалось получить данные');
         }
-        let user_data = await responseOfUser.json();
+        
+        const user_data = await responseOfUser.json();
 
-        let name_infoHTML = document.getElementById('name_info');
+        const name_infoHTML = document.getElementById('name_info');
+        
         if (name_infoHTML) {
-            name_infoHTML.textContent = user_data.role + "|" + user_data.company_name;
+            name_infoHTML.textContent = `${user_data.userRole} | ${user_data.full_name}`;
+            
+            name_infoHTML.style.cursor = "pointer";
+            name_infoHTML.onclick = () => {
+                alert(JSON.stringify(user_data, null, 4));
+            };
         }
 
         console.log("Данные получены:", user_data);
@@ -18,4 +25,4 @@ async function updateUI() {
     }
 }
 
-updateUI();
+loadUserData();
