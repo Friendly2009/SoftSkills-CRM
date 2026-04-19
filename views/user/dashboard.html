@@ -155,10 +155,23 @@
           <input type="text" placeholder="Поиск клиента" />
         </div>
       </div>
-      <div class="header-right">
-        <span class="user-name" id="name_info"></span>
+      <div class="header-right"> 
+        <span class="user-name" id="name_info">Имя Пользователя</span>
         <div class="user-avatar">
           <img src="/img/user/dashboard/empty-male.png" alt="" />
+        </div>
+
+        <div class="user-menu-dropdown" id="userDropdown">
+          <div class="dropdown-info">
+            <p class="dropdown-name">Имя Пользователя</p>
+            <p class="dropdown-email">user@example.com</p>
+          </div>
+          <hr />
+          <ul class="dropdown-links">
+            <li><a href="/profile">Мой профиль</a></li>
+            <li><a href="/settings">Настройки</a></li>
+            <li><a href="/logout" class="logout-link">Выйти</a></li>
+          </ul>
         </div>
       </div>
     </header>
@@ -284,9 +297,7 @@
         </div>
 
         <div class="dashboard-placeholder">
-          <div class="placeholder-content" id="placeholder-content">
-            
-          </div>
+          <div class="placeholder-content" id="placeholder-content"></div>
         </div>
       </section>
     </main>

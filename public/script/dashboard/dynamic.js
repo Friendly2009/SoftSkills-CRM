@@ -16,8 +16,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const btn = document.getElementById("plusBtn");
   const menu = document.getElementById("dropdownMenu");
 
-  if (!btn || !menu) return;
-
   btn.addEventListener("mouseenter", () => {
     menu.style.display = "block";
   });
@@ -38,7 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
-
 //-----------------------------------------------------------------//
 const sectionsContentMap = {
   analityc: `
@@ -81,11 +78,11 @@ const sectionsContentMap = {
 const placeholder_content = document.getElementById("placeholder-content");
 const navItems = document.querySelectorAll(".nav-item");
 
-navItems.forEach(item => {
-  item.addEventListener("click", function(){
+navItems.forEach((item) => {
+  item.addEventListener("click", function () {
     const type = item.getAttribute("screen_type");
 
-    if(sectionsContentMap[type]){
+    if (sectionsContentMap[type]) {
       placeholder_content.innerHTML = sectionsContentMap[type];
     }
   });
