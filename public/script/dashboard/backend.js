@@ -14,9 +14,6 @@ async function loadUserData() {
             name_infoHTML.textContent = `${user_data.userRole} | ${user_data.full_name}`;
             
             name_infoHTML.style.cursor = "pointer";
-            name_infoHTML.onclick = () => {
-                alert(JSON.stringify(user_data, null, 4));
-            };
         }
 
         console.log("Данные получены:", user_data);

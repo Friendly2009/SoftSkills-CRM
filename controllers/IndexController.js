@@ -76,7 +76,6 @@ exports.APIsignin = async (req, res) => {
   try {
     connection = await db.getConnection();
 
-    // 1. Ищем компанию
     const [companies] = await connection.query(
       "SELECT * FROM company WHERE name = ? AND (access_key_admin = ? OR access_key_user = ?)",
       [name, key, key]
