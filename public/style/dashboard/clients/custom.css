@@ -16,7 +16,7 @@
 
 .filter-btn.active {
     background: var(--primary);
-    color: white;
+    color: rgba(0,0,0,0.5);
 }
 
 .table-wrapper {
