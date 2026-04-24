@@ -13,6 +13,7 @@ router.get('/signin',controller.signin);
 router.post('/api/signin',controller.APIsignin);
 
 router.get("/dashboard", controller.dashboard);
+router.get("/clients",controller.clients);
 
 //----------------------------data require----------------------------//
 router.get('/data/getUser', data.getUser);

@@ -121,11 +121,12 @@ exports.APIsignin = async (req, res) => {
   }
 };
 
-
-
 exports.dashboard = (req, res) => {
   //ДОРАБОТАТЬ БЕЗОПАСНОСТЬ
   return res.sendFile(
     path.join(__dirname, "..", "views", "user", "dashboard.html"),
   );
+};
+exports.clients = (req,res) => {
+  return res.sendFile(path.join(__dirname, "..","views","user","clients.html"));
 };

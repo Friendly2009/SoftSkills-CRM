@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Управление клиентами</title>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="filters">
+            <button class="filter-btn active" data-type="all">Текущие</button>
+            <button class="filter-btn" data-type="no-group">Без группы</button>
+            <button class="filter-btn" data-type="with-group">С группой</button>
+            <button class="filter-btn" data-type="birthday">ДР в этом месяце</button>
+            <button class="filter-btn" data-type="archive">Архивные</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="clientTable">
+                <thead>
+                    <tr>
+                        <th>Фото</th>
+                        <th>ФИО</th>
+                        <th>Группы</th>
+                        <th>Активные группы</th>
+                        <th>Общий остаток</th>
+                        <th>Бонусный счёт</th>
+                        <th>Статус обучения</th>
+                        <th>Контакты</th>
+                        <th>След. посещение</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-type="with-group">
+                        <td><img src="https://placeholder.com" alt="avatar" class="avatar"></td>
+                        <td>Иванов Иван Иванович</td>
+                        <td>Английский B1</td>
+                        <td>Да</td>
+                        <td>5 400 ₽</td>
+                        <td>500</td>
+                        <td class="status-active">Учится</td>
+                        <td>+7 999 000-00-00</td>
+                        <td>26.04.2024</td>
+                        <td><button class="delete-btn">Удалить</button></td>
+                    </tr>
+                    <tr data-type="no-group">
+                        <td><img src="https://placeholder.com" alt="avatar" class="avatar"></td>
+                        <td>Петров Петр Петрович</td>
+                        <td>—</td>
+                        <td>Нет</td>
+                        <td>0 ₽</td>
+                        <td>100</td>
+                        <td class="status-paused">Перерыв</td>
+                        <td>+7 999 111-22-33</td>
+                        <td>—</td>
+                        <td><button class="delete-btn">Удалить</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+
+</html>
