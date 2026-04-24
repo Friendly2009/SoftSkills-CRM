@@ -46,6 +46,29 @@ CREATE TABLE IF NOT EXISTS `crm`.`users` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `crm`.`clients`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `crm`.`clients` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `company_id` INT NOT NULL,
+  `photo_url` mediumblob NULL, -- Ссылка на фото
+  `full_name` VARCHAR(255) NOT NULL, -- ФИО
+  `active_groups` TEXT NULL, -- Активные группы
+  `total_balance` DECIMAL(10, 2) DEFAULT 0, 
+  `bonus_account` INT DEFAULT 0, -- Бонусный счет
+  `learning_status` VARCHAR(100) NULL, -- Статус обучения
+  `contacts` VARCHAR(255) NULL, -- Телефон/email
+  `next_visit_date` DATETIME NULL, -- Дата следующего посещения
+  PRIMARY KEY (`id`),
+  INDEX `fk_clients_company_idx` (`company_id` ASC) VISIBLE,
+  CONSTRAINT `fk_clients_company`
+    FOREIGN KEY (`company_id`)
+    REFERENCES `crm`.`company` (`id`)
+    ON DELETE CASCADE -- Если компания удалится, удалятся и её клиенты
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
