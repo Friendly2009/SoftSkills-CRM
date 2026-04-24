@@ -1,307 +1,189 @@
 <!doctype html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cheap CRM Dashboard Layout</title>
-    <link rel="stylesheet" href="/style/dashboard/custom.css" />
-  </head>
 
-  <body>
-    <header class="alfa-header">
-      <div class="header-left">
-        <button class="burger-menu" id="burger-button">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        <div class="logo">
-          <img src="/img/index/brand-logo-2024.webp" alt="alfacrm" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cheap CRM Dashboard</title>
+  <link rel="stylesheet" href="/style/dashboard/custom.css" />
+</head>
+
+<body>
+  <header class="alfa-header">
+    <div class="header-left">
+      <button class="burger-menu" id="burger-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="logo">
+        <img src="/img/index/brand-logo-2024.webp" alt="alfacrm" />
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div id="dropdownMenu" class="dropdown-menu">
+        <div class="menu-item">
+          <img src="/img/user/dashboard/list-check-solid.png" alt="" class="nav-icon" />Задача
+        </div>
+        <div class="menu-item">
+          <img src="/img/user/dashboard/user-plus-solid.png" alt="" class="nav-icon" />Лид
+        </div>
+        <div class="menu-item" id="clientLink">
+          <img src="/img/user/dashboard/user-solid.png" alt="" class="nav-icon" />Клиент
+        </div>
+        <div class="menu-item">
+          <img src="/img/user/dashboard/user-group-solid.png" alt="" class="nav-icon" />Группа
+        </div>
+        <hr />
+        <div class="menu-item">
+          <img src="/img/user/dashboard/money-bill-trend-up-solid.png" alt="" class="nav-icon" />Доход
+        </div>
+        <div class="menu-item">
+          <img src="/img/user/dashboard/cart-shopping-solid.png" alt="" class="nav-icon" />Продажа товара
+        </div>
+        <div class="menu-item">
+          <img src="/img/user/dashboard/money-bill-trend-up-solid.png" alt="" class="nav-icon" />Возврат средств
+        </div>
+        <div class="menu-item">
+          <img src="/img/user/dashboard/wand-magic-sparkles-solid.png" alt="" class="nav-icon" />Корректировка
+        </div>
+        <hr />
+        <div class="menu-item">
+          <img src="/img/user/dashboard/user-group-solid.png" alt="" class="nav-icon" />Групповой
+        </div>
+        <div class="menu-item">
+          <img src="/img/user/dashboard/user-solid.png" alt="" class="nav-icon" />Индивидуальный
+        </div>
+        <div class="menu-item">
+          <img src="/img/user/dashboard/wand-magic-sparkles-solid.png" alt="" class="nav-icon" />Пробный
+        </div>
+      </div>
+      <div class="icon-box" id="plusBtn">
+        <img src="/img/user/dashboard/plus-solid.png" alt="" class="nav-icon" />
+      </div>
+      <div class="icon-box">
+        <img src="/img/user/dashboard/wrench-solid.png" alt="" class="nav-icon" />
+      </div>
+      <div class="icon-box">
+        <img src="/img/user/dashboard/envelope-solid.png" alt="" class="nav-icon" />
+      </div>
+      <div class="icon-box">
+        <img src="/img/user/dashboard/mobile-solid.png" alt="" class="nav-icon" />
+      </div>
+      <div class="icon-box">
+        <img src="/img/user/dashboard/telegram-brands-solid.png" alt="" class="nav-icon" />
+      </div>
+      <div class="icon-box">
+        <img src="/img/user/dashboard/cart-shopping-solid.png" alt="" class="nav-icon" />
+      </div>
+      <div class="icon-box">
+        <img src="/img/user/dashboard/bell-regular.png" alt="" class="nav-icon" />
+      </div>
+      <div class="search-container">
+        <input type="text" placeholder="Поиск клиента" />
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="user-name" id="name_info">Имя Пользователя</span>
+      <div class="user-avatar">
+        <img src="/img/user/dashboard/empty-male.png" alt="" />
+      </div>
+
+      <div class="user-menu-dropdown" id="userDropdown">
+        <div class="dropdown-info">
+          <p class="dropdown-name">Имя Пользователя</p>
+          <p class="dropdown-email">user@example.com</p>
+        </div>
+        <hr />
+        <ul class="dropdown-links">
+          <li><a href="/profile">Мой профиль</a></li>
+          <li><a href="/settings">Настройки</a></li>
+          <li><a href="/logout" class="logout-link">Выйти</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main class="alfa-container">
+    <aside class="sidebar" id="burger-menu">
+      <nav class="sidebar-nav">
+        <div class="nav-item" screen_type="analityc">
+          <img src="/img/user/dashboard/chart-line-solid.png" alt="" class="nav-icon" />
+          <span>Аналитика</span>
+        </div>
+        <div class="nav-item" screen_type="lessons">
+          <img src="/img/user/dashboard/calendar-regular.png" alt="" class="nav-icon" />
+          <span>Уроки</span>
+        </div>
+        <div class="nav-item" screen_type="tasks">
+          <img src="/img/user/dashboard/list-check-solid.png" alt="" class="nav-icon" />
+          <span>Задачи</span>
+        </div>
+        <div class="nav-item" screen_type="clients" id="clientLink">
+          <img src="/img/user/dashboard/user-solid.png" alt="" class="nav-icon" />
+          <span>Клиенты</span>
+        </div>
+        <div class="nav-item" screen_type="groups">
+          <img src="/img/user/dashboard/user-group-solid.png" alt="" class="nav-icon" />
+          <span>Группы</span>
+        </div>
+        <div class="nav-item" screen_type="teachers">
+          <img src="/img/user/dashboard/chalkboard-user-solid.png" alt="" class="nav-icon" />
+          <span>Педагоги</span>
+        </div>
+        <div class="nav-item" screen_type="finance">
+          <img src="/img/user/dashboard/coins-solid.png" alt="" class="nav-icon" />
+          <span>Финансы</span>
+        </div>
+        <div class="nav-item" screen_type="abonements">
+          <img src="/img/user/dashboard/tags-solid.png" alt="" class="nav-icon" />
+          <span>Абонементы</span>
+        </div>
+        <div class="nav-item" screen_type="leaders">
+          <img src="/img/user/dashboard/user-plus-solid.png" alt="" class="nav-icon" />
+          <span>Лиды</span>
+        </div>
+        <div class="nav-item" screen_type="legalEntity">
+          <img src="/img/user/dashboard/briefcase-solid.png" alt="" class="nav-icon" />
+          <span>Юр Лица</span>
+        </div>
+        <div class="nav-item" screen_type="informer">
+          <img src="/img/user/dashboard/book-solid.png" alt="" class="nav-icon" />
+          <span>Информер</span>
+        </div>
+        <div class="nav-item" screen_type="security">
+          <img src="/img/user/dashboard/lock-solid.png" alt="" class="nav-icon" />
+          <span>Доступ в CRM</span>
+        </div>
+      </nav>
+    </aside>
+
+    <section class="main-content">
+      <div class="content-header">
+        <div class="tabs">
+          <button class="tab active">Рабочий стол</button>
+          <button class="tab">Отчеты</button>
+        </div>
+
+        <div class="action-bar">
+          <div class="btn-group">
+            <button class="btn btn-blue">+ Добавить</button>
+            <button class="btn btn-light-blue">Править</button>
+            <button class="btn btn-red">Удалить</button>
+            <button class="btn btn-gray">Другое</button>
+          </div>
+          <button class="btn btn-green">Личный рабочий стол</button>
         </div>
       </div>
 
-      <div class="header-center">
-        <div id="dropdownMenu" class="dropdown-menu">
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/list-check-solid.png"
-              alt=""
-              class="nav-icon"
-            />Задача
-          </div>
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/user-plus-solid.png"
-              alt=""
-              class="nav-icon"
-            />Лид
-          </div>
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/user-solid.png"
-              alt=""
-              class="nav-icon"
-            />Клиент
-          </div>
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/user-group-solid.png"
-              alt=""
-              class="nav-icon"
-            />Группа
-          </div>
-          <hr />
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/money-bill-trend-up-solid.png"
-              alt=""
-              class="nav-icon"
-            />Доход
-          </div>
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/cart-shopping-solid.png"
-              alt=""
-              class="nav-icon"
-            />Продажа товара
-          </div>
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/money-bill-trend-up-solid.png"
-              alt=""
-              class="nav-icon"
-            />Возврат средств
-          </div>
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/wand-magic-sparkles-solid.png"
-              alt=""
-              class="nav-icon"
-            />Корректировка
-          </div>
-          <hr />
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/user-group-solid.png"
-              alt=""
-              class="nav-icon"
-            />Групповой
-          </div>
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/user-solid.png"
-              alt=""
-              class="nav-icon"
-            />Индивидуальный
-          </div>
-          <div class="menu-item">
-            <img
-              src="/img/user/dashboard/wand-magic-sparkles-solid.png"
-              alt=""
-              class="nav-icon"
-            />Пробный
-          </div>
-        </div>
-        <div class="icon-box" id="plusBtn">
-          <img
-            src="/img/user/dashboard/plus-solid.png"
-            alt=""
-            class="nav-icon"
-          />
-        </div>
-        <div class="icon-box">
-          <img
-            src="/img/user/dashboard/wrench-solid.png"
-            alt=""
-            class="nav-icon"
-          />
-        </div>
-        <div class="icon-box">
-          <img
-            src="/img/user/dashboard/envelope-solid.png"
-            alt=""
-            class="nav-icon"
-          />
-        </div>
-        <div class="icon-box">
-          <img
-            src="/img/user/dashboard/mobile-solid.png"
-            alt=""
-            class="nav-icon"
-          />
-        </div>
-        <div class="icon-box">
-          <img
-            src="/img/user/dashboard/telegram-brands-solid.png"
-            alt=""
-            class="nav-icon"
-          />
-        </div>
-        <div class="icon-box">
-          <img
-            src="/img/user/dashboard/cart-shopping-solid.png"
-            alt=""
-            class="nav-icon"
-          />
-        </div>
-        <div class="icon-box">
-          <img
-            src="/img/user/dashboard/bell-regular.png"
-            alt=""
-            class="nav-icon"
-          />
-        </div>
-        <div class="search-container">
-          <input type="text" placeholder="Поиск клиента" />
-        </div>
+      <div class="dashboard-placeholder">
+        <div class="placeholder-content" id="placeholder-content"></div>
       </div>
-      <div class="header-right"> 
-        <span class="user-name" id="name_info">Имя Пользователя</span>
-        <div class="user-avatar">
-          <img src="/img/user/dashboard/empty-male.png" alt="" />
-        </div>
+    </section>
+  </main>
+  <script src="/script/dashboard/backend.js"></script>
+  <script src="/script/dashboard/dynamic.js"></script>
+</body>
 
-        <div class="user-menu-dropdown" id="userDropdown">
-          <div class="dropdown-info">
-            <p class="dropdown-name">Имя Пользователя</p>
-            <p class="dropdown-email">user@example.com</p>
-          </div>
-          <hr />
-          <ul class="dropdown-links">
-            <li><a href="/profile">Мой профиль</a></li>
-            <li><a href="/settings">Настройки</a></li>
-            <li><a href="/logout" class="logout-link">Выйти</a></li>
-          </ul>
-        </div>
-      </div>
-    </header>
-
-    <main class="alfa-container">
-      <aside class="sidebar" id="burger-menu">
-        <nav class="sidebar-nav">
-          <div class="nav-item" screen_type="analityc">
-            <img
-              src="/img/user/dashboard/chart-line-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Аналитика</span>
-          </div>
-          <div class="nav-item" screen_type="lessons">
-            <img
-              src="/img/user/dashboard/calendar-regular.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Уроки</span>
-          </div>
-          <div class="nav-item" screen_type="tasks">
-            <img
-              src="/img/user/dashboard/list-check-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Задачи</span>
-          </div>
-          <div class="nav-item" screen_type="clients">
-            <img
-              src="/img/user/dashboard/user-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Клиенты</span>
-          </div>
-          <div class="nav-item" screen_type="groups">
-            <img
-              src="/img/user/dashboard/user-group-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Группы</span>
-          </div>
-          <div class="nav-item" screen_type="teachers">
-            <img
-              src="/img/user/dashboard/chalkboard-user-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Педагоги</span>
-          </div>
-          <div class="nav-item" screen_type="finance">
-            <img
-              src="/img/user/dashboard/coins-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Финансы</span>
-          </div>
-          <div class="nav-item" screen_type="abonements">
-            <img
-              src="/img/user/dashboard/tags-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Абонементы</span>
-          </div>
-          <div class="nav-item" screen_type="leaders">
-            <img
-              src="/img/user/dashboard/user-plus-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Лиды</span>
-          </div>
-          <div class="nav-item" screen_type="legalEntity">
-            <img
-              src="/img/user/dashboard/briefcase-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Юр Лица</span>
-          </div>
-          <div class="nav-item" screen_type="informer">
-            <img
-              src="/img/user/dashboard/book-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Информер</span>
-          </div>
-          <div class="nav-item" screen_type="security">
-            <img
-              src="/img/user/dashboard/lock-solid.png"
-              alt=""
-              class="nav-icon"
-            />
-            <span>Доступ в CRM</span>
-          </div>
-        </nav>
-      </aside>
-
-      <section class="main-content">
-        <div class="content-header">
-          <div class="tabs">
-            <button class="tab active">Рабочий стол</button>
-            <button class="tab">Отчеты</button>
-          </div>
-
-          <div class="action-bar">
-            <div class="btn-group">
-              <button class="btn btn-blue">+ Добавить</button>
-              <button class="btn btn-light-blue">Править</button>
-              <button class="btn btn-red">Удалить</button>
-              <button class="btn btn-gray">Другое</button>
-            </div>
-            <button class="btn btn-green">Личный рабочий стол</button>
-          </div>
-        </div>
-
-        <div class="dashboard-placeholder">
-          <div class="placeholder-content" id="placeholder-content"></div>
-        </div>
-      </section>
-    </main>
-    <script src="/script/dashboard/backend.js"></script>
-    <script src="/script/dashboard/dynamic.js"></script>
-  </body>
 </html>

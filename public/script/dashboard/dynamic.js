@@ -37,3 +37,12 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 //-----------------------------------------------------------------//
+try {
+  const clientLink = document.getElementById("clientLink");
+  clientLink.addEventListener("click", function () {
+    alert("awd");
+    window.location.href = "/clients";
+  });
+} catch (ex) {
+  alert(ex);
+}
