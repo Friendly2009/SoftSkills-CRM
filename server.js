@@ -20,7 +20,7 @@ console.log("use session");
 app.use('/', routes); 
 
 app.use(express.static(path.join(__dirname, "public")));
-
+console.log("its katya");
 app.listen(3000, async () => {
     console.log("your server was be running on http://localhost:3000");
 });
