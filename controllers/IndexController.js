@@ -130,3 +130,6 @@ exports.dashboard = (req, res) => {
 exports.clients = (req,res) => {
   return res.sendFile(path.join(__dirname, "..","views","user","clients.html"));
 };
+exports.teachers = (req,res) => {
+  return res.sendFile(path.join(__dirname, "..", "views", "user", "teachers.html"));
+};

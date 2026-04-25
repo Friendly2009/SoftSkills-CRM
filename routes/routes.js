@@ -14,6 +14,7 @@ router.post('/api/signin',controller.APIsignin);
 
 router.get("/dashboard", controller.dashboard);
 router.get("/clients",controller.clients);
+router.get("/teachers",controller.teachers);
 
 //----------------------------data require----------------------------//
 router.get('/data/getUser', data.getUser);

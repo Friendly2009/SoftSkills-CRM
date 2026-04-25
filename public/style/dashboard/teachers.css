@@ -1,0 +1,79 @@
+/* Контейнер для таблицы */
+.alfa-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+}
+
+.alfa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  font-size: 11px; /* В таких CRM шрифт обычно очень мелкий */
+  color: #333;
+}
+
+/* Стили заголовков */
+.alfa-table thead th {
+  background-color: #f7f7f7;
+  color: #666;
+  font-weight: bold;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+/* Стили ячеек */
+.alfa-table tbody td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+/* Чередование строк (зебра), если нужно */
+.alfa-table tbody tr:hover {
+  background-color: #fafafa;
+}
+
+/* Специфические колонки */
+.col-name {
+  font-weight: bold;
+  color: #000;
+}
+
+.avatar-circle {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* Статусы как на скриншоте */
+.status {
+  font-weight: bold;
+}
+.status-active {
+  color: #7ed321; /* Ярко-зеленый */
+}
+.status-inactive {
+  color: #f5a623; /* Оранжевый */
+}
+
+.btn-del {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-del:hover {
+  text-decoration: underline;
+}
+
+.fw-bold {
+  font-weight: bold;
+}

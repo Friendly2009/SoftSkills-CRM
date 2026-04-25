@@ -11,6 +11,7 @@ burger_btn.addEventListener("click", function () {
     burger_menu.style.display = "block";
   }
 });
+
 //-----------------------------------------------------------------//
 document.addEventListener("DOMContentLoaded", function () {
   const btn = document.getElementById("plusBtn");
@@ -35,14 +36,16 @@ document.addEventListener("DOMContentLoaded", function () {
       menu.style.display = "none";
     }
   });
-});
-//-----------------------------------------------------------------//
-try {
+
+  
   const clientLink = document.getElementById("clientLink");
   clientLink.addEventListener("click", function () {
-    alert("awd");
     window.location.href = "/clients";
   });
-} catch (ex) {
-  alert(ex);
-}
+
+  const teachersLink = document.getElementById("teachersLink");
+  teachersLink.addEventListener("click", function() {
+    window.location.href = "/teachers"
+  });
+});
+//-----------------------------------------------------------------//

@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cheap CRM Dashboard Layout</title>
+    <title>Cheap CRM Dashboard</title>
+    <link rel="stylesheet" href="/style/dashboard/teachers.css" />
     <link rel="stylesheet" href="/style/dashboard/custom.css" />
-    <link rel="stylesheet" href="/style/dashboard/clients/custom.css" />
   </head>
 
   <body>
@@ -37,7 +37,7 @@
               class="nav-icon"
             />Лид
           </div>
-          <div class="menu-item">
+          <div class="menu-item" id="clientLink">
             <img
               src="/img/user/dashboard/user-solid.png"
               alt=""
@@ -296,66 +296,12 @@
             <button class="btn btn-green">Личный рабочий стол</button>
           </div>
         </div>
-        <div class="placeholder-content">
-          <div class="container" style="margin-top: 20px">
-            <div class="filters">
-              <button class="filter-btn active" data-type="all">Текущие</button>
-              <button class="filter-btn" data-type="no-group">
-                Без группы
-              </button>
-              <button class="filter-btn" data-type="with-group">
-                С группой
-              </button>
-              <button class="filter-btn" data-type="birthday">
-                ДР в этом месяце
-              </button>
-              <button class="filter-btn" data-type="archive">Архивные</button>
-            </div>
 
-            <div class="table-wrapper">
-              <table id="clientTable">
-                <thead>
-                  <tr>
-                    <th>Фото</th>
-                    <th>ФИО</th>
-                    <th>Группы</th>
-                    <th>Активные группы</th>
-                    <th>Общий остаток</th>
-                    <th>Бонусный счёт</th>
-                    <th>Статус обучения</th>
-                    <th>Контакты</th>
-                    <th>След. посещение</th>
-                    <th>Действие</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr data-type="with-group">
-                    <td><img class="avatar" /></td>
-                    <td>Иванов Иван Иванович</td>
-                    <td>Английский B1</td>
-                    <td>Да</td>
-                    <td>5 400 ₽</td>
-                    <td>500</td>
-                    <td class="status-active">Активен</td>
-                    <td>+7 999 000-00-00</td>
-                    <td>26.04.2024</td>
-                    <td><button class="delete-btn">Удалить</button></td>
-                  </tr>
-                  <tr data-type="no-group">
-                    <td><img class="avatar" /></td>
-                    <td>Петров Петр Петрович</td>
-                    <td>—</td>
-                    <td>Нет</td>
-                    <td>0 ₽</td>
-                    <td>100</td>
-                    <td class="status-paused">Не активен</td>
-                    <td>+7 999 111-22-33</td>
-                    <td>—</td>
-                    <td><button class="delete-btn">Удалить</button></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+        <div class="dashboard-placeholder">
+          <div class="placeholder-content" id="placeholder-content">
+            
+
+            
           </div>
         </div>
       </section>
