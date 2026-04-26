@@ -1,79 +1,82 @@
-/* Контейнер для таблицы */
-.alfa-table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  background: #fff;
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-.alfa-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: Arial, sans-serif;
-  font-size: 11px; /* В таких CRM шрифт обычно очень мелкий */
-  color: #333;
+.filter-btn {
+    padding: 8px 16px;
+    border: none;
+    background: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: 0.3s;
 }
 
-/* Стили заголовков */
-.alfa-table thead th {
-  background-color: #f7f7f7;
-  color: #666;
-  font-weight: bold;
-  text-align: left;
-  padding: 8px 10px;
-  border-bottom: 1px solid #e0e0e0;
-  white-space: nowrap;
+.filter-btn.active {
+    background: var(--primary);
+    color: rgba(0,0,0,0.5);
 }
 
-/* Стили ячеек */
-.alfa-table tbody td {
-  padding: 6px 10px;
-  border-bottom: 1px solid #f0f0f0;
-  vertical-align: middle;
+.table-wrapper {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* Чередование строк (зебра), если нужно */
-.alfa-table tbody tr:hover {
-  background-color: #fafafa;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
 }
 
-/* Специфические колонки */
-.col-name {
-  font-weight: bold;
-  color: #000;
+th {
+    background: #fafafa;
+    padding: 15px;
+    border-bottom: 2px solid #eee;
+    color: #666;
 }
 
-.avatar-circle {
-  width: 24px;
-  height: 24px;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  background: #fff;
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
 }
 
-/* Статусы как на скриншоте */
-.status {
-  font-weight: bold;
+tr:hover {
+    background: #f9fbff;
 }
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 .status-active {
-  color: #7ed321; /* Ярко-зеленый */
-}
-.status-inactive {
-  color: #f5a623; /* Оранжевый */
+    color: #52c41a;
+    font-weight: bold;
 }
 
-.btn-del {
-  background: none;
-  border: none;
-  color: #333;
-  font-size: 11px;
-  cursor: pointer;
-  padding: 0;
+.status-paused {
+    color: #faad14;
+    font-weight: bold;
 }
 
-.btn-del:hover {
-  text-decoration: underline;
+.delete-btn {
+    background: none;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-.fw-bold {
-  font-weight: bold;
+.delete-btn:hover {
+    background: var(--danger);
+    color: white;
 }

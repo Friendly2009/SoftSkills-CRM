@@ -37,7 +37,8 @@
               class="nav-icon"
             />Лид
           </div>
-          <div class="menu-item"> <!--NOT THIS-->
+          <div class="menu-item">
+            <!--NOT THIS-->
             <img
               src="/img/user/dashboard/user-solid.png"
               alt=""
@@ -204,7 +205,8 @@
             />
             <span>Задачи</span>
           </div>
-          <div class="nav-item" id="clientLink"> <!--ITS HERE-->
+          <div class="nav-item" id="clientLink">
+            <!--ITS HERE-->
             <img
               src="/img/user/dashboard/user-solid.png"
               alt=""
@@ -297,11 +299,55 @@
           </div>
         </div>
 
-        <div class="dashboard-placeholder">
+        <div>
           <div class="placeholder-content" id="placeholder-content">
-            
+            <div style="margin-top: 20px">
+              <div class="filters">
+                <button class="filter-btn active" data-type="all">
+                  Текущие
+                </button>
+                <button class="filter-btn" data-type="no-group">
+                  Без группы
+                </button>
+                <button class="filter-btn" data-type="with-group">
+                  С группой
+                </button>
+                <button class="filter-btn" data-type="birthday">
+                  ДР в этом месяце
+                </button>
+                <button class="filter-btn" data-type="archive">Архивные</button>
+              </div>
 
-            
+              <div class="table-wrapper">
+                <table id="clientTable">
+                  <thead>
+                    <tr>
+                      <th>Фото</th>
+                      <th>ФИО</th>
+                      <th>Группы</th>
+                      <th>Предметы</th>
+                      <th>Удалить</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><img class="avatar" /></td>
+                      <td>Иванов Иван Иванович</td>
+                      <td>Английский B1</td>
+                      <td>Английский</td>
+                      <td><button class="delete-btn">Удалить</button></td>
+                    </tr>
+                    <tr data-type="no-group">
+                      <td><img class="avatar" /></td>
+                      <td>Иванов Иван Иванович</td>
+                      <td>Английский B1</td>
+                      <td>Английский</td>
+                      <td><button class="delete-btn">Удалить</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </section>
