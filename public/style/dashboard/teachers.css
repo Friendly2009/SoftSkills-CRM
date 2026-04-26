@@ -1,82 +1,74 @@
 .filters {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .filter-btn {
-    padding: 8px 16px;
-    border: none;
-    background: #fff;
-    border-radius: 20px;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: 0.3s;
+  padding: 8px 16px;
+  border: none;
+  background: #fff;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: 0.3s;
 }
 
 .filter-btn.active {
-    background: var(--primary);
-    color: rgba(0,0,0,0.5);
+  background: var(--primary);
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .table-wrapper {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 14px;
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
 }
 
 th {
-    background: #fafafa;
-    padding: 15px;
-    border-bottom: 2px solid #eee;
-    color: #666;
+  background: #fafafa;
+  padding: 15px;
+  border-bottom: 2px solid #eee;
+  color: #666;
 }
 
 td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eee;
-    vertical-align: middle;
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
 }
 
 tr:hover {
-    background: #f9fbff;
+  background: #f9fbff;
 }
 
 .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.status-active {
-    color: #52c41a;
-    font-weight: bold;
-}
-
-.status-paused {
-    color: #faad14;
-    font-weight: bold;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-image: "img/user/dahboard/user-solid.png" !important;
 }
 
 .delete-btn {
-    background: none;
-    border: 1px solid var(--danger);
-    color: var(--danger);
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
+  background-color: #dc3545; 
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer; 
+  font-size: 16px;
+  transition: background-color 0.3s ease; 
 }
 
 .delete-btn:hover {
-    background: var(--danger);
-    color: white;
+  background-color: #bb2d3b;
 }
