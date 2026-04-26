@@ -39,7 +39,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const clientLink = document.getElementById("clientLink");
   clientLink.addEventListener("click", function () {
-    alert();
     window.location.href = "/clients";
   });
 

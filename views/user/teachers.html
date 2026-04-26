@@ -290,7 +290,7 @@
 
           <div class="action-bar">
             <div class="btn-group">
-              <button class="btn btn-blue">+ Добавить</button>
+              <button class="btn btn-blue" id="add_btn">+ Добавить</button>
               <button class="btn btn-light-blue">Править</button>
               <button class="btn btn-red">Удалить</button>
               <button class="btn btn-gray">Другое</button>
@@ -303,9 +303,7 @@
           <div class="placeholder-content" id="placeholder-content">
             <div style="margin-top: 20px">
               <div class="filters">
-                <button class="filter-btn active" data-type="all">
-                  Все
-                </button>
+                <button class="filter-btn active" data-type="all">Все</button>
               </div>
 
               <div class="table-wrapper">
@@ -341,7 +339,33 @@
           </div>
         </div>
       </section>
+      <div class="dark_phone">
+        <div class="add_teacher_container">
+          <form id="masterTeacherForm" class="teacher-entry-panel">
+            <h2 class="form-title">Регистрация преподавателя</h2>
+            <a class="add_teacher_exit_btn">&times;</a>
+            <input
+              type="text"
+              id="teacherFullName"
+              class="primary-data-input"
+              placeholder="ФИО преподавателя"
+              required
+            />
+
+            <input
+              type="text"
+              id="teacherSpecialty"
+              class="primary-data-input"
+              placeholder="Учебная дисциплина"
+              required
+            />
+
+            <button type="submit" class="action-submit-btn">Войти</button>
+          </form>
+        </div>
+      </div>
     </main>
+    <script src="/script/dashboard/teachers.js"></script>
     <script src="/script/dashboard/backend.js"></script>
     <script src="/script/dashboard/dynamic.js"></script>
   </body>
