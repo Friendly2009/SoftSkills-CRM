@@ -30,7 +30,6 @@ exports.getTeacher = async (req, res) => {
   try{
     connection = await db.getConnection();
     const [teachers] = await db.query(`SELECT * FROM teachers WHERE company_id = ?`,[company_id]);
-    console.table(teachers);
     res.json({
         data: teachers
     });

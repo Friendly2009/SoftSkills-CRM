@@ -1,14 +1,29 @@
-document.addEventListener("DOMContentLoaded", function () {
-    
-    
+document.addEventListener("DOMContentLoaded", async function () {
+  try {
+    let teacher_table_tbody = document.getElementById("teacher_table_tbody");
 
-
-
-
-
-
-
-
+    const getTeacher_response = await fetch("/data/getTeacher");
+    const teachers = await getTeacher_response.json(); //id avatar name subject company_id
+    teachers.data.forEach((element) => {
+        if(element.avatar == null || element.avatar == ""){
+            element.avatar = "/img/user/dashboard/user-solid.png";
+        }
+        teacher_table_tbody.insertAdjacentHTML(
+        "beforeend",
+        `
+        <tr>
+            <td><img class="avatar" src="${element.avatar}"/></td>
+            <td>${element.name}</td>
+            <td>develop in feature...</td>
+            <td>${element.subject}</td>
+            <td><button class="delete-btn">Удалить</button></td>
+        </tr>
+        `,
+      );
+    });
+  } catch (ex) {
+    alert(ex);
+  }
 
   const add_btn = document.getElementById("add_btn");
   const dark_phone = document.getElementById("dark_phone");
