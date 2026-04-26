@@ -37,15 +37,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  
   const clientLink = document.getElementById("clientLink");
   clientLink.addEventListener("click", function () {
+    alert();
     window.location.href = "/clients";
   });
 
   const teachersLink = document.getElementById("teachersLink");
-  teachersLink.addEventListener("click", function() {
-    window.location.href = "/teachers"
+  teachersLink.addEventListener("click", function () {
+    window.location.href = "/teachers";
   });
 });
 //-----------------------------------------------------------------//
