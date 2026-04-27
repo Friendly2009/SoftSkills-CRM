@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS `CheapCRM`.`teachers` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `avatar` TEXT NULL,
   `name` VARCHAR(255) NOT NULL,
-  `subject` VARCHAR(45) NOT NULL,
+  `gender` VARCHAR(45) NOT NULL,
+  `birthday` DATETIME NOT NULL,
   `company_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_teachers_company1_idx` (`company_id` ASC) VISIBLE,
@@ -84,11 +85,12 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `CheapCRM`.`group_members` (
   `group_id` INT NOT NULL,
   `client_id` INT NOT NULL,
+  PRIMARY KEY (`group_id`, `client_id`), -- Хорошая практика для связующих таблиц
   INDEX `fk_group_members_clients1_idx` (`client_id` ASC) VISIBLE,
-  INDEX `fk_group_members_groups1_idx` (`group_id` ASC, `client_id` ASC) VISIBLE,
+  INDEX `fk_group_members_groups1_idx` (`group_id` ASC) VISIBLE,
   CONSTRAINT `fk_group_members_groups1`
-    FOREIGN KEY (`group_id` , `client_id`)
-    REFERENCES `CheapCRM`.`groups` (`id` , `id`)
+    FOREIGN KEY (`group_id`)
+    REFERENCES `CheapCRM`.`groups` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `fk_group_members_clients1`
@@ -97,6 +99,7 @@ CREATE TABLE IF NOT EXISTS `CheapCRM`.`group_members` (
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

@@ -160,3 +160,171 @@ tr:hover {
   color: #333;
   transform: scale(1.1);
 }
+.teacher-registration-container {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 600px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+.teacher-form__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.teacher-form__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #555;
+}
+.teacher-form__close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.teacher-form__body {
+  padding: 20px 25px;
+}
+
+.form-field-group {
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  align-items: start;
+}
+.form-label {
+  font-size: 0.9rem;
+  color: #666;
+  padding-top: 8px;
+}
+
+.form-input-text,
+.form-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-sizing: border-box;
+  outline: none;
+}
+.form-input-text::placeholder,
+.form-textarea::placeholder {
+  color: #ccc;
+}
+.form-textarea {
+  height: 60px;
+  resize: none;
+}
+
+.form-row-flexible {
+  display: flex;
+  gap: 20px;
+}
+.field-date {
+  grid-template-columns: 140px 120px;
+}
+.field-gender {
+  grid-template-columns: 60px 1fr;
+}
+
+.gender-toggle-container {
+  display: flex;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.gender-radio {
+  display: none;
+}
+.gender-button-label {
+  padding: 5px 15px;
+  background: #fff;
+  cursor: pointer;
+  border-right: 1px solid #e0e0e0;
+  font-size: 0.85rem;
+}
+.gender-radio:checked + .gender-button-label {
+  background: #f0f0f0;
+}
+
+.contact-entry-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.contact-type-selector {
+  border: 1px solid #e0e0e0;
+  padding: 5px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+.btn-remove-row {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.link-action-add {
+  font-size: 0.85rem;
+  color: #4a90e2;
+  text-decoration: none;
+  float: right;
+  margin-top: 5px;
+}
+
+.branch-selection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.checkbox-custom-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.color-preview-box {
+  width: 150px;
+  height: 25px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.teacher-form__footer {
+  padding: 15px 25px;
+  background: #f9f9f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  border-radius: 0 0 8px 8px;
+}
+.btn-primary-submit {
+  background: #4a90e2;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-secondary-action {
+  background: none;
+  border: 1px solid #e0e0e0;
+  padding: 10px 20px;
+  border-radius: 4px;
+  color: #888;
+  cursor: pointer;
+}

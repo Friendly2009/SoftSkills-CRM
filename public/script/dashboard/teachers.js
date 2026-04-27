@@ -14,8 +14,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         <tr>
             <td><img class="avatar" src="${element.avatar}"/></td>
             <td>${element.name}</td>
-            <td>develop in feature...</td>
-            <td>${element.subject}</td>
+            <td>${element.gender}</td>
+            <td>${element.birthday}</td>
+            <td>${element.contact}</td>
             <td><button class="delete-btn">Удалить</button></td>
         </tr>
         `,

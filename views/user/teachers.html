@@ -312,14 +312,13 @@
                     <tr>
                       <th>Фото</th>
                       <th>ФИО</th>
-                      <th>Группы</th>
-                      <th>Предметы</th>
-                      <th>Удалить</th>
+                      <th>Пол</th>
+                      <th>Дата рождения</th>
+                      <th>Контакты</th>
+                      <th></th>
                     </tr>
                   </thead>
-                  <tbody id="teacher_table_tbody">
-                    
-                  </tbody>
+                  <tbody id="teacher_table_tbody"></tbody>
                 </table>
               </div>
             </div>
@@ -327,27 +326,132 @@
         </div>
       </section>
       <div class="dark_phone" id="dark_phone">
-        <div class="add_teacher_container">
-          <form id="masterTeacherForm" class="teacher-entry-panel">
-            <h2 class="form-title">Регистрация преподавателя</h2>
-            <a class="add_teacher_exit_btn" id="add_teacher_exit_btn">&times;</a>
-            <input
-              type="text"
-              id="teacherFullName"
-              class="primary-data-input"
-              placeholder="ФИО преподавателя"
-              required
-            />
+        <div class="teacher-registration-container">
+          <form class="teacher-form" id="addTeacherForm">
+            <div class="teacher-form__header">
+              <h2 class="teacher-form__title">Добавить педагога</h2>
+              <button
+                type="button"
+                class="teacher-form__close-btn"
+                id="add_teacher_exit_btn"
+              >
+                &times;
+              </button>
+            </div>
 
-            <input
-              type="text"
-              id="teacherSpecialty"
-              class="primary-data-input"
-              placeholder="Учебная дисциплина"
-              required
-            />
+            <div class="teacher-form__body">
+              <div class="form-field-group">
+                <label class="form-label" for="fullName">ФИО *</label>
+                <input
+                  type="text"
+                  id="fullName"
+                  class="form-input-text"
+                  placeholder="Например, Иванова Мария Ивановна"
+                  required
+                />
+              </div>
+              <div class="form-row-flexible">
+                <div class="form-field-group field-date">
+                  <label class="form-label">Дата рождения</label>
+                  <input
+                    type="text"
+                    class="form-input-text input-mask-date"
+                    placeholder="__.__.____"
+                  />
+                </div>
+                <div class="form-field-group field-gender">
+                  <label class="form-label">Пол</label>
+                  <div class="gender-toggle-container">
+                    <input
+                      type="radio"
+                      name="gender"
+                      id="male"
+                      class="gender-radio"
+                      value="M"
+                    />
+                    <label for="male" class="gender-button-label">
+                      <span class="icon">⬆</span> М.
+                    </label>
+                    <input
+                      type="radio"
+                      name="gender"
+                      id="female"
+                      class="gender-radio"
+                      value="F"
+                    />
+                    <label for="female" class="gender-button-label">
+                      <span class="icon">⬆</span> Ж.
+                    </label>
+                  </div>
+                </div>
+              </div>
 
-            <button type="submit" class="action-submit-btn">Войти</button>
+              <!-- Контакты -->
+              <div class="form-field-group">
+                <label class="form-label">Контакты</label>
+                <div class="contact-entry-row">
+                  <div class="contact-type-selector">
+                    <span class="icon-phone">📱</span>
+                    <span class="dropdown-arrow">▼</span>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-input-text"
+                    placeholder="Мобильный"
+                  />
+                  <input
+                    type="text"
+                    class="form-input-text"
+                    placeholder="Примечание"
+                  />
+                  <button type="button" class="btn-remove-row">−</button>
+                </div>
+                <div class="add-more-link-wrapper">
+                  <a href="#" class="link-action-add">+ еще</a>
+                </div>
+              </div>
+
+              <!-- Примечание -->
+              <div class="form-field-group">
+                <label class="form-label">Примечание</label>
+                <textarea
+                  class="form-textarea"
+                  placeholder="Любое текстовое примечание"
+                ></textarea>
+              </div>
+
+              <!-- Филиалы -->
+              <div class="form-field-group">
+                <label class="form-label">Филиалы</label>
+                <div class="branch-selection-list">
+                  <label class="checkbox-custom-label">
+                    <input type="checkbox" checked />
+                    <span class="checkbox-text">SoftSkills Александров</span>
+                  </label>
+                  <label class="checkbox-custom-label">
+                    <input type="checkbox" />
+                    <span class="checkbox-text">SoftSkills Ярославль</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-field-group">
+                <label class="form-label">Цвет</label>
+                <div class="color-picker-wrapper">
+                  <div
+                    class="color-preview-box"
+                    style="background-color: #bab07d"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="teacher-form__footer">
+              <button type="button" class="btn-secondary-action">Отмена</button>
+              <button type="submit" class="btn-primary-submit">
+                <span class="icon-save">💾</span> Сохранить
+              </button>
+            </div>
           </form>
         </div>
       </div>
