@@ -328,3 +328,103 @@ tr:hover {
   color: #888;
   cursor: pointer;
 }
+.icon-phone {
+  width: 15px;
+  height: 15px;
+  margin-top: 5px;
+}
+.icon {
+  width: 15px;
+  height: 15px;
+}
+
+/* Общий контейнер, чтобы input и селектор были в ряд */
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  font-family: sans-serif;
+}
+
+.contact-type-selector {
+  display: flex;
+  align-items: center;
+  background: #f4f4f7;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+  border: 1px solid #ddd;
+}
+
+.contact-type-selector:hover {
+  background: #ebebed;
+}
+
+.selected-flag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  margin-left: 8px;
+  color: #888;
+  transition: transform 0.3s;
+}
+
+.country-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  width: 200px;
+  display: none; 
+  z-index: 100;
+  border: 1px solid #eee;
+}
+
+.country-dropdown.active {
+  display: block;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.country-dropdown li {
+  padding: 10px 15px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.country-dropdown li:hover {
+  background: #f0f7ff;
+  color: #007bff;
+}
+
+.form-input-text {
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 8px;
+  outline: none;
+  flex-grow: 1;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

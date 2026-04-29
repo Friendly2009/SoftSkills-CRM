@@ -353,11 +353,7 @@
               <div class="form-row-flexible">
                 <div class="form-field-group field-date">
                   <label class="form-label">Дата рождения</label>
-                  <input
-                    type="text"
-                    class="form-input-text input-mask-date"
-                    placeholder="__.__.____"
-                  />
+                  <input type="date" class="form-input-text input-mask-date" />
                 </div>
                 <div class="form-field-group field-gender">
                   <label class="form-label">Пол</label>
@@ -370,7 +366,12 @@
                       value="M"
                     />
                     <label for="male" class="gender-button-label">
-                      <span class="icon">⬆</span> М.
+                      <span
+                        ><img
+                          src="/img/user/dashboard/person-dress-solid.png"
+                          class="icon"
+                      /></span>
+                      Ж.
                     </label>
                     <input
                       type="radio"
@@ -380,7 +381,12 @@
                       value="F"
                     />
                     <label for="female" class="gender-button-label">
-                      <span class="icon">⬆</span> Ж.
+                      <span
+                        ><img
+                          src="/img/user/dashboard/person-solid.png"
+                          class="icon"
+                      /></span>
+                      Ж.
                     </label>
                   </div>
                 </div>
@@ -389,12 +395,27 @@
               <div class="form-field-group">
                 <label class="form-label">Контакты</label>
                 <div class="contact-entry-row">
-                  <div class="contact-type-selector">
-                    <span class="icon-phone">📱</span>
+                  <div class="contact-type-selector" id="countrySelector">
+                    <span class="selected-flag">
+                      <img
+                        src="/img/user/dashboard/mobile-solid.png"
+                        class="icon-phone"
+                        alt="phone"
+                      />
+                      <span id="selectedCode">+7</span>
+                    </span>
                     <span class="dropdown-arrow">▼</span>
+
+                    <ul class="country-dropdown" id="countryList">
+                      <li data-code="+7">🇷🇺 Россия (+7)</li>
+                      <li data-code="+375">🇧🇾 Беларусь (+375)</li>
+                      <li data-code="+380">🇺🇦 Украина (+380)</li>
+                      <li data-code="+7">🇰🇿 Казахстан (+7)</li>
+                      <li data-code="+994">🇦🇿 Азербайджан (+994)</li>
+                    </ul>
                   </div>
                   <input
-                    type="text"
+                    type="tel"
                     class="form-input-text"
                     placeholder="Мобильный"
                   />
@@ -435,16 +456,19 @@
               <div class="form-field-group">
                 <label class="form-label">Цвет</label>
                 <div class="color-picker-wrapper">
-                  <input
-                    type="color"
-                    class="color-preview-box"
-                  />
+                  <input type="color" class="color-preview-box" />
                 </div>
               </div>
             </div>
 
             <div class="teacher-form__footer">
-              <button type="button" class="btn-secondary-action">Отмена</button>
+              <button
+                id="add_teacher_exit_btn"
+                type="button"
+                class="btn-secondary-action"
+              >
+                Отмена
+              </button>
               <button type="submit" class="btn-primary-submit">
                 <span class="icon-save">💾</span> Сохранить
               </button>
