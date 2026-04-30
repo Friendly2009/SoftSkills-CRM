@@ -16,6 +16,8 @@ router.get("/dashboard", controller.dashboard);
 router.get("/clients",controller.clients);
 router.get("/teachers",controller.teachers);
 
+router.post('/api/addteacher', controller.APIaddteacher);
+
 //----------------------------data require----------------------------//
 router.get('/data/getUser', data.getUser);
 router.get('/data/getTeacher', data.getTeacher)

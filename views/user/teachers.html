@@ -327,7 +327,12 @@
       </section>
       <div class="dark_phone" id="dark_phone">
         <div class="teacher-registration-container">
-          <form class="teacher-form" id="addTeacherForm">
+          <form
+            class="teacher-form"
+            id="addTeacherForm"
+            action="/api/addteacher"
+            method="post"
+          >
             <div class="teacher-form__header">
               <h2 class="teacher-form__title">Добавить педагога</h2>
               <button
@@ -341,10 +346,10 @@
 
             <div class="teacher-form__body">
               <div class="form-field-group">
-                <label class="form-label" for="fullName">ФИО *</label>
+                <label class="form-label" for="fullname">ФИО *</label>
                 <input
                   type="text"
-                  id="fullName"
+                  name="fullname"
                   class="form-input-text"
                   placeholder="Например, Иванова Мария Ивановна"
                   required
@@ -353,7 +358,11 @@
               <div class="form-row-flexible">
                 <div class="form-field-group field-date">
                   <label class="form-label">Дата рождения</label>
-                  <input type="date" class="form-input-text input-mask-date" />
+                  <input
+                    type="date"
+                    name="birthday"
+                    class="form-input-text input-mask-date"
+                  />
                 </div>
                 <div class="form-field-group field-gender">
                   <label class="form-label">Пол</label>
@@ -418,16 +427,8 @@
                     type="tel"
                     class="form-input-text"
                     placeholder="Мобильный"
+                    name="contacts"
                   />
-                  <input
-                    type="text"
-                    class="form-input-text"
-                    placeholder="Примечание"
-                  />
-                  <button type="button" class="btn-remove-row">−</button>
-                </div>
-                <div class="add-more-link-wrapper">
-                  <a href="#" class="link-action-add">+ еще</a>
                 </div>
               </div>
 
@@ -436,27 +437,21 @@
                 <textarea
                   class="form-textarea"
                   placeholder="Любое текстовое примечание"
+                  name="description"
                 ></textarea>
               </div>
 
               <div class="form-field-group">
                 <label class="form-label">Филиалы</label>
                 <div class="branch-selection-list">
-                  <label class="checkbox-custom-label">
-                    <input type="checkbox" checked />
-                    <span class="checkbox-text">SoftSkills Александров</span>
-                  </label>
-                  <label class="checkbox-custom-label">
-                    <input type="checkbox" />
-                    <span class="checkbox-text">SoftSkills Ярославль</span>
-                  </label>
+                  <!--<label class="checkbox-custom-label"><input type="checkbox" checked /><span class="checkbox-text">SoftSkills Александров</span></label> -->
                 </div>
               </div>
 
               <div class="form-field-group">
                 <label class="form-label">Цвет</label>
                 <div class="color-picker-wrapper">
-                  <input type="color" class="color-preview-box" />
+                  <input type="color" class="color-preview-box" name="color" />
                 </div>
               </div>
             </div>

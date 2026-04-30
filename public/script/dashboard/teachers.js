@@ -54,17 +54,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   const selectedCodeDisplay = document.getElementById("selectedCode");
   const arrow = selector.querySelector(".dropdown-arrow");
 
-  // Открыть/закрыть меню
   selector.addEventListener("click", (e) => {
     e.stopPropagation();
     dropdown.classList.toggle("active");
-    // Поворачиваем стрелочку
     arrow.style.transform = dropdown.classList.contains("active")
       ? "rotate(180deg)"
       : "rotate(0deg)";
   });
 
-  // Выбор страны
   dropdown.querySelectorAll("li").forEach((item) => {
     item.addEventListener("click", (e) => {
       const code = item.getAttribute("data-code");
@@ -74,7 +71,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
   });
 
-  // Закрыть, если кликнули мимо
   document.addEventListener("click", () => {
     dropdown.classList.remove("active");
     arrow.style.transform = "rotate(0deg)";
