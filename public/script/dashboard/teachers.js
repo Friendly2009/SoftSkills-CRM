@@ -13,10 +13,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         `
         <tr>
             <td><img class="avatar" src="${element.avatar}"/></td>
-            <td>${element.name}</td>
+            <td>${element.fullname}</td>
             <td>${element.gender}</td>
             <td>${element.birthday}</td>
-            <td>${element.contact}</td>
+            <td>${element.contacts}</td>
             <td><button class="delete-btn">Удалить</button></td>
         </tr>
         `,
@@ -31,14 +31,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   const add_teacher_exit_btn = document.querySelectorAll(
     "#add_teacher_exit_btn",
   );
-  let tableHTML = `
-    <tr>
-     <td><img class="avatar" /></td>
-     <td>Иванов Иван Иванович</td>
-     <td>Английский B1</td>
-     <td>Английский</td>
-    <td><button class="delete-btn">Удалить</button></td>
-    </tr>`;
 
   add_btn.addEventListener("click", function () {
     dark_phone.style.visibility = "visible";
@@ -66,10 +58,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     item.addEventListener("click", (e) => {
       const code = item.getAttribute("data-code");
       selectedCodeDisplay.textContent = code;
+      phoneInput.value = code + " ";
+      phoneInput.focus();
       dropdown.classList.remove("active");
-      arrow.style.transform = "rotate(0deg)";
+      if (arrow) arrow.style.transform = "rotate(0deg)";
     });
   });
+
+  function getFullPhoneNumber() {
+    const code = selectedCodeDisplay.textContent;
+    const number = phoneInput.value.replace(code, "").trim();
+    return code + number;
+  }
 
   document.addEventListener("click", () => {
     dropdown.classList.remove("active");

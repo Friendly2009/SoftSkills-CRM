@@ -139,7 +139,7 @@ exports.APIaddteacher = async (req, res) => {
         (avatar, fullname, birthday, company_id, gender, contacts, description) 
         VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
-        " ",
+        "",
         fullname,
         birthday,
         req.session.company_id,
