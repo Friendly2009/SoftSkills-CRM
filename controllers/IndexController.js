@@ -128,16 +128,18 @@ exports.APIsignin = async (req, res) => {
   }
 };
 exports.APIaddteacher = async (req, res) => {
-  try {
-    const { fullname, birthday, gender, contacts, description } = req.body;
+  const { fullname, birthday, gender, contacts, description, color } = req.body;
 
-    let connection;
+  let connection;
+  try {
+
     connection = await db.getConnection();
 
+    console.log(fullname + birthday + gender + contacts + description + color);
     await connection.query(
       `INSERT INTO teachers 
-        (avatar, fullname, birthday, company_id, gender, contacts, description) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        (avatar, fullname, birthday, company_id, gender, contacts, description, color) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         "",
         fullname,
@@ -146,6 +148,7 @@ exports.APIaddteacher = async (req, res) => {
         gender,
         contacts,
         description,
+        color,
       ],
     );
 

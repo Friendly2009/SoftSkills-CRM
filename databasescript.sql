@@ -22,7 +22,6 @@ CREATE SCHEMA IF NOT EXISTS `CheapCRM` DEFAULT CHARACTER SET utf8 ;
 -- -----------------------------------------------------
 -- Schema crm
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `crm` ;
 USE `CheapCRM` ;
 
 -- -----------------------------------------------------
@@ -68,6 +67,7 @@ CREATE TABLE IF NOT EXISTS `CheapCRM`.`teachers` (
   `gender` VARCHAR(2) NOT NULL,
   `contacts` VARCHAR(45) NOT NULL,
   `description` TEXT NULL,
+  `color` TEXT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_teachers_company1_idx` (`company_id` ASC) VISIBLE,
   CONSTRAINT `fk_teachers_company1`

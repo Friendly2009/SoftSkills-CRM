@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const arrow = selector.querySelector(".dropdown-arrow");
   const invisiblePhoneInput = document.getElementById('invisiblePhoneInput');
   const telInput = document.getElementById("telInput");
+  const genderInput = document.getElementById('gender');
 
   selector.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -61,13 +62,17 @@ document.addEventListener("DOMContentLoaded", async function () {
       const code = item.getAttribute("data-code");
       selectedCodeDisplay.textContent = code;
       invisiblePhoneInput.value = code + telInput.value;
-      alert(invisiblePhoneInput.value);
       invisiblePhoneInput.focus();
       dropdown.classList.remove("active");
       if (arrow) arrow.style.transform = "rotate(0deg)";
     });
   });
-
+  document.getElementById("female").addEventListener("click", () => {
+    genderInput.value = "Жен"
+  });
+  document.getElementById("male").addEventListener("click", () => {
+    genderInput.value = "Муж"
+  })
   document.addEventListener("click", () => {
     dropdown.classList.remove("active");
     arrow.style.transform = "rotate(0deg)";
