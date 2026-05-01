@@ -77,4 +77,29 @@ document.addEventListener("DOMContentLoaded", async function () {
     dropdown.classList.remove("active");
     arrow.style.transform = "rotate(0deg)";
   });
+
+  document.getElementById('addTeacherForm').addEventListener('submit', function (e) {
+    // 1. Получаем значения полей
+    const fullname = this.querySelector('input[name="fullname"]').value.trim();
+    const birthday = this.querySelector('input[name="birthday"]').value;
+    const gender = this.querySelector('input[name="ender"]:checked'); // Радиокнопки пола
+    const phone = document.getElementById('invisiblePhoneInput').value.trim();
+
+    let errorMessage = "";
+
+    if (!fullname) {
+      errorMessage = "Введите ФИО педагога";
+    } else if (!birthday) {
+      errorMessage = "Укажите дату рождения";
+    } else if (!gender) {
+      errorMessage = "Выберите пол (М или Ж)";
+    } else if (!phone || phone.length < 5) {
+      errorMessage = "Введите корректный номер телефона";
+    }
+
+    if (errorMessage) {
+      e.preventDefault();
+    }
+  });
+
 });
