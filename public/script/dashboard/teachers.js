@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const dropdown = document.getElementById("countryList");
   const selectedCodeDisplay = document.getElementById("selectedCode");
   const arrow = selector.querySelector(".dropdown-arrow");
+  const invisiblePhoneInput = document.getElementById('invisiblePhoneInput');
+  const telInput = document.getElementById("telInput");
 
   selector.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -58,18 +60,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     item.addEventListener("click", (e) => {
       const code = item.getAttribute("data-code");
       selectedCodeDisplay.textContent = code;
-      phoneInput.value = code + " ";
-      phoneInput.focus();
+      invisiblePhoneInput.value = code + telInput.value;
+      alert(invisiblePhoneInput.value);
+      invisiblePhoneInput.focus();
       dropdown.classList.remove("active");
       if (arrow) arrow.style.transform = "rotate(0deg)";
     });
   });
-
-  function getFullPhoneNumber() {
-    const code = selectedCodeDisplay.textContent;
-    const number = phoneInput.value.replace(code, "").trim();
-    return code + number;
-  }
 
   document.addEventListener("click", () => {
     dropdown.classList.remove("active");
