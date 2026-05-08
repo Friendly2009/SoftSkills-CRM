@@ -13,33 +13,38 @@ exports.getUser = async (req, res) => {
   const user_id = req.session.user_id;
   const full_name = req.session.user_full_name;
   const user_description = req.session.user_description;
-  res.json({
-    userRole: userRole,
-    company_id: company_id,
-    company_name: company_name,
-    key_admin: key_admin,
-    key_user: key_user,
-    user_id: user_id,
-    full_name: full_name,
-    user_description: user_description,
-  });
+  try {
+    res.json({
+      userRole: userRole,
+      company_id: company_id,
+      company_name: company_name,
+      key_admin: key_admin,
+      key_user: key_user,
+      user_id: user_id,
+      full_name: full_name,
+      user_description: user_description,
+    });
+  } catch (ex) {
+    console.error(ex);
+    return res.status(400);
+  }
 };
 exports.getTeacher = async (req, res) => {
   const company_id = req.session.company_id;
   let connection;
-  try{
+  try {
     connection = await db.getConnection();
-    const [teachers] = await db.query(`SELECT * FROM teachers WHERE company_id = ?`,[company_id]);
+    const [teachers] = await db.query(`SELECT * FROM teachers WHERE company_id = ?`, [company_id]);
     res.json({
-        data: teachers
+      data: teachers
     });
     await connection.commit();
-  }catch(ex){
+  } catch (ex) {
     console.error(ex);
     connection.rollback();
-  }finally{
-    if(connection){
-        connection.release();
+  } finally {
+    if (connection) {
+      connection.release();
     }
   }
 };
