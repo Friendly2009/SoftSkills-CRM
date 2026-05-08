@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     let teacher_table_tbody = document.getElementById("teacher_table_tbody");
 
     const getTeacher_response = await fetch("/data/getTeacher");
-    const teachers = await getTeacher_response.json(); //id avatar name subject company_id
+    const teachers = await getTeacher_response.json();
     teachers.data.forEach((element) => {
       if (element.avatar == null || element.avatar == "") {
         element.avatar = "/img/user/dashboard/user-solid.png";
@@ -11,13 +11,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       teacher_table_tbody.insertAdjacentHTML(
         "beforeend",
         `
-        <tr>
+        <tr id="teacherrow">
             <td><img class="avatar" src="${element.avatar}"/></td>
             <td>${element.fullname}</td>
             <td>${element.gender}</td>
             <td>${element.birthday}</td>
             <td>${element.contacts}</td>
-            <td><button class="delete-btn">Удалить</button></td>
+            <td><button class="delete-btn" teacherId="${element.id}" id="teacherDelBtn">Удалить</button></td>
         </tr>
         `,
       );
@@ -28,9 +28,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const add_btn = document.getElementById("add_btn");
   const dark_phone = document.getElementById("dark_phone");
-  const add_teacher_exit_btn = document.querySelectorAll(
-    "#add_teacher_exit_btn",
-  );
+  const add_teacher_exit_btn = document.querySelectorAll("#add_teacher_exit_btn",);
 
   add_btn.addEventListener("click", function () {
     dark_phone.style.visibility = "visible";
@@ -79,10 +77,9 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 
   document.getElementById('addTeacherForm').addEventListener('submit', function (e) {
-    // 1. Получаем значения полей
     const fullname = this.querySelector('input[name="fullname"]').value.trim();
     const birthday = this.querySelector('input[name="birthday"]').value;
-    const gender = this.querySelector('input[name="ender"]:checked'); // Радиокнопки пола
+    const gender = this.querySelector('input[name="ender"]:checked');
     const phone = document.getElementById('invisiblePhoneInput').value.trim();
 
     let errorMessage = "";
@@ -101,5 +98,22 @@ document.addEventListener("DOMContentLoaded", async function () {
       e.preventDefault();
     }
   });
-
+  const teacherDelBtns = document.querySelectorAll("#teacherDelBtn");
+  teacherDelBtns.forEach(element => {
+    element.addEventListener("click", function (e) {
+      if (confirm("Вы действительно хотите удалить этого учителя?")) {
+        try {
+          const response = fetch(`api/deleteteacher/${e.currentTarget.getAttribute('teacherId')}`, {
+            method: 'delete'
+          });
+          if (response.ok) {
+            const teachersRow = e.currentTarget.closest('#teacherrow');
+            teachersRow.remove();
+          }
+        } catch (ex) {
+          console.log(ex);
+        }
+      }
+    });
+  });
 });
