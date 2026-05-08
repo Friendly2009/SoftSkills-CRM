@@ -161,7 +161,27 @@ exports.APIaddteacher = async (req, res) => {
     if (connection) connection.release();
   }
 };
+exports.APIDelTeacher = async (req, res) => {
+  let connection;
 
+  try {
+    const delId = req.params.id
+    console.log(delId);
+
+    connection = await db.getConnection();
+
+    await connection.query('DELETE FROM teachers WHERE id = ?',[delId]);
+
+    await connection.commit();
+    return res.status(200).json({ success: true });
+  } catch (ex) {
+    console.error(ex);
+    return res.status(500);
+    connection.rollback();
+  } finally {
+    if (connection) connection.release();
+  }
+};
 exports.dashboard = (req, res) => {
   //ДОРАБОТАТЬ БЕЗОПАСНОСТЬ
   return res.sendFile(

@@ -17,6 +17,7 @@ router.get("/clients",controller.clients);
 router.get("/teachers",controller.teachers);
 
 router.post('/api/addteacher', controller.APIaddteacher);
+router.delete('/api/deleteteacher/:id', controller.APIDelTeacher);
 
 //----------------------------data require----------------------------//
 router.get('/data/getUser', data.getUser);
