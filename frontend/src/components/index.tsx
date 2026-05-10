@@ -1,8 +1,4 @@
-interface LayoutProps {
-  onEnter: () => void;
-}
-
-const WelcomePage = ({ onEnter }: LayoutProps) => {
+const Index = () => {
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
       {/* Шапка */}
@@ -76,4 +72,4 @@ const WelcomePage = ({ onEnter }: LayoutProps) => {
   );
 };
 
-export default WelcomePage;
+export default Index;
