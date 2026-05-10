@@ -23,9 +23,6 @@ app.use("/api", routes);
 
 const buildPath = path.join(__dirname, "..", "frontend", "dist");
 app.use(express.static(buildPath));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(buildPath, "index.html"));
-});
 
 app.listen(3000, async () => {
   console.log("your server was be running on http://localhost:3000");

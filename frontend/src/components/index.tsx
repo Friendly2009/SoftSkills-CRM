@@ -1,54 +1,79 @@
-import React from 'react';
+interface LayoutProps {
+  onEnter: () => void;
+}
 
-const Layout = () => {
+const WelcomePage = ({ onEnter }: LayoutProps) => {
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <header style={styles.header}>
-        <div style={styles.logo}>💜 CRM_System</div>
-        <div style={styles.authButtons}>
-          <button style={styles.loginBtn}>Войти</button>
-          <button style={styles.registerBtn}>Регистрация</button>
+    <div className="min-h-screen bg-white font-sans text-gray-900">
+      {/* Шапка */}
+      <header className="flex justify-between items-center px-6 py-4 md:px-12 bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+        <div className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          💜 EduCRM
+        </div>
+        <div className="flex gap-4">
+          <button 
+            onClick={onEnter}
+            className="px-5 py-2 text-indigo-600 font-medium hover:bg-indigo-50 rounded-xl transition-all"
+          >
+            Войти
+          </button>
+          <button 
+            onClick={onEnter}
+            className="px-5 py-2 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all"
+          >
+            Регистрация
+          </button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main style={styles.main}>
-        <aside style={styles.sidebar}>
-          <div style={styles.navItem}>📊 Дашборд</div>
-          <div style={styles.navItem}>👥 Клиенты</div>
-          <div style={styles.navItem}>⚙️ Настройки</div>
-        </aside>
+      {/* Hero Section (Главный блок) */}
+      <main className="max-w-6xl mx-auto px-6 pt-20 pb-12 text-center">
+        <div className="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wide text-indigo-600 uppercase bg-indigo-50 rounded-full">
+          Система управления обучением v1.0
+        </div>
         
-        <section style={styles.content}>
-          <h1 style={{color: '#4A3AFF'}}>Добро пожаловать!</h1>
-          <p>Выберите раздел в меню слева для начала работы.</p>
-        </section>
+        <h1 className="text-5xl md:text-7xl font-extrabold mb-8 tracking-tight">
+          Управляйте учебным процессом <br />
+          <span className="text-indigo-600">без лишней суеты</span>
+        </h1>
+        
+        <p className="text-xl text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+          Автоматизируйте расписание, следите за успехами студентов и контролируйте финансы в одной интуитивно понятной панели.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
+          <button 
+            onClick={onEnter}
+            className="px-8 py-4 bg-indigo-600 text-white text-lg font-bold rounded-2xl hover:bg-indigo-700 hover:-translate-y-1 transition-all shadow-xl shadow-indigo-200"
+          >
+            Начать работу бесплатно
+          </button>
+          <button className="px-8 py-4 bg-white text-gray-700 text-lg font-semibold border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all">
+            Посмотреть демо
+          </button>
+        </div>
+
+        {/* Карточки преимуществ */}
+        <div className="grid md:grid-cols-3 gap-8 text-left">
+          {[
+            { title: 'Дашборд', desc: 'Наглядная статистика всех процессов в реальном времени.', icon: '📊' },
+            { title: 'Студенты', desc: 'Удобная база данных с историей обучения и оценками.', icon: '👥' },
+            { title: 'Финансы', desc: 'Автоматический учет оплат и задолженностей.', icon: '💰' },
+          ].map((feature, i) => (
+            <div key={i} className="p-8 bg-gray-50 rounded-3xl border border-transparent hover:border-indigo-100 hover:bg-white hover:shadow-2xl transition-all group">
+              <div className="text-4xl mb-4 grayscale group-hover:grayscale-0 transition-all">{feature.icon}</div>
+              <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+              <p className="text-gray-500 leading-relaxed">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
       </main>
+
+      <footer className="py-12 border-t border-gray-100 text-center text-gray-400 text-sm">
+        &copy; 2024 EduCRM System. Все права защищены.
+      </footer>
     </div>
   );
 };
 
-const styles = {
-  container: { fontFamily: 'Inter, sans-serif', backgroundColor: '#F8F7FF', minHeight: '100vh' },
-  header: { 
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-    padding: '1rem 5%', backgroundColor: '#fff', boxShadow: '0 2px 10px rgba(74, 58, 255, 0.1)' 
-  },
-  logo: { fontSize: '1.5rem', fontWeight: 'bold', color: '#4A3AFF' },
-  authButtons: { display: 'flex', gap: '10px' },
-  loginBtn: { 
-    background: 'none', border: '1px solid #4A3AFF', color: '#4A3AFF', 
-    padding: '8px 20px', borderRadius: '8px', cursor: 'pointer' 
-  },
-  registerBtn: { 
-    background: '#4A3AFF', border: 'none', color: '#fff', 
-    padding: '8px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' 
-  },
-  main: { display: 'flex', height: 'calc(100vh - 70px)' },
-  sidebar: { width: '250px', backgroundColor: '#EDE9FE', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' },
-  navItem: { padding: '10px', borderRadius: '8px', cursor: 'pointer', color: '#5B4EB3', transition: '0.3s', ':hover': { backgroundColor: '#DDD6FE' } },
-  content: { flex: 1, padding: '40px' }
-};
-
-export default Layout;
+export default WelcomePage;

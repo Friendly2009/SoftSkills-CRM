@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Index from './components/index';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
@@ -10,9 +11,10 @@ import { Grades } from './components/Grades';
 import { Finance } from './components/Finance';
 import { Settings } from './components/Settings';
 
-type Page = 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings';
+type Page = 'index' | 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings';
 
 const pageTitles: Record<Page, string> = {
+  index: "",
   dashboard: 'Дашборд',
   students: 'Студенты',
   teachers: 'Преподаватели',
@@ -24,8 +26,12 @@ const pageTitles: Record<Page, string> = {
 };
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+  const [currentPage, setCurrentPage] = useState<Page>('index');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  if (currentPage === 'index') {
+    return <Index/>;
+  }
 
   const renderPage = () => {
     switch (currentPage) {
