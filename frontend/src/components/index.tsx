@@ -1,4 +1,7 @@
-const Index = () => {
+interface IndexProps{
+  setPage: (page:'registration'|'authorization') => void;
+}
+const Index = ({ setPage }: IndexProps) => {
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900">
       {/* Шапка */}
@@ -8,13 +11,13 @@ const Index = () => {
         </div>
         <div className="flex gap-4">
           <button 
-            onClick={onEnter}
+            onClick={() => setPage('authorization')}
             className="px-5 py-2 text-indigo-600 font-medium hover:bg-indigo-50 rounded-xl transition-all"
           >
             Войти
           </button>
           <button 
-            onClick={onEnter}
+            onClick={() => setPage('registration')}
             className="px-5 py-2 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all"
           >
             Регистрация
@@ -39,7 +42,6 @@ const Index = () => {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
           <button 
-            onClick={onEnter}
             className="px-8 py-4 bg-indigo-600 text-white text-lg font-bold rounded-2xl hover:bg-indigo-700 hover:-translate-y-1 transition-all shadow-xl shadow-indigo-200"
           >
             Начать работу бесплатно

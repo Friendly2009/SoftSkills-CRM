@@ -10,8 +10,10 @@ import { Schedule } from './components/Schedule';
 import { Grades } from './components/Grades';
 import { Finance } from './components/Finance';
 import { Settings } from './components/Settings';
+import { LoginForm } from './components/authorization';
+import { RegisterForm } from './components/registration';
 
-type Page = 'index' | 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings';
+type Page = 'index' | 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings' | 'registration' | 'authorization';
 
 const pageTitles: Record<Page, string> = {
   index: "",
@@ -23,14 +25,21 @@ const pageTitles: Record<Page, string> = {
   grades: 'Оценки',
   finance: 'Финансы',
   settings: 'Настройки',
+  registration: "Новый аккаунт",
+  authorization: "Войти"
 };
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('index');
+  let [currentPage, setCurrentPage] = useState<Page>('index');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  if (currentPage === 'index') {
-    return <Index/>;
+  switch (currentPage){
+    case 'index':
+      return <Index setPage={setCurrentPage}/>
+      case 'authorization':
+        return <LoginForm/>
+      case 'registration':
+        return <RegisterForm/>
   }
 
   const renderPage = () => {

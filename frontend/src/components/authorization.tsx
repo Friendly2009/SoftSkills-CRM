@@ -1,20 +1,16 @@
-export const RegisterForm = () => {
+export const LoginForm = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md space-y-8 rounded-3xl bg-white p-10 shadow-xl border border-gray-100">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900">Создать аккаунт</h2>
-          <p className="mt-2 text-sm text-gray-600">Присоединяйтесь к нашей CRM системе</p>
+          <h2 className="text-3xl font-extrabold text-gray-900">С возвращением!</h2>
+          <p className="mt-2 text-sm text-gray-600">Пожалуйста, войдите в свой аккаунт</p>
         </div>
         <form className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Полное имя</label>
-              <input type="text" required className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Иван Иванов" />
-            </div>
-            <div>
               <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input type="email" required className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="mail@example.com" />
+              <input type="email" required className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="admin@example.com" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Пароль</label>
@@ -22,7 +18,7 @@ export const RegisterForm = () => {
             </div>
           </div>
           <button type="submit" className="w-full rounded-xl bg-indigo-600 py-3 px-4 text-sm font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all">
-            Зарегистрироваться
+            Войти
           </button>
         </form>
       </div>
