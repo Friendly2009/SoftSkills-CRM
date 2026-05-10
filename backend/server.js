@@ -2,9 +2,10 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const routes = require('./routes/routes.js');
+const cors = require('cors');
 
 const app = express();
-console.log("init objects");
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -16,9 +17,8 @@ app.use(session({
     saveUninitialized: false,
     cookie: { secure: false}
 }));
-console.log("use session");
 app.use('/', routes); 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "..", "frontend", "public")));
 
 app.listen(3000, async () => {
     console.log("your server was be running on http://localhost:3000");
