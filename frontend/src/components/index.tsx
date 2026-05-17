@@ -1,3 +1,4 @@
+import { Page } from ''
 interface IndexProps{
   setPage: (page:'registration'|'authorization') => void;
 }

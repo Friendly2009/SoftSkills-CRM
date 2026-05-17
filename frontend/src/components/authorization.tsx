@@ -1,7 +1,17 @@
-export const LoginForm = () => {
+import { useState } from 'react';
+import IndexProps from './index';
+export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'authorization') => void }) => {
+  const backbtnOnClick = () => {
+    setPage('registration');
+  }
+
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md space-y-8 rounded-3xl bg-white p-10 shadow-xl border border-gray-100">
+        <button onClick={backbtnOnClick}>
+          <img src="/img/user/dashboard/angle-left-solid.png" className="backbtn"></img>
+        </button>
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900">С возвращением!</h2>
           <p className="mt-2 text-sm text-gray-600">Пожалуйста, войдите в свой аккаунт</p>

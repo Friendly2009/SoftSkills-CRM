@@ -11,7 +11,9 @@ import { Grades } from './components/Grades';
 import { Finance } from './components/Finance';
 import { Settings } from './components/Settings';
 import { LoginForm } from './components/authorization';
-import { RegisterForm } from './components/registration';
+import { RegisterForm } from './components/Registration';
+import { Page } from './types/index'; // Убедитесь, что путь до types.ts указан верно
+
 
 type Page = 'index' | 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings' | 'registration' | 'authorization';
 
@@ -36,10 +38,10 @@ function App() {
   switch (currentPage){
     case 'index':
       return <Index setPage={setCurrentPage}/>
-      case 'authorization':
-        return <LoginForm/>
-      case 'registration':
-        return <RegisterForm/>
+    case 'authorization':
+      return <LoginForm setPage={setCurrentPage}/>
+    case 'registration':
+      return <RegisterForm setPage={setCurrentPage}/>
   }
 
   const renderPage = () => {

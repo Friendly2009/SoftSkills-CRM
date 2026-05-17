@@ -8,9 +8,9 @@ export interface Student {
   phone: string;
   avatar?: string;
   group: string;
-  status: 'active' | 'inactive' | 'graduated';
+  status: "active" | "inactive" | "graduated";
   enrollmentDate: string;
-  paymentStatus: 'paid' | 'pending' | 'overdue';
+  paymentStatus: "paid" | "pending" | "overdue";
   balance: number;
 }
 
@@ -23,7 +23,7 @@ export interface Teacher {
   avatar?: string;
   subjects: string[];
   groups: string[];
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   salary: number;
 }
 
@@ -37,7 +37,7 @@ export interface Group {
   startDate: string;
   endDate: string;
   schedule: string;
-  status: 'active' | 'completed' | 'upcoming';
+  status: "active" | "completed" | "upcoming";
   room: string;
 }
 
@@ -69,8 +69,8 @@ export interface Payment {
   studentName: string;
   amount: number;
   date: string;
-  status: 'completed' | 'pending' | 'failed';
-  method: 'cash' | 'card' | 'transfer';
+  status: "completed" | "pending" | "failed";
+  method: "cash" | "card" | "transfer";
   description: string;
 }
 
@@ -82,3 +82,16 @@ export interface DashboardStats {
   activeCourses: number;
   pendingPayments: number;
 }
+
+export type Page =
+  | "index"
+  | "dashboard"
+  | "students"
+  | "teachers"
+  | "groups"
+  | "schedule"
+  | "grades"
+  | "finance"
+  | "settings"
+  | "registration"
+  | "authorization";
