@@ -11,9 +11,7 @@ import { Grades } from './components/Grades';
 import { Finance } from './components/Finance';
 import { Settings } from './components/Settings';
 import { LoginForm } from './components/authorization';
-import { RegisterForm } from './components/Registration';
-import { Page } from './types/index'; // Убедитесь, что путь до types.ts указан верно
-
+import { RegisterForm } from './components/registration';
 
 type Page = 'index' | 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings' | 'registration' | 'authorization';
 

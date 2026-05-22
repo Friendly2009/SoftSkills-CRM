@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 
-export const RegisterForm = () => {
-  interface RegisterFormProps {
-    setPage: (page: any) => void; 
-  }
+export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'authorization' | 'dashboard' | 'index') => void }) => {
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -24,15 +21,21 @@ export const RegisterForm = () => {
       });
 
       if(response.ok){
-        props.setPage('dashboard');        
+        setPage('dashboard');        
       }
     } catch(ex){
       console.log(ex);
     }
   }
+  const backbtnOnClick = () => {
+    setPage('index');
+  }
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md space-y-8 rounded-3xl bg-white p-10 shadow-xl border border-gray-100">
+        <button onClick={backbtnOnClick}>
+          <img src="/img/user/dashboard/angle-left-solid.png" className="backbtn" alt="exit"></img>
+        </button>
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900">Создать аккаунт</h2>
           <p className="mt-2 text-sm text-gray-600">Присоединяйтесь к нашей CRM системе</p>
