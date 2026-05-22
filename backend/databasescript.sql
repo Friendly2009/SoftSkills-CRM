@@ -30,8 +30,6 @@ USE `CheapCRM` ;
 CREATE TABLE IF NOT EXISTS `CheapCRM`.`company` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
-  `access_key_admin` VARCHAR(45) NOT NULL,
-  `access_key_user` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -43,8 +41,12 @@ CREATE TABLE IF NOT EXISTS `CheapCRM`.`users` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `company_id` INT NOT NULL,
   `full_name` VARCHAR(255) NOT NULL,
-  `role` VARCHAR(45) NOT NULL,
-  `description` TEXT NOT NULL,
+  `role` INT NOT NULL,
+  `login` NVARCHAR(n) NOT NULL,
+  `password` NVARCHAR(n) NOT NULL,
+  `email` NVARCHAR(n) NOT NULL,
+  `contact` NVARCHAR(n) NOT NULL,
+
   PRIMARY KEY (`id`, `company_id`),
   INDEX `fk_users_company_idx` (`company_id` ASC) VISIBLE,
   CONSTRAINT `fk_users_company`
