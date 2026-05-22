@@ -77,7 +77,7 @@ export const APIsignup = async (req: Request, res: Response): Promise<Response |
 };
 
 export const APIsignin = async (req: Request, res: Response): Promise<Response | void> => {
-  const { name, key } = req.body;
+  const { company, login, password } = req.body;
   let connection: PoolConnection | undefined;
 
   try {
@@ -86,7 +86,7 @@ export const APIsignin = async (req: Request, res: Response): Promise<Response |
 
     const [companies]: any = await connection.query(
       "SELECT * FROM company WHERE name = ? AND (access_key_admin = ? OR access_key_user = ?)",
-      [name, key, key]
+      [company, key, key]
     );
 
     if (companies.length > 0) {

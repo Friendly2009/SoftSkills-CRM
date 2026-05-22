@@ -1,7 +1,23 @@
+import { useState } from "react";
+
 export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'authorization' | "dashboard" | "index") => void }) => {
 
+  const [formData, setFormData] = useState({
+    company: '',
+    login: '',
+    password: ''
+  });
   const backbtnOnClick = () => {
     setPage('index');
+  }
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+      const response = await fetch('http://localhost:5000/api/signin');
+    try{
+
+    } catch(ex){
+
+    }
   }
 
   return (
@@ -14,11 +30,15 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
           <h2 className="text-3xl font-extrabold text-gray-900">С возвращением!</h2>
           <p className="mt-2 text-sm text-gray-600">Пожалуйста, войдите в свой аккаунт</p>
         </div>
-        <form className="mt-8 space-y-6">
+        <form className="mt-8 space-y-6" onSubmit={handleFormSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input type="email" required className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="admin@example.com" />
+              <label className="block text-sm font-medium text-gray-700">Компания</label>
+              <input type="text" required className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="OOO 'Тмыв денег'" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Логин</label>
+              <input type="text" required className="mt-1 block w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Логие" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Пароль</label>
