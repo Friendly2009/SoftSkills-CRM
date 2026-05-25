@@ -1,0 +1,31 @@
+{
+  "hash": "b2320899",
+  "configHash": "0f4dda87",
+  "lockfileHash": "fbe2ee28",
+  "browserHash": "3d2c366f",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "72fad7b4",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "e2f2a236",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "da674389",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-AYPAJTUR": {
+      "file": "chunk-AYPAJTUR.js"
+    }
+  }
+}

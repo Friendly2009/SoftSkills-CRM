@@ -1,4 +1,4 @@
-import style from './cssmoduls/index.module.css'
+import style from './cssmoduls/index.module.css' //ОГРОМНАЯ ОШИБКА КРИВОЙ ДИЗАЙН ИЗЗА ВТОРОГО МОДУЛЯ СТИЛЯ ЕСЛИ ЕГО УБРАТЬ ИНДЕКС ВСТАНЕТ КАК НАДО
 interface IndexProps {
   setPage: (page: 'registration' | 'authorization') => void;
 }
