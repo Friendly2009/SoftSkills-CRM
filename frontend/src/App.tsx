@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import Index from './components/index';
-import { Sidebar } from './components/Sidebar';
-import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { Students } from './components/Students';
 import { Teachers } from './components/Teachers';
@@ -15,24 +13,8 @@ import { RegisterForm } from './components/registration';
 
 type Page = 'index' | 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings' | 'registration' | 'authorization';
 
-const pageTitles: Record<Page, string> = {
-  index: "",
-  dashboard: 'Дашборд',
-  students: 'Студенты',
-  teachers: 'Преподаватели',
-  groups: 'Группы',
-  schedule: 'Расписание',
-  grades: 'Оценки',
-  finance: 'Финансы',
-  settings: 'Настройки',
-  registration: "Новый аккаунт",
-  authorization: "Войти"
-};
-
 function App() {
   let [currentPage, setCurrentPage] = useState<Page>('index');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   switch (currentPage){
     case 'index':
       return <Index setPage={setCurrentPage}/>
@@ -66,22 +48,8 @@ function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        isOpen={sidebarOpen}
-        setIsOpen={setSidebarOpen}
-      />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
-          title={pageTitles[currentPage]}
-          onMenuClick={() => setSidebarOpen(true)}
-        />
-        <main className="flex-1 p-4 lg:p-8 overflow-auto">
-          {renderPage()}
-        </main>
-      </div>
+    <div>
+      {renderPage()}
     </div>
   );
 }
