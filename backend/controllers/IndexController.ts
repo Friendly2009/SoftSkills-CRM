@@ -1,15 +1,20 @@
 import { Request, Response } from "express";
 import path from "path";
 import crypto from "crypto";
-import db from "/Users/S/StudioProjects/crm systen/alpha_crm_open_source/backend/data_base_connect.js";
 import { PoolConnection } from "mysql2/promise";
+import pool from "../data_base_connect.js";
+
 
 export const index = (req: Request, res: Response): void => {
   res.status(200).json({ 
     message: "Добро пожаловать в API" 
   });
 };
-
+export const index2 = (req: Request, res: Response): void => {
+  res.status(200).json({ 
+    message: "Добро пожаловать в index2" 
+  });
+}
 export const signup = (req: Request, res: Response): void => {
   res.status(200).json({ 
     page: "signup", 
@@ -24,7 +29,7 @@ export const APIsignup = async (req: Request, res: Response): Promise<Response |
   let connection: PoolConnection | undefined;
 
   try {
-    connection = await (db as any).getConnection();
+    connection = await (pool as any).getConnection();
     if (!connection) throw new Error("Не удалось установить соединение с БД");
 
     await connection.beginTransaction();    const [compResult]: any = await connection.query(
@@ -77,21 +82,23 @@ export const APIsignup = async (req: Request, res: Response): Promise<Response |
 };
 
 export const APIsignin = async (req: Request, res: Response): Promise<Response | void> => {
+  res.status(200).json({ success: true});
+  //ЗАГЛУШКА
   const { company, login, password } = req.body;
   let connection: PoolConnection | undefined;
 
   try {
-    connection = await (db as any).getConnection();
+    connection = await (pool as any).getConnection();
     if (!connection) throw new Error("Не удалось установить соединение с БД");
 
     const [companies]: any = await connection.query(
       "SELECT * FROM company WHERE name = ? AND (access_key_admin = ? OR access_key_user = ?)",
-      [company, key, key]
+      [company, password, password]
     );
 
     if (companies.length > 0) {
       const currentCompany = companies[0];
-      const userRole = currentCompany.access_key_admin === key ? "admin" : "user";
+      const userRole = currentCompany.access_key_admin === password ? "admin" : "user";
       
       const session = req.session as any;
       session.role = userRole;
@@ -140,7 +147,7 @@ export const APIaddteacher = async (req: Request, res: Response): Promise<Respon
   let connection: PoolConnection | undefined;
 
   try {
-    connection = await (db as any).getConnection();
+    connection = await (pool as any).getConnection();
     if (!connection) throw new Error("Не удалось установить соединение с БД");
 
     await connection.beginTransaction();
@@ -184,7 +191,7 @@ export const APIDelTeacher = async (req: Request, res: Response): Promise<Respon
     const delId = req.params.id;
     console.log(`Удаление преподавателя с ID: ${delId}`);
 
-    connection = await (db as any).getConnection();
+    connection = await (pool as any).getConnection();
     if (!connection) throw new Error("Не удалось установить соединение с БД");
 
     await connection.beginTransaction();

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import db from "./../data_base_connect.js";
 import { PoolConnection } from "mysql2/promise";
+import pool from "../data_base_connect.js";
+
 
 export const getUser = async (req: Request, res: Response): Promise<Response | void> => {
   const session = req.session as any;
@@ -39,7 +40,7 @@ export const getTeacher = async (req: Request, res: Response): Promise<Response 
   let connection: PoolConnection | undefined;
 
   try {
-    connection = await (db as any).getConnection();
+    connection = await (pool as any).getConnection();
     if (!connection) throw new Error("Не удалось установить соединение с БД");
 
     await connection.beginTransaction();
@@ -52,8 +53,6 @@ export const getTeacher = async (req: Request, res: Response): Promise<Response 
     return res.status(200).json({
       data: teachers
     });
-
-    await connection?.commit();
   } catch (ex) {
     console.error("Ошибка при получении списка преподавателей:", ex);
     if (connection) await connection.rollback();

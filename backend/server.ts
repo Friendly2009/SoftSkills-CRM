@@ -1,5 +1,6 @@
 import express, { Express } from "express";
 import path from "path";
+import { fileURLToPath } from "url";
 import session from "express-session";
 import cors from "cors";
 import routes from "./routes/routes"
@@ -7,7 +8,7 @@ import routes from "./routes/routes"
 const app: Express = express();
 
 app.use(cors({
-  origin: 'http://localhost:5137', 
+  origin: 'http://localhost:5173', 
   credentials: true,          
 }));
 
@@ -22,12 +23,15 @@ app.use(
     saveUninitialized: false,
     cookie: { 
       secure: false, 
-      httpOnly: true 
+      httpOnly: true,
+      sameSite: "lax"
     },
   }),
 );
 
-app.use("/api", routes);
+app.use("/", routes);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const buildPath = path.join(__dirname, "..", "frontend");
 app.use(express.static(buildPath));

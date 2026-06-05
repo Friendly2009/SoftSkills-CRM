@@ -7,24 +7,52 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
     login: '',
     password: ''
   });
-  const backbtnOnClick = () => {
-    setPage('index');
+  const backbtnOnClick = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      alert('Успешный вход:' + data);
+      setPage('dashboard');
+    } catch (ex) {
+      alert(ex);
+    }
   }
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const response = await fetch('http://localhost:5000/api/signin');
     try {
-
+      const response = await fetch('http://localhost:3000/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        throw new Error('Ошибка авторизации');
+      }
+      const data = await response.json();
+      alert('Успешный вход:' + data);
+      setPage('dashboard');
     } catch (ex) {
-
+      alert(ex);
     }
   }
 
   return (
     <div className={login['login-card']}>
+      <button onClick={backbtnOnClick}>
+        click me blyat
+      </button>
       <h2>Авторизация в систему</h2>
 
-      <form action="/api/signin" method="post">
+      <form onSubmit={handleFormSubmit}>
         <div className={login['input-group']}>
           <label htmlFor="name">Название компании</label>
           <input
@@ -53,8 +81,7 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
       <p>
         Обратитесь к администрации компании или
         <a href="/support" className={login['support-link']}
-        > Напишите в поддержку</a
-        >
+        > Напишите в поддержку</a>
       </p>
     </div>
   );
