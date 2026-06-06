@@ -81,7 +81,7 @@ export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'au
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 required
                 className={register.input}
-                placeholder="+7 (999) 999-99-99" /* Исправлено */
+                placeholder="+7 (999) 999-99-99" 
               />
             </div>
 
@@ -94,7 +94,7 @@ export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'au
                 onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 required
                 className={register.input}
-                placeholder="Название вашей компании" /* Исправлено */
+                placeholder="Название вашей компании" 
               />
             </div>
 

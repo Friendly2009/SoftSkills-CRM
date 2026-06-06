@@ -13,12 +13,10 @@
     box-sizing: border-box;
 }
 
-/* Сама карточка */
 .login-card {
     background: #ffffff;
     padding: 45px 40px;
     border-radius: 20px;
-    /* Глубокая мягкая тень */
     box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
     width: 100%;
     max-width: 420px;
@@ -26,34 +24,23 @@
     box-sizing: border-box;
     font-family: 'JetBrainsFont', monospace;
     border: 1px solid rgba(226, 232, 240, 0.8);
+    position: relative; 
 }
 
-/* Вайбовая верхняя кнопка */
-.back-btn {
-    font-family: 'JetBrainsFont', monospace;
-    background: #f1f5f9;
-    color: #64748b;
-    border: 1px dashed #cbd5e1;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    margin-bottom: 28px;
-    transition: all 0.2s ease;
-}
+
 
 .back-btn:hover {
-    background: #e2e8f0;
-    color: #1e293b;
-    border-color: #94a3b8;
+    background-color: #e2e8f0;
+    border-color: #cbd5e1;
+    transform: translateX(-2px);
 }
 
 .title {
     color: #1e293b;
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
-    font-style: normal; /* Книжный стиль */
-    margin-top: 0;
+    font-style: normal;
+    margin-top: 24px; 
     margin-bottom: 36px;
     letter-spacing: -0.5px;
 }
@@ -155,4 +142,27 @@
 .support-link:hover {
     text-decoration: underline;
     color: #1557b0;
+}
+.back-icon {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    opacity: 0.6; 
+    transition: opacity 0.2s ease;
+}
+.back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+    position: absolute;
+    
 }

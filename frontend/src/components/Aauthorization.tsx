@@ -8,21 +8,7 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
     password: ''
   });
   const backbtnOnClick = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      alert('Успешный вход:' + data);
-      setPage('dashboard');
-    } catch (ex) {
-      alert(ex);
-    }
+    setPage("index");
   }
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,6 +34,9 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
   return (
     <div className={login['page-wrapper']}>
       <div className={login['login-card']}>
+        <button onClick={backbtnOnClick} className={login['back-btn']}>
+          <img src="/img/user/dashboard/angle-left-solid.png" className={login['back-icon']} alt="exit" />
+        </button>
         <h2 className={login.title}>Авторизация в систему</h2>
 
         <form onSubmit={handleFormSubmit}>

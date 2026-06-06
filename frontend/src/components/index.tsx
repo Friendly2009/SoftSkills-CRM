@@ -1,4 +1,4 @@
-import style from './cssmoduls/index.module.css' //ОГРОМНАЯ ОШИБКА КРИВОЙ ДИЗАЙН ИЗЗА ВТОРОГО МОДУЛЯ СТИЛЯ ЕСЛИ ЕГО УБРАТЬ ИНДЕКС ВСТАНЕТ КАК НАДО
+import style from './cssmoduls/index.module.css'
 interface IndexProps {
   setPage: (page: 'registration' | 'authorization') => void;
 }
@@ -18,7 +18,6 @@ const Index = ({ setPage }: IndexProps) => {
               <a href="#" className={style['header-nav-link']}>База знаний</a>
               <a href="#" className={style['header-nav-link']}>Контакты</a>
             </nav>
-            {/* Исправили className на модульный */}
             <div className={style['header-actions']}>
               <button className={style['header-main-btn']} type="button" onClick={() => { setPage('registration') }}>Создать компанию</button>
               <button className={style['header-sec-btn']} type="button" onClick={() => { setPage('authorization') }}>Войти в компанию</button>
