@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Index from './components/index';
+import Index from './components/Index';
 import { Dashboard } from './components/Dashboard';
 import { Students } from './components/Students';
 import { Teachers } from './components/Teachers';
@@ -8,8 +8,8 @@ import { Schedule } from './components/Schedule';
 import { Grades } from './components/Grades';
 import { Finance } from './components/Finance';
 import { Settings } from './components/Settings';
-import { LoginForm } from './components/authorization';
-import { RegisterForm } from './components/registration';
+import { LoginForm } from './components/Aauthorization';
+import { RegisterForm } from './components/Registration';
 
 type Page = 'index' | 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings' | 'registration' | 'authorization';
 

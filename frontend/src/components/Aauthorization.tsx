@@ -16,7 +16,7 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
         },
         body: JSON.stringify(formData),
       });
-      
+
       const data = await response.json();
       alert('Успешный вход:' + data);
       setPage('dashboard');
@@ -47,42 +47,45 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
 
   return (
     <div className={login['login-card']}>
-      <button onClick={backbtnOnClick}>
-        click me blyat
-      </button>
-      <h2>Авторизация в систему</h2>
+
+      <h2 className={login.title}>Авторизация в систему</h2>
 
       <form onSubmit={handleFormSubmit}>
         <div className={login['input-group']}>
-          <label htmlFor="name">Название компании</label>
+          <label htmlFor="name" className={login.label}>Название компании</label>
           <input
             type="text"
             id="name"
             name="name"
             placeholder="Введите название компании..."
+            className={login.input} 
             required
           />
         </div>
 
         <div className={login['input-group']}>
-          <label htmlFor="key">Лицензионный ключ</label>
+          <label htmlFor="key" className={login.label}>Лицензионный ключ</label>
           <input
             type="password"
             id="key"
             name="key"
             placeholder="••••••••"
+            className={login.input} 
             required
           />
         </div>
 
-        <button type="submit">Войти</button>
+        <button type="submit" className={login['submit-btn']}>Войти</button>
       </form>
-      <p>Забыли ключ?</p>
-      <p>
-        Обратитесь к администрации компании или
-        <a href="/support" className={login['support-link']}
-        > Напишите в поддержку</a>
-      </p>
+
+      <div className={login['support-block']}>
+        <p className={login['forgot-text']}>Забыли ключ?</p>
+        <p className={login['info-text']}>
+          Обратитесь к администрации компании или
+          <a href="/support" className={login['support-link']}> Напишите в поддержку</a>
+        </p>
+      </div>
     </div>
+
   );
 };

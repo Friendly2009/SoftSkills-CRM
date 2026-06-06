@@ -3,69 +3,74 @@ interface IndexProps {
   setPage: (page: 'registration' | 'authorization') => void;
 }
 const Index = ({ setPage }: IndexProps) => {
-  
+
   return (
     <div>
       <header className={style['main-header']}>
-      <div className={style['container']}>
-        <div className={style['header-inner']}>
-          <a href="/" className={style['header-logo']}>
-            <img src="/img/index/brand-logo-2024.webp" alt="alfacrm" />
-          </a>
-          <nav className={style['header-nav']}>
-            <a href="#" className={style['header-nav-link']}>Новости</a>
-            <a href="#" className={style['header-nav-link']}>Тарифы</a>
-            <a href="#" className={style['header-nav-link']}>База знаний</a>
-            <a href="#" className={style['header-nav-link']}>Контакты</a>
-          </nav>
-          <div className="header-actions">
-            <button className={style['header-main-btn']} type="submit" onClick={() => {setPage('registration')}}>Создать компанию</button>
-            <button className={style['header-main-btn']} type="submit" onClick={() => {setPage('authorization')}}>Войти в компанию</button>
+        <div className={style['container']}>
+          <div className={style['header-inner']}>
+            <a href="/" className={style['header-logo']}>
+              <img src="/img/index/brand-logo-2024.webp" alt="alfacrm" />
+            </a>
+            <nav className={style['header-nav']}>
+              <a href="#" className={style['header-nav-link']}>Новости</a>
+              <a href="#" className={style['header-nav-link']}>Тарифы</a>
+              <a href="#" className={style['header-nav-link']}>База знаний</a>
+              <a href="#" className={style['header-nav-link']}>Контакты</a>
+            </nav>
+            {/* Исправили className на модульный */}
+            <div className={style['header-actions']}>
+              <button className={style['header-main-btn']} type="button" onClick={() => { setPage('registration') }}>Создать компанию</button>
+              <button className={style['header-sec-btn']} type="button" onClick={() => { setPage('authorization') }}>Войти в компанию</button>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
-    <main className={style['main']}>
-      <section className={style['hero']}>
-      <div className={style['container']}>
-        <div className={style['hero-content']}>
-          <h1 className={style['hero-title']}>
-            Повышайте свою прибыль <br />
-            в учебных центрах
-          </h1>
-          <div className={style['hero-features']}>
-            <div className={style['feature-item']}>
-              <img src="/img/index/benefits/benefit-1-1024.png" />
-              <p>Аналитика и контроль за сотрудниками</p>
-            </div>
-            <div className={style['feature-item']}>
-              <img src="/img/index/benefits/benefit-2-1024.png" />
-              <p>Удобное начисление зарплат педагогам</p>
-            </div>
-            <div className={style['feature-item']}>
-              <img src="/img/index/benefits/benefit-3-1024.png" />
-              <p>Система лояльности и накопление баллов</p>
-            </div>
-            <div className={style['feature-item']}>
-              <img src="/img/index/benefits/benefit-4-1024.png" />
-              <p>Мобильное приложение ученика</p>
-            </div>
-            <div className={style['feature-item']}>
-              <img src="/img/index/benefits/benefit-5-1024.png" />
-              <p>Простая настройка и бесплатная поддержка</p>
-            </div>
-            <div className={style['feature-item']}>
-              <img src="/img/index/benefits/benefit-6-1024.png" />
-              <p>Онлайн оплата по QR коду</p>
+      </header>
+
+      <main className={style['main']}>
+        <section className={style['hero']}>
+          <div className={style['container']}>
+            <div className={style['hero-content']}>
+              <h1 className={style['hero-title']}>
+                Повышайте свою прибыль <br />
+                <span>в учебных центрах</span>
+              </h1>
+
+              <div className={style['hero-features']}>
+                <div className={style['feature-item']}>
+                  <img src="/img/index/benefits/benefit-1-1024.png" alt="" />
+                  <p>Аналитика и контроль за сотрудниками</p>
+                </div>
+                <div className={style['feature-item']}>
+                  <img src="/img/index/benefits/benefit-2-1024.png" alt="" />
+                  <p>Удобное начисление зарплат педагогам</p>
+                </div>
+                <div className={style['feature-item']}>
+                  <img src="/img/index/benefits/benefit-3-1024.png" alt="" />
+                  <p>Система лояльности и накопление баллов</p>
+                </div>
+                <div className={style['feature-item']}>
+                  <img src="/img/index/benefits/benefit-4-1024.png" alt="" />
+                  <p>Мобильное приложение ученика</p>
+                </div>
+                <div className={style['feature-item']}>
+                  <img src="/img/index/benefits/benefit-5-1024.png" alt="" />
+                  <p>Простая настройка и бесплатная поддержка</p>
+                </div>
+                <div className={style['feature-item']}>
+                  <img src="/img/index/benefits/benefit-6-1024.png" alt="" />
+                  <p>Онлайн оплата по QR коду</p>
+                </div>
+              </div>
+
+              <div className={style['hero-btns']}>
+                <button className={style['hero-cta-btn']} onClick={() => { setPage('authorization') }}>Начать бесплатно</button>
+              </div>
             </div>
           </div>
-          <div className={style['hero-btns']}>
-            <button className={style['header-main-btn']} onClick={() => {setPage('authorization')}}>Начать бесплатно</button>
-          </div>
-        </div>
-      </div>
-    </section>
-    </main>
+        </section>
+      </main>
+
       <footer className={style['footer']}>
         <div className={style['container']}>
           <div className={style['footer-top']}>
@@ -73,10 +78,10 @@ const Index = ({ setPage }: IndexProps) => {
               <img
                 src="/img/index/alfacrm-bw-2024.svg"
                 alt="AlfaCRM"
-                className={style['footer-logo']}
+                className={style['footer-logo-img']}
               />
               <p className={style['footer-desc']}>
-                Peach ALFACRM - CRM система для учебного центра.
+                Peach ALFACRM — CRM система для учебного центра.
               </p>
             </div>
 
@@ -100,12 +105,13 @@ const Index = ({ setPage }: IndexProps) => {
               <a href="#"><img src="/img/index/vk.svg" alt="VK" /></a>
               <a href="#"><img src="/img/index/tg.svg" alt="TG" /></a>
             </div>
-            <p className={style['footer-copy']}>© 2026, ООО «Soft Skills »</p>
-            <p>made with me</p>
+            <p className={style['footer-copy']}>© 2026, ООО «Soft Skills»</p>
+            <p className={style['footer-author']}>made with me</p>
           </div>
         </div>
       </footer>
     </div>
+
   );
 };
 
