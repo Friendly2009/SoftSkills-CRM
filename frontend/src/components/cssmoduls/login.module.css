@@ -1,58 +1,99 @@
+/* Локальная обёртка на весь экран для центрирования */
+.page-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Сине-серый академический градиент */
+    background: radial-gradient(circle at 50% 50%, #f1f5f9 0%, #e2e8f0 100%);
+    box-sizing: border-box;
+}
+
+/* Сама карточка */
 .login-card {
     background: #ffffff;
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+    padding: 45px 40px;
+    border-radius: 20px;
+    /* Глубокая мягкая тень */
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
     width: 100%;
     max-width: 420px;
     text-align: center;
     box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'JetBrainsFont', monospace;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Вайбовая верхняя кнопка */
+.back-btn {
+    font-family: 'JetBrainsFont', monospace;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px dashed #cbd5e1;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: 28px;
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    border-color: #94a3b8;
 }
 
 .title {
-    color: #1a73e8;
-    font-size: 24px;
+    color: #1e293b;
+    font-size: 28px;
     font-weight: 700;
+    font-style: normal; /* Книжный стиль */
     margin-top: 0;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
     letter-spacing: -0.5px;
 }
 
 .input-group {
     text-align: left;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
 }
 
 .label {
     display: block;
     margin-bottom: 8px;
-    color: #4a4a4a;
+    color: #334155;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .input {
     width: 100%;
-    padding: 14px 16px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 10px;
+    padding: 13px 16px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
     box-sizing: border-box;
     font-size: 15px;
-    color: #202124;
+    color: #0f172a;
     outline: none;
-    background-color: #fafafa;
+    background-color: #ffffff;
+    font-family: 'JetBrainsFont', monospace; 
     transition: all 0.2s ease;
 }
 
 .input:focus {
     border-color: #1a73e8;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.15);
+    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.12);
 }
 
 .input::placeholder {
-    color: #9aa0a6;
+    color: #94a3b8;
+    font-family: "JetBrainsFont", monospace;
+    font-style: normal;
 }
 
 .submit-btn {
@@ -61,39 +102,43 @@
     background-color: #1a73e8;
     color: #ffffff;
     border: none;
-    border-radius: 10px;
-    font-size: 16px;
+    border-radius: 8px;
+    font-size: 15px;
     font-weight: 600;
+    font-family: 'JetBrainsFont', monospace;
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    margin-top: 8px;
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+    transition: all 0.2s ease;
+    margin-top: 10px;
 }
 
 .submit-btn:hover {
     background-color: #1557b0;
+    box-shadow: 0 6px 16px rgba(26, 115, 232, 0.3);
 }
 
 .submit-btn:active {
-    transform: scale(0.99);
+    transform: scale(0.98);
 }
 
-/* Нижний блок с текстом */
 .support-block {
-    margin-top: 24px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px dashed #e2e8f0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .forgot-text {
-    color: #202124;
+    color: #0f172a;
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     margin: 0;
 }
 
 .info-text {
-    color: #5f6368;
+    color: #475569;
     font-size: 14px;
     line-height: 1.5;
     margin: 0;
@@ -102,9 +147,12 @@
 .support-link {
     color: #1a73e8;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 2px;
 }
 
 .support-link:hover {
     text-decoration: underline;
+    color: #1557b0;
 }

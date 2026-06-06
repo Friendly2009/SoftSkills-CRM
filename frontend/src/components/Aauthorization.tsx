@@ -46,46 +46,46 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
   }
 
   return (
-    <div className={login['login-card']}>
+    <div className={login['page-wrapper']}>
+      <div className={login['login-card']}>
+        <h2 className={login.title}>Авторизация в систему</h2>
 
-      <h2 className={login.title}>Авторизация в систему</h2>
+        <form onSubmit={handleFormSubmit}>
+          <div className={login['input-group']}>
+            <label htmlFor="name" className={login.label}>Название компании</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Введите название компании..."
+              className={login.input}
+              required
+            />
+          </div>
 
-      <form onSubmit={handleFormSubmit}>
-        <div className={login['input-group']}>
-          <label htmlFor="name" className={login.label}>Название компании</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            placeholder="Введите название компании..."
-            className={login.input} 
-            required
-          />
+          <div className={login['input-group']}>
+            <label htmlFor="key" className={login.label}>Лицензионный ключ</label>
+            <input
+              type="password"
+              id="key"
+              name="key"
+              placeholder="••••••••"
+              className={login.input}
+              required
+            />
+          </div>
+
+          <button type="submit" className={login['submit-btn']}>Войти</button>
+        </form>
+
+        <div className={login['support-block']}>
+          <p className={login['forgot-text']}>Забыли ключ?</p>
+          <p className={login['info-text']}>
+            Обратитесь к администрации компании или
+            <a href="/support" className={login['support-link']}> Напишите в поддержку</a>
+          </p>
         </div>
-
-        <div className={login['input-group']}>
-          <label htmlFor="key" className={login.label}>Лицензионный ключ</label>
-          <input
-            type="password"
-            id="key"
-            name="key"
-            placeholder="••••••••"
-            className={login.input} 
-            required
-          />
-        </div>
-
-        <button type="submit" className={login['submit-btn']}>Войти</button>
-      </form>
-
-      <div className={login['support-block']}>
-        <p className={login['forgot-text']}>Забыли ключ?</p>
-        <p className={login['info-text']}>
-          Обратитесь к администрации компании или
-          <a href="/support" className={login['support-link']}> Напишите в поддержку</a>
-        </p>
       </div>
     </div>
-
   );
 };
