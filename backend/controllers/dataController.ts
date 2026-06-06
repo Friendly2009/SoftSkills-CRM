@@ -61,3 +61,17 @@ export const getTeacher = async (req: Request, res: Response): Promise<Response 
     if (connection) connection.release();
   }
 };
+
+export const checkConnect = async (req: Request, res: Response) =>{
+  try{
+    let connection: PoolConnection | undefined;
+    connection = await (pool as any).getConnection();
+    if (!connection) throw new Error("Не удалось установить соединение с БД");
+    return res.status(200).json({
+      "connect with internet": "true",
+      "connect with database": "true"
+    });
+  }catch(ex){
+    return res.status(400).json({error: ex})
+  }
+}

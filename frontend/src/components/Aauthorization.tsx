@@ -7,11 +7,12 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
     login: '',
     password: ''
   });
-  const backbtnOnClick = async () => {
+  const backbtnOnClick = () => {
     setPage("index");
   }
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     try {
       const response = await fetch('http://localhost:3000/signin', {
         method: 'POST',
@@ -20,17 +21,38 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
         },
         body: JSON.stringify(formData),
       });
+
       if (!response.ok) {
         throw new Error('Ошибка авторизации');
       }
+
       const data = await response.json();
+
       alert('Успешный вход:' + data);
+
       setPage('dashboard');
     } catch (ex) {
+
       alert(ex);
     }
   }
 
+  const checkConnect = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/checkConnect', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Ошибка сервера');
+
+      const jsonData = await response.json();
+      alert(JSON.stringify(jsonData));
+    } catch (ex) {
+      alert(ex);
+    }
+  }
   return (
     <div className={login['page-wrapper']}>
       <div className={login['login-card']}>
@@ -64,7 +86,7 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
             />
           </div>
 
-          <button type="submit" className={login['submit-btn']}>Войти</button>
+          <button type="submit" className={login['submit-btn']} onClick={checkConnect}>Войти</button>
         </form>
 
         <div className={login['support-block']}>
