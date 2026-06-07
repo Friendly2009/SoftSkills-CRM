@@ -6,7 +6,7 @@ const router: Router = Router();
 router.get("/", index);
 router.get('/signin2', index2);
 router.post('/signin', APIsignin);
-router.get('/api/signup', APIsignup);
+router.post('/signup', APIsignup);
 
 router.get('/checkConnect',checkConnect)
 

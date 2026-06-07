@@ -3,86 +3,85 @@ import path from "path";
 import crypto from "crypto";
 import { PoolConnection } from "mysql2/promise";
 import pool from "../data_base_connect.js";
-
+import { text } from "body-parser";
 
 export const index = (req: Request, res: Response): void => {
-  res.status(200).json({ 
-    message: "Добро пожаловать в API" 
+  res.status(200).json({
+    message: "Добро пожаловать в API",
   });
 };
 export const index2 = (req: Request, res: Response): void => {
-  res.status(200).json({ 
-    message: "Добро пожаловать в index2" 
-  });
-}
-export const signup = (req: Request, res: Response): void => {
-  res.status(200).json({ 
-    page: "signup", 
-    title: "Регистрация новой компании" 
+  res.status(200).json({
+    message: "Добро пожаловать в index2",
   });
 };
+export const signup = (req: Request, res: Response): void => {
+  res.status(200).json({
+    page: "signup",
+    title: "Регистрация новой компании",
+  });
+};
+//INSERT INTO users (company_id, full_name, role, rank, email, password_hash, phone)
+//VALUES (42, 'Иван Иванов', 'director', 1000, 'director@company.com', 'пароль', '+7...');
 
-export const APIsignup = async (req: Request, res: Response): Promise<Response | void> => {
-  const { fullName, email, phone, companyName, adminKey } = req.body;
-
-  const userKey = crypto.randomBytes(4).toString("hex");
-  let connection: PoolConnection | undefined;
+export const APIsignup = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
+  const { company, fullname, email, contact, password } = req.body;
+  let connection: any; // меняем на any или импортируем правильный тип, чтобы не ругался TS
 
   try {
     connection = await (pool as any).getConnection();
-    if (!connection) throw new Error("Не удалось установить соединение с БД");
 
-    await connection.beginTransaction();    const [compResult]: any = await connection.query(
-      `INSERT INTO company (name, access_key_admin, access_key_user) VALUES (?, ?, ?)`,
-      [companyName, adminKey, userKey]
-    );
-    const companyId = compResult.insertId;
+    await connection.beginTransaction();
 
-    const userDescription = `Phone: ${phone}, Email: ${email}`;
-    const [userResult]: any = await connection.query(
-      `INSERT INTO users (company_id, full_name, role, description) VALUES (?, ?, ?, ?)`,
-      [companyId, fullName, "admin", userDescription]
-    );
-    const userId = userResult.insertId;
+    const role = "Директор";
+    const rank = 1000;
 
-    const [[dbCompany]]: any = await connection.query(
-      "SELECT * FROM company WHERE id = ?",
-      [companyId]
+    const [newCompany]: any = await connection.query(
+      "INSERT INTO company (name) VALUES (?)",
+      [company],
     );
-    const [[dbUser]]: any = await connection.query(
-      "SELECT * FROM users WHERE id = ?",
-      [userId]
+
+    const company_id = newCompany.insertId;
+
+    const [initDirector]: any = await connection.query(
+      "INSERT INTO users (company_id, full_name, role, users.rank, email, password_hash, contact) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [company_id, fullname, role, rank, email, password, contact],
     );
 
     await connection.commit();
 
-    const session = req.session as any;
-    
-    session.company_id = dbCompany.id;
-    session.company_name = dbCompany.name;
-    session.key_admin = dbCompany.access_key_admin;
-    session.key_user = dbCompany.access_key_user;
+    return res.status(200).json({
+      success: true,
+      message: "Company and director successfully created",
+    });
+  } catch (ex: any) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error(ex);
 
-    session.user_id = dbUser.id;
-    session.user_full_name = dbUser.full_name;
-    session.role = dbUser.role;
-    session.user_description = dbUser.description;
+    if (ex.code === "ER_DUP_ENTRY") {
+      return res
+        .status(400)
+        .json({ error: "User with this email already exists" });
+    }
 
-    console.log(`Администратор ${fullName} и компания ${companyName} успешно созданы`);
-    
-    return res.status(200).json({ success: true, redirectUrl: "/dashboard" });
-
-  } catch (error) {
-    if (connection) await connection.rollback();
-    console.error("Ошибка при регистрации:", error);
-    return res.status(500).json({ error: "Ошибка сервера при регистрации" });
+    return res.status(500).json({ error: "Internal server error" });
   } finally {
-    if (connection) connection.release();
+    if (connection) {
+      await connection.release();
+    }
   }
 };
 
-export const APIsignin = async (req: Request, res: Response): Promise<Response | void> => {
-  res.status(200).json({ success: true});
+export const APIsignin = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
+  res.status(200).json({ success: true });
   //ЗАГЛУШКА
   const { company, login, password } = req.body;
   let connection: PoolConnection | undefined;
@@ -93,13 +92,14 @@ export const APIsignin = async (req: Request, res: Response): Promise<Response |
 
     const [companies]: any = await connection.query(
       "SELECT * FROM company WHERE name = ? AND (access_key_admin = ? OR access_key_user = ?)",
-      [company, password, password]
+      [company, password, password],
     );
 
     if (companies.length > 0) {
       const currentCompany = companies[0];
-      const userRole = currentCompany.access_key_admin === password ? "admin" : "user";
-      
+      const userRole =
+        currentCompany.access_key_admin === password ? "admin" : "user";
+
       const session = req.session as any;
       session.role = userRole;
 
@@ -110,7 +110,7 @@ export const APIsignin = async (req: Request, res: Response): Promise<Response |
 
       const [users]: any = await connection.query(
         "SELECT * FROM users WHERE company_id = ? AND role = ? LIMIT 1",
-        [currentCompany.id, userRole]
+        [currentCompany.id, userRole],
       );
 
       if (users.length > 0) {
@@ -123,13 +123,12 @@ export const APIsignin = async (req: Request, res: Response): Promise<Response |
       }
 
       console.log(`Вход выполнен: ${name} (${session.role})`);
-      
+
       return res.status(200).json({ success: true, redirectUrl: "/dashboard" });
     }
 
     console.log("Неверное имя компании или ключ");
     return res.status(401).json({ error: "Неверное имя компании или ключ" });
-
   } catch (ex) {
     console.error("Ошибка при попытке входа: " + ex);
     return res.status(500).json({ error: "server error" });
@@ -138,9 +137,12 @@ export const APIsignin = async (req: Request, res: Response): Promise<Response |
   }
 };
 
-export const APIaddteacher = async (req: Request, res: Response): Promise<Response | void> => {
+export const APIaddteacher = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
   const { fullname, birthday, gender, contacts, description, color } = req.body;
-  
+
   const session = req.session as any;
   const companyId = session.company_id;
 
@@ -158,33 +160,28 @@ export const APIaddteacher = async (req: Request, res: Response): Promise<Respon
       `INSERT INTO teachers 
         (avatar, fullname, birthday, company_id, gender, contacts, description, color) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        "",
-        fullname,
-        birthday,
-        companyId,
-        gender,
-        contacts,
-        description,
-        color,
-      ],
+      ["", fullname, birthday, companyId, gender, contacts, description, color],
     );
 
     await connection.commit();
-    
-    return res.status(200).json({ success: true, redirectUrl: "/teachers" });
 
+    return res.status(200).json({ success: true, redirectUrl: "/teachers" });
   } catch (ex) {
     console.error("Ошибка при добавлении преподавателя:", ex);
     if (connection) await connection.rollback();
-    
-    return res.status(500).json({ error: "Ошибка сервера при добавлении преподавателя" });
+
+    return res
+      .status(500)
+      .json({ error: "Ошибка сервера при добавлении преподавателя" });
   } finally {
     if (connection) connection.release();
   }
 };
 
-export const APIDelTeacher = async (req: Request, res: Response): Promise<Response | void> => {
+export const APIDelTeacher = async (
+  req: Request,
+  res: Response,
+): Promise<Response | void> => {
   let connection: PoolConnection | undefined;
 
   try {
@@ -196,17 +193,16 @@ export const APIDelTeacher = async (req: Request, res: Response): Promise<Respon
 
     await connection.beginTransaction();
 
-    await connection.query('DELETE FROM teachers WHERE id = ?', [delId]);
+    await connection.query("DELETE FROM teachers WHERE id = ?", [delId]);
 
     await connection.commit();
-    
-    return res.status(200).json({ success: true });
 
+    return res.status(200).json({ success: true });
   } catch (ex) {
     console.error("Ошибка при удалении преподавателя:", ex);
-    
+
     if (connection) await connection.rollback();
-    
+
     return res.status(500).json({ error: "Ошибка сервера при удалении" });
   } finally {
     if (connection) connection.release();

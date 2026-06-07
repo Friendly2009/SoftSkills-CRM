@@ -3,16 +3,16 @@ import register from './CssModuls/signup.module.css'
 export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'authorization' | 'dashboard' | 'index') => void }) => {
 
   const [formData, setFormData] = useState({
-    fullName: '',
+    company: '',
+    fullname: '',
     email: '',
-    phone: '',
-    companyName: '',
-    adminKey: ''
+    contact: '',
+    password: ''
   });
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/signup', {
+      const response = await fetch('http://localhost:3000/signup', {
         method: 'POST',
         headers: {
           'Content-type': 'application/json',
@@ -47,28 +47,41 @@ export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'au
           <div className={register['inputs-container']}>
 
             <div className={register['input-group']}>
-              <label className={register.label}>Полное имя</label>
+              <label className={register.label}>Имя компани</label>
               <input
-                name="fullName"
+                name="company"
                 type="text"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                value={formData.company}
+                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                 required
                 className={register.input}
-                placeholder="Иван Иванов"
+                placeholder="AnyCompany"
               />
             </div>
 
             <div className={register['input-group']}>
-              <label className={register.label}>Email</label>
+              <label className={register.label}>ФИО</label>
               <input
-                name="email"
+                name="fullname"
+                type="text"
+                value={formData.fullname}
+                onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+                required
+                className={register.input}
+                placeholder="Иван Иванов Иванович"
+              />
+            </div>
+
+            <div className={register['input-group']}>
+              <label className={register.label}>Эл. почта</label>
+              <input
                 type="email"
+                name="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
                 className={register.input}
-                placeholder="mail@example.com"
+                placeholder="mail@example.com" 
               />
             </div>
 
@@ -76,25 +89,12 @@ export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'au
               <label className={register.label}>Номер телефона</label>
               <input
                 type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                name="contact"
+                value={formData.contact}
+                onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                 required
                 className={register.input}
-                placeholder="+7 (999) 999-99-99" 
-              />
-            </div>
-
-            <div className={register['input-group']}>
-              <label className={register.label}>Название центра</label>
-              <input
-                type="text"
-                name="companyName"
-                value={formData.companyName}
-                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                required
-                className={register.input}
-                placeholder="Название вашей компании" 
+                placeholder="+71234567890" 
               />
             </div>
 
@@ -103,8 +103,8 @@ export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'au
               <input
                 type="password"
                 name="adminKey"
-                value={formData.adminKey}
-                onChange={(e) => setFormData({ ...formData, adminKey: e.target.value })}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 className={register.input}
                 placeholder="••••••••"

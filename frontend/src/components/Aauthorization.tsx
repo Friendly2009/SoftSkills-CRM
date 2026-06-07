@@ -75,6 +75,18 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
           </div>
 
           <div className={login['input-group']}>
+            <label htmlFor="email" className={login.label} ></label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Введите Эл. почту"
+              className={login.input}
+              required
+            />
+          </div>
+
+          <div className={login['input-group']}>
             <label htmlFor="key" className={login.label}>Лицензионный ключ</label>
             <input
               type="password"
