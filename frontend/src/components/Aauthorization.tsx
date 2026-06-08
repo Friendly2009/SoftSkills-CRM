@@ -28,7 +28,7 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
 
       const data = await response.json();
 
-      alert('Успешный вход:' + data);
+      console.log('Успешный вход:' + JSON.stringify(data));
 
       setPage('dashboard');
     } catch (ex) {
@@ -37,22 +37,22 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
     }
   }
 
-  const checkConnect = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/checkConnect', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) throw new Error('Ошибка сервера');
+  //const checkConnect = async () => {
+  //  try {
+  //    const response = await fetch('http://localhost:3000/checkConnect', {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //    },
+  //  });
+  //  if (!response.ok) throw new Error('Ошибка сервера');
 
-      const jsonData = await response.json();
-      alert(JSON.stringify(jsonData));
-    } catch (ex) {
-      alert(ex);
-    }
-  }
+  // const jsonData = await response.json();
+  // alert(JSON.stringify(jsonData));
+  //} catch (ex) {
+  //  alert(ex);
+  //}
+  //}
   return (
     <div className={login['page-wrapper']}>
       <div className={login['login-card']}>
@@ -68,6 +68,7 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
               type="text"
               id="name"
               name="name"
+              onChange={(e) => {setFormData({...formData, company: e.target.value})}}
               placeholder="Введите название компании..."
               className={login.input}
               required
@@ -80,6 +81,7 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
               type="email"
               id="email"
               name="email"
+              onChange={(e) => {setFormData({...formData, login: e.target.value})}}
               placeholder="Введите Эл. почту"
               className={login.input}
               required
@@ -92,13 +94,14 @@ export const LoginForm = ({ setPage }: { setPage: (page: 'registration' | 'autho
               type="password"
               id="key"
               name="key"
+              onChange={(e) => {setFormData({...formData, password: e.target.value})}}
               placeholder="••••••••"
               className={login.input}
               required
             />
           </div>
 
-          <button type="submit" className={login['submit-btn']} onClick={checkConnect}>Войти</button>
+          <button type="submit" className={login['submit-btn']}>Войти</button>
         </form>
 
         <div className={login['support-block']}>

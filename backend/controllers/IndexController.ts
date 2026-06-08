@@ -81,57 +81,68 @@ export const APIsignin = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
-  res.status(200).json({ success: true });
-  //ЗАГЛУШКА
   const { company, login, password } = req.body;
   let connection: PoolConnection | undefined;
 
   try {
     connection = await (pool as any).getConnection();
-    if (!connection) throw new Error("Не удалось установить соединение с БД");
+    if (!connection) throw new Error("No Connect with database");
 
-    const [companies]: any = await connection.query(
-      "SELECT * FROM company WHERE name = ? AND (access_key_admin = ? OR access_key_user = ?)",
-      [company, password, password],
+    //----------company----------//
+    const [companyData] = await connection.query(
+      "select * from company where name = ?",
+      [company],
     );
 
-    if (companies.length > 0) {
-      const currentCompany = companies[0];
-      const userRole =
-        currentCompany.access_key_admin === password ? "admin" : "user";
+    const companyRows = companyData as any[];
 
-      const session = req.session as any;
-      session.role = userRole;
-
-      session.company_id = currentCompany.id;
-      session.company_name = currentCompany.name;
-      session.key_admin = currentCompany.access_key_admin;
-      session.key_user = currentCompany.access_key_user;
-
-      const [users]: any = await connection.query(
-        "SELECT * FROM users WHERE company_id = ? AND role = ? LIMIT 1",
-        [currentCompany.id, userRole],
-      );
-
-      if (users.length > 0) {
-        const currentUser = users[0];
-
-        session.user_id = currentUser.id;
-        session.user_full_name = currentUser.full_name;
-        session.user_description = currentUser.description;
-        session.db_user_role = currentUser.role;
-      }
-
-      console.log(`Вход выполнен: ${name} (${session.role})`);
-
-      return res.status(200).json({ success: true, redirectUrl: "/dashboard" });
+    if (companyRows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ message: "Company not found" });
     }
 
-    console.log("Неверное имя компании или ключ");
-    return res.status(401).json({ error: "Неверное имя компании или ключ" });
-  } catch (ex) {
-    console.error("Ошибка при попытке входа: " + ex);
-    return res.status(500).json({ error: "server error" });
+    const companyId = companyRows[0]?.id;
+    //----------users----------//
+    const [userData] = await connection.query(
+      "select * from users where company_id = ? and email = ? and password_hash = ?",
+      [companyId, login, password],
+    );
+
+    const userRows = userData as any[];
+    if (userRows.length > 0) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          company: {
+            company_id: companyRows[0]?.id,
+            company_name: companyRows[0]?.name,
+          },
+          user: {
+            user_id: userRows[0]?.id,
+            full_name: userRows[0]?.full_name,
+            role: userRows[0]?.role,
+            rank: userRows[0]?.rank,
+            email: userRows[0]?.email,
+            password: password,
+            birthday: userRows[0]?.birthday,
+            contact: userRows[0]?.contact,
+            gender: userRows[0]?.gender,
+            avatar: userRows[0]?.avatar,
+          },
+        },
+      });
+    }
+
+    return res.status(404).json({
+      succes: false,
+      message: "user not found",
+    });
+  } catch (ex: any) { 
+    console.error(ex);
+    return res.status(500).json({
+      success: false,
+      error: "internal server error"
+    });
   } finally {
     if (connection) connection.release();
   }
@@ -143,14 +154,11 @@ export const APIaddteacher = async (
 ): Promise<Response | void> => {
   const { fullname, birthday, gender, contacts, description, color } = req.body;
 
-  const session = req.session as any;
-  const companyId = session.company_id;
-
   let connection: PoolConnection | undefined;
 
   try {
     connection = await (pool as any).getConnection();
-    if (!connection) throw new Error("Не удалось установить соединение с БД");
+    if (!connection) throw new Error("No Connect with database");
 
     await connection.beginTransaction();
 
@@ -160,7 +168,7 @@ export const APIaddteacher = async (
       `INSERT INTO teachers 
         (avatar, fullname, birthday, company_id, gender, contacts, description, color) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      ["", fullname, birthday, companyId, gender, contacts, description, color],
+      ["", fullname, birthday, fullname, gender, contacts, description, color],
     );
 
     await connection.commit();
