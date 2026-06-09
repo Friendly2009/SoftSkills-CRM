@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+import 'dotenv/config';
 import express, { Express } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -7,14 +10,15 @@ import routes from "./routes/routes"
 
 const app: Express = express();
 
+const FRONTEND_PORT = process.env.FRONTEND_PORT;
+const FRONTEND_HOST = process.env.FRONTEND_HOST;
 app.use(cors({
-  origin: 'http://localhost:5173', 
+  origin: `http://${FRONTEND_HOST}:${FRONTEND_PORT}`, 
   credentials: true,          
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-console.log("use json");
 
 app.use(
   session({
@@ -36,7 +40,8 @@ const __dirname = path.dirname(__filename);
 const buildPath = path.join(__dirname, "..", "frontend");
 app.use(express.static(buildPath));
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Your server is running on http://localhost:${PORT}`);
+const BACKEND_PORT = process.env.BACKEND_PORT;
+const BACKEND_HOST = process.env.BACKEND_HOST;
+app.listen(BACKEND_PORT, () => {
+  console.log(`Your server is running on http://${BACKEND_HOST}:${BACKEND_PORT}`);
 });
