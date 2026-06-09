@@ -1,10 +1,7 @@
 import { Request, Response } from "express";
-import path from "path";
-import crypto from "crypto";
 import { PoolConnection } from "mysql2/promise";
 import pool from "../data_base_connect.js";
 import bcrypt from "bcrypt";
-import { text } from "body-parser";
 
 export const index = (req: Request, res: Response): void => {
   res.status(200).json({
@@ -22,8 +19,6 @@ export const signup = (req: Request, res: Response): void => {
     title: "Регистрация новой компании",
   });
 };
-//INSERT INTO users (company_id, full_name, role, rank, email, password_hash, phone)
-//VALUES (42, 'Иван Иванов', 'director', 1000, 'director@company.com', 'пароль', '+7...');
 
 export const APIsignup = async (
   req: Request,
@@ -42,24 +37,42 @@ export const APIsignup = async (
 
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
-
+    
     const [newCompany]: any = await connection.query(
       "INSERT INTO company (name) VALUES (?)",
       [company],
     );
-
+    
+    const companyRows = newCompany[0];
     const company_id = newCompany.insertId;
-
+     
     const [initDirector]: any = await connection.query(
       "INSERT INTO users (company_id, full_name, role, users.rank, email, password_hash, contact) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [company_id, fullname, role, rank, email, passwordHash, contact],
     );
 
+    const user = initDirector[0];
     await connection.commit();
 
     return res.status(200).json({
       success: true,
-      message: "Company and director successfully created",
+      data: {
+        company: {
+          company_id: company_id,
+          company_name: companyRows[0]?.name,
+        },
+        user: {
+          user_id: user.id,
+          full_name: user.full_name,
+          role: user.role,
+          rank: user.rank,
+          email: user.email,
+          birthday: user.birthday,
+          contact: user.contact,
+          gender: user.gender,
+          avatar: user.avatar,
+        },
+      },
     });
   } catch (ex: any) {
     if (connection) {
@@ -150,7 +163,7 @@ export const APIsignin = async (
           gender: user.gender,
           avatar: user.avatar,
         },
-      },
+      }
     });
   } catch (ex: any) {
     console.error(ex);
