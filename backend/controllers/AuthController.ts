@@ -3,23 +3,6 @@ import { PoolConnection } from "mysql2/promise";
 import pool from "../data_base_connect.js";
 import bcrypt from "bcrypt";
 
-export const index = (req: Request, res: Response): void => {
-  res.status(200).json({
-    message: "Добро пожаловать в API",
-  });
-};
-export const index2 = (req: Request, res: Response): void => {
-  res.status(200).json({
-    message: "Добро пожаловать в index2",
-  });
-};
-export const signup = (req: Request, res: Response): void => {
-  res.status(200).json({
-    page: "signup",
-    title: "Регистрация новой компании",
-  });
-};
-
 export const APIsignup = async (
   req: Request,
   res: Response,
@@ -171,74 +154,6 @@ export const APIsignin = async (
       success: false,
       error: "internal server error",
     });
-  } finally {
-    if (connection) connection.release();
-  }
-};
-export const APIaddteacher = async (
-  req: Request,
-  res: Response,
-): Promise<Response | void> => {
-  const { fullname, birthday, gender, contacts, description, color } = req.body;
-
-  let connection: PoolConnection | undefined;
-
-  try {
-    connection = await (pool as any).getConnection();
-    if (!connection) throw new Error("No Connect with database");
-
-    await connection.beginTransaction();
-
-    console.log(fullname, birthday, gender, contacts, description, color);
-
-    await connection.query(
-      `INSERT INTO teachers 
-        (avatar, fullname, birthday, company_id, gender, contacts, description, color) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      ["", fullname, birthday, fullname, gender, contacts, description, color],
-    );
-
-    await connection.commit();
-
-    return res.status(200).json({ success: true, redirectUrl: "/teachers" });
-  } catch (ex) {
-    console.error("Ошибка при добавлении преподавателя:", ex);
-    if (connection) await connection.rollback();
-
-    return res
-      .status(500)
-      .json({ error: "Ошибка сервера при добавлении преподавателя" });
-  } finally {
-    if (connection) connection.release();
-  }
-};
-
-export const APIDelTeacher = async (
-  req: Request,
-  res: Response,
-): Promise<Response | void> => {
-  let connection: PoolConnection | undefined;
-
-  try {
-    const delId = req.params.id;
-    console.log(`Удаление преподавателя с ID: ${delId}`);
-
-    connection = await (pool as any).getConnection();
-    if (!connection) throw new Error("Не удалось установить соединение с БД");
-
-    await connection.beginTransaction();
-
-    await connection.query("DELETE FROM teachers WHERE id = ?", [delId]);
-
-    await connection.commit();
-
-    return res.status(200).json({ success: true });
-  } catch (ex) {
-    console.error("Ошибка при удалении преподавателя:", ex);
-
-    if (connection) await connection.rollback();
-
-    return res.status(500).json({ error: "Ошибка сервера при удалении" });
   } finally {
     if (connection) connection.release();
   }

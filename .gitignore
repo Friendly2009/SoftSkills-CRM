@@ -2,5 +2,4 @@ backend/.env
 backend/api.http
 backend/node_modules/
 frontend/node_modules/
-
-backend/databasescript.sql
+backend/.sql

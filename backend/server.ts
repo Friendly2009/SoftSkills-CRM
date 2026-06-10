@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import session from "express-session";
 import cors from "cors";
-import routes from "./routes/routes"
+import routes from "./router"
 
 const app: Express = express();
 
