@@ -1,5 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import 'dotenv/config';
 import express, { Express } from "express";
 import path from "path";
@@ -22,13 +20,13 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
-    secret: "mysecretkey",
+    secret: process.env.SESSION_SECRET || "mysecretkey",
     resave: false,
     saveUninitialized: false,
     cookie: { 
       secure: false, 
-      httpOnly: true,
-      sameSite: "lax"
+      httpOnly: true, 
+      sameSite: "lax" 
     },
   }),
 );
