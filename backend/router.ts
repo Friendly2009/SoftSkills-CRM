@@ -8,7 +8,7 @@ router.get('/checkconnect', checkConnect);
 router.post("/getusers", getUsers);
 
 router.post("/signin", APIsignin);
-router.post("/signin", APIsignup);
+router.post("/signup", APIsignup);
 
 
 

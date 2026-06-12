@@ -12,8 +12,21 @@ export const APIsignup = async (
 
   try {
     connection = await (pool as any).getConnection();
-
     await connection.beginTransaction();
+
+    // 1. Проверяем, существует ли уже компания с таким именем
+    const [existingCompany]: any = await connection.query(
+      "SELECT id FROM company WHERE name = ?",
+      [company]
+    );
+
+    if (existingCompany && existingCompany.length > 0) {
+      // Если компания найдена, отменяем транзакцию и блокируем действие
+      await connection.rollback();
+      return res.status(400).json({ 
+        error: "Компания с таким названием уже зарегистрирована" 
+      });
+    }
 
     const role = "Директор";
     const rank = 1000;
@@ -21,39 +34,40 @@ export const APIsignup = async (
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
     
-    const [newCompany]: any = await connection.query(
+    // 2. Создаем новую компанию
+    const [insertCompanyResult]: any = await connection.query(
       "INSERT INTO company (name) VALUES (?)",
       [company],
     );
-    
-    const companyRows = newCompany[0];
-    const company_id = newCompany.insertId;
+    const company_id = insertCompanyResult.insertId;
      
-    const [initDirector]: any = await connection.query(
+    // 3. Создаем пользователя (Директора) для этой компании
+    const [initDirectorResult]: any = await connection.query(
       "INSERT INTO users (company_id, full_name, role, users.rank, email, password_hash, contact) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [company_id, fullname, role, rank, email, passwordHash, contact],
     );
+    const user_id = initDirectorResult.insertId;
 
-    const user = initDirector[0];
     await connection.commit();
 
+    // Возвращаем успешный ответ, собирая данные из req.body и полученных ID
     return res.status(200).json({
       success: true,
       data: {
         company: {
           company_id: company_id,
-          company_name: companyRows[0]?.name,
+          company_name: company,
         },
         user: {
-          user_id: user.id,
-          full_name: user.full_name,
-          role: user.role,
-          rank: user.rank,
-          email: user.email,
-          birthday: user.birthday,
-          contact: user.contact,
-          gender: user.gender,
-          avatar: user.avatar,
+          user_id: user_id,
+          full_name: fullname,
+          role: role,
+          rank: rank,
+          email: email,
+          contact: contact,
+          birthday: null,
+          gender: null,
+          avatar: null,
         },
       },
     });
@@ -66,7 +80,7 @@ export const APIsignup = async (
     if (ex.code === "ER_DUP_ENTRY") {
       return res
         .status(400)
-        .json({ error: "User with this email already exists" });
+        .json({ error: "Пользователь с таким email уже существует" });
     }
 
     return res.status(500).json({ error: "Internal server error" });
@@ -76,6 +90,7 @@ export const APIsignup = async (
     }
   }
 };
+
 
 export const APIsignin = async (
   req: Request,

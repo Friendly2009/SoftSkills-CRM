@@ -102,7 +102,7 @@ export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'au
               <label className={register.label}>Пароль</label>
               <input
                 type="password"
-                name="adminKey"
+                name="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
