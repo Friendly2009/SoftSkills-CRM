@@ -3,9 +3,9 @@ import { PoolConnection } from "mysql2/promise";
 import pool from "../data_base_connect.js";
 
 export const getUsers = async (req: Request, res: Response): Promise<Response | void> => {
-  const {company_id} = req.body;
+  const { company_id } = req.body;
   let connection: PoolConnection | undefined;
-  try{
+  try {
     connection = await pool.getConnection();
 
     if (!connection) throw new Error("don't connect with database");
@@ -18,7 +18,7 @@ export const getUsers = async (req: Request, res: Response): Promise<Response | 
       success: true,
       data: rows
     });
-  } catch(ex) {
+  } catch (ex) {
     return res.status(400).json({
       success: false,
       message: "Couldn't get list of users"
@@ -26,8 +26,26 @@ export const getUsers = async (req: Request, res: Response): Promise<Response | 
   }
 };
 
-export const checkConnect = async (req: Request, res: Response) =>{
-  try{
+export const getGlobalInfo = async (req: Request, res: Response) => {
+  try {
+
+    let connection: PoolConnection | undefined;
+
+    connection = await pool.getConnection();
+    if(!connection) throw new Error("do not connected with database");
+
+    const companyName = await connection.query("select name from company where id = ?", [req.session.company_id]) as any[];
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        companyName: companyName[0]
+      }
+    })
+  }  
+}
+export const checkConnect = async (req: Request, res: Response) => {
+  try {
     let connection: PoolConnection | undefined;
     connection = await (pool as any).getConnection();
     if (!connection) throw new Error("Не удалось установить соединение с БД");
@@ -35,7 +53,7 @@ export const checkConnect = async (req: Request, res: Response) =>{
       "connect with internet": "true",
       "connect with database": "true"
     });
-  }catch(ex){
-    return res.status(400).json({error: ex})
+  } catch (ex) {
+    return res.status(400).json({ error: ex })
   }
 }

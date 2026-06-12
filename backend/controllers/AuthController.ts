@@ -14,14 +14,12 @@ export const APIsignup = async (
     connection = await (pool as any).getConnection();
     await connection.beginTransaction();
 
-    // 1. Проверяем, существует ли уже компания с таким именем
     const [existingCompany]: any = await connection.query(
       "SELECT id FROM company WHERE name = ?",
       [company]
     );
 
     if (existingCompany && existingCompany.length > 0) {
-      // Если компания найдена, отменяем транзакцию и блокируем действие
       await connection.rollback();
       return res.status(400).json({ 
         error: "Компания с таким названием уже зарегистрирована" 
@@ -34,14 +32,12 @@ export const APIsignup = async (
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
     
-    // 2. Создаем новую компанию
     const [insertCompanyResult]: any = await connection.query(
       "INSERT INTO company (name) VALUES (?)",
       [company],
     );
     const company_id = insertCompanyResult.insertId;
      
-    // 3. Создаем пользователя (Директора) для этой компании
     const [initDirectorResult]: any = await connection.query(
       "INSERT INTO users (company_id, full_name, role, users.rank, email, password_hash, contact) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [company_id, fullname, role, rank, email, passwordHash, contact],
@@ -50,7 +46,6 @@ export const APIsignup = async (
 
     await connection.commit();
 
-    // Возвращаем успешный ответ, собирая данные из req.body и полученных ID
     return res.status(200).json({
       success: true,
       data: {
@@ -142,6 +137,8 @@ export const APIsignin = async (
         message: "Invalid credentials",
       });
     }
+
+    req.session.company_id = companyRows[0]?.id;
 
     return res.status(200).json({
       success: true,
