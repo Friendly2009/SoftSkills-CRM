@@ -1,0 +1,107 @@
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+  border: 1px solid #e2e8f0;
+}
+
+.crm-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  color: #334155;
+}
+
+.crm-table th {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 2px solid #e2e8f0;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.crm-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.crm-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Стили для сущностей внутри ячеек */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #475569;
+}
+
+.user-fullname {
+  font-weight: 600;
+  color: #1e3d59;
+}
+
+/* Бейджи для ролей и рангов */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-role {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.badge-rank {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.text-muted {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Действия над строкой */
+.actions-cell {
+  text-align: right;
+}
+
+.btn-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #64748b;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-action:hover {
+  background-color: #f1f5f9;
+  color: #1e3d59;
+}

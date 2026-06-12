@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import style from './cssmoduls/dashboard.module.css';
+import { ClientsTable } from './DashboardsComponents/ClientsTable.tsx';
 
 export const Dashboard: React.FC = () => {
 
   const [isPlusOpen, setIsPlusOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
-  
+
   const [activeTab, setActiveTab] = useState<'desktop' | 'reports'>('desktop');
-  const [activeMenu, setActiveMenu] = useState<string>('analytics');
+  const [activeMenu, setActiveMenu] = useState<string>('clients');
+
+  const GetGlobalInfo = () => {
+    
+  }
+  GetGlobalInfo();
   return (
     <>
       <header className={style['alfa-header']}>
@@ -133,6 +139,13 @@ export const Dashboard: React.FC = () => {
             <img src="/img/user/dashboard/user-solid.png" alt="" className={style['nav-icon']} />
             <span>Клиенты</span>
           </div>
+          <div 
+            className={`${style['nav-item']} ${activeMenu === 'users' ? style['nav-item-active'] : ''}`}
+            onClick={() => setActiveMenu('users')}
+          >
+            <img src="/img/user/dashboard/chalkboard-user-solid.png" alt="" className={style['nav-icon']} />
+            <span>Сотрудники</span>
+          </div>
         </nav>
       </aside>
 
@@ -166,8 +179,9 @@ export const Dashboard: React.FC = () => {
 
         <div className={style['dashboard-placeholder']}>
           <div className={style['placeholder-content']} id="placeholder-content">
-            {activeMenu === 'analytics' && <p>Контент аналитики...</p>}
-            {activeMenu === 'clients' && <p>Таблица клиентов...</p>}
+            {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
+            {activeMenu === 'users' && <ClientsTable></ClientsTable>}
+            {activeMenu === 'clients' && <p>Контент аналитики...</p>}
           </div>
         </div>
       </section>
