@@ -4,12 +4,12 @@ import path from "path";
 import { fileURLToPath } from "url";
 import session from "express-session";
 import cors from "cors";
-import routes from "./router"
+import routes from "./router.js"
 
 const app: Express = express();
 
-const FRONTEND_PORT = process.env.FRONTEND_PORT;
-const FRONTEND_HOST = process.env.FRONTEND_HOST;
+const FRONTEND_PORT = process.env.FRONT_PORT;
+const FRONTEND_HOST = process.env.DB_HOST;
 app.use(cors({
   origin: `http://${FRONTEND_HOST}:${FRONTEND_PORT}`, 
   credentials: true,          
@@ -38,8 +38,8 @@ const __dirname = path.dirname(__filename);
 const buildPath = path.join(__dirname, "..", "frontend");
 app.use(express.static(buildPath));
 
-const BACKEND_PORT = process.env.BACKEND_PORT;
-const BACKEND_HOST = process.env.BACKEND_HOST;
+const BACKEND_PORT = process.env.PORT;
+const BACKEND_HOST = process.env.DB_HOST;
 app.listen(BACKEND_PORT, () => {
   console.log(`Your server is running on http://${BACKEND_HOST}:${BACKEND_PORT}`);
 });
