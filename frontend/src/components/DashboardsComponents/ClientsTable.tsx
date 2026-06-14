@@ -20,12 +20,13 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         full_name: '',
-        role: 'Менеджер',
+        role: '',
         rank: 100,
         email: '',
         contact: '',
         birthday: '',
-        gender: 'Мужской'
+        gender: 'Муж',
+        password: ''
     });
 
     const getUsers = async () => {
@@ -74,7 +75,6 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
 
     return (
         <>
-            {/* 4. Форма рендерится на верхнем уровне, поверх таблицы, если isModalOpen === true */}
             {isModalOpen && (
                 <div className={style['modal-overlay']} onClick={() => setIsModalOpen(false)}>
                     <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
@@ -124,6 +124,14 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
                                     <input
                                         type="text" name="contact" className={style['form-input']}
                                         value={formData.contact} onChange={handleInputChange} placeholder="+79991112233"
+                                    />
+                                </div>
+
+                                <div className={`${style['form-group']} ${style['full-width']}`}>
+                                    <label>Пароль для входа</label>
+                                    <input
+                                        type="password" name="password" className={style['form-input']}
+                                        value={formData.password} onChange={handleInputChange} placeholder="•••••••••"
                                     />
                                 </div>
 
