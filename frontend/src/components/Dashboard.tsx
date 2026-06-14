@@ -17,6 +17,16 @@ export const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'desktop' | 'reports'>('desktop');
   const [activeMenu, setActiveMenu] = useState<string>('clients');
 
+  const [plusAction, setPlusAction] = useState<(() => void) | null>(null);
+
+  const handlePlusClick = () => {
+    if (plusAction) {
+      plusAction();
+    } else {
+      console.log("Для этого экрана кнопка '+' не настроена");
+    }
+  };
+
   const GetGlobalInfo = async () => {
     try {
       const response = await fetch("http://localhost:3000/getglobalinfo", {
@@ -41,94 +51,91 @@ export const Dashboard: React.FC = () => {
   return (
     <>
       <header className={style['alfa-header']}>
-      {/* Левая часть: бургер и логотип */}
-      <div className={style['header-left']}>
-        <button className={style['burger-menu']} id="burger-button">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        <div className={style.logo}>
-          <img src="/img/index/brand-logo-2024.webp" alt="alfacrm" />
+        <div className={style['header-left']}>
+          <button className={style['burger-menu']} id="burger-button">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div className={style.logo}>
+            <img src="/img/index/brand-logo-2024.webp" alt="alfacrm" />
+          </div>
         </div>
-      </div>
 
-      {/* Центральная часть: быстрые действия, иконки и поиск */}
-      <div className={style['header-center']}>
-        <div className={`${style['dropdown-menu']} ${isPlusOpen ? style.active : ''}`}>
-          <div className={style['menu-item']}>
-            <img src="/img/user/dashboard/list-check-solid.png" alt="" className={style['nav-icon']} />
-            Задача
+        <div className={style['header-center']}>
+          <div className={`${style['dropdown-menu']} ${isPlusOpen ? style.active : ''}`}>
+            <div className={style['menu-item']}>
+              <img src="/img/user/dashboard/list-check-solid.png" alt="" className={style['nav-icon']} />
+              Задача
+            </div>
+            <div className={style['menu-item']}>
+              <img src="/img/user/dashboard/user-plus-solid.png" alt="" className={style['nav-icon']} />
+              Лид
+            </div>
+            <div className={style['menu-item']}>
+              <img src="/img/user/dashboard/user-solid.png" alt="" className={style['nav-icon']} />
+              Клиент
+            </div>
+            <div className={style['menu-item']}>
+              <img src="/img/user/dashboard/user-group-solid.png" alt="" className={style['nav-icon']} />
+              Группа
+            </div>
+            <hr className={style.hr} />
+            <div className={style['menu-item']}>
+              <img src="/img/user/dashboard/money-bill-trend-up-solid.png" alt="" className={style['nav-icon']} />
+              Доход
+            </div>
           </div>
-          <div className={style['menu-item']}>
-            <img src="/img/user/dashboard/user-plus-solid.png" alt="" className={style['nav-icon']} />
-            Лид
+
+          <div
+            className={style['icon-box']}
+            id="plusBtn"
+            onClick={() => setIsPlusOpen(!isPlusOpen)}
+          >
+            <img src="/img/user/dashboard/plus-solid.png" alt="" className={style['nav-icon']} />
           </div>
-          <div className={style['menu-item']}>
-            <img src="/img/user/dashboard/user-solid.png" alt="" className={style['nav-icon']} />
-            Клиент
-          </div>
-          <div className={style['menu-item']}>
-            <img src="/img/user/dashboard/user-group-solid.png" alt="" className={style['nav-icon']} />
-            Группа
-          </div>
-          <hr className={style.hr} />
-          <div className={style['menu-item']}>
-            <img src="/img/user/dashboard/money-bill-trend-up-solid.png" alt="" className={style['nav-icon']} />
-            Доход
+
+          <div className={style['icon-box']}><img src="/img/user/dashboard/wrench-solid.png" alt="" className={style['nav-icon']} /></div>
+          <div className={style['icon-box']}><img src="/img/user/dashboard/envelope-solid.png" alt="" className={style['nav-icon']} /></div>
+          <div className={style['icon-box']}><img src="/img/user/dashboard/mobile-solid.png" alt="" className={style['nav-icon']} /></div>
+          <div className={style['icon-box']}><img src="/img/user/dashboard/telegram-brands-solid.png" alt="" className={style['nav-icon']} /></div>
+          <div className={style['icon-box']}><img src="/img/user/dashboard/cart-shopping-solid.png" alt="" className={style['nav-icon']} /></div>
+          <div className={style['icon-box']}><img src="/img/user/dashboard/bell-regular.png" alt="" className={style['nav-icon']} /></div>
+
+          <div className={style['search-container']}>
+            <input type="text" placeholder="Поиск клиента" />
           </div>
         </div>
 
         <div
-          className={style['icon-box']}
-          id="plusBtn"
-          onClick={() => setIsPlusOpen(!isPlusOpen)}
+          className={style['header-right']}
+          onClick={() => setIsUserOpen(!isUserOpen)}
         >
-          <img src="/img/user/dashboard/plus-solid.png" alt="" className={style['nav-icon']} />
-        </div>
-
-        <div className={style['icon-box']}><img src="/img/user/dashboard/wrench-solid.png" alt="" className={style['nav-icon']} /></div>
-        <div className={style['icon-box']}><img src="/img/user/dashboard/envelope-solid.png" alt="" className={style['nav-icon']} /></div>
-        <div className={style['icon-box']}><img src="/img/user/dashboard/mobile-solid.png" alt="" className={style['nav-icon']} /></div>
-        <div className={style['icon-box']}><img src="/img/user/dashboard/telegram-brands-solid.png" alt="" className={style['nav-icon']} /></div>
-        <div className={style['icon-box']}><img src="/img/user/dashboard/cart-shopping-solid.png" alt="" className={style['nav-icon']} /></div>
-        <div className={style['icon-box']}><img src="/img/user/dashboard/bell-regular.png" alt="" className={style['nav-icon']} /></div>
-
-        <div className={style['search-container']}>
-          <input type="text" placeholder="Поиск клиента" />
-        </div>
-      </div>
-
-      {/* Правая часть: профиль пользователя и выпадающее меню */}
-      <div
-        className={style['header-right']}
-        onClick={() => setIsUserOpen(!isUserOpen)}
-      >
-        {profile ? (
-          <>
-            <span className={style['user-name']} id="name_info">{profile.fullname}</span>
-            <div className={style['user-avatar']}>
-              <img src="/img/user/dashboard/empty-male.png" alt="" />
-            </div>
-
-            <div className={`${style['user-menu-dropdown']} ${isUserOpen ? style.active : ''}`}>
-              <div className={style['dropdown-info']}>
-                <p className={style['dropdown-name']}>{profile.fullname}</p>
-                <p className={style['dropdown-email']}>{profile.email}</p>
+          {profile ? (
+            <>
+              <span className={style['user-name']} id="name_info">{profile.fullname}</span>
+              <div className={style['user-avatar']}>
+                <img src="/img/user/dashboard/empty-male.png" alt="" />
               </div>
-              <hr className={style.hr} />
-              <ul className={style['dropdown-links']}>
-                <li><a href="/profile">Мой профиль</a></li>
-                <li><a href="/settings">Настройки</a></li>
-                <li><a href="/logout" className={style['logout-link']}>Выйти</a></li>
-              </ul>
-            </div>
-          </>
-        ) : (
-          <div className={style['loading']}>Загрузка...</div>
-        )}
-      </div>
-    </header>
+
+              <div className={`${style['user-menu-dropdown']} ${isUserOpen ? style.active : ''}`}>
+                <div className={style['dropdown-info']}>
+                  <p className={style['dropdown-name']}>{profile.fullname}</p>
+                  <p className={style['dropdown-email']}>{profile.email}</p>
+                </div>
+                <hr className={style.hr} />
+                <ul className={style['dropdown-links']}>
+                  <li><a href="/profile">Мой профиль</a></li>
+                  <li><a href="/settings">Настройки</a></li>
+                  <li><a href="/logout" className={style['logout-link']}>Выйти</a></li>
+                </ul>
+              </div>
+            </>
+          ) : (
+            <div className={style['loading']}>Загрузка...</div>
+          )}
+        </div>
+      </header>
       <main className={style['alfa-container']}>
         <aside className={style.sidebar} id="burger-menu">
           <nav className={style['sidebar-nav']}>
@@ -189,7 +196,7 @@ export const Dashboard: React.FC = () => {
 
             <div className={style['action-bar']}>
               <div className={style['btn-group']}>
-                <button className={`${style.btn} ${style['btn-blue']}`}>+ Добавить</button>
+                <button className={`${style.btn} ${style['btn-blue']}`} onClick={handlePlusClick}>+ Добавить</button>
                 <button className={`${style.btn} ${style['btn-light-blue']}`}>Править</button>
                 <button className={`${style.btn} ${style['btn-red']}`}>Удалить</button>
                 <button className={`${style.btn} ${style['btn-gray']}`}>Другое</button>
@@ -201,7 +208,7 @@ export const Dashboard: React.FC = () => {
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
               {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
-              {activeMenu === 'users' && <ClientsTable></ClientsTable>}
+              {activeMenu === 'users' && <ClientsTable setPlusAction={setPlusAction}></ClientsTable>}
               {activeMenu === 'clients' && <p>Контент аналитики...</p>}
             </div>
           </div>
