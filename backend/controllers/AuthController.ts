@@ -16,13 +16,13 @@ export const APIsignup = async (
 
     const [existingCompany]: any = await connection.query(
       "SELECT id FROM company WHERE name = ?",
-      [company]
+      [company],
     );
 
     if (existingCompany && existingCompany.length > 0) {
       await connection.rollback();
-      return res.status(400).json({ 
-        error: "Компания с таким названием уже зарегистрирована" 
+      return res.status(400).json({
+        error: "Компания с таким названием уже зарегистрирована",
       });
     }
 
@@ -31,13 +31,13 @@ export const APIsignup = async (
 
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
-    
+
     const [insertCompanyResult]: any = await connection.query(
       "INSERT INTO company (name) VALUES (?)",
       [company],
     );
     const company_id = insertCompanyResult.insertId;
-     
+
     const [initDirectorResult]: any = await connection.query(
       "INSERT INTO users (company_id, full_name, role, users.rank, email, password_hash, contact) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [company_id, fullname, role, rank, email, passwordHash, contact],
@@ -46,25 +46,17 @@ export const APIsignup = async (
 
     await connection.commit();
 
+    req.session.company_id = company_id;
+    req.session.user_id = user_id;
+    req.session.user_role = role;
+    req.session.fullname = fullname;
+    req.session.email = email;
+    req.session.rank = rank;
+    req.session.company_name = company;
+
     return res.status(200).json({
       success: true,
-      data: {
-        company: {
-          company_id: company_id,
-          company_name: company,
-        },
-        user: {
-          user_id: user_id,
-          full_name: fullname,
-          role: role,
-          rank: rank,
-          email: email,
-          contact: contact,
-          birthday: null,
-          gender: null,
-          avatar: null,
-        },
-      },
+      message: "company with director has been created"
     });
   } catch (ex: any) {
     if (connection) {
@@ -85,7 +77,6 @@ export const APIsignup = async (
     }
   }
 };
-
 
 export const APIsignin = async (
   req: Request,
@@ -139,14 +130,16 @@ export const APIsignin = async (
     }
 
     req.session.company_id = companyRows[0]?.id;
+    req.session.company_name = companyRows[0]?.name;
     req.session.user_id = user.id;
     req.session.user_role = user.role;
     req.session.fullname = user.full_name;
     req.session.email = user.email;
-    
+    req.session.rank = user.rank;
+
     return res.status(200).json({
       success: true,
-      message: "authorization was be completed"
+      message: "authorization was be completed",
     });
   } catch (ex: any) {
     console.error(ex);

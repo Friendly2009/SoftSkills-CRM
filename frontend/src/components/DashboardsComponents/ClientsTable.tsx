@@ -28,7 +28,7 @@ export const ClientsTable: React.FC = () => {
             const data = await response.json();
             setUsers(data.data || []);
         } catch (ex) {
-            alert(ex);
+            console.error(ex);
         }
     }
     useEffect(() => {

@@ -50,7 +50,8 @@ export const getGlobalInfo = async (req: Request, res: Response) => {
         companyName: companyName[0],
         role: req.session.user_role,
         fullname: req.session.fullname,
-        email: req.session.email
+        email: req.session.email,
+        rank: req.session.rank
       },
     });
   } catch (ex) {
