@@ -1,46 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/clients.module.css';
 
-export const ClientsTable: React.FC = () => {
-    interface UserTemplate {
-        full_name: string;
-        role: string;
-        rank: number;
-        email: string;
-        birthday: string | null;
-        contact: string;
-        gender: string | null;
-    }
+interface UserTemplate {
+    id?: number;
+    full_name: string;
+    role: string;
+    rank: number;
+    email: string;
+    birthday: string | null;
+    contact: string;
+    gender: string | null;
+}
 
-    const dummyUsers: UserTemplate[] = [
-        {
-            full_name: "Иван Иванов Иванович",
-            role: "Директор",
-            rank: 1000,
-            email: "mail@example.com",
-            birthday: null,
-            contact: "+79190197884",
-            gender: null
-        },
-        {
-            full_name: "Сидоров Петр Алексеевич",
-            role: "Менеджер",
-            rank: 500,
-            email: "sidorov@example.com",
-            birthday: "15.05.1994",
-            contact: "+79201234567",
-            gender: "Мужской"
-        },
-        {
-            full_name: "Ковалева Анна Сергеевна",
-            role: "Педагог",
-            rank: 800,
-            email: "anna.teach@example.com",
-            birthday: null,
-            contact: "+79307654321",
-            gender: "Женский"
+export const ClientsTable: React.FC = () => {
+
+    const [users, setUsers] = useState<UserTemplate[]>([]);
+
+    const getUsers = async () => {
+        try {
+            const response = await fetch("http://localhost:3000/getusers",{
+                credentials: "include"
+            });
+            
+            if (!response.ok) {
+                throw new Error('oooops, something went wrong');
+            }
+            const data = await response.json();
+            setUsers(data.data || []);
+        } catch (ex) {
+            alert(ex);
         }
-    ];
+    }
+    useEffect(() => {
+        getUsers();
+    }, []);
 
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -62,7 +55,7 @@ export const ClientsTable: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {dummyUsers.map((user, index) => (
+                        {users.map((user, index) => (
                             <tr key={index}>
                                 <td>
                                     <div className={style['user-info']}>

@@ -8,6 +8,6 @@
     "skipLibCheck": true
   },
   "include": [
-    "**/*.ts" // Говорит TypeScript сканировать ВСЕ ts файлы в папке backend, включая session.d.ts
+    "**/*.ts"
   ]
 }

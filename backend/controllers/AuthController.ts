@@ -139,26 +139,14 @@ export const APIsignin = async (
     }
 
     req.session.company_id = companyRows[0]?.id;
-
+    req.session.user_id = user.id;
+    req.session.user_role = user.role;
+    req.session.fullname = user.full_name;
+    req.session.email = user.email;
+    
     return res.status(200).json({
       success: true,
-      data: {
-        company: {
-          company_id: companyRows[0]?.id,
-          company_name: companyRows[0]?.name,
-        },
-        user: {
-          user_id: user.id,
-          full_name: user.full_name,
-          role: user.role,
-          rank: user.rank,
-          email: user.email,
-          birthday: user.birthday,
-          contact: user.contact,
-          gender: user.gender,
-          avatar: user.avatar,
-        },
-      }
+      message: "authorization was be completed"
     });
   } catch (ex: any) {
     console.error(ex);
