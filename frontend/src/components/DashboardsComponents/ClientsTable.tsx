@@ -67,11 +67,33 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Данные для отправки на бэкенд:", formData);
-        setIsModalOpen(false);
+
+        try {
+            const response = await fetch("http://localhost:3000/adduser", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка сервера: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("Пользователь успешно добавлен:", data);
+
+            setIsModalOpen(false);
+
+        } catch (error) {
+            console.error("Не удалось отправить данные:", error);
+            alert("Произошла ошибка при сохранении сотрудника.");
+        }
     };
+
 
     return (
         <>
@@ -96,11 +118,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
 
                                 <div className={style['form-group']}>
                                     <label>Роль</label>
-                                    <select name="role" className={style['form-input']} value={formData.role} onChange={handleInputChange}>
-                                        <option value="Директор">Директор</option>
-                                        <option value="Менеджер">Менеджер</option>
-                                        <option value="Учитель">Учитель</option>
-                                    </select>
+                                    <input name="role" type="text" className={style['form-input']} value={formData.role} onChange={handleInputChange}></input>
                                 </div>
 
                                 <div className={style['form-group']}>
@@ -146,8 +164,8 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
                                 <div className={style['form-group']}>
                                     <label>Пол</label>
                                     <select name="gender" className={style['form-input']} value={formData.gender} onChange={handleInputChange}>
-                                        <option value="Мужской">Мужской</option>
-                                        <option value="Женский">Женский</option>
+                                        <option value="Мужской">Муж</option>
+                                        <option value="Женский">Жен</option>
                                     </select>
                                 </div>
 
@@ -166,7 +184,6 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
                 </div>
             )}
 
-            {/* Ваша таблица */}
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
                     <thead>

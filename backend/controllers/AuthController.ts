@@ -129,7 +129,7 @@ export const APIsignin = async (
       });
     }
 
-    req.session.company_id = companyRows[0]?.id;
+    req.session.company_id = companyId; //ДОПИСАТЬ СЕССИЮ И НАПИСАТЬ ЗАПРОС НА ПРОВЕРКУ ДАННЫХ В СЕССИИ
     req.session.company_name = companyRows[0]?.name;
     req.session.user_id = user.id;
     req.session.user_role = user.role;
