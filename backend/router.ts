@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getusers, adduser } from "./controllers/UsersController.js"; 
+import { getusers, adduser, deluser } from "./controllers/UsersController.js"; 
 import { getglobalinfo, checkconnect, getallsession} from "./controllers/BackController.js"
 import { APIsignup, APIsignin } from './controllers/AuthController.js'
 
@@ -11,11 +11,12 @@ router.get('/getsession', getallsession);
 router.post("/signin", APIsignin);
 router.post("/signup", APIsignup);
 
-router.get("/getusers", getusers);
 
 router.get("/getglobalinfo", getglobalinfo);
 
 router.post("/adduser", adduser);
+router.get("/getusers", getusers);
+router.delete("/deluser/:id", deluser);
 
 
 

@@ -72,6 +72,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
 
         try {
             const response = await fetch("http://localhost:3000/adduser", {
+                credentials: "include",
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

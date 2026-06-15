@@ -88,3 +88,72 @@ export const adduser = async (req: Request, res: Response) => {
   }
 };
 
+export const deluser = async (req: Request, res: Response) => {
+  const { id } = req.params; 
+  const company_id = req.session.company_id;
+  let connection: PoolConnection | undefined;
+
+  try {
+    if (!id) {
+      return res.status(400).json({ success: false, message: "User ID is required" });
+    }
+
+    connection = await pool.getConnection();
+    if (!connection) throw new Error("Do not connected with database");
+
+    await connection.beginTransaction();
+
+    const [rows]: any = await connection.query(
+      "SELECT id, `rank` FROM users WHERE id = ? AND company_id = ?",
+      [id, company_id]
+    );
+
+    if (rows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: "User not found or access denied" });
+    }
+    
+    if (rows[0].rank === 1000) {
+      await connection.rollback();
+      return res.status(403).json({ 
+        success: false, 
+        message: "you cannot delete user whose rank is 1000" 
+      });
+    }
+
+    await connection.query(
+      "UPDATE `groups` SET users_id = NULL WHERE users_id = ?",
+      [id]
+    );
+
+    await connection.query(
+      "DELETE FROM users WHERE id = ? AND company_id = ?",
+      [id, company_id]
+    );
+
+    await connection.commit();
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+      data: { id }
+    });
+
+  } catch (ex: any) {
+    console.error(ex);
+
+    if (connection) {
+      await connection.rollback();
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Ooops, something went wrong",
+      error: ex.message
+    });
+  } finally {
+    if (connection) {
+      await connection.release();
+    }
+  }
+};
