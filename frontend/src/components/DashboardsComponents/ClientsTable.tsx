@@ -3,9 +3,10 @@ import style from '../cssmoduls/DashboardComponentsCssModuls/clients.module.css'
 
 interface ClientsTableProps {
     setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
+    setDelAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
 }
 interface UserTemplate {
-    id?: number;
+    id: number;
     full_name: string;
     role: string;
     rank: number;
@@ -15,8 +16,9 @@ interface UserTemplate {
     gender: string | null;
 }
 
-export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => {
+export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDelAction }) => {
     const [users, setUsers] = useState<UserTemplate[]>([]);
+    const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         full_name: '',
@@ -49,12 +51,19 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
         setIsModalOpen(true);
     };
 
+    const handleDelUser = () => {
+        setIsDeleteMode(true);
+    };
+    
     useEffect(() => {
         getUsers();
         setPlusAction(() => handleAddUser);
 
+        setDelAction(() => handleDelUser);
+
         return () => {
             setPlusAction(null);
+            setDelAction(null);
         };
     }, []);
 
@@ -69,32 +78,56 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         try {
             const response = await fetch("http://localhost:3000/adduser", {
                 credentials: "include",
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
 
-            if (!response.ok) {
-                throw new Error(`Ошибка сервера: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log("Пользователь успешно добавлен:", data);
-
+            if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
             setIsModalOpen(false);
-
+            getUsers();
         } catch (error) {
             console.error("Не удалось отправить данные:", error);
             alert("Произошла ошибка при сохранении сотрудника.");
         }
     };
+    //----------------------------del-user----------------------------//
+    const handleRowClick = async (user: UserTemplate) => {
+        alert("awd");
+        if (!isDeleteMode) return;
 
+        if (user.rank === 1000) {
+            alert("Нельзя удалить сотрудника с рангом 1000 (Директор)!");
+            return;
+        }
+
+        if (!window.confirm(`Вы действительно хотите удалить сотрудника ${user.full_name}?`)) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`http://localhost:3000/deluser/${user.id}`, {
+                method: "DELETE",
+                credentials: "include"
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                setUsers(prev => prev.filter(u => u.id !== user.id));
+            } else {
+                alert(result.message || "Ошибка при удалении");
+            }
+        } catch (error) {
+            console.error("Ошибка при удалении пользователя:", error);
+            alert("Не удалось выполнить удаление.");
+        } finally{
+            setIsDeleteMode(false);
+        }
+    };
 
     return (
         <>
@@ -201,7 +234,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction }) => 
                     </thead>
                     <tbody>
                         {users.map((user, index) => (
-                            <tr key={index}>
+                            <tr key={index} onClick={() => handleRowClick(user)}>
                                 <td>
                                     <div className={style['user-info']}>
                                         <div className={style['avatar-placeholder']}>

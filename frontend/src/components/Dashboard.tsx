@@ -18,12 +18,22 @@ export const Dashboard: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string>('clients');
 
   const [plusAction, setPlusAction] = useState<(() => void) | null>(null);
+  const [delAction, setDelAction] = useState<(() => void) | null>(null);
+
 
   const handlePlusClick = () => {
     if (plusAction) {
       plusAction();
     } else {
       console.log("Для этого экрана кнопка '+' не настроена");
+    }
+  };
+
+  const handleDelClick = () => {
+    if (delAction) {
+      delAction();
+    } else {
+      console.log("Для этого экрана кнопка 'Удалить' не настроена");
     }
   };
 
@@ -198,7 +208,7 @@ export const Dashboard: React.FC = () => {
               <div className={style['btn-group']}>
                 <button className={`${style.btn} ${style['btn-blue']}`} onClick={handlePlusClick}>+ Добавить</button>
                 <button className={`${style.btn} ${style['btn-light-blue']}`}>Править</button>
-                <button className={`${style.btn} ${style['btn-red']}`}>Удалить</button>
+                <button className={`${style.btn} ${style['btn-red']}`} onClick={handleDelClick}>Удалить</button>
                 <button className={`${style.btn} ${style['btn-gray']}`}>Другое</button>
               </div>
               <button className={`${style.btn} ${style['btn-green']}`}>Личный рабочий стол</button>
@@ -208,7 +218,7 @@ export const Dashboard: React.FC = () => {
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
               {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
-              {activeMenu === 'users' && <ClientsTable setPlusAction={setPlusAction}></ClientsTable>}
+              {activeMenu === 'users' && <ClientsTable setPlusAction={setPlusAction} setDelAction={setDelAction}></ClientsTable>}
               {activeMenu === 'clients' && <p>Контент аналитики...</p>}
             </div>
           </div>
