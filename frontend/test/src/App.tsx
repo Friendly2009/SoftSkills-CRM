@@ -7,7 +7,7 @@ import { RegisterForm } from './components/registration';
 type Page = 'index' | 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings' | 'registration' | 'authorization';
 
 function App() {
-  let [currentPage, setCurrentPage] = useState<Page>('index');
+  const [currentPage, setCurrentPage] = useState<Page>('index');
   switch (currentPage){
     case 'index':
       return <Index setPage={setCurrentPage}/>

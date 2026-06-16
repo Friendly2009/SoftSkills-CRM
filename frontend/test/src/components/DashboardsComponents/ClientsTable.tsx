@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/clients.module.css';
-
+//----------------mock import----------------//
+import { mockUsers } from '../../data/users';
+import { User } from "../../data/types";
 interface ClientsTableProps {
     setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
     setDelAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
@@ -32,19 +34,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
     });
 
     const getUsers = async () => {
-        try {
-            const response = await fetch("http://localhost:3000/getusers", {
-                credentials: "include"
-            });
-
-            if (!response.ok) {
-                throw new Error('oooops, something went wrong');
-            }
-            const data = await response.json();
-            setUsers(data.data || []);
-        } catch (ex) {
-            console.error(ex);
-        }
+        setUsers(mockUsers);
     }
 
     const handleAddUser = () => {
@@ -54,9 +44,10 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
     const handleDelUser = () => {
         setIsDeleteMode(true);
     };
-    
+
     useEffect(() => {
         getUsers();
+        
         setPlusAction(() => handleAddUser);
 
         setDelAction(() => handleDelUser);
@@ -78,21 +69,21 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const response = await fetch("http://localhost:3000/adduser", {
-                credentials: "include",
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
-            setIsModalOpen(false);
-            getUsers();
-        } catch (error) {
-            console.error("Не удалось отправить данные:", error);
-            alert("Произошла ошибка при сохранении сотрудника.");
-        }
+        const newUser: User = {
+            id: users.length + 1,
+            company_id: 101,
+            full_name: 'Иван Новый',
+            email: 'new.user@company.com',
+            role: 'User',
+            rank: 1,
+            contact: '+7 (999) 000-00-00',
+            birthday: '2000-01-01',
+            gender: 'male',
+            password: 'new_password'
+        };
+        setUsers([...users, newUser]);
+        getUsers();
+        setIsModalOpen(false);
     };
     //----------------------------del-user----------------------------//
     const handleRowClick = async (user: UserTemplate) => {
@@ -106,28 +97,14 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
         if (!window.confirm(`Вы действительно хотите удалить сотрудника ${user.full_name}?`)) {
             return;
         }
-        
-        try {
-            const response = await fetch(`http://localhost:3000/deluser/${user.id}`, {
-                method: "DELETE",
-                credentials: "include"
-            });
 
-            const result = await response.json();
+        setUsers((prevUsers) => prevUsers.filter((u) => u.id !== user.id));
+        getUsers();
 
-            if (response.ok && result.success) {
-                setUsers(prev => prev.filter(u => u.id !== user.id));
-            } else {
-                alert(result.message || "Ошибка при удалении");
-            }
-        } catch (error) {
-            console.error("Ошибка при удалении пользователя:", error);
-            alert("Не удалось выполнить удаление.");
-        } finally{
-            setIsDeleteMode(false);
-        }
+        setIsDeleteMode(false);
     };
-
+    
+    
     return (
         <>
             {isModalOpen && (
