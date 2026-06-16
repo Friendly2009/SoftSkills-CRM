@@ -5,8 +5,9 @@ import { mockUsers } from '../../data/users';
 import { User } from "../../data/types";
 interface ClientsTableProps {
     setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
-    setDelAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
+    setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
 }
+
 interface UserTemplate {
     id: number;
     full_name: string;
@@ -42,21 +43,30 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
     };
 
     const handleDelUser = () => {
-        setIsDeleteMode(true);
+        setIsDeleteMode(prev => !prev);
     };
+
 
     useEffect(() => {
         getUsers();
-        
-        setPlusAction(() => handleAddUser);
 
-        setDelAction(() => handleDelUser);
+        setPlusAction(() => handleAddUser);
 
         return () => {
             setPlusAction(null);
-            setDelAction(null);
         };
     }, []);
+
+    useEffect(() => {
+        setDelAction({
+            isActive: isDeleteMode,
+            handler: handleDelUser
+        });
+
+        return () => {
+            setDelAction(null);
+        };
+    }, [isDeleteMode]);
 
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -103,8 +113,8 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
 
         setIsDeleteMode(false);
     };
-    
-    
+
+
     return (
         <>
             {isModalOpen && (

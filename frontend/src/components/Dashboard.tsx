@@ -18,7 +18,7 @@ export const Dashboard: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string>('clients');
 
   const [plusAction, setPlusAction] = useState<(() => void) | null>(null);
-  const [delAction, setDelAction] = useState<(() => void) | null>(null);
+  const [delAction, setDelAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
 
 
   const handlePlusClick = () => {
@@ -31,7 +31,7 @@ export const Dashboard: React.FC = () => {
 
   const handleDelClick = () => {
     if (delAction) {
-      delAction();
+      delAction.handler();
     } else {
       console.log("Для этого экрана кнопка 'Удалить' не настроена");
     }
@@ -208,7 +208,12 @@ export const Dashboard: React.FC = () => {
               <div className={style['btn-group']}>
                 <button className={`${style.btn} ${style['btn-blue']}`} onClick={handlePlusClick}>+ Добавить</button>
                 <button className={`${style.btn} ${style['btn-light-blue']}`}>Править</button>
-                <button className={`${style.btn} ${style['btn-red']}`} onClick={handleDelClick}>Удалить</button>
+                <button
+                  className={`${style.btn} ${delAction?.isActive ? style['btn-gray'] : style['btn-red']}`}
+                  onClick={handleDelClick}
+                >
+                  {delAction?.isActive ? 'Отменить' : 'Удалить'}
+                </button>
                 <button className={`${style.btn} ${style['btn-gray']}`}>Другое</button>
               </div>
               <button className={`${style.btn} ${style['btn-green']}`}>Личный рабочий стол</button>

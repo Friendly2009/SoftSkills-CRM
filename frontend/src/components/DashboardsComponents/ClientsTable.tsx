@@ -3,8 +3,9 @@ import style from '../cssmoduls/DashboardComponentsCssModuls/clients.module.css'
 
 interface ClientsTableProps {
     setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
-    setDelAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
+    setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
 }
+
 interface UserTemplate {
     id: number;
     full_name: string;
@@ -52,20 +53,29 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
     };
 
     const handleDelUser = () => {
-        setIsDeleteMode(true);
+        setIsDeleteMode(prev => !prev);
     };
-    
+
     useEffect(() => {
         getUsers();
         setPlusAction(() => handleAddUser);
 
-        setDelAction(() => handleDelUser);
-
         return () => {
             setPlusAction(null);
+        };
+    }, []); 
+
+    useEffect(() => {
+        setDelAction({
+            isActive: isDeleteMode,
+            handler: handleDelUser
+        });
+
+        return () => {
             setDelAction(null);
         };
-    }, []);
+    }, [isDeleteMode]); 
+
 
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -106,7 +116,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
         if (!window.confirm(`Вы действительно хотите удалить сотрудника ${user.full_name}?`)) {
             return;
         }
-        
+
         try {
             const response = await fetch(`http://localhost:3000/deluser/${user.id}`, {
                 method: "DELETE",
@@ -123,7 +133,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
         } catch (error) {
             console.error("Ошибка при удалении пользователя:", error);
             alert("Не удалось выполнить удаление.");
-        } finally{
+        } finally {
             setIsDeleteMode(false);
         }
     };
