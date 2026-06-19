@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import style from './cssmoduls/dashboard.module.css';
-import { ClientsTable } from './DashboardsComponents/ClientsTable.tsx';
+import { UsersTable } from './DashboardsComponents/UsersTable.tsx';
+import { ClientTable } from './DashboardsComponents/ClientsTable.tsx';
 
 interface UserProfile {
   fullname: string;
@@ -223,8 +224,8 @@ export const Dashboard: React.FC = () => {
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
               {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
-              {activeMenu === 'users' && <ClientsTable setPlusAction={setPlusAction} setDelAction={setDelAction}></ClientsTable>}
-              {activeMenu === 'clients' && <p>Контент аналитики...</p>}
+              {activeMenu === 'users' && <UsersTable setPlusAction={setPlusAction} setDelAction={setDelAction}></UsersTable>}
+              {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction}></ClientTable>}
             </div>
           </div>
         </section>

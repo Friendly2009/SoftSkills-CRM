@@ -2,6 +2,7 @@ import { Router } from "express";
 import { getusers, adduser, deluser } from "./controllers/UsersController.js"; 
 import { getglobalinfo, checkconnect, getallsession} from "./controllers/BackController.js"
 import { APIsignup, APIsignin } from './controllers/AuthController.js'
+import { APIGetClients } from './controllers/ClientController.js'
 
 const router: Router = Router();
 
@@ -17,6 +18,8 @@ router.get("/getglobalinfo", getglobalinfo);
 router.post("/adduser", adduser);
 router.get("/getusers", getusers);
 router.delete("/deluser/:id", deluser);
+
+router.get("/getclient", APIGetClients);
 
 
 

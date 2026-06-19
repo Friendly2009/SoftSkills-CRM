@@ -1,40 +1,41 @@
 import React, { useEffect, useState } from "react";
-import style from '../cssmoduls/DashboardComponentsCssModuls/clients.module.css';
+import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
 
-interface ClientsTableProps {
+interface ClientTableProps {
     setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
     setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
 }
 
-interface UserTemplate {
+interface ClientTemplate {
     id: number;
-    full_name: string;
-    role: string;
-    rank: number;
-    email: string;
-    birthday: string | null;
+    name: string;
+    active_group: string;
+    balance: number;
+    skills: number;
+    status: boolean;
     contact: string;
-    gender: string | null;
+    next_visit: string | null;
 }
 
-export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDelAction }) => {
-    const [users, setUsers] = useState<UserTemplate[]>([]);
+export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelAction }) => {
+
+    const [client, setClient] = useState<ClientTemplate[]>([]);
+
+
     const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [formData, setFormData] = useState({
-        full_name: '',
-        role: '',
-        rank: 100,
-        email: '',
-        contact: '',
-        birthday: '',
-        gender: 'Муж',
-        password: ''
-    });
 
-    const getUsers = async () => {
+    const getInitials = (name: string) => {
+        return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    };
+    
+    const handleRowClick = async (client: ClientTemplate) => {
+
+    }
+
+    const getClient = async () => {
         try {
-            const response = await fetch("http://localhost:3000/getusers", {
+            const response = await fetch("http://localhost:3000/getclient", {
                 credentials: "include"
             });
 
@@ -42,7 +43,7 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
                 throw new Error('oooops, something went wrong');
             }
             const data = await response.json();
-            setUsers(data.data || []);
+            setClient(data.data || []);
         } catch (ex) {
             console.error(ex);
         }
@@ -55,220 +56,72 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
     const handleDelUser = () => {
         setIsDeleteMode(prev => !prev);
     };
-
+    
     useEffect(() => {
-        getUsers();
-        setPlusAction(() => handleAddUser);
-
-        return () => {
-            setPlusAction(null);
-        };
-    }, []); 
-
-    useEffect(() => {
-        setDelAction({
-            isActive: isDeleteMode,
-            handler: handleDelUser
-        });
-
-        return () => {
-            setDelAction(null);
-        };
-    }, [isDeleteMode]); 
-
-
-    const getInitials = (name: string) => {
-        return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const response = await fetch("http://localhost:3000/adduser", {
-                credentials: "include",
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+            getClient();
+            setPlusAction(() => handleAddUser);
+    
+            return () => {
+                setPlusAction(null);
+            };
+        }, []); 
+    
+        useEffect(() => {
+            setDelAction({
+                isActive: isDeleteMode,
+                handler: handleDelUser
             });
-
-            if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
-            setIsModalOpen(false);
-            getUsers();
-        } catch (error) {
-            console.error("Не удалось отправить данные:", error);
-            alert("Произошла ошибка при сохранении сотрудника.");
-        }
-    };
-    //----------------------------del-user----------------------------//
-    const handleRowClick = async (user: UserTemplate) => {
-        if (!isDeleteMode) return;
-
-        if (user.rank === 1000) {
-            alert("Нельзя удалить сотрудника с рангом 1000 (Директор)!");
-            return;
-        }
-
-        if (!window.confirm(`Вы действительно хотите удалить сотрудника ${user.full_name}?`)) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`http://localhost:3000/deluser/${user.id}`, {
-                method: "DELETE",
-                credentials: "include"
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                setUsers(prev => prev.filter(u => u.id !== user.id));
-            } else {
-                alert(result.message || "Ошибка при удалении");
-            }
-        } catch (error) {
-            console.error("Ошибка при удалении пользователя:", error);
-            alert("Не удалось выполнить удаление.");
-        } finally {
-            setIsDeleteMode(false);
-        }
-    };
+    
+            return () => {
+                setDelAction(null);
+            };
+        }, [isDeleteMode]); 
+    
 
     return (
         <>
-            {isModalOpen && (
-                <div className={style['modal-overlay']} onClick={() => setIsModalOpen(false)}>
-                    <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
-                        <div className={style['modal-header']}>
-                            <h3>Добавить сотрудника</h3>
-                            <button className={style['btn-close']} onClick={() => setIsModalOpen(false)}>×</button>
-                        </div>
-
-                        <form onSubmit={handleSubmit}>
-                            <div className={style['form-grid']}>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>ФИО Сотрудника</label>
-                                    <input
-                                        type="text" name="full_name" required className={style['form-input']}
-                                        value={formData.full_name} onChange={handleInputChange} placeholder="Иван Иванов Иванович"
-                                    />
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Роль</label>
-                                    <input name="role" type="text" className={style['form-input']} value={formData.role} onChange={handleInputChange}></input>
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Ранг</label>
-                                    <input
-                                        type="number" name="rank" className={style['form-input']}
-                                        value={formData.rank} onChange={handleInputChange}
-                                    />
-                                </div>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Эл. почта</label>
-                                    <input
-                                        type="email" name="email" required className={style['form-input']}
-                                        value={formData.email} onChange={handleInputChange} placeholder="mail@example.com"
-                                    />
-                                </div>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Телефон</label>
-                                    <input
-                                        type="text" name="contact" className={style['form-input']}
-                                        value={formData.contact} onChange={handleInputChange} placeholder="+79991112233"
-                                    />
-                                </div>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Пароль для входа</label>
-                                    <input
-                                        type="password" name="password" className={style['form-input']}
-                                        value={formData.password} onChange={handleInputChange} placeholder="•••••••••"
-                                    />
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>ДР</label>
-                                    <input
-                                        type="date" name="birthday" className={style['form-input']}
-                                        value={formData.birthday} onChange={handleInputChange}
-                                    />
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Пол</label>
-                                    <select name="gender" className={style['form-input']} value={formData.gender} onChange={handleInputChange}>
-                                        <option value="Муж">Муж</option>
-                                        <option value="Жен">Жен</option>
-                                    </select>
-                                </div>
-
-                            </div>
-
-                            <div className={style['form-actions']}>
-                                <button type="button" className={style['btn-secondary']} onClick={() => setIsModalOpen(false)}>
-                                    Отмена
-                                </button>
-                                <button type="submit" className={style['btn-primary']}>
-                                    Сохранить
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
                     <thead>
                         <tr>
-                            <th>Сотрудник</th>
-                            <th>Роль</th>
-                            <th>Ранг</th>
-                            <th>Эл. почта</th>
-                            <th>Телефон</th>
-                            <th>Др</th>
-                            <th>Пол</th>
+                            <th>Клиент</th>
+                            <th>Группа</th>
+                            <th>Баланс</th>
+                            <th>Скилы</th>
+                            <th>Статус</th>
+                            <th>Контакт</th>
+                            <th>Следующее посещение</th>
                             <th className={style['actions-cell']}>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map((user, index) => (
-                            <tr key={index} onClick={() => handleRowClick(user)}>
+                        {client.map((client, index) => (
+                            <tr key={index} onClick={() => handleRowClick(client)}>
                                 <td>
                                     <div className={style['user-info']}>
                                         <div className={style['avatar-placeholder']}>
-                                            {getInitials(user.full_name)}
+                                            {getInitials(client.name)}
                                         </div>
-                                        <span className={style['user-fullname']}>{user.full_name}</span>
+                                        <span className={style['user-fullname']}>{client.name}</span>
                                     </div>
                                 </td>
                                 <td>
                                     <span className={`${style.badge} ${style['badge-role']}`}>
-                                        {user.role}
+                                        {client.active_group}
                                     </span>
                                 </td>
                                 <td>
                                     <span className={`${style.badge} ${style['badge-rank']}`}>
-                                        {user.rank}
+                                        {client.balance}
                                     </span>
                                 </td>
-                                <td>{user.email}</td>
-                                <td>{user.contact}</td>
+                                <td>{client.skills}</td>
+                                <td>{client.contact}</td>
                                 <td>
-                                    {user.birthday ? user.birthday : <span className={style['text-muted']}>—</span>}
+                                    {client.next_visit ? client.next_visit : <span className={style['text-muted']}>—</span>}
                                 </td>
                                 <td>
-                                    {user.gender ? user.gender : <span className={style['text-muted']}>—</span>}
+                                    {client.status ? client.status : <span className={style['text-muted']}>—</span>}
                                 </td>
                                 <td className={style['actions-cell']}>
                                     <button className={style['btn-action']} title="Действия">•••</button>
@@ -279,5 +132,5 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({ setPlusAction, setDe
                 </table>
             </div>
         </>
-    )
+    );
 }
