@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import register from './CssModuls/signup.module.css'
-export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'authorization' | 'dashboard' | 'index') => void }) => {
+import { useNavigate } from 'react-router-dom';
+
+export const RegisterForm = () => {
+const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     company: '',
@@ -22,14 +25,14 @@ export const RegisterForm = ({ setPage }: { setPage: (page: 'registration' | 'au
       });
 
       if (response.ok) {
-        setPage('dashboard');
+        navigate('/dashboard');
       }
     } catch (ex) {
       console.log(ex);
     }
   }
   const backbtnOnClick = () => {
-    setPage('index');
+    navigate('/index');
   }
   return (
     <div className={register['page-wrapper']}>

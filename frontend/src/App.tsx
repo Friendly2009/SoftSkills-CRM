@@ -1,35 +1,34 @@
-import { useState } from 'react';
-import Index from './components/Index';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Index from './components/index';
 import { Dashboard } from './components/Dashboard';
 import { LoginForm } from './components/Aauthorization';
 import { RegisterForm } from './components/registration';
+import { JSX } from 'react/jsx-runtime';
 
-type Page = 'index' | 'dashboard' | 'students' | 'teachers' | 'groups' | 'schedule' | 'grades' | 'finance' | 'settings' | 'registration' | 'authorization';
+// Компонент для защиты приватных страниц
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const isAuthenticated = Boolean(localStorage.getItem('token')); // Ваша проверка авторизации
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
 
 function App() {
-  let [currentPage, setCurrentPage] = useState<Page>('index');
-  switch (currentPage){
-    case 'index':
-      return <Index setPage={setCurrentPage}/>
-    case 'authorization':
-      return <LoginForm setPage={setCurrentPage}/>
-    case 'registration':
-      return <RegisterForm setPage={setCurrentPage}/>
-  }
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'dashboard':
-        return <Dashboard />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
   return (
-    <div>
-      {renderPage()}
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/authorization" element={<LoginForm />} />
+        <Route path="/registration" element={<RegisterForm />} />
+
+        <Route 
+          path="/dashboard" 
+          element={
+            <Dashboard />
+          } 
+        />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

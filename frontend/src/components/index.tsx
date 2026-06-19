@@ -1,8 +1,8 @@
 import style from './cssmoduls/index.module.css'
-interface IndexProps {
-  setPage: (page: 'registration' | 'authorization') => void;
-}
-const Index = ({ setPage }: IndexProps) => {
+import { useNavigate } from 'react-router-dom';
+
+const Index = () => {
+const navigate = useNavigate();
 
   return (
     <div>
@@ -19,8 +19,8 @@ const Index = ({ setPage }: IndexProps) => {
               <a href="#" className={style['header-nav-link']}>Контакты</a>
             </nav>
             <div className={style['header-actions']}>
-              <button className={style['header-main-btn']} type="button" onClick={() => { setPage('registration') }}>Создать компанию</button>
-              <button className={style['header-sec-btn']} type="button" onClick={() => { setPage('authorization') }}>Войти в компанию</button>
+              <button className={style['header-main-btn']} type="button" onClick={() => { navigate('/registration') }}>Создать компанию</button>
+              <button className={style['header-sec-btn']} type="button" onClick={() => { navigate('/authorization') }}>Войти в компанию</button>
             </div>
           </div>
         </div>
@@ -63,7 +63,7 @@ const Index = ({ setPage }: IndexProps) => {
               </div>
 
               <div className={style['hero-btns']}>
-                <button className={style['hero-cta-btn']} onClick={() => { setPage('authorization') }}>Начать бесплатно</button>
+                <button className={style['hero-cta-btn']} onClick={() => { navigate('/authorization') }}>Начать бесплатно</button>
               </div>
             </div>
           </div>

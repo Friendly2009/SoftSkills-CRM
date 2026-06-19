@@ -3,6 +3,7 @@ import { PoolConnection } from "mysql2/promise";
 import pool from "../data_base_connect.js";
 
 export const APIGetClients = async (req: Request, res: Response): Promise<Response | void> =>{
+    
     let connection: PoolConnection | undefined;
     try{
         connection = await pool.getConnection();
