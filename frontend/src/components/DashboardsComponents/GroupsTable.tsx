@@ -15,12 +15,26 @@ interface GroupTemplate {
     text_meeting: string;
     teacher_name: string;
 }
-export const GroupTable: React.FC<GroupTableProps> = ({ }) => {
+export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
     const [groups, setGroups] = useState<GroupTemplate[]>([]);
+    const [isAddGroup, setIsAddGroup] = useState(false);
+    const [formData, setFormData] = useState({
+        name: '',
+        status: false,
+        last_meeting: '',
+        next_meeting: '',
+        teacher_name: ''
+    });
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+    const handleSubmit = () => {
 
+    }
     const addFiveMockGroups = () => {
         const mockGroups: GroupTemplate[] = Array.from({ length: 5 }, (_, index) => {
-            const uniqueId = Date.now() + index; // Уникальный ID для каждого элемента
+            const uniqueId = Date.now() + index;
 
             return {
                 id: uniqueId,
@@ -35,12 +49,103 @@ export const GroupTable: React.FC<GroupTableProps> = ({ }) => {
 
         setGroups((prevGroups) => [...prevGroups, ...mockGroups]);
     };
+    const handleAddGroup = () => {
+        setIsAddGroup(true);
+    };
+    useEffect(() => {
+        addFiveMockGroups();
+        setPlusAction(() => handleAddGroup);
 
+        return () => {
+            setPlusAction(null);
+        };
+    }, []);
     useEffect(() => {
         addFiveMockGroups();
     }, []);
     return (
         <>
+            {isAddGroup === true && (
+                <div className={style['modal-overlay']} onClick={() => setIsAddGroup(false)}>
+                    <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
+                        <div className={style['modal-header']}>
+                            <h3>Добавить группу</h3>
+                            <button className={style['btn-close']} onClick={() => setIsAddGroup(false)}>×</button>
+                        </div>
+
+                        <form onSubmit={handleSubmit}>
+                            <div className={style['form-grid']}>
+
+                                {/* РЯД 1: Название на всю ширину */}
+                                <div className={`${style['form-group']} ${style['full-width']}`}>
+                                    <label>Название группы</label>
+                                    <input
+                                        type="text" name="name" required className={style['form-input']}
+                                        value={formData.name} onChange={handleInputChange} placeholder="Typescript по пятницам (старшая)"
+                                    />
+                                </div>
+
+                                {/* РЯД 2: Обе даты встают симметрично бок о бок */}
+                                <div className={style['form-group']}>
+                                    <label>Последняя работа</label>
+                                    <input
+                                        type="date" name="last_meeting" className={style['form-input']}
+                                        value={formData.last_meeting} onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                <div className={style['form-group']}>
+                                    <label>Следующая работа</label>
+                                    <input
+                                        type="date" name="next_meeting" required className={style['form-input']}
+                                        value={formData.next_meeting} onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                {/* РЯД 3: Статус и Преподаватель в один ряд */}
+                                <div className={style['form-group']}>
+                                    <label>Статус</label>
+                                    <div className={style['radio-container']}>
+                                        <label className={style['radio-label']}>
+                                            <input
+                                                name="status" type="radio" value="true"
+                                                checked={formData.status === true} onChange={handleInputChange}
+                                            />
+                                            Активен
+                                        </label>
+                                        <label className={style['radio-label']}>
+                                            <input
+                                                name="status" type="radio" value="false"
+                                                checked={formData.status === false} onChange={handleInputChange}
+                                            />
+                                            Неактивен
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className={style['form-group']}>
+                                    <label>Преподаватель</label>
+                                    <input
+                                        type="text" name="teacher_name" className={style['form-input']}
+                                        value={formData.teacher_name} onChange={handleInputChange}
+                                    />
+                                </div>
+
+                            </div>
+
+
+                            <div className={style['form-actions']}>
+                                <button type="button" className={style['btn-secondary']} onClick={() => setIsAddGroup(false)}>
+                                    Отмена
+                                </button>
+                                <button type="submit" className={style['btn-primary']}>
+                                    Сохранить
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
                     <thead>
