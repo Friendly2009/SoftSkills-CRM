@@ -157,3 +157,73 @@ export const deluser = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const resetuser = async (req: Request, res: Response) => {
+  const { id, full_name, role, rank, email, contact, birthday, gender, password } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: "ID пользователя не указан" });
+  }
+
+  let connection: PoolConnection | undefined;
+
+  try {
+    connection = await pool.getConnection();
+    if (!connection) throw new Error("Не удалось подключиться к базе данных");
+
+    // 1. Берем текущие данные из базы с форматированием даты в строку YYYY-MM-DD
+    const [currentUsers]: any = await connection.query(
+      'SELECT password_hash, DATE_FORMAT(birthday, "%Y-%m-%d") as birthday, gender FROM users WHERE id = ?', 
+      [id]
+    );
+    
+    if (!currentUsers || currentUsers.length === 0) {
+      return res.status(404).json({ success: false, message: "Пользователь не найден" });
+    }
+
+    const currentUser = currentUsers[0]; 
+
+    // 2. Проверяем пустые поля
+    let finalBirthday = (birthday && birthday.trim() !== '') ? birthday : currentUser.birthday;
+    if (finalBirthday && typeof finalBirthday === 'string' && finalBirthday.includes('T')) {
+      finalBirthday = finalBirthday.split('T')[0];
+    }
+    
+    const finalGender = (gender && gender.trim() !== '') ? gender : currentUser.gender;
+    
+    let finalPasswordHash = currentUser.password_hash;
+    if (password && password.trim() !== '') {
+      finalPasswordHash = await bcrypt.hash(password, 10);
+    }
+
+    const sql = `UPDATE users SET full_name = ?, role = ?, \`rank\` = ?, email = ?, contact = ?, birthday = ?, gender = ?, password_hash = ? WHERE id = ?`;
+
+    const queryParams = [
+      full_name, 
+      role, 
+      rank, 
+      email, 
+      contact, 
+      finalBirthday, 
+      finalGender, 
+      finalPasswordHash, 
+      id
+    ];
+
+    const [result]: any = await connection.query(sql, queryParams);
+
+    return res.status(200).json({
+      success: true,
+      message: "Данные сотрудника успешно обновлены"
+    });
+
+  } catch (ex) {
+    console.error("Ошибка при обновлении пользователя:", ex);
+    return res.status(500).json({
+      success: false,
+      message: "Произошла ошибка на сервере"
+    });
+  } finally {
+    if (connection) connection.release();
+  }
+};

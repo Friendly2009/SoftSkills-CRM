@@ -31,7 +31,17 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
     
     const handleRowClick = async (client: ClientTemplate) => {
 
-    }
+    const [reMakeUserFormData, setReMakeUserFormData] = useState({
+        id: 0,
+        full_name: '',
+        role: '',
+        rank: 100,
+        email: '',
+        contact: '',
+        birthday: '',
+        gender: 'Муж',
+        password: ''
+    });
 
     const getClient = async () => {
         try {
