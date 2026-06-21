@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import style from './cssmoduls/dashboard.module.css';
 import { UsersTable } from './DashboardsComponents/UsersTable.tsx';
 import { ClientTable } from './DashboardsComponents/ClientsTable.tsx';
+import { GroupTable } from './DashboardsComponents/GroupsTable.tsx'
 
 interface UserProfile {
   fullname: string;
@@ -16,7 +17,7 @@ export const Dashboard: React.FC = () => {
   const [isUserOpen, setIsUserOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'desktop' | 'reports'>('desktop');
-  const [activeMenu, setActiveMenu] = useState<string>('clients');
+  const [activeMenu, setActiveMenu] = useState<string>('groups');
 
   const [plusAction, setPlusAction] = useState<(() => void) | null>(null);
   const [delAction, setDelAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
@@ -158,11 +159,11 @@ export const Dashboard: React.FC = () => {
               <span>Аналитика</span>
             </div>
             <div
-              className={`${style['nav-item']} ${activeMenu === 'lessons' ? style['nav-item-active'] : ''}`}
-              onClick={() => setActiveMenu('lessons')}
+              className={`${style['nav-item']} ${activeMenu === 'groups' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('groups')}
             >
-              <img src="/img/user/dashboard/calendar-regular.png" alt="" className={style['nav-icon']} />
-              <span>Уроки</span>
+              <img src="/img/user/dashboard/user-group-solid.png" alt="" className={style['nav-icon']} />
+              <span>Группы</span>
             </div>
             <div
               className={`${style['nav-item']} ${activeMenu === 'tasks' ? style['nav-item-active'] : ''}`}
@@ -226,6 +227,7 @@ export const Dashboard: React.FC = () => {
               {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
               {activeMenu === 'users' && <UsersTable setPlusAction={setPlusAction} setDelAction={setDelAction}></UsersTable>}
               {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction}></ClientTable>}
+              {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction}></GroupTable>}
             </div>
           </div>
         </section>
