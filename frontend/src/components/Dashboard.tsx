@@ -21,6 +21,7 @@ export const Dashboard: React.FC = () => {
 
   const [plusAction, setPlusAction] = useState<(() => void) | null>(null);
   const [delAction, setDelAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
+  const [ReSetAction, setReSetAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
 
 
   const handlePlusClick = () => {
@@ -39,6 +40,13 @@ export const Dashboard: React.FC = () => {
     }
   };
 
+  const handleResetClick = () => {
+    if (ReSetAction) {
+      ReSetAction.handler();
+    } else {
+      console.log("Для этого экрана кнопка 'Править' не настроена");
+    }
+  }
   const GetGlobalInfo = async () => {
     try {
       const response = await fetch("http://localhost:3000/getglobalinfo", {
@@ -209,7 +217,7 @@ export const Dashboard: React.FC = () => {
             <div className={style['action-bar']}>
               <div className={style['btn-group']}>
                 <button className={`${style.btn} ${style['btn-blue']}`} onClick={handlePlusClick}>+ Добавить</button>
-                <button className={`${style.btn} ${style['btn-light-blue']}`}>Править</button>
+                <button className={`${style.btn} ${ReSetAction?.isActive ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClick}>{ReSetAction?.isActive ? 'Отменить' : 'Править'}</button>
                 <button
                   className={`${style.btn} ${delAction?.isActive ? style['btn-gray'] : style['btn-red']}`}
                   onClick={handleDelClick}
@@ -225,7 +233,7 @@ export const Dashboard: React.FC = () => {
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
               {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
-              {activeMenu === 'users' && <UsersTable setPlusAction={setPlusAction} setDelAction={setDelAction}></UsersTable>}
+              {activeMenu === 'users' && <UsersTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></UsersTable>}
               {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction}></ClientTable>}
               {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction}></GroupTable>}
             </div>

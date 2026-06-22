@@ -183,7 +183,6 @@ export const resetuser = async (req: Request, res: Response) => {
 
     const currentUser = currentUsers[0]; 
 
-    // 2. Проверяем пустые поля
     let finalBirthday = (birthday && birthday.trim() !== '') ? birthday : currentUser.birthday;
     if (finalBirthday && typeof finalBirthday === 'string' && finalBirthday.includes('T')) {
       finalBirthday = finalBirthday.split('T')[0];

@@ -4,6 +4,7 @@ import style from '../cssmoduls/DashboardComponentsCssModuls/user.module.css';
 interface UsersTableProps {
     setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
     setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
+    setReSetAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
 }
 
 interface UserTemplate {
@@ -17,11 +18,25 @@ interface UserTemplate {
     gender: string | null;
 }
 
-export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAction }) => {
+export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAction, setReSetAction }) => {
     const [users, setUsers] = useState<UserTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isReSetModalWinOpen, setIsReSetModalWinOpen] = useState(false);
+    const [isReSetMode, setIsReSetMode] = useState(false);
     const [formData, setFormData] = useState({
+        full_name: '',
+        role: '',
+        rank: 100,
+        email: '',
+        contact: '',
+        birthday: '',
+        gender: 'Муж',
+        password: ''
+    });
+
+    const [resetFormData, SetResetFormData] = useState({
+        id: 0,
         full_name: '',
         role: '',
         rank: 100,
@@ -55,9 +70,22 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
     const handleDelUser = () => {
         setIsDeleteMode(prev => !prev);
     };
+    const handleResetUser = () => {
+        setIsReSetMode(prev => !prev);
+    }
 
     useEffect(() => {
-        getUsers();
+        setReSetAction({
+            isActive: isReSetMode,
+            handler: handleResetUser
+        });
+
+        return () => {
+            setReSetAction(null);
+        };
+    }, [isReSetMode]);
+
+    useEffect(() => {
         setPlusAction(() => handleAddUser);
 
         return () => {
@@ -76,6 +104,9 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
         };
     }, [isDeleteMode]);
 
+    useEffect(() => {
+        getUsers();
+    }, []);
 
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -85,6 +116,11 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
+
+    const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        SetResetFormData(prev => ({ ...prev, [name]: value }));
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,42 +140,164 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
             alert("Произошла ошибка при сохранении сотрудника.");
         }
     };
-    //----------------------------del-user----------------------------//
-    const handleRowClick = async (user: UserTemplate) => {
-        if (!isDeleteMode) return;
-
-        if (user.rank === 1000) {
-            alert("Нельзя удалить сотрудника с рангом 1000 (Директор)!");
-            return;
-        }
-
-        if (!window.confirm(`Вы действительно хотите удалить сотрудника ${user.full_name}?`)) {
-            return;
-        }
-
+    const handleResetFormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         try {
-            const response = await fetch(`http://localhost:3000/deluser/${user.id}`, {
-                method: "DELETE",
-                credentials: "include"
+            const response = await fetch("http://localhost:3000/resetuser", {
+                credentials: "include",
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(resetFormData),
             });
 
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                setUsers(prev => prev.filter(u => u.id !== user.id));
-            } else {
-                alert(result.message || "Ошибка при удалении");
-            }
+            if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
+            setIsReSetModalWinOpen(false);
+            setIsReSetMode(false);
+            getUsers();
         } catch (error) {
-            console.error("Ошибка при удалении пользователя:", error);
-            alert("Не удалось выполнить удаление.");
-        } finally {
+            console.error("Не удалось отправить данные:", error);
+            alert("Произошла ошибка при сохранении сотрудника.");
+        }
+    };
+    const handleRowClick = async (user: UserTemplate) => {
+        if (isDeleteMode) {
+
+            if (user.rank === 1000) {
+                alert("Нельзя удалить сотрудника с рангом 1000 (Директор)!");
+                return;
+            }
+
+            if (!window.confirm(`Вы действительно хотите удалить сотрудника ${user.full_name}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/deluser/${user.id}`, {
+                    method: "DELETE",
+                    credentials: "include"
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    setUsers(prev => prev.filter(u => u.id !== user.id));
+                } else {
+                    alert(result.message || "Ошибка при удалении");
+                }
+            } catch (error) {
+                console.error("Ошибка при удалении пользователя:", error);
+                alert("Не удалось выполнить удаление.");
+            } finally {
+                setIsDeleteMode(false);
+            }
+        }
+        if (isReSetMode) {
             setIsDeleteMode(false);
+
+            SetResetFormData({
+                id: user.id,
+                full_name: user.full_name,
+                role: user.role,
+                rank: user.rank,
+                email: user.email,
+                contact: user.contact,
+                birthday: user.birthday || '',
+                gender: user.gender || 'Муж',
+                password: ''
+            });
+
+            setIsReSetModalWinOpen(true);
         }
     };
 
     return (
         <>
+            {isReSetModalWinOpen && (
+                <div className={style['modal-overlay']} onClick={() => setIsReSetModalWinOpen(false)}>
+                    <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
+                        <div className={style['modal-header']}>
+                            <h3>Добавить сотрудника</h3>
+                            <button className={style['btn-close']} onClick={() => setIsReSetModalWinOpen(false)}>×</button>
+                        </div>
+
+                        <form onSubmit={handleResetFormSubmit}>
+                            <div className={style['form-grid']}>
+
+                                <div className={`${style['form-group']} ${style['full-width']}`}>
+                                    <label>ФИО Сотрудника</label>
+                                    <input
+                                        type="text" name="full_name" required className={style['form-input']}
+                                        value={resetFormData.full_name} onChange={handleResetInputChange} placeholder="Иван Иванов Иванович"
+                                    />
+                                </div>
+
+                                <div className={style['form-group']}>
+                                    <label>Роль</label>
+                                    <input name="role" type="text" className={style['form-input']} value={resetFormData.role} onChange={handleResetInputChange}></input>
+                                </div>
+
+                                <div className={style['form-group']}>
+                                    <label>Ранг</label>
+                                    <input
+                                        type="number" name="rank" className={style['form-input']}
+                                        value={resetFormData.rank} onChange={handleResetInputChange}
+                                    />
+                                </div>
+
+                                <div className={`${style['form-group']} ${style['full-width']}`}>
+                                    <label>Эл. почта</label>
+                                    <input
+                                        type="email" name="email" required className={style['form-input']}
+                                        value={resetFormData.email} onChange={handleResetInputChange} placeholder="mail@example.com"
+                                    />
+                                </div>
+
+                                <div className={`${style['form-group']} ${style['full-width']}`}>
+                                    <label>Телефон</label>
+                                    <input
+                                        type="text" name="contact" className={style['form-input']}
+                                        value={resetFormData.contact} onChange={handleResetInputChange} placeholder="+79991112233"
+                                    />
+                                </div>
+
+                                <div className={`${style['form-group']} ${style['full-width']}`}>
+                                    <label>Пароль для входа</label>
+                                    <input
+                                        type="password" name="password" className={style['form-input']}
+                                        value={resetFormData.password} onChange={handleResetInputChange} placeholder="•••••••••"
+                                    />
+                                </div>
+
+                                <div className={style['form-group']}>
+                                    <label>ДР</label>
+                                    <input
+                                        type="date" name="birthday" className={style['form-input']}
+                                        value={resetFormData.birthday} onChange={handleResetInputChange}
+                                    />
+                                </div>
+
+                                <div className={style['form-group']}>
+                                    <label>Пол</label>
+                                    <select name="gender" className={style['form-input']} value={resetFormData.gender} onChange={handleResetInputChange}>
+                                        <option value="Муж">Муж</option>
+                                        <option value="Жен">Жен</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <div className={style['form-actions']}>
+                                <button type="button" className={style['btn-secondary']} onClick={() => setIsReSetModalWinOpen(false)}>
+                                    Отмена
+                                </button>
+                                <button type="submit" className={style['btn-primary']}>
+                                    Сохранить
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
             {isModalOpen && (
                 <div className={style['modal-overlay']} onClick={() => setIsModalOpen(false)}>
                     <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
