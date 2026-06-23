@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { PoolConnection } from "mysql2/promise";
 import pool from "../data_base_connect.js";
 import bcrypt from "bcrypt";
 
@@ -7,26 +6,19 @@ export const getusers = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
-  let connection: PoolConnection | undefined;
   try {
-    connection = await pool.getConnection();
-
-    if (!connection) throw new Error("don't connect with database");
-
-    const [users] = await connection.query(
-      "select * from users where company_id = ?",
+    const [users] = await pool.query(
+      "SELECT * FROM users WHERE company_id = ?",
       [req.session.company_id],
     );
 
-    const rows = users as any[];
-
     return res.status(200).json({
       success: true,
-      data: rows,
+      data: users,
     });
   } catch (ex) {
-    console.error(ex);
-    return res.status(400).json({
+    console.error("Ошибка при получении пользователей:", ex);
+    return res.status(500).json({
       success: false,
       message: "Couldn't get list of users",
     });
@@ -35,63 +27,44 @@ export const getusers = async (
 
 export const adduser = async (req: Request, res: Response) => {
   const { full_name, role, rank, email, contact, birthday, gender, password } = req.body;
-  let connection: PoolConnection | undefined;
 
   try {
-    connection = await pool.getConnection();
-    if (!connection) throw new Error("do not connected with database");
-
-    await connection.beginTransaction();
-
     const company_id = req.session.company_id;
-
     const saltRounds = 10;
     const password_hash = await bcrypt.hash(password, saltRounds);
 
-    await connection.query(
+    await pool.query(
       "INSERT INTO users (company_id, full_name, role, `rank`, email, password_hash, birthday, contact, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [company_id, full_name, role, rank, email, password_hash, birthday || null, contact || null, gender || null]
     );
 
-    await connection.commit();
-
     return res.status(200).json({
       success: true,
       data: {
-        company_id: company_id,
-        full_name: full_name,
-        role: role,
-        rank: rank,
-        email: email,
-        contact: contact,
-        birthday: birthday,
-        gender: gender,
-        password_hash: password_hash,
+        company_id,
+        full_name,
+        role,
+        rank,
+        email,
+        contact,
+        birthday,
+        gender,
+        password_hash,
       },
     });
   } catch (ex: any) {
-    console.error(ex);
-
-    if (connection) {
-      await connection.rollback();
-    }
-
-    return res.status(400).json({
+    console.error("Ошибка добавления пользователя:", ex);
+    return res.status(500).json({
       success: false,
       message: "oooops, something went wrong",
-      error: ex.message
     });
-  } finally {
-    if (connection) {
-      await connection.release();
-    }
   }
 };
 
 export const deluser = async (req: Request, res: Response) => {
   const { id } = req.params; 
   const company_id = req.session.company_id;
-  let connection: PoolConnection | undefined;
+  let connection;
 
   try {
     if (!id) {
@@ -99,8 +72,6 @@ export const deluser = async (req: Request, res: Response) => {
     }
 
     connection = await pool.getConnection();
-    if (!connection) throw new Error("Do not connected with database");
-
     await connection.beginTransaction();
 
     const [rows]: any = await connection.query(
@@ -108,7 +79,7 @@ export const deluser = async (req: Request, res: Response) => {
       [id, company_id]
     );
 
-    if (rows.length === 0) {
+    if (!rows || rows.length === 0) {
       await connection.rollback();
       return res.status(404).json({ success: false, message: "User not found or access denied" });
     }
@@ -140,21 +111,14 @@ export const deluser = async (req: Request, res: Response) => {
     });
 
   } catch (ex: any) {
-    console.error(ex);
-
-    if (connection) {
-      await connection.rollback();
-    }
-
-    return res.status(400).json({
+    if (connection) await connection.rollback();
+    console.error("Ошибка при удалении пользователя:", ex);
+    return res.status(500).json({
       success: false,
       message: "Ooops, something went wrong",
-      error: ex.message
     });
   } finally {
-    if (connection) {
-      await connection.release();
-    }
+    if (connection) connection.release(); // Безопасно возвращаем в пул
   }
 };
 
@@ -165,14 +129,8 @@ export const resetuser = async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, message: "ID пользователя не указан" });
   }
 
-  let connection: PoolConnection | undefined;
-
   try {
-    connection = await pool.getConnection();
-    if (!connection) throw new Error("Не удалось подключиться к базе данных");
-
-    // 1. Берем текущие данные из базы с форматированием даты в строку YYYY-MM-DD
-    const [currentUsers]: any = await connection.query(
+    const [currentUsers]: any = await pool.query(
       'SELECT password_hash, DATE_FORMAT(birthday, "%Y-%m-%d") as birthday, gender FROM users WHERE id = ?', 
       [id]
     );
@@ -196,20 +154,9 @@ export const resetuser = async (req: Request, res: Response) => {
     }
 
     const sql = `UPDATE users SET full_name = ?, role = ?, \`rank\` = ?, email = ?, contact = ?, birthday = ?, gender = ?, password_hash = ? WHERE id = ?`;
+    const queryParams = [full_name, role, rank, email, contact, finalBirthday, finalGender, finalPasswordHash, id];
 
-    const queryParams = [
-      full_name, 
-      role, 
-      rank, 
-      email, 
-      contact, 
-      finalBirthday, 
-      finalGender, 
-      finalPasswordHash, 
-      id
-    ];
-
-    const [result]: any = await connection.query(sql, queryParams);
+    await pool.query(sql, queryParams);
 
     return res.status(200).json({
       success: true,
@@ -222,7 +169,5 @@ export const resetuser = async (req: Request, res: Response) => {
       success: false,
       message: "Произошла ошибка на сервере"
     });
-  } finally {
-    if (connection) connection.release();
   }
 };

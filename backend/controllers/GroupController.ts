@@ -1,33 +1,28 @@
 import { Request, Response } from "express";
-import { PoolConnection } from "mysql2/promise";
 import pool from "../data_base_connect.js";
 
 export const getgroups = async (req: Request, res: Response) => {
-  let connect: PoolConnection | undefined;
-
   try {
-    connect = await pool.getConnection();
-    if (!connect) throw new Error("don't connect with database");
-
     const company_id = req.session.company_id;
-    const [groups] = await connect.query(
+
+    const [groups] = await pool.query(
       "SELECT g.* FROM `groups` g JOIN users u ON g.users_id = u.id WHERE u.company_id = ?",
       [company_id],
     );
 
-    const rows = groups as any[];
     return res.status(200).json({
       success: true,
-      data: rows,
+      data: groups,
     });
   } catch (ex) {
-    console.log(ex);
-    return res.status(400).json({
+    console.error("Ошибка при получении групп:", ex);
+    return res.status(500).json({
       success: false,
       message: "Couldn't get list of group",
     });
   }
 };
+
 export const creategroup = async (req: Request, res: Response) => {
   let connect;
 
@@ -39,8 +34,6 @@ export const creategroup = async (req: Request, res: Response) => {
     }
 
     connect = await pool.getConnection();
-    if (!connect) throw new Error("don't connect with database");
-
     await connect.beginTransaction();
 
     const [groupResult]: any = await connect.query(
@@ -51,7 +44,6 @@ export const creategroup = async (req: Request, res: Response) => {
     const newGroupId = groupResult.insertId;
 
     if (schedules && Array.isArray(schedules) && schedules.length > 0) {
-      
       const scheduleValues = schedules.map((item: any) => [
         item.day_of_week,
         item.start_time,
@@ -73,11 +65,14 @@ export const creategroup = async (req: Request, res: Response) => {
     });
 
   } catch (error: any) {
-    if (connect) await connect.rollback();
-    
+    if (connect) {
+      await connect.rollback();
+    }
     console.error("Ошибка при создании группы:", error);
-    return res.status(500).json({ message: "Внутренняя ошибка сервера", error: error.message });
+    return res.status(500).json({ message: "Внутренняя ошибка сервера" });
   } finally {
-    if (connect) connect.release();
+    if (connect) {
+      connect.release();
+    }
   }
 };

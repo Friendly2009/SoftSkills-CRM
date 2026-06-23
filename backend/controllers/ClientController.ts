@@ -1,27 +1,24 @@
 import { Request, Response } from "express";
-import { PoolConnection } from "mysql2/promise";
 import pool from "../data_base_connect.js";
 
-export const APIGetClients = async (req: Request, res: Response): Promise<Response | void> =>{
-    
-    let connection: PoolConnection | undefined;
-    try{
-        connection = await pool.getConnection();
-        if (!connection) throw new Error("No connect with database");
+export const APIGetClients = async (req: Request, res: Response): Promise<Response | void> => {
+  try {
+    const company_id = req.session.company_id;
 
-        const company_id = req.session.company_id;
+    const [clients] = await pool.query(
+      "SELECT * FROM clients WHERE company_id = ?", 
+      [company_id]
+    );
 
-        const [clients] = await connection.query("select * from clients where company_id = ?", [company_id]);
-        const rowClients = clients as [];
-        return res.status(200).json({
-            success: true,
-            data: rowClients
-        })
-    } catch(ex){
-        console.error(ex);
-        return res.status(400).json({
-            success: false,
-            message: "in server be finded some error"
-        })
-    }
+    return res.status(200).json({
+      success: true,
+      data: clients
+    });
+  } catch (ex) {
+    console.error("Ошибка при получении списка клиентов:", ex);
+    return res.status(500).json({
+      success: false,
+      message: "internal server error"
+    });
+  }
 };

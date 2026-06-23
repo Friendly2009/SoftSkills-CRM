@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { PoolConnection } from "mysql2/promise";
 import pool from "../data_base_connect.js";
 import bcrypt from "bcrypt";
 
@@ -8,12 +7,13 @@ export const APIsignup = async (
   res: Response,
 ): Promise<Response | void> => {
   const { company, fullname, email, contact, password } = req.body;
-  let connection: any;
+  let connection;
 
   try {
-    connection = await (pool as any).getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
+    // Проверяем компанию
     const [existingCompany]: any = await connection.query(
       "SELECT id FROM company WHERE name = ?",
       [company],
@@ -28,7 +28,6 @@ export const APIsignup = async (
 
     const role = "Директор";
     const rank = 1000;
-
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
@@ -62,7 +61,7 @@ export const APIsignup = async (
     if (connection) {
       await connection.rollback();
     }
-    console.error(ex);
+    console.error("Ошибка при регистрации:", ex);
 
     if (ex.code === "ER_DUP_ENTRY") {
       return res
@@ -73,7 +72,7 @@ export const APIsignup = async (
     return res.status(500).json({ error: "Internal server error" });
   } finally {
     if (connection) {
-      await connection.release();
+      connection.release();
     }
   }
 };
@@ -83,35 +82,25 @@ export const APIsignin = async (
   res: Response,
 ): Promise<Response | void> => {
   const { company, login, password } = req.body;
-  let connection: PoolConnection | undefined;
 
   try {
-    connection = await (pool as any).getConnection();
-    if (!connection) throw new Error("No Connect with database");
-
-    //----------company----------//
-    const [companyData] = await connection.query(
-      "select * from company where name = ?",
+    const [companyRows]: any = await pool.query(
+      "SELECT id, name FROM company WHERE name = ?",
       [company],
     );
 
-    const companyRows = companyData as any[];
-
-    if (companyRows.length === 0) {
+    if (!companyRows || companyRows.length === 0) {
       return res.status(404).json({ message: "Company not found" });
     }
 
-    const companyId = companyRows[0]?.id;
+    const companyId = companyRows[0].id;
 
-    //----------users----------//
-    const [userData] = await connection.query(
-      "select * from users where company_id = ? and email = ?",
+    const [userRows]: any = await pool.query(
+      "SELECT id, role, full_name, email, users.rank, password_hash FROM users WHERE company_id = ? AND email = ?",
       [companyId, login],
     );
 
-    const userRows = userData as any[];
-
-    if (userRows.length === 0) {
+    if (!userRows || userRows.length === 0) {
       return res.status(404).json({
         success: false,
         message: "User not found",
@@ -119,7 +108,6 @@ export const APIsignin = async (
     }
 
     const user = userRows[0];
-
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
@@ -129,8 +117,8 @@ export const APIsignin = async (
       });
     }
 
-    req.session.company_id = companyId; //ДОПИСАТЬ СЕССИЮ И НАПИСАТЬ ЗАПРОС НА ПРОВЕРКУ ДАННЫХ В СЕССИИ
-    req.session.company_name = companyRows[0]?.name;
+    req.session.company_id = companyId;
+    req.session.company_name = companyRows[0].name;
     req.session.user_id = user.id;
     req.session.user_role = user.role;
     req.session.fullname = user.full_name;
@@ -142,12 +130,10 @@ export const APIsignin = async (
       message: "authorization was be completed",
     });
   } catch (ex: any) {
-    console.error(ex);
+    console.error("Ошибка при авторизации:", ex);
     return res.status(500).json({
       success: false,
       error: "internal server error",
     });
-  } finally {
-    if (connection) connection.release();
   }
 };
