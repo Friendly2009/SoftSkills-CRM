@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `CheapCRM`.`users` (
   `contact` VARCHAR(45) NULL,
   `gender` VARCHAR(3) NULL,
   `avatar` VARCHAR(255) NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`, `company_id`),
   INDEX `fk_users_company_idx` (`company_id` ASC) VISIBLE,
   CONSTRAINT `fk_users_company`
     FOREIGN KEY (`company_id`)
@@ -100,11 +100,10 @@ CREATE TABLE IF NOT EXISTS `CheapCRM`.`group_members` (
   `group_id` INT NOT NULL,
   `client_id` INT NOT NULL,
   INDEX `fk_group_members_clients1_idx` (`client_id` ASC) VISIBLE,
-  INDEX `fk_group_members_groups1_idx` (`group_id` ASC) VISIBLE, -- Исправлен индекс
-  PRIMARY KEY (`group_id`, `client_id`), -- Рекомендуется добавить составной PK для таблицы связи
+  INDEX `fk_group_members_groups1_idx` (`group_id` ASC, `client_id` ASC) VISIBLE,
   CONSTRAINT `fk_group_members_groups1`
-    FOREIGN KEY (`group_id`)
-    REFERENCES `CheapCRM`.`groups` (`id`) -- Исправлено: связь строго по одному полю id
+    FOREIGN KEY (`group_id` , `client_id`)
+    REFERENCES `CheapCRM`.`groups` (`id` , `id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `fk_group_members_clients1`
