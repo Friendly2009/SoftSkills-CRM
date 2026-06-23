@@ -3,7 +3,7 @@ import { getusers, adduser, deluser, resetuser } from "./controllers/UsersContro
 import { getglobalinfo, checkconnect, getallsession} from "./controllers/BackController.js"
 import { APIsignup, APIsignin } from './controllers/AuthController.js'
 import { APIGetClients } from './controllers/ClientController.js'
-
+import { getgroups, creategroup } from './controllers/GroupController.js'
 const router: Router = Router();
 
 router.get('/checkconnect', checkconnect);
@@ -21,6 +21,9 @@ router.delete("/deluser/:id", deluser);
 router.post('/resetuser', resetuser);
 
 router.get("/getclient", APIGetClients);
+
+router.get("/getgroups", getgroups);
+router.post('/creategroup', creategroup);
 
 
 
