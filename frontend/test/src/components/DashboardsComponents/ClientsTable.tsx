@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import style from '../cssmoduls/DashboardComponentsCssModuls/clients.module.css';
+import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
 //----------------mock import----------------//
 import { mockUsers } from '../../data/users';
 import { User } from "../../data/types";

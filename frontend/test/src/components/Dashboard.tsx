@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import style from './cssmoduls/dashboard.module.css';
 import { ClientsTable } from './DashboardsComponents/ClientsTable.tsx';
+import { GroupsTable } from './DashboardsComponents/GroupTable.tsx'
 
 interface UserProfile {
   fullname: string;
@@ -157,6 +158,13 @@ export const Dashboard: React.FC = () => {
               <img src="/img/user/dashboard/chalkboard-user-solid.png" alt="" className={style['nav-icon']} />
               <span>Сотрудники</span>
             </div>
+            <div
+              className={`${style['nav-item']} ${activeMenu === 'users' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('groups')}
+            >
+              <img src="/img/user/dashboard/chalkboard-user-solid.png" alt="" className={style['nav-icon']} />
+              <span>Группы</span>
+            </div>
           </nav>
         </aside>
 
@@ -197,6 +205,7 @@ export const Dashboard: React.FC = () => {
               {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
               {activeMenu === 'users' && <ClientsTable setPlusAction={setPlusAction} setDelAction={setDelAction}></ClientsTable>}
               {activeMenu === 'clients' && <p>Контент аналитики...</p>}
+              {activeMenu === 'groups' && <GroupsTable setPlusAction={setPlusAction} setDelAction={setDelAction}></GroupsTable>}
             </div>
           </div>
         </section>

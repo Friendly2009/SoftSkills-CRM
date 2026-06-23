@@ -27,3 +27,14 @@ export interface Lesson {
   time: string;
   room: string;
 }
+
+export interface Group {
+  id: number;
+  name: string;          // Название группы (например: Frontend Senior-1)
+  teacher: string;       // Фио преподавателя
+  schedule: string;      // Компактная строка расписания (Вт 15:00, Пт 18:00)
+  studentsCount: number; // Текущее количество учеников в группе
+  maxStudents: number;   // Максимальная вместимость группы
+  nextMeeting: string;   // Дата и время следующего урока для вывода на экран
+  status: 'active' | 'forming' | 'archived'; // Статусы для цветных бейджей
+}

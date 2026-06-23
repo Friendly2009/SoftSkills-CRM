@@ -6,14 +6,15 @@ interface GroupTableProps {
     setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
 }
 
-interface GroupTemplate {
+export interface GroupTemplate {
     id: number;
-    users_id: number;
     name: string;
-    status: boolean;
-    last_meeting: string;
-    text_meeting: string;
-    teacher_name: string;
+    teacher: string;
+    schedule: string;
+    studentsCount: number;
+    maxStudents: number;
+    nextMeeting: string;
+    status: 'active' | 'forming' | 'archived';
 }
 export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
     const [groups, setGroups] = useState<GroupTemplate[]>([]);
@@ -30,30 +31,28 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
     const handleSubmit = () => {
-
+        
     }
-    const addFiveMockGroups = () => {
-        const mockGroups: GroupTemplate[] = Array.from({ length: 5 }, (_, index) => {
-            const uniqueId = Date.now() + index;
-
-            return {
-                id: uniqueId,
-                users_id: Math.floor(Math.random() * 1000) + 1,
-                name: `Тестовая группа №${index + 1}`,
-                status: true,
-                last_meeting: new Date().toISOString(),
-                text_meeting: `Краткое содержание встречи для группы №${index + 1}`,
-                teacher_name: ["Алексей Иванов", "Мария Петрова", "Дмитрий Соколов"][index % 3]
-            };
-        });
-
-        setGroups((prevGroups) => [...prevGroups, ...mockGroups]);
+    const getGroup = async () => {
+        try{
+            const response = await fetch('http://localhost:3000/getgroups', {
+                credentials: "include"
+            });
+            if(!response){
+                throw new Error('oooops, something went wrong');
+            }
+            const rows = await response.json();
+            setGroups(rows.data || []);
+        } catch (ex) {
+            console.log(ex);
+            alert('something went wrong...');
+        }
     };
     const handleAddGroup = () => {
         setIsAddGroup(true);
     };
     useEffect(() => {
-        addFiveMockGroups();
+        getGroup();
         setPlusAction(() => handleAddGroup);
 
         return () => {
@@ -61,8 +60,13 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
         };
     }, []);
     useEffect(() => {
-        addFiveMockGroups();
+        getGroup();
     }, []);
+    const getStatusLabel = (status: GroupTemplate['status']) => {
+        if (status === 'active') return 'Активна';
+        if (status === 'forming') return 'Набор';
+        return 'Архив';
+    };
     return (
         <>
             {isAddGroup === true && (
@@ -151,42 +155,43 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                     <thead>
                         <tr>
                             <th>Группа</th>
+                            <th>Расписание</th>
+                            <th>Ученики</th>
+                            <th>Следующий урок</th>
                             <th>Статус</th>
-                            <th>Последнее посещение</th>
-                            <th>Следующее посещение</th>
-                            <th>Преподаватель</th>
                             <th className={style['actions-cell']}>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {groups.map((group, index) => (
-                            <tr key={index} onClick={() => { }}>
+                        {groups.map((group) => (
+                            <tr key={group.id}>
                                 <td>
                                     <div className={style['group-info']}>
-                                        <span className={style['group_name']}>{group.name}</span>
+                                        <div>
+                                            <div className={style['group_name']}>{group.name}</div>
+                                            <div style={{ color: '#64748b', fontSize: '11px', marginTop: '2px' }}>
+                                                {group.teacher}
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
-                                <td>
-                                    {group.status === false && <span className={`${style.badge} ${style['is_not_active']}`}>Пассивен</span>}
-                                    {group.status === true && <span className={`${style.badge} ${style['is_active']}`}>Активен</span>}
+                                <td>{group.schedule}</td>
+                                <td style={{ fontWeight: 500 }}>
+                                    {group.studentsCount} / {group.maxStudents}
                                 </td>
                                 <td>
-                                    <span className={style['date']}>
-                                        {group.last_meeting}
-                                    </span>
+                                    <span className={style['date']}>{group.nextMeeting}</span>
                                 </td>
                                 <td>
-                                    <span className={style['date']}>
-                                        {group.text_meeting}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span className={style['date']}>
-                                        {group.teacher_name}
+                                    <span className={`
+                  ${style['badge']} 
+                  ${group.status === 'active' ? style['is_active'] : style['is_not_active']}
+                `}>
+                                        {getStatusLabel(group.status)}
                                     </span>
                                 </td>
                                 <td className={style['actions-cell']}>
-                                    <button className={style['btn-action']} title="Действия">•••</button>
+                                    <button className={style['btn-action']}>•••</button>
                                 </td>
                             </tr>
                         ))}
