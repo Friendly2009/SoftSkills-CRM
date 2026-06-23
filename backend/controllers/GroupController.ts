@@ -6,22 +6,44 @@ export const getgroups = async (req: Request, res: Response) => {
     const company_id = req.session.company_id;
 
     const [groups] = await pool.query(
-      "SELECT g.* FROM `groups` g JOIN users u ON g.users_id = u.id WHERE u.company_id = ?",
+      `SELECT 
+        g.*, 
+        IF(COUNT(gs.id) > 0, 
+          JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'day_of_week', gs.day_of_week, 
+              'start_time', gs.start_time, 
+              'end_time', gs.end_time
+            )
+          ), 
+          JSON_ARRAY()
+        ) AS schedules
+      FROM \`groups\` g 
+      JOIN users u ON g.users_id = u.id 
+      LEFT JOIN group_schedules gs ON g.id = gs.group_id
+      WHERE u.company_id = ?
+      GROUP BY g.id`,
       [company_id],
     );
 
+    const formattedGroups = (groups as any[]).map(group => ({
+      ...group,
+      schedules: typeof group.schedules === 'string' ? JSON.parse(group.schedules) : group.schedules
+    }));
+
     return res.status(200).json({
       success: true,
-      data: groups,
+      data: formattedGroups,
     });
   } catch (ex) {
-    console.error("Ошибка при получении групп:", ex);
+    console.error("Ошибка при получении групп и расписания:", ex);
     return res.status(500).json({
       success: false,
       message: "Couldn't get list of group",
     });
   }
 };
+
 
 export const creategroup = async (req: Request, res: Response) => {
   let connect;

@@ -6,16 +6,33 @@ interface GroupTableProps {
     setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
 }
 
+export interface ScheduleItem {
+    day_of_week: string;
+    start_time: string;
+    end_time: string;
+}
+
 export interface GroupTemplate {
     id: number;
     name: string;
-    teacher: string;
-    schedule: string;
-    studentsCount: number;
-    maxStudents: number;
-    nextMeeting: string;
-    status: 'active' | 'forming' | 'archived';
+    users_id: number;
+    status: number;
+    schedules: ScheduleItem[];
+
+    teacher?: string;
+    studentsCount?: number;
+    maxStudents?: number;
+    nextMeeting?: string;
 }
+
+const formatTime = (timeStr: string) => {
+    if (!timeStr) return '';
+    const parts = timeStr.split(':');
+    if (parts.length >= 2) return `${parts[0]}:${parts[1]}`;
+    return timeStr;
+};
+
+
 export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
     const [groups, setGroups] = useState<GroupTemplate[]>([]);
     const [isAddGroup, setIsAddGroup] = useState(false);
@@ -31,14 +48,14 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
     const handleSubmit = () => {
-        
+
     }
     const getGroup = async () => {
-        try{
+        try {
             const response = await fetch('http://localhost:3000/getgroups', {
                 credentials: "include"
             });
-            if(!response){
+            if (!response) {
                 throw new Error('oooops, something went wrong');
             }
             const rows = await response.json();
@@ -63,8 +80,8 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
         getGroup();
     }, []);
     const getStatusLabel = (status: GroupTemplate['status']) => {
-        if (status === 'active') return 'Активна';
-        if (status === 'forming') return 'Набор';
+        if (status === 2) return 'Активна';
+        if (status === 1) return 'Набор';
         return 'Архив';
     };
     return (
@@ -175,7 +192,27 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                                         </div>
                                     </div>
                                 </td>
-                                <td>{group.schedule}</td>
+                                <td>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                        {group.schedules && group.schedules.length > 0 ? (
+                                            group.schedules.map((item, index) => (
+                                                <div key={index} style={{ fontSize: '13px', whiteSpace: 'nowrap' }}>
+                                                    <strong style={{ color: '#475569', marginRight: '4px' }}>
+                                                        {item.day_of_week}:
+                                                    </strong>
+                                                    <span style={{ color: '#64748b' }}>
+                                                        {formatTime(item.start_time)} – {formatTime(item.end_time)}
+                                                    </span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <span style={{ color: '#94a3b8', fontSize: '12px', fontStyle: 'italic' }}>
+                                                Нет расписания
+                                            </span>
+                                        )}
+                                    </div>
+                                </td>
+
                                 <td style={{ fontWeight: 500 }}>
                                     {group.studentsCount} / {group.maxStudents}
                                 </td>
@@ -185,7 +222,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                                 <td>
                                     <span className={`
                   ${style['badge']} 
-                  ${group.status === 'active' ? style['is_active'] : style['is_not_active']}
+                  ${group.status === 2 ? style['is_active'] : style['is_not_active']}
                 `}>
                                         {getStatusLabel(group.status)}
                                     </span>
