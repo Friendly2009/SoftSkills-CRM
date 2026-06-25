@@ -250,3 +250,52 @@
   from { transform: translateY(10px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* Список групп внутри ячейки (флекс, чтобы бейджи шли в ряд с отступами) */
+.groups-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Общий стиль для всех маленьких бейджей */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Бейдж для групп */
+.badge-group {
+  background-color: #f0f4f9;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+}
+
+/* Бейджи для статусов */
+.badge-active {
+  background-color: #e6fffa;
+  color: #047481;
+}
+
+.badge-inactive {
+  background-color: #feebc8;
+  color: #c05621;
+}
+
+/* Стили для баланса (зеленый при плюсе, красный при минусе) */
+.balance-text {
+  font-weight: 600;
+}
+.balance-text.positive {
+  color: #2f855a;
+}
+.balance-text.negative {
+  color: #c53030;
+}
+
+.text-muted {
+  color: #a0aec0;
+}

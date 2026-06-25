@@ -9,29 +9,27 @@ interface ClientTableProps {
 interface ClientTemplate {
     id: number;
     name: string;
-    active_group: string;
     balance: number;
     skills: number;
-    status: boolean;
+    status: number;
     contact: string;
-    next_visit: string | null;
+    company_id: number;
+    group_ids: number[];
+    group_names: string[];
 }
 
 export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelAction }) => {
-
-    const [client, setClient] = useState<ClientTemplate[]>([]);
-
-
+    const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     };
-    
-    const handleRowClick = async (client: ClientTemplate) => {
 
-    }
+    const handleRowClick = async (client: ClientTemplate) => {
+        // Логика клика на строку
+    };
 
     const getClient = async () => {
         try {
@@ -47,7 +45,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
         } catch (ex) {
             console.error(ex);
         }
-    }
+    };
 
     const handleAddUser = () => {
         setIsModalOpen(true);
@@ -56,81 +54,113 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
     const handleDelUser = () => {
         setIsDeleteMode(prev => !prev);
     };
-    
+
     useEffect(() => {
-            getClient();
-            setPlusAction(() => handleAddUser);
-    
-            return () => {
-                setPlusAction(null);
-            };
-        }, []); 
-    
-        useEffect(() => {
-            setDelAction({
-                isActive: isDeleteMode,
-                handler: handleDelUser
-            });
-    
-            return () => {
-                setDelAction(null);
-            };
-        }, [isDeleteMode]); 
-    
+        getClient();
+        setPlusAction(() => handleAddUser);
+
+        return () => {
+            setPlusAction(null);
+        };
+    }, []);
+
+    useEffect(() => {
+        setDelAction({
+            isActive: isDeleteMode,
+            handler: handleDelUser
+        });
+
+        return () => {
+            setDelAction(null);
+        };
+    }, [isDeleteMode]);
+
+    const formatBalance = (amount: number) => {
+        return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
+    };
+
+    const renderStatus = (status: number) => {
+        switch (status) {
+            case 1:
+                return <span className={`${style.badge} ${style['badge-active']}`}>Активен</span>;
+            case 0:
+                return <span className={`${style.badge} ${style['badge-inactive']}`}>Заморожен</span>;
+            default:
+                return <span className={style['text-muted']}>—</span>;
+        }
+    };
 
     return (
-        <>
-            <div className={style['table-container']}>
-                <table className={style['crm-table']}>
-                    <thead>
-                        <tr>
-                            <th>Клиент</th>
-                            <th>Группа</th>
-                            <th>Баланс</th>
-                            <th>Скилы</th>
-                            <th>Статус</th>
-                            <th>Контакт</th>
-                            <th>Следующее посещение</th>
-                            <th className={style['actions-cell']}>Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {client.map((client, index) => (
-                            <tr key={index} onClick={() => handleRowClick(client)}>
-                                <td>
-                                    <div className={style['user-info']}>
-                                        <div className={style['avatar-placeholder']}>
-                                            {getInitials(client.name)}
-                                        </div>
-                                        <span className={style['user-fullname']}>{client.name}</span>
+        <div className={style['table-container']}>
+            <table className={style['crm-table']}>
+                <thead>
+                    <tr>
+                        <th>Клиент</th>
+                        <th>Группа</th>
+                        <th>Баланс</th>
+                        <th>Скилы</th>
+                        <th>Контакт</th>
+                        <th>Статус</th>
+                        <th>Следующее посещение</th>
+                        <th className={style['actions-cell']}>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {clients.map((client) => (
+                        <tr key={client.id} onClick={() => handleRowClick(client)}>
+                            <td>
+                                <div className={style['user-info']}>
+                                    <div className={style['avatar-placeholder']}>
+                                        {getInitials(client.name)}
                                     </div>
-                                </td>
-                                <td>
-                                    <span className={`${style.badge} ${style['badge-role']}`}>
-                                        {client.active_group}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span className={`${style.badge} ${style['badge-rank']}`}>
-                                        {client.balance}
-                                    </span>
-                                </td>
-                                <td>{client.skills}</td>
-                                <td>{client.contact}</td>
-                                <td>
-                                    {client.next_visit ? client.next_visit : <span className={style['text-muted']}>—</span>}
-                                </td>
-                                <td>
-                                    {client.status ? client.status : <span className={style['text-muted']}>—</span>}
-                                </td>
-                                <td className={style['actions-cell']}>
-                                    <button className={style['btn-action']} title="Действия">•••</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </>
+                                    <span className={style['user-fullname']}>{client.name}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div className={style['groups-list']}>
+                                    {client.group_names.length > 0 ? (
+                                        client.group_names.map((name, i) => (
+                                            <span key={i} className={`${style.badge} ${style['badge-group']}`}>
+                                                {name}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className={style['text-muted']}>Нет группы</span>
+                                    )}
+                                </div>
+                            </td>
+                            <td>
+                                <span className={`${style['balance-text']} ${client.balance >= 0 ? style['positive'] : style['negative']}`}>
+                                    {formatBalance(client.balance)}
+                                </span>
+                            </td>
+                            <td>
+                                <span className={style['skills-count']}>{client.skills}</span>
+                            </td>
+                            <td>
+                                <span className={style['contact-text']}>{client.contact}</span>
+                            </td>
+                            <td>
+                                {renderStatus(client.status)}
+                            </td>                                
+                            <td>        
+                                coming soon...
+                            </td>
+                            <td className={style['actions-cell']}>
+                                <button 
+                                    className={style['btn-action']} 
+                                    title="Действия"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                    }}
+                                >
+                                    •••
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
     );
-}
+};

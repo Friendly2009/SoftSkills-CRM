@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
-import { ResultSetHeader } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
+
 export const APIGetClients = async (
   req: Request,
   res: Response,
@@ -8,8 +9,26 @@ export const APIGetClients = async (
   try {
     const company_id = req.session.company_id;
 
-    const [clients] = await pool.query(
-      "SELECT * FROM clients WHERE company_id = ?",
+    if (!company_id) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const [clients] = await pool.query<RowDataPacket[]>(
+      `SELECT 
+        c.id,
+        c.name,
+        c.balance,
+        c.skills,
+        c.status,
+        c.contact,
+        c.company_id,
+        COALESCE(JSON_ARRAYAGG(g.id), JSON_ARRAY()) AS group_ids,
+        COALESCE(JSON_ARRAYAGG(g.name), JSON_ARRAY()) AS group_names
+      FROM clients c
+      LEFT JOIN group_members gm ON c.id = gm.client_id
+      LEFT JOIN \`groups\` g ON gm.group_id = g.id
+      WHERE c.company_id = ?
+      GROUP BY c.id`,
       [company_id],
     );
 
@@ -106,11 +125,12 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
   const clientId = parseInt(req.params.id[0]);
 
   if (isNaN(clientId)) {
-    res.status(400).json({ error: 'Некорректный ID клиента' });
+    res.status(400).json({ error: "Некорректный ID клиента" });
     return;
   }
 
-  const { name, balance, skills, status, contact, company_id, group_id } = req.body;
+  const { name, balance, skills, status, contact, company_id, group_id } =
+    req.body;
 
   const clientFields: Record<string, any> = {};
   if (name !== undefined) clientFields.name = name;
@@ -121,7 +141,7 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
   if (company_id !== undefined) clientFields.company_id = company_id;
 
   if (Object.keys(clientFields).length === 0 && group_id === undefined) {
-    res.status(400).json({ error: 'Нет данных для обновления' });
+    res.status(400).json({ error: "Нет данных для обновления" });
     return;
   }
 
@@ -133,14 +153,14 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
 
     if (Object.keys(clientFields).length > 0) {
       const keys = Object.keys(clientFields);
-      const setClause = keys.map(key => `${key} = ?`).join(', ');
-      const values = keys.map(key => clientFields[key]);
-      
+      const setClause = keys.map((key) => `${key} = ?`).join(", ");
+      const values = keys.map((key) => clientFields[key]);
+
       values.push(clientId);
 
       const [clientResult] = await connection.execute<ResultSetHeader>(
         `UPDATE clients SET ${setClause} WHERE id = ?`,
-        values
+        values,
       );
 
       if (clientResult.affectedRows > 0) {
@@ -151,18 +171,18 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
     if (group_id !== undefined) {
       const [existingRelation] = await connection.execute<any[]>(
         `SELECT * FROM group_members WHERE client_id = ?`,
-        [clientId]
+        [clientId],
       );
 
       if (existingRelation.length > 0) {
         await connection.execute(
           `UPDATE group_members SET group_id = ? WHERE client_id = ?`,
-          [group_id, clientId]
+          [group_id, clientId],
         );
       } else {
         await connection.execute(
           `INSERT INTO group_members (group_id, client_id) VALUES (?, ?)`,
-          [group_id, clientId]
+          [group_id, clientId],
         );
       }
       clientUpdated = true;
@@ -170,17 +190,18 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
 
     if (!clientUpdated) {
       await connection.rollback();
-      res.status(404).json({ error: 'Клиент не найден или данные не изменились' });
+      res
+        .status(404)
+        .json({ error: "Клиент не найден или данные не изменились" });
       return;
     }
 
     await connection.commit();
-    res.status(200).json({ message: 'Данные клиента успешно обновлены' });
-
+    res.status(200).json({ message: "Данные клиента успешно обновлены" });
   } catch (error) {
     await connection.rollback();
-    console.error('Ошибка при обновлении клиента:', error);
-    res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+    console.error("Ошибка при обновлении клиента:", error);
+    res.status(500).json({ error: "Внутренняя ошибка сервера" });
   } finally {
     connection.release();
   }
