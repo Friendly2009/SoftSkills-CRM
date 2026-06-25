@@ -114,12 +114,22 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({
+            ...prev,
+            [name]: name === 'status'
+                ? (value === 'true' ? 1 : 0)
+                : value
+        }));
     };
 
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        SetResetFormData(prev => ({ ...prev, [name]: value }));
+        SetResetFormData(prev => ({
+            ...prev,
+            [name]: name === 'status'
+                ? (value === 'true' ? 1 : 0)
+                : value
+        }));
     }
 
     const handleSubmit = async (e: React.FormEvent) => {

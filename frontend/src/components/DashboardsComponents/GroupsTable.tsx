@@ -45,7 +45,12 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
     });
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({
+            ...prev,
+            [name]: name === 'status'
+                ? (value === 'true' ? 1 : 0)
+                : value
+        }));
     };
     const handleSubmit = () => {
 
@@ -97,7 +102,6 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                         <form onSubmit={handleSubmit}>
                             <div className={style['form-grid']}>
 
-                                {/* РЯД 1: Название на всю ширину */}
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Название группы</label>
                                     <input
@@ -106,7 +110,6 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                                     />
                                 </div>
 
-                                {/* РЯД 2: Обе даты встают симметрично бок о бок */}
                                 <div className={style['form-group']}>
                                     <label>Последняя работа</label>
                                     <input
@@ -123,7 +126,6 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                                     />
                                 </div>
 
-                                {/* РЯД 3: Статус и Преподаватель в один ряд */}
                                 <div className={style['form-group']}>
                                     <label>Статус</label>
                                     <div className={style['radio-container']}>

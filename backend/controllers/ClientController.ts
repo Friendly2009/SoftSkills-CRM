@@ -49,9 +49,14 @@ export const addclient = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
-  const { name, group_id, balance, skills, status, contact } = req.body;
+  const { name, group_ids, balance, skills, status, contact } = req.body;
+
   try {
     const company_id = req.session.company_id;
+
+    const targetGroupId =
+      group_ids && group_ids.length > 0 ? group_ids[0] : null;
+
     const [clientResult] = await pool.query(
       `INSERT INTO clients (name, balance, skills, status, contact, company_id) 
        VALUES (?, ?, ?, ?, ?, ?)`,
@@ -60,11 +65,13 @@ export const addclient = async (
 
     const newClientId = (clientResult as ResultSetHeader).insertId;
 
-    await pool.query(
-      `INSERT INTO group_members (group_id, client_id) 
-       VALUES (?, ?)`,
-      [group_id, newClientId],
-    );
+    if (targetGroupId !== null) {
+      await pool.query(
+        `INSERT INTO group_members (group_id, client_id) VALUES (?, ?)`,
+        [targetGroupId, newClientId],
+      );
+    }
+
     return res.status(200).json({
       success: true,
       message: "client was be added in database",

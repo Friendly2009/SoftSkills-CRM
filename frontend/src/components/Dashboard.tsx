@@ -234,7 +234,7 @@ export const Dashboard: React.FC = () => {
             <div className={style['placeholder-content']} id="placeholder-content">
               {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
               {activeMenu === 'users' && <UsersTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></UsersTable>}
-              {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction}></ClientTable>}
+              {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></ClientTable>}
               {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction}></GroupTable>}
             </div>
           </div>

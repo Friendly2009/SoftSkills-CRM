@@ -119,7 +119,6 @@
   z-index: 9999;
   animation: fadeIn 0.2s ease-out;
 }
-
 .modal-content {
   background: #ffffff;
   width: 100%;
@@ -131,21 +130,18 @@
   font-family: 'Inter', system-ui, sans-serif;
   animation: slideUp 0.2s ease-out;
 }
-
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
 }
-
 .modal-header h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #1e3d59; 
 }
-
 .btn-close {
   background: none;
   border: none;
@@ -155,28 +151,23 @@
   padding: 4px;
   line-height: 1;
 }
-
 .btn-close:hover {
   color: #64748b;
 }
-
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-bottom: 24px;
 }
-
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-
 .full-width {
   grid-column: span 2;
 }
-
 .form-group label {
   font-size: 11px;
   font-weight: 600;
@@ -184,7 +175,6 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .form-input {
   width: 100%;
   padding: 8px 12px;
@@ -197,11 +187,9 @@
   outline: none;
   transition: border-color 0.15s ease;
 }
-
 .form-input:focus {
   border-color: #0369a1; 
 }
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -209,7 +197,6 @@
   border-top: 1px solid #f1f5f9;
   padding-top: 16px;
 }
-
 .btn-secondary {
   background: #f1f5f9;
   color: #475569;
@@ -220,11 +207,9 @@
   font-weight: 600;
   cursor: pointer;
 }
-
 .btn-secondary:hover {
   background: #e2e8f0;
 }
-
 .btn-primary {
   background: #0369a1; 
   color: #ffffff;
@@ -236,29 +221,22 @@
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
-
 .btn-primary:hover {
   background: #025a87;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
 @keyframes slideUp {
   from { transform: translateY(10px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
-
-/* Список групп внутри ячейки (флекс, чтобы бейджи шли в ряд с отступами) */
 .groups-list {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
-
-/* Общий стиль для всех маленьких бейджей */
 .badge {
   display: inline-block;
   padding: 4px 8px;
@@ -266,15 +244,11 @@
   font-size: 12px;
   font-weight: 500;
 }
-
-/* Бейдж для групп */
 .badge-group {
   background-color: #f0f4f9;
   color: #4a5568;
   border: 1px solid #e2e8f0;
 }
-
-/* Бейджи для статусов */
 .badge-active {
   background-color: #e6fffa;
   color: #047481;
@@ -284,8 +258,6 @@
   background-color: #feebc8;
   color: #c05621;
 }
-
-/* Стили для баланса (зеленый при плюсе, красный при минусе) */
 .balance-text {
   font-weight: 600;
 }
@@ -298,4 +270,46 @@
 
 .text-muted {
   color: #a0aec0;
+}
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+.form-select {
+  width: 100%;
+  padding: 8px 36px 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #334155;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-select:focus {
+  border-color: #0369a1;
+  box-shadow: 0 0 0 1px #0369a1;
+}
+.select-wrapper::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none; 
+  transition: transform 0.15s ease;
+}
+
+.select-wrapper:focus-within::after {
+  transform: translateY(-50%) rotate(180deg);
 }
