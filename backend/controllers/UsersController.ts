@@ -118,7 +118,7 @@ export const deluser = async (req: Request, res: Response) => {
       message: "Ooops, something went wrong",
     });
   } finally {
-    if (connection) connection.release(); // Безопасно возвращаем в пул
+    if (connection) connection.release(); 
   }
 };
 

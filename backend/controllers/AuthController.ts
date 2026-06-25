@@ -13,7 +13,6 @@ export const APIsignup = async (
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // Проверяем компанию
     const [existingCompany]: any = await connection.query(
       "SELECT id FROM company WHERE name = ?",
       [company],
