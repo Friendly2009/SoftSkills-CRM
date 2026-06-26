@@ -68,7 +68,8 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                 contact: client.contact,
                 group_ids: client.group_ids,
                 group_names: client.group_names
-            })
+            });
+            setIsResetModalWinOpen(true);
         }
     };
     const getClient = async () => {
@@ -180,14 +181,41 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
             }
 
             const data = await response.json();
-            alert("Клиент успешно добавлен!");
             console.log(data);
+            getCompanyGroups();
+            getClient();
+            setIsModalOpen(false);
         } catch (ex) {
             alert("Произошла ошибка при отправке данных");
             console.error(ex);
         }
     }
+    const handleResetFormSubmit = async (e:React.FormEvent) => {
+        e.preventDefault();
+        try{
+            const response = await fetch(`http://localhost:3000/updateclient/${resetFormData.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(resetFormData)
+            });
 
+            if(!response) {
+                throw new Error("something went wrong");
+            }
+            const data = await response.json();
+            console.log(data);
+            getCompanyGroups();
+            getClient();
+            setIsResetModalWinOpen(false);
+            setIsResetMode(false);
+        } catch (ex) {
+            console.log(ex);
+            alert('something went wrong');
+        }
+    }
     return (
         <>
             {isModalOpen && (<div>
@@ -293,7 +321,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                             <button className={style['btn-close']} onClick={() => setIsResetModalWinOpen(false)}>×</button>
                         </div>
 
-                        <form onSubmit={() => { }}>
+                        <form onSubmit={handleResetFormSubmit}>
                             <div className={style['form-grid']}>
 
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
