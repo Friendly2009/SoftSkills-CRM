@@ -14,7 +14,7 @@ interface ClientTemplate {
     skills: number;
     status: number;
     contact: string;
-    group_ids: number[];
+    group_id: number;
     group_names: string[];
 }
 
@@ -32,7 +32,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
         skills: 0,
         status: 0,
         contact: "",
-        group_ids: [],
+        group_id: 0,
         group_names: []
     });
     const [formData, setFormData] = useState<ClientTemplate>({
@@ -42,7 +42,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
         skills: 0,
         status: 0,
         contact: "",
-        group_ids: [],
+        group_id: 0,
         group_names: []
     })
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -66,10 +66,24 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                 skills: client.skills,
                 status: client.status,
                 contact: client.contact,
-                group_ids: client.group_ids,
+                group_id: client.group_id,
                 group_names: client.group_names
             });
             setIsResetModalWinOpen(true);
+        }
+        if (isDeleteMode){
+            try{
+                const response = await fetch(`http://localhost:3000/delclients/${client.id}`);
+                if(!response) throw new Error('something went wrong');
+                alert("user was be deleted");
+                console.log("user was be deleted");
+                setIsDeleteMode(false);
+                getClient();
+                getCompanyGroups();
+            } catch(ex) {
+                alert(ex);
+                console.log(ex);
+            }
         }
     };
     const getClient = async () => {
@@ -190,9 +204,9 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
             console.error(ex);
         }
     }
-    const handleResetFormSubmit = async (e:React.FormEvent) => {
+    const handleResetFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try{
+        try {
             const response = await fetch(`http://localhost:3000/updateclient/${resetFormData.id}`, {
                 method: 'PATCH',
                 headers: {
@@ -202,7 +216,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                 body: JSON.stringify(resetFormData)
             });
 
-            if(!response) {
+            if (!response) {
                 throw new Error("something went wrong");
             }
             const data = await response.json();
@@ -238,7 +252,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                 </div>
                                 <div className={style['form-group']}>
                                     <label>Баланс</label>
-                                    <input name="balance" type="number" className={style['form-input']} value={formData.balance} onChange={handleResetInputChange}></input>
+                                    <input name="balance" type="number" className={style['form-input']} value={formData.balance} onChange={handleInputChange}></input>
                                 </div>
 
                                 <div className={style['form-group']}>
@@ -280,14 +294,14 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                     <label>Группа</label>
                                     <div className={style['select-wrapper']}>
                                         <select
-                                            name="group_ids"
+                                            name="group_id"
                                             className={style['form-select']}
-                                            value={formData.group_ids[0] || ""}
+                                            value={formData.group_id || ""}
                                             onChange={(e) => {
                                                 const selectedGroupId = parseInt(e.target.value, 10);
                                                 setFormData(prev => ({
                                                     ...prev,
-                                                    group_ids: selectedGroupId ? [selectedGroupId] : []
+                                                    group_id: isNaN(selectedGroupId) ? 0 : selectedGroupId
                                                 }));
                                             }}
                                         >
@@ -369,6 +383,31 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                             />
                                             Неактивен
                                         </label>
+                                    </div>
+                                </div>
+                                <div className={`${style['form-group']} ${style['full-width']}`}>
+                                    <label>Группа</label>
+                                    <div className={style['select-wrapper']}>
+                                        <select
+                                            name="group_id"
+                                            className={style['form-select']}
+                                            value={formData.group_id || ""}
+                                            onChange={(e) => {
+                                                const selectedGroupId = parseInt(e.target.value, 10);
+                                                setResetFormData(prev => ({
+                                                    ...prev,
+                                                    group_id: isNaN(selectedGroupId) ? 0 : selectedGroupId
+                                                }));
+                                            }}
+
+                                        >
+                                            <option value="">-- Без группы --</option>
+                                            {allGroups.map(group => (
+                                                <option key={group.id} value={group.id}>
+                                                    {group.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
                             </div>

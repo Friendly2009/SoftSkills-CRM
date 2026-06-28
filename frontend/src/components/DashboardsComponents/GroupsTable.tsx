@@ -1,66 +1,133 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/group.module.css';
-
+interface UserTemplate {
+    id: number;
+    full_name: string;
+}
 interface GroupTableProps {
     setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
     setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
 }
-
-export interface ScheduleItem {
+interface ScheduleItem {
     day_of_week: string;
     start_time: string;
     end_time: string;
 }
-
-export interface GroupTemplate {
+interface GroupTemplate {
     id: number;
     name: string;
     users_id: number;
     status: number;
     schedules: ScheduleItem[];
-
     teacher?: string;
     studentsCount?: number;
     maxStudents?: number;
     nextMeeting?: string;
 }
-
+interface FormState {
+    name: string;
+    users_id: number;
+    status: number;
+    start_date: string;
+    end_date: string;
+    schedules: ScheduleItem[];
+}
 const formatTime = (timeStr: string) => {
     if (!timeStr) return '';
     const parts = timeStr.split(':');
     if (parts.length >= 2) return `${parts[0]}:${parts[1]}`;
     return timeStr;
 };
-
-
 export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
     const [groups, setGroups] = useState<GroupTemplate[]>([]);
+    const [users, setUsers] = useState<UserTemplate[]>([]);
     const [isAddGroup, setIsAddGroup] = useState(false);
-    const [formData, setFormData] = useState({
+    const [hasEndDate, setHasEndDate] = useState(false);
+    const [formData, setFormData] = useState<FormState>({
         name: '',
-        status: false,
-        last_meeting: '',
-        next_meeting: '',
-        teacher_name: ''
+        users_id: 0,
+        status: 1,
+        start_date: new Date().toISOString().split('T')[0],
+        end_date: '',
+        schedules: [{ day_of_week: 'Понедельник', start_time: '', end_time: '' }]
     });
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: name === 'status'
-                ? (value === 'true' ? 1 : 0)
+            [name]: name === 'status' || name === 'users_id'
+                ? Number(value)
                 : value
         }));
     };
-    const handleSubmit = () => {
+    const handleScheduleChange = (index: number, field: keyof ScheduleItem, value: string) => {
+        const updatedSchedules = [...formData.schedules];
+        updatedSchedules[index] = { ...updatedSchedules[index], [field]: value };
+        setFormData(prev => ({ ...prev, schedules: updatedSchedules }));
+    };
+    const addScheduleField = () => {
+        setFormData(prev => ({
+            ...prev,
+            schedules: [...prev.schedules, { day_of_week: 'Понедельник', start_time: '', end_time: '' }]
+        }));
+    };
+    const removeScheduleField = (index: number) => {
+        if (formData.schedules.length === 1) return;
+        setFormData(prev => ({
+            ...prev,
+            schedules: prev.schedules.filter((_, i) => i !== index)
+        }));
+    };
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    }
+        try {
+            const response = await fetch('http://localhost:3000/creategroup', {
+                method: 'POST',
+                credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    users_id: formData.users_id,
+                    status: formData.status,
+                    start_date: formData.start_date,
+                    end_date: hasEndDate ? formData.end_date : null,
+                    schedules: formData.schedules
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка при сохранении группы');
+            }
+
+            const result = await response.json();
+            alert(result.message || 'Группа успешно создана');
+
+            setIsAddGroup(false);
+            setHasEndDate(false);
+            setFormData({
+                name: '',
+                users_id: 0,
+                status: 1,
+                start_date: new Date().toISOString().split('T')[0],
+                end_date: '',
+                schedules: [{ day_of_week: 'Понедельник', start_time: '', end_time: '' }]
+            });
+
+            getGroup();
+        } catch (ex) {
+            console.error(ex);
+            alert('Не удалось сохранить группу');
+        }
+    };
     const getGroup = async () => {
         try {
             const response = await fetch('http://localhost:3000/getgroups', {
                 credentials: "include"
             });
-            if (!response) {
+            if (!response.ok) {
                 throw new Error('oooops, something went wrong');
             }
             const rows = await response.json();
@@ -70,19 +137,32 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
             alert('something went wrong...');
         }
     };
+    const getUsers = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/getusers', {
+                credentials: "include"
+            });
+            if (!response.ok) {
+                throw new Error('Ошибка при загрузке сотрудников');
+            }
+            const rows = await response.json();
+
+            setUsers(rows.data || []);
+        } catch (ex) {
+            console.error(ex);
+        }
+    };
     const handleAddGroup = () => {
         setIsAddGroup(true);
     };
     useEffect(() => {
         getGroup();
+        getUsers();
         setPlusAction(() => handleAddGroup);
 
         return () => {
             setPlusAction(null);
         };
-    }, []);
-    useEffect(() => {
-        getGroup();
     }, []);
     const getStatusLabel = (status: GroupTemplate['status']) => {
         if (status === 2) return 'Активна';
@@ -111,59 +191,117 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                                 </div>
 
                                 <div className={style['form-group']}>
-                                    <label>Последняя работа</label>
-                                    <input
-                                        type="date" name="last_meeting" className={style['form-input']}
-                                        value={formData.last_meeting} onChange={handleInputChange}
-                                    />
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Следующая работа</label>
-                                    <input
-                                        type="date" name="next_meeting" required className={style['form-input']}
-                                        value={formData.next_meeting} onChange={handleInputChange}
-                                    />
+                                    <label>Преподаватель</label>
+                                    <select
+                                        name="users_id" required className={style['form-input']}
+                                        value={formData.users_id || ''} onChange={handleInputChange}
+                                    >
+                                        <option value="" disabled>Выберите преподавателя</option>
+                                        {users.map((user) => (
+                                            <option key={user.id} value={user.id}>{user.full_name}</option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 <div className={style['form-group']}>
                                     <label>Статус</label>
                                     <div className={style['radio-container']}>
                                         <label className={style['radio-label']}>
-                                            <input
-                                                name="status" type="radio" value="true"
-                                                checked={formData.status === true} onChange={handleInputChange}
-                                            />
-                                            Активен
+                                            <input name="status" type="radio" value="1" checked={formData.status === 1} onChange={handleInputChange} />
+                                            Набор
                                         </label>
                                         <label className={style['radio-label']}>
-                                            <input
-                                                name="status" type="radio" value="false"
-                                                checked={formData.status === false} onChange={handleInputChange}
-                                            />
-                                            Неактивен
+                                            <input name="status" type="radio" value="2" checked={formData.status === 2} onChange={handleInputChange} />
+                                            Активна
+                                        </label>
+                                        <label className={style['radio-label']}>
+                                            <input name="status" type="radio" value="0" checked={formData.status === 0} onChange={handleInputChange} />
+                                            Архив
                                         </label>
                                     </div>
                                 </div>
 
                                 <div className={style['form-group']}>
-                                    <label>Преподаватель</label>
+                                    <label>Дата начала работы группы</label>
                                     <input
-                                        type="text" name="teacher_name" className={style['form-input']}
-                                        value={formData.teacher_name} onChange={handleInputChange}
+                                        type="date" name="start_date" required className={style['form-input']}
+                                        value={formData.start_date} onChange={handleInputChange}
                                     />
+                                </div>
+
+                                <div className={style['form-group']}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '5px' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={hasEndDate}
+                                            onChange={(e) => {
+                                                setHasEndDate(e.target.checked);
+                                                if (!e.target.checked) {
+                                                    setFormData(prev => ({ ...prev, end_date: '' }));
+                                                }
+                                            }}
+                                        />
+                                        До определенного дня
+                                    </label>
+                                    <input
+                                        type="date"
+                                        name="end_date"
+                                        className={style['form-input']}
+                                        disabled={!hasEndDate}
+                                        required={hasEndDate}
+                                        value={formData.end_date}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                {/* Блок расписания занятий */}
+                                <div className={`${style['form-group']} ${style['full-width']}`} style={{ marginTop: '15px' }}>
+                                    <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>Расписание занятий</label>
+                                    {formData.schedules.map((schedule, index) => (
+                                        <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                                            <select
+                                                value={schedule.day_of_week}
+                                                onChange={(e) => handleScheduleChange(index, 'day_of_week', e.target.value)}
+                                                className={style['form-input']} style={{ flex: 2 }}
+                                            >
+                                                <option value="Понедельник">Понедельник</option>
+                                                <option value="Вторник">Вторник</option>
+                                                <option value="Среда">Среда</option>
+                                                <option value="Четверг">Четверг</option>
+                                                <option value="Пятница">Пятница</option>
+                                                <option value="Суббота">Суббота</option>
+                                                <option value="Воскресенье">Воскресенье</option>
+                                            </select>
+
+                                            <input
+                                                type="time" value={schedule.start_time} required className={style['form-input']} style={{ flex: 1.5 }}
+                                                onChange={(e) => handleScheduleChange(index, 'start_time', e.target.value)}
+                                            />
+                                            <span style={{ alignSelf: 'center' }}>—</span>
+                                            <input
+                                                type="time" value={schedule.end_time} required className={style['form-input']} style={{ flex: 1.5 }}
+                                                onChange={(e) => handleScheduleChange(index, 'end_time', e.target.value)}
+                                            />
+
+                                            {formData.schedules.length > 1 && (
+                                                <button
+                                                    type="button" onClick={() => removeScheduleField(index)}
+                                                    style={{ padding: '5px 10px', cursor: 'pointer', background: 'none', border: 'none', color: '#ff4d4d', fontSize: '18px' }}
+                                                >✕</button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button" onClick={addScheduleField} className={style['btn-secondary']}
+                                        style={{ padding: '5px 10px', fontSize: '13px', marginTop: '5px' }}
+                                    >+ Добавить день</button>
                                 </div>
 
                             </div>
 
-
                             <div className={style['form-actions']}>
-                                <button type="button" className={style['btn-secondary']} onClick={() => setIsAddGroup(false)}>
-                                    Отмена
-                                </button>
-                                <button type="submit" className={style['btn-primary']}>
-                                    Сохранить
-                                </button>
+                                <button type="button" className={style['btn-secondary']} onClick={() => setIsAddGroup(false)}>Отмена</button>
+                                <button type="submit" className={style['btn-primary']}>Сохранить</button>
                             </div>
                         </form>
                     </div>

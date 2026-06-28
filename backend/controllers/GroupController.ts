@@ -49,9 +49,9 @@ export const creategroup = async (req: Request, res: Response) => {
   let connect;
 
   try {
-    const { name, users_id, status, schedules } = req.body;
+    const { name, users_id, status, schedules, start_date, end_date } = req.body;
 
-    if (!name || !users_id || status === undefined) {
+    if (!name || !users_id || status === undefined || !start_date) {
       return res.status(400).json({ message: "Не все обязательные поля заполнены" });
     }
 
@@ -59,8 +59,8 @@ export const creategroup = async (req: Request, res: Response) => {
     await connect.beginTransaction();
 
     const [groupResult]: any = await connect.query(
-      'INSERT INTO `groups` (name, users_id, status) VALUES (?, ?, ?)',
-      [name, users_id, status]
+      'INSERT INTO `groups` (name, users_id, status, start_date, end_date) VALUES (?, ?, ?, ?, ?)',
+      [name, users_id, status, start_date, end_date || null]
     );
 
     const newGroupId = groupResult.insertId;

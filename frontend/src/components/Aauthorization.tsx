@@ -58,7 +58,6 @@ export const LoginForm = () => {
               onChange={(e) => { setFormData({ ...formData, company: e.target.value }) }}
               placeholder="Введите название компании..."
               className={login.input}
-              value="AnyCompany"
               required
             />
           </div>
@@ -72,7 +71,6 @@ export const LoginForm = () => {
               onChange={(e) => { setFormData({ ...formData, login: e.target.value }) }}
               placeholder="Введите Эл. почту"
               className={login.input}
-              value="mail@example.com"
               required
             />
           </div>
@@ -86,7 +84,6 @@ export const LoginForm = () => {
               onChange={(e) => { setFormData({ ...formData, password: e.target.value }) }}
               placeholder="••••••••"
               className={login.input}
-              value="19614141_Kirill"
               required
             />
           </div>
