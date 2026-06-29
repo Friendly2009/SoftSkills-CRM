@@ -71,20 +71,27 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
             });
             setIsResetModalWinOpen(true);
         }
-        if (isDeleteMode){
-            try{
-                const response = await fetch(`http://localhost:3000/delclients/${client.id}`);
-                if(!response) throw new Error('something went wrong');
-                alert("user was be deleted");
-                console.log("user was be deleted");
+        if (isDeleteMode) {
+            try {
+                const response = await fetch(`http://localhost:3000/delclients/${client.id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status}`);
+                }
+
+                alert("User was deleted");
+                console.log("User was deleted");
+
                 setIsDeleteMode(false);
                 getClient();
                 getCompanyGroups();
-            } catch(ex) {
-                alert(ex);
-                console.log(ex);
+            } catch (ex) {
+                console.error(ex);
             }
         }
+
     };
     const getClient = async () => {
         try {

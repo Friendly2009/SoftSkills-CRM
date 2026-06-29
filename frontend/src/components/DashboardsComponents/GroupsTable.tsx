@@ -21,7 +21,7 @@ interface GroupTemplate {
     schedules: ScheduleItem[];
     teacher?: string;
     studentsCount?: number;
-    maxStudents?: number;
+    max_students?: number;
     nextMeeting?: string;
 }
 interface FormState {
@@ -31,6 +31,7 @@ interface FormState {
     start_date: string;
     end_date: string;
     schedules: ScheduleItem[];
+    max_students: number;
 }
 const formatTime = (timeStr: string) => {
     if (!timeStr) return '';
@@ -47,6 +48,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
         name: '',
         users_id: 0,
         status: 1,
+        max_students: 10,
         start_date: new Date().toISOString().split('T')[0],
         end_date: '',
         schedules: [{ day_of_week: 'Понедельник', start_time: '', end_time: '' }]
@@ -113,6 +115,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                 status: 1,
                 start_date: new Date().toISOString().split('T')[0],
                 end_date: '',
+                max_students: 0,
                 schedules: [{ day_of_week: 'Понедельник', start_time: '', end_time: '' }]
             });
 
@@ -135,6 +138,21 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
         } catch (ex) {
             console.log(ex);
             alert('something went wrong...');
+        }
+    };
+    const getClient = async () => {
+        try {
+            const response = await fetch("http://localhost:3000/getclient", {
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                throw new Error('oooops, something went wrong');
+            }
+            const data = await response.json();
+            
+        } catch (ex) {
+            console.error(ex);
         }
     };
     const getUsers = async () => {
@@ -253,8 +271,12 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                                         onChange={handleInputChange}
                                     />
                                 </div>
-
-                                {/* Блок расписания занятий */}
+                                <div className={`${style['form-group']} ${style['full-width']}`}>
+                                    <input
+                                        type="number" name="max_students" required className={style['form-input']}
+                                        value={formData.max_students} onChange={handleInputChange}
+                                    />
+                                </div>
                                 <div className={`${style['form-group']} ${style['full-width']}`} style={{ marginTop: '15px' }}>
                                     <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>Расписание занятий</label>
                                     {formData.schedules.map((schedule, index) => (
@@ -354,7 +376,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                                 </td>
 
                                 <td style={{ fontWeight: 500 }}>
-                                    {group.studentsCount} / {group.maxStudents}
+                                    {group.studentsCount} / {group.max_students}
                                 </td>
                                 <td>
                                     <span className={style['date']}>{group.nextMeeting}</span>
