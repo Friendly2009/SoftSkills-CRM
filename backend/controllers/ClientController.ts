@@ -51,13 +51,14 @@ export const addclient = async (
 ): Promise<Response | void> => {
   const { name, group_ids, balance, skills, status, contact } = req.body;
 
+  const connection = await pool.getConnection();
+
   try {
     const company_id = req.session.company_id;
 
-    const targetGroupId =
-      group_ids && group_ids.length > 0 ? group_ids[0] : null;
+    await connection.beginTransaction();
 
-    const [clientResult] = await pool.query(
+    const [clientResult] = await connection.query(
       `INSERT INTO clients (name, balance, skills, status, contact, company_id) 
        VALUES (?, ?, ?, ?, ?, ?)`,
       [name, balance, skills, status, contact, company_id],
@@ -65,23 +66,31 @@ export const addclient = async (
 
     const newClientId = (clientResult as ResultSetHeader).insertId;
 
-    if (targetGroupId !== null) {
-      await pool.query(
-        `INSERT INTO group_members (group_id, client_id) VALUES (?, ?)`,
-        [targetGroupId, newClientId],
+    if (Array.isArray(group_ids) && group_ids.length > 0) {
+      const values = group_ids.map((groupId: number) => [groupId, newClientId]);
+
+      await connection.query(
+        `INSERT INTO group_members (group_id, client_id) VALUES ?`,
+        [values],
       );
     }
 
+    await connection.commit();
+
     return res.status(200).json({
       success: true,
-      message: "client was be added in database",
+      message: "Client was successfully added to the database",
     });
   } catch (ex) {
+    await connection.rollback();
+
     console.error(ex);
     return res.status(500).json({
       success: false,
-      message: "internal server error",
+      message: "Internal server error",
     });
+  } finally {
+    connection.release();
   }
 };
 

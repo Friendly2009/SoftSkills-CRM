@@ -14,7 +14,7 @@ interface ClientTemplate {
     skills: number;
     status: number;
     contact: string;
-    group_id: number;
+    group_ids: number[];
     group_names: string[];
 }
 
@@ -32,7 +32,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
         skills: 0,
         status: 0,
         contact: "",
-        group_id: 0,
+        group_ids: [],
         group_names: []
     });
     const [formData, setFormData] = useState<ClientTemplate>({
@@ -42,7 +42,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
         skills: 0,
         status: 0,
         contact: "",
-        group_id: 0,
+        group_ids: [],
         group_names: []
     })
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -66,7 +66,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                 skills: client.skills,
                 status: client.status,
                 contact: client.contact,
-                group_id: client.group_id,
+                group_ids: client.group_ids,
                 group_names: client.group_names
             });
             setIsResetModalWinOpen(true);
@@ -298,19 +298,31 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                     </div>
                                 </div>
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Группа</label>
+                                    <label>Группы (зажмите Ctrl/Cmd для выбора нескольких)</label>
                                     <div className={style['select-wrapper']}>
                                         <select
-                                            name="group_id"
+                                            multiple
+                                            name="group_ids"
                                             className={style['form-select']}
-                                            value={formData.group_id || ""}
+                                            value={resetFormData.group_ids.map(String)}
                                             onChange={(e) => {
-                                                const selectedGroupId = parseInt(e.target.value, 10);
-                                                setFormData(prev => ({
+                                                const selectedOptions = Array.from(e.target.selectedOptions);
+                                                const selectedIds = selectedOptions
+                                                    .map(option => parseInt(option.value, 10))
+                                                    .filter(id => !isNaN(id));
+                                                //if (selectedIds.length > resetFormData.group_ids.length) {         \
+                                                //    alert(`Текущий список ID групп: [${selectedIds.join(', ')}]`); |
+                                                //} else{                                                            \==>Yebany kostil na vsyakiy
+                                                //    alert(`${selectedIds[0]}`);                                    /==>blyadskiy sluchay
+                                                //}                                                                  |
+                                                //                                                                   /
+                                                setResetFormData(prev => ({
                                                     ...prev,
-                                                    group_id: isNaN(selectedGroupId) ? 0 : selectedGroupId
+                                                    group_ids: selectedIds
                                                 }));
                                             }}
+
+                                            style={{ height: 'auto', minHeight: '100px' }}
                                         >
                                             <option value="">-- Без группы --</option>
                                             {allGroups.map(group => (
@@ -393,20 +405,30 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                     </div>
                                 </div>
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Группа</label>
+                                    <label>Группы (зажмите Ctrl/Cmd для выбора нескольких)</label>
                                     <div className={style['select-wrapper']}>
                                         <select
-                                            name="group_id"
+                                            multiple
+                                            name="group_ids"
                                             className={style['form-select']}
-                                            value={formData.group_id || ""}
+                                            value={resetFormData.group_ids.map(String)}
                                             onChange={(e) => {
-                                                const selectedGroupId = parseInt(e.target.value, 10);
+                                                const selectedOptions = Array.from(e.target.selectedOptions);
+                                                const selectedIds = selectedOptions
+                                                    .map(option => parseInt(option.value, 10))
+                                                    .filter(id => !isNaN(id));
+                                                if (selectedIds.length > resetFormData.group_ids.length) {
+                                                    alert(`Текущий список ID групп: [${selectedIds.join(', ')}]`);
+                                                }
+
                                                 setResetFormData(prev => ({
                                                     ...prev,
-                                                    group_id: isNaN(selectedGroupId) ? 0 : selectedGroupId
+                                                    group_ids: selectedIds
                                                 }));
                                             }}
 
+
+                                            style={{ height: 'auto', minHeight: '100px' }}
                                         >
                                             <option value="">-- Без группы --</option>
                                             {allGroups.map(group => (
@@ -417,6 +439,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                         </select>
                                     </div>
                                 </div>
+
                             </div>
                             <div className={style['form-actions']}>
                                 <button type="button" className={style['btn-secondary']} onClick={() => setIsResetModalWinOpen(false)}>

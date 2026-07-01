@@ -4,7 +4,6 @@ import pool from "../data_base_connect.js";
 export const getgroups = async (req: Request, res: Response) => {
   try {
     const company_id = req.session.company_id;
-
     const [groups] = await pool.query(
       `SELECT 
         g.*, 
@@ -74,7 +73,7 @@ export const creategroup = async (req: Request, res: Response) => {
     await connect.beginTransaction();
 
     const [groupResult]: any = await connect.query(
-      "INSERT INTO `groups` (name, users_id, status, start_date, end_date, max_students) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO `groups` (name, users_id, status, start_date, end_date, max_students) VALUES (?, ?, ?, ?, ?, ?)",
       [name, users_id, status, start_date, end_date || null, max_students],
     );
 
