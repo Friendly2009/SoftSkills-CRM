@@ -21,7 +21,7 @@ interface GroupTemplate {
     schedules: ScheduleItem[];
     teacher?: string;
     studentsCount?: number;
-    max_students?: number;
+    max_students: number;
     nextMeeting?: string;
 }
 interface FormState {
@@ -82,7 +82,6 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
     };
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         try {
             const response = await fetch('http://localhost:3000/creategroup', {
                 method: 'POST',
@@ -96,7 +95,8 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction }) => {
                     status: formData.status,
                     start_date: formData.start_date,
                     end_date: hasEndDate ? formData.end_date : null,
-                    schedules: formData.schedules
+                    schedules: formData.schedules,
+                    max_students: formData.max_students
                 }),
             });
 

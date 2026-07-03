@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
-import { json } from "stream/consumers";
 
 interface ClientTableProps {
     setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
@@ -92,7 +91,6 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                 console.error(ex);
             }
         }
-
     };
     const getClient = async () => {
         try {

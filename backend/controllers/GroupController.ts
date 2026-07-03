@@ -1,29 +1,16 @@
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
+import { RowDataPacket, ResultSetHeader } from "mysql2";
 
 export const getgroups = async (req: Request, res: Response) => {
   try {
     const company_id = req.session.company_id;
-    const [groups] = await pool.query(
-      `SELECT 
-        g.*, 
-        COUNT(DISTINCT gm.client_id) AS studentsCount, -- Считаем уникальных студентов в группе
-        IF(COUNT(gs.id) > 0, 
-          JSON_ARRAYAGG(
-            JSON_OBJECT(
-              'day_of_week', gs.day_of_week, 
-              'start_time', gs.start_time, 
-              'end_time', gs.end_time
-            )
-          ), 
-          JSON_ARRAY()
-        ) AS schedules
-      FROM \`groups\` g 
-      JOIN users u ON g.users_id = u.id 
-      LEFT JOIN group_schedules gs ON g.id = gs.group_id
-      LEFT JOIN group_members gm ON g.id = gm.group_id -- Присоединяем таблицу связей студентов
-      WHERE u.company_id = ?
-      GROUP BY g.id`,
+    if (!company_id) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const [groups] = await pool.query<RowDataPacket[]>(
+      `SELECT g.*, (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id) AS studentsCount, IF(gs.id IS NULL, JSON_ARRAY(), JSON_ARRAYAGG( JSON_OBJECT('day_of_week', gs.day_of_week, 'start_time', gs.start_time, 'end_time', gs.end_time ))) AS schedules FROM \`groups\` g JOIN users u ON g.users_id = u.id LEFT JOIN group_schedules gs ON g.id = gs.group_id WHERE u.company_id = ? GROUP BY g.id, gs.group_id`,
       [company_id],
     );
 
@@ -50,6 +37,11 @@ export const getgroups = async (req: Request, res: Response) => {
 };
 
 export const creategroup = async (req: Request, res: Response) => {
+  const company_id = req.session.company_id;
+  if (!company_id) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
   let connect;
 
   try {
@@ -72,9 +64,9 @@ export const creategroup = async (req: Request, res: Response) => {
     connect = await pool.getConnection();
     await connect.beginTransaction();
 
-    const [groupResult]: any = await connect.query(
+    const [groupResult] = await connect.query<ResultSetHeader>(
       "INSERT INTO `groups` (name, users_id, status, start_date, end_date, max_students) VALUES (?, ?, ?, ?, ?, ?)",
-      [name, users_id, status, start_date, end_date || null, max_students],
+      [name, users_id, status, start_date, end_date || null, max_students || null],
     );
 
     const newGroupId = groupResult.insertId;

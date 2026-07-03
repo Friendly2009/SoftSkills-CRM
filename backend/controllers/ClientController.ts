@@ -22,8 +22,8 @@ export const APIGetClients = async (
         c.status,
         c.contact,
         c.company_id,
-        COALESCE(JSON_ARRAYAGG(g.id), JSON_ARRAY()) AS group_ids,
-        COALESCE(JSON_ARRAYAGG(g.name), JSON_ARRAY()) AS group_names
+        GROUP_CONCAT(DISTINCT g.id) AS group_ids_str,
+        GROUP_CONCAT(DISTINCT g.name SEPARATOR '|||') AS group_names_str
       FROM clients c
       LEFT JOIN group_members gm ON c.id = gm.client_id
       LEFT JOIN \`groups\` g ON gm.group_id = g.id
@@ -32,9 +32,27 @@ export const APIGetClients = async (
       [company_id],
     );
 
+    const formattedClients = clients.map((client) => {
+      const group_ids = client.group_ids_str
+        ? client.group_ids_str.split(',').map(Number)
+        : [];
+
+      const group_names = client.group_names_str
+        ? client.group_names_str.split('|||')
+        : [];
+
+      const { group_ids_str, group_names_str, ...cleanClient } = client;
+
+      return {
+        ...cleanClient,
+        group_ids,
+        group_names
+      };
+    });
+
     return res.status(200).json({
       success: true,
-      data: clients,
+      data: formattedClients,
     });
   } catch (ex) {
     console.error("Ошибка при получении списка клиентов:", ex);
@@ -45,17 +63,21 @@ export const APIGetClients = async (
   }
 };
 
+
 export const addclient = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
   const { name, group_ids, balance, skills, status, contact } = req.body;
 
+  const company_id = req.session.company_id;
+  if (!company_id) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
   const connection = await pool.getConnection();
 
   try {
-    const company_id = req.session.company_id;
-
     await connection.beginTransaction();
 
     const [clientResult] = await connection.query(
@@ -83,8 +105,7 @@ export const addclient = async (
     });
   } catch (ex) {
     await connection.rollback();
-
-    console.error(ex);
+    console.error("Ошибка при добавлении клиента:", ex);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -94,11 +115,12 @@ export const addclient = async (
   }
 };
 
+
 export const delclient = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
-  const clientId = parseInt(req.params.id[0]);
+  const clientId = parseInt(req.params.id as string, 10);
 
   if (isNaN(clientId)) {
     res.status(400).json({ error: "Некорректный ID клиента" });
@@ -138,15 +160,14 @@ export const delclient = async (
 };
 
 export async function updateClient(req: Request, res: Response): Promise<void> {
-  const clientId = parseInt(req.params.id[0]);
+  const clientId = parseInt(req.params.id as string, 10);
 
   if (isNaN(clientId)) {
     res.status(400).json({ error: "Некорректный ID клиента" });
     return;
   }
 
-  const { name, balance, skills, status, contact, company_id, group_id } =
-    req.body;
+  const { name, balance, skills, status, contact, company_id, group_id } = req.body;
 
   const clientFields: Record<string, any> = {};
   if (name !== undefined) clientFields.name = name;
@@ -165,7 +186,17 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
 
   try {
     await connection.beginTransaction();
-    let clientUpdated = false;
+
+    const [rows] = await connection.execute<any[]>(
+      `SELECT id FROM clients WHERE id = ?`,
+      [clientId]
+    );
+
+    if (rows.length === 0) {
+      await connection.rollback();
+      res.status(404).json({ error: "Клиент не найден" });
+      return;
+    }
 
     if (Object.keys(clientFields).length > 0) {
       const keys = Object.keys(clientFields);
@@ -174,14 +205,10 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
 
       values.push(clientId);
 
-      const [clientResult] = await connection.execute<ResultSetHeader>(
+      await connection.execute(
         `UPDATE clients SET ${setClause} WHERE id = ?`,
-        values,
+        values
       );
-
-      if (clientResult.affectedRows > 0) {
-        clientUpdated = true;
-      }
     }
 
     if (group_id !== undefined) {
@@ -201,15 +228,6 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
           [group_id, clientId],
         );
       }
-      clientUpdated = true;
-    }
-
-    if (!clientUpdated) {
-      await connection.rollback();
-      res
-        .status(404)
-        .json({ error: "Клиент не найден или данные не изменились" });
-      return;
     }
 
     await connection.commit();
