@@ -1,26 +1,13 @@
--- MySQL Script generated and corrected
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-
--- -----------------------------------------------------
--- Schema CheapCRM
--- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `CheapCRM` DEFAULT CHARACTER SET utf8mb3;
 USE `CheapCRM` ;
-
--- -----------------------------------------------------
--- Table `CheapCRM`.`company`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `company` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
-
--- -----------------------------------------------------
--- Table `CheapCRM`.`users`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `company_id` INT NOT NULL,
@@ -38,10 +25,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   KEY `fk_users_company_idx` (`company_id`),
   CONSTRAINT `fk_users_company` FOREIGN KEY (`company_id`) REFERENCES `company` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
-
--- -----------------------------------------------------
--- Table `CheapCRM`.`clients`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `clients` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
@@ -55,10 +38,6 @@ CREATE TABLE IF NOT EXISTS `clients` (
   KEY `fk_clients_company_idx` (`company_id`),
   CONSTRAINT `fk_clients_company` FOREIGN KEY (`company_id`) REFERENCES `company` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3;
-
--- -----------------------------------------------------
--- Table `CheapCRM`.`groups`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `groups` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `users_id` INT NOT NULL,
@@ -71,10 +50,6 @@ CREATE TABLE IF NOT EXISTS `groups` (
   KEY `fk_groups_users_idx` (`users_id`),
   CONSTRAINT `fk_groups_users` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
-
--- -----------------------------------------------------
--- Table `CheapCRM`.`group_members`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `group_members` (
   `group_id` INT NOT NULL,
   `client_id` INT NOT NULL,
@@ -84,10 +59,6 @@ CREATE TABLE IF NOT EXISTS `group_members` (
   CONSTRAINT `fk_group_members_clients` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_group_members_groups` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-
--- -----------------------------------------------------
--- Table `CheapCRM`.`group_schedules`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `group_schedules` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `day_of_week` VARCHAR(15) NOT NULL,
@@ -98,10 +69,6 @@ CREATE TABLE IF NOT EXISTS `group_schedules` (
   KEY `fk_group_schedules_groups_idx` (`group_id`),
   CONSTRAINT `fk_group_schedules_groups` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
-
--- -----------------------------------------------------
--- Table `CheapCRM`.`lessons`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `lessons` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `lesson_date` DATE NOT NULL,
@@ -113,7 +80,6 @@ CREATE TABLE IF NOT EXISTS `lessons` (
   KEY `fk_lessons_groups_idx` (`group_id`),
   CONSTRAINT `fk_lessons_groups` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

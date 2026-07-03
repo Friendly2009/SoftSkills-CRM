@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
+import { json } from "stream/consumers";
 
 interface ClientTableProps {
     setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
@@ -187,6 +188,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
     };
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log(JSON.stringify(formData));
         try {
             const response = await fetch('http://localhost:3000/addclients', {
                 method: 'POST',
@@ -304,7 +306,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                             multiple
                                             name="group_ids"
                                             className={style['form-select']}
-                                            value={resetFormData.group_ids.map(String)}
+                                            value={formData.group_ids.map(String)}
                                             onChange={(e) => {
                                                 const selectedOptions = Array.from(e.target.selectedOptions);
                                                 const selectedIds = selectedOptions
@@ -316,7 +318,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                                 //    alert(`${selectedIds[0]}`);                                    /==>blyadskiy sluchay
                                                 //}                                                                  |
                                                 //                                                                   /
-                                                setResetFormData(prev => ({
+                                                setFormData(prev => ({
                                                     ...prev,
                                                     group_ids: selectedIds
                                                 }));
