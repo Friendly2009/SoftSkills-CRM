@@ -167,7 +167,8 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const { name, balance, skills, status, contact, company_id, group_id } = req.body;
+  // Принимаем из тела запроса массив group_ids вместо одиночного group_id
+  const { name, balance, skills, status, contact, company_id, group_ids } = req.body;
 
   const clientFields: Record<string, any> = {};
   if (name !== undefined) clientFields.name = name;
@@ -177,7 +178,7 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
   if (contact !== undefined) clientFields.contact = contact;
   if (company_id !== undefined) clientFields.company_id = company_id;
 
-  if (Object.keys(clientFields).length === 0 && group_id === undefined) {
+  if (Object.keys(clientFields).length === 0 && group_ids === undefined) {
     res.status(400).json({ error: "Нет данных для обновления" });
     return;
   }
@@ -211,21 +212,18 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
       );
     }
 
-    if (group_id !== undefined) {
-      const [existingRelation] = await connection.execute<any[]>(
-        `SELECT * FROM group_members WHERE client_id = ?`,
-        [clientId],
+    if (group_ids !== undefined) {
+      await connection.execute(
+        `DELETE FROM group_members WHERE client_id = ?`,
+        [clientId]
       );
 
-      if (existingRelation.length > 0) {
-        await connection.execute(
-          `UPDATE group_members SET group_id = ? WHERE client_id = ?`,
-          [group_id, clientId],
-        );
-      } else {
-        await connection.execute(
-          `INSERT INTO group_members (group_id, client_id) VALUES (?, ?)`,
-          [group_id, clientId],
+      if (Array.isArray(group_ids) && group_ids.length > 0) {
+        const values = group_ids.map((groupId: number) => [groupId, clientId]);
+
+        await connection.query(
+          `INSERT INTO group_members (group_id, client_id) VALUES ?`,
+          [values]
         );
       }
     }

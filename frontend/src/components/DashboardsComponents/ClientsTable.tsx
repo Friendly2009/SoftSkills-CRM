@@ -243,7 +243,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                 <div className={style['modal-overlay']} onClick={() => setIsModalOpen(false)}>
                     <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
                         <div className={style['modal-header']}>
-                            <h3>Добавить Клиента</h3>
+                            <h3>Добавить клиента</h3>
                             <button className={style['btn-close']} onClick={() => setIsModalOpen(false)}>×</button>
                         </div>
 
@@ -310,12 +310,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                                 const selectedIds = selectedOptions
                                                     .map(option => parseInt(option.value, 10))
                                                     .filter(id => !isNaN(id));
-                                                //if (selectedIds.length > resetFormData.group_ids.length) {         \
-                                                //    alert(`Текущий список ID групп: [${selectedIds.join(', ')}]`); |
-                                                //} else{                                                            \==>Yebany kostil na vsyakiy
-                                                //    alert(`${selectedIds[0]}`);                                    /==>blyadskiy sluchay
-                                                //}                                                                  |
-                                                //                                                                   /
+                                                                                                         
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     group_ids: selectedIds
@@ -417,9 +412,6 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                                 const selectedIds = selectedOptions
                                                     .map(option => parseInt(option.value, 10))
                                                     .filter(id => !isNaN(id));
-                                                if (selectedIds.length > resetFormData.group_ids.length) {
-                                                    alert(`Текущий список ID групп: [${selectedIds.join(', ')}]`);
-                                                }
 
                                                 setResetFormData(prev => ({
                                                     ...prev,
