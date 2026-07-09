@@ -187,16 +187,7 @@ export const updategroup = (req: Request, res: Response) => {
 
     const company_id = req.session.company_id;
 
-    return res.status(200).json({
-      name: name,
-      users_id: users_id,
-      status: status,
-      schedules: schedules,
-      start_date: start_date,
-      end_date: end_date,
-      max_students: max_students,
-      company_id: company_id
-    });
+    
 
   } catch (er){
     console.log(er);
