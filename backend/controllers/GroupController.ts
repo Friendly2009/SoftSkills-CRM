@@ -66,7 +66,14 @@ export const creategroup = async (req: Request, res: Response) => {
 
     const [groupResult] = await connect.query<ResultSetHeader>(
       "INSERT INTO `groups` (name, users_id, status, start_date, end_date, max_students) VALUES (?, ?, ?, ?, ?, ?)",
-      [name, users_id, status, start_date, end_date || null, max_students || null],
+      [
+        name,
+        users_id,
+        status,
+        start_date,
+        end_date || null,
+        max_students || null,
+      ],
     );
 
     const newGroupId = groupResult.insertId;
@@ -103,3 +110,96 @@ export const creategroup = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const deleteGroup = async (req: Request, res: Response): Promise<void> => {
+  const groupId = parseInt(req.params.id as string, 10);
+  const companyId = req.session.company_id;
+
+  if (isNaN(groupId) || !companyId) {
+    res
+      .status(400)
+      .json({ error: "Некорректный ID группы или вы не авторизованы" });
+    return;
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [groupRows] = await connection.execute<RowDataPacket[]>(
+      `SELECT g.id 
+       FROM \`groups\` g
+       JOIN users u ON g.users_id = u.id
+       WHERE g.id = ? AND u.company_id = ?`,
+      [groupId, companyId],
+    );
+
+    if (groupRows.length === 0) {
+      await connection.rollback();
+      res
+        .status(404)
+        .json({ error: "Группа не найдена или у вас нет прав на её удаление" });
+      return;
+    }
+
+    await connection.execute(`DELETE FROM group_schedules WHERE group_id = ?`, [
+      groupId,
+    ]);
+
+    await connection.execute(`DELETE FROM lessons WHERE group_id = ?`, [
+      groupId,
+    ]);
+
+    await connection.execute(`DELETE FROM group_members WHERE group_id = ?`, [
+      groupId,
+    ]);
+
+    await connection.execute(`DELETE FROM \`groups\` WHERE id = ?`, [groupId]);
+
+    await connection.commit();
+    res.status(200).json({
+      success: true,
+      message: "Группа и все её связанные данные успешно удалены",
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error("Ошибка при удалении группы:", error);
+    res
+      .status(500)
+      .json({ error: "Внутренняя ошибка сервера при удалении группы" });
+  } finally {
+    connection.release();
+  }
+}
+export const updategroup = (req: Request, res: Response) => {
+  try{
+    
+    const {
+      name,
+      users_id,
+      status,
+      schedules,
+      start_date,
+      end_date,
+      max_students,
+    } = req.body;
+
+    const company_id = req.session.company_id;
+
+    return res.status(200).json({
+      name: name,
+      users_id: users_id,
+      status: status,
+      schedules: schedules,
+      start_date: start_date,
+      end_date: end_date,
+      max_students: max_students,
+      company_id: company_id
+    });
+
+  } catch (er){
+    console.log(er);
+    return res.status(500).json({success: false, message: 'something went wrong'});
+  }
+}

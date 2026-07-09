@@ -235,7 +235,7 @@ export const Dashboard: React.FC = () => {
               {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
               {activeMenu === 'users' && <UsersTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></UsersTable>}
               {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></ClientTable>}
-              {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction}></GroupTable>}
+              {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction} setUpdateAction={setReSetAction}></GroupTable>}
             </div>
           </div>
         </section>

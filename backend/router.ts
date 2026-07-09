@@ -3,7 +3,7 @@ import { getusers, adduser, deluser, resetuser } from "./controllers/UsersContro
 import { getglobalinfo, checkconnect, getallsession} from "./controllers/BackController.js"
 import { APIsignup, APIsignin } from './controllers/AuthController.js'
 import { APIGetClients, addclient, delclient, updateClient } from './controllers/ClientController.js'
-import { getgroups, creategroup } from './controllers/GroupController.js'
+import { getgroups, creategroup, deleteGroup, updategroup } from './controllers/GroupController.js'
 const router: Router = Router();
 
 router.get('/checkconnect', checkconnect);
@@ -25,5 +25,6 @@ router.patch('/updateclient/:id', updateClient);
 
 router.get("/getgroups", getgroups);
 router.post('/creategroup', creategroup);
-
+router.delete('/deletegroup/:id', deleteGroup);
+router.patch('/updategroup/:id', updategroup);
 export default router;
