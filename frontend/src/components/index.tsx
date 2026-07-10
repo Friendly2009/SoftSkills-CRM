@@ -80,7 +80,7 @@ const navigate = useNavigate();
                 className={style['footer-logo-img']}
               />
               <p className={style['footer-desc']}>
-                Peach ALFACRM — CRM система для учебного центра.
+                SoftSkills CRM — CRM система для учебного центра.
               </p>
             </div>
 

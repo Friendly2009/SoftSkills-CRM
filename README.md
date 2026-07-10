@@ -1,16 +1,18 @@
-## For starting backend
-```
-npm run dev
-```
-## For starting frontend
-```
-npm run dev
-```
-Before starting you need enter in directory (frontend or backend) with command ``` cd ```
-## .env
-you need write dot env for starting project
-### example of .env:
-```
+# SoftSkills CRM
+
+A lightweight open-source CRM system.
+
+##  Getting Started
+
+### 1. Prerequisites
+
+Make sure you have [Node.js](https://nodejs.org) and [MySQL Server](https://mysql.com) installed on your machine.
+
+### 2. Environment Setup
+
+Create a `.env` file in the root directory (or respective frontend/backend folders depending on your architecture) and configure your environment variables:
+
+```env
 FRONTEND_PORT=5173
 FRONTEND_HOST=localhost
 
@@ -20,20 +22,26 @@ BACKEND_PORT=3000
 BACKEND_HOST=localhost
 
 DB_HOST=localhost
-DB_ROLE=your_role_of_bd
-DB_PASSWORD=your_password_from_bd
-DB_NAME='your_name_of_bd'
+DB_ROLE=your_username
+DB_PASSWORD=your_password
+DB_NAME='CheapCRM'
 ```
-#### this code is example for local starting!!!
 
-## database
+_> **Note:** The above configuration is for local development environments only._
+
+### 3. Database Initialization
+
+This project uses MySQL. You can initialize the database using MySQL Workbench or any other database client.
+
+Execute the following script to create the database schema:
+
 ```sql
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
-CREATE SCHEMA IF NOT EXISTS `CheapCRM` DEFAULT CHARACTER SET utf8mb3;
-USE `CheapCRM` ;
+CREATE SCHEMA IF NOT EXISTS `database` DEFAULT CHARACTER SET utf8mb3;
+USE `database` ;
 
 CREATE TABLE IF NOT EXISTS `company` (
   `id` INT NOT NULL AUTO_INCREMENT,
@@ -99,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `group_members` (
 CREATE TABLE IF NOT EXISTS `group_schedules` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `day_of_week` VARCHAR(15) NOT NULL,
-  `start_time` TIME NOT NULL, 
+  `start_time` TIME NOT NULL,
   `end_time` TIME NOT NULL,
   `group_id` INT NOT NULL,
   PRIMARY KEY (`id`),
@@ -123,8 +131,23 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 ```
-This is a sql script, which is suitable for the backend. 
 
-On developing this project i use MySql workbench 8.0.25
+### 4. Running the Application
 
-link for downdload GE: https://downloads.mysql.com/archives/get/p/25/file/mysql-installer-community-8.0.25.0.msi
+Before starting, navigate to the target directory using the `cd` command.
+
+#### Start Backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+#### Start Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```

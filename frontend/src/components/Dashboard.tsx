@@ -78,7 +78,7 @@ export const Dashboard: React.FC = () => {
             <span></span>
           </button>
           <div className={style.logo}>
-            <img src="/img/index/brand-logo-2024.webp" alt="alfacrm" />
+            <img src="/img/index/brand-logo-2024.webp" alt="SoftSkills CRM" />
           </div>
         </div>
 
