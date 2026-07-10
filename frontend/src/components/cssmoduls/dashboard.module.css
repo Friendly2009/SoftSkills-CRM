@@ -1,16 +1,14 @@
-/* Основные константы темы Alpha CRM */
 :root {
-  --alfa-primary: #1e3d59;       /* Темно-синий бренд */
-  --alfa-accent: #17b978;        /* Зеленый акцент (для кнопок/активности) */
-  --alfa-bg-hover: #f5f7fa;      /* Светло-серый фон при наведении */
-  --alfa-border: #e2e8f0;        /* Границы элементов */
-  --alfa-text-main: #334155;     /* Основной текст */
-  --alfa-text-muted: #64748b;    /* Второстепенный текст */
+  --alfa-primary: #1e3d59;      
+  --alfa-accent: #17b978;       
+  --alfa-bg-hover: #f5f7fa;     
+  --alfa-border: #e2e8f0;        
+  --alfa-text-main: #334155;     
+  --alfa-text-muted: #64748b;    
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
 }
 
-/* Контейнер шапки */
 .alfa-header {
   display: flex;
   justify-content: space-between;
@@ -26,7 +24,6 @@
   z-index: 100;
 }
 
-/* --- ЛЕВАЯ ЧАСТЬ (Бургер и Лого) --- */
 .header-left {
   display: flex;
   align-items: center;
@@ -59,7 +56,6 @@
   display: block;
 }
 
-/* --- ЦЕНТРАЛЬНАЯ ЧАСТЬ (Иконки и Поиск) --- */
 .header-center {
   display: flex;
   align-items: center;
@@ -67,7 +63,6 @@
   position: relative;
 }
 
-/* Кнопки-иконки верхнего меню */
 .icon-box {
   display: flex;
   align-items: center;
@@ -95,21 +90,19 @@
   opacity: 1;
 }
 
-/* Выделенная кнопка плюса (Добавление сущностей) */
 #plusBtn {
   background-color: var(--alfa-primary);
 }
 
 #plusBtn .nav-icon {
-  filter: invert(1) brightness(2); /* Делает иконку белой */
+  filter: invert(1) brightness(2); 
   opacity: 1;
 }
 
 #plusBtn:hover {
-  background-color: #112940; /* Чуть темнее при наведении */
+  background-color: #112940; 
 }
 
-/* Контейнер поиска */
 .search-container {
   margin-left: 10px;
 }
@@ -132,7 +125,6 @@
   box-shadow: 0 0 0 3px rgba(30, 61, 89, 0.1);
 }
 
-/* --- ВЫПАДАЮЩЕЕ МЕНЮ ПЛЮСА (Dropdown) --- */
 .dropdown-menu {
   position: absolute;
   top: 48px;
@@ -143,11 +135,10 @@
   border-radius: 8px;
   box-shadow: var(--shadow-md);
   padding: 6px 0;
-  display: none; /* Переключайте на flex через JS/React state */
+  display: none; 
   flex-direction: column;
 }
 
-/* Показываем меню, если добавлен класс active */
 .dropdown-menu.active {
   display: flex;
 }
@@ -184,7 +175,6 @@ hr {
   margin: 6px 0;
 }
 
-/* --- ПРАВАЯ ЧАСТЬ (Профиль пользователя) --- */
 .header-right {
   display: flex;
   align-items: center;
@@ -221,7 +211,6 @@ hr {
   object-fit: cover;
 }
 
-/* --- ВЫПАДАЮЩЕЕ МЕНЮ ПОЛЬЗОВАТЕЛЯ --- */
 .user-menu-dropdown {
   position: absolute;
   top: 48px;
@@ -232,10 +221,9 @@ hr {
   border-radius: 8px;
   box-shadow: var(--shadow-md);
   padding: 12px 0 6px 0;
-  display: none; /* Переключайте на block через JS/React state */
+  display: none; 
 }
 
-/* Показываем меню пользователя при активности */
 .user-menu-dropdown.active {
   display: block;
 }
@@ -278,21 +266,19 @@ hr {
 }
 
 .dropdown-links li a.logout-link {
-  color: #ef4444; /* Красный цвет для выхода */
+  color: #ef4444; 
 }
 
 .dropdown-links li a.logout-link:hover {
   background-color: #fef2f2;
 }
-/* --- СЕТКА ОСНОВНОГО ЭКРАНА --- */
 .alfa-container {
   display: flex;
-  min-height: calc(100vh - 60px); /* Вычитаем высоту шапки */
+  min-height: calc(100vh - 60px);
   background-color: #f8fafc;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* --- БОКОВАЯ ПАНЕЛЬ (SIDEBAR) --- */
 .sidebar {
   width: 220px;
   background-color: #ffffff;
@@ -329,16 +315,14 @@ hr {
   opacity: 1;
 }
 
-/* Активный пункт меню (например, выбранный раздел) */
 .nav-item-active {
   background-color: #ecf2f7;
   color: var(--alfa-primary);
   font-weight: 600;
   border-left: 4px solid var(--alfa-primary);
-  padding-left: 16px; /* Компенсируем границу */
+  padding-left: 16px;
 }
 
-/* --- ОСНОВНОЙ КОНТЕНТ --- */
 .main-content {
   flex-grow: 1;
   padding: 20px;
@@ -348,7 +332,6 @@ hr {
   overflow-x: hidden;
 }
 
-/* Шапка контента (вкладки + кнопки) */
 .content-header {
   display: flex;
   justify-content: space-between;
@@ -359,7 +342,6 @@ hr {
   padding-bottom: 12px;
 }
 
-/* Вкладки (Tabs) */
 .tabs {
   display: flex;
   gap: 4px;
@@ -390,7 +372,6 @@ hr {
   border: 1px solid var(--alfa-border);
 }
 
-/* Панель кнопок */
 .action-bar {
   display: flex;
   align-items: center;
@@ -404,7 +385,6 @@ hr {
   flex-wrap: wrap;
 }
 
-/* Базовый класс для кнопок */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -419,7 +399,6 @@ hr {
   transition: all 0.15s ease;
 }
 
-/* Цветовые схемы кнопок в стиле Alpha CRM */
 .btn-blue {
   background-color: var(--alfa-primary);
   color: #ffffff;
@@ -451,7 +430,6 @@ hr {
 }
 .btn-green:hover { background-color: #bbf7d0; }
 
-/* Рабочая область для динамического контента */
 .dashboard-placeholder {
   flex-grow: 1;
   background-color: #ffffff;
@@ -462,13 +440,12 @@ hr {
   min-height: 400px;
 }
 
-/* --- АДАПТИВНОСТЬ (МОБИЛЬНАЯ ВЕРСИЯ) --- */
 @media (max-width: 1024px) {
   .sidebar {
-    width: 68px; /* Сворачиваем сайдбар до иконок на планшетах */
+    width: 68px;
   }
   .nav-item span {
-    display: none; /* Прячем текст пунктов меню */
+    display: none;
   }
   .nav-item {
     justify-content: center;
@@ -478,21 +455,20 @@ hr {
 
 @media (max-width: 768px) {
   .alfa-container {
-    flex-direction: column; /* Сайдбар уходит наверх или скрывается */
+    flex-direction: column;
   }
   
   .sidebar {
     width: 100%;
     height: auto;
     padding: 8px 0;
-    overflow-x: auto; /* Позволяет скроллить иконки по горизонтали */
+    overflow-x: auto; 
     border-right: none;
     border-bottom: 1px solid var(--alfa-border);
   }
 
   .sidebar-nav {
-    flex-direction: row; /* Выстраиваем меню в строку на мобильных */
-    padding: 0 12px;
+    flex-direction: row;
   }
 
   .nav-item {
@@ -501,7 +477,7 @@ hr {
 
   .content-header {
     flex-direction: column;
-    align-items: stretch; /* Растягиваем элементы во всю ширину */
+    align-items: stretch;
   }
 
   .action-bar {
@@ -511,7 +487,7 @@ hr {
 
   .btn-group {
     grid-template-columns: repeat(2, 1fr);
-    display: grid; /* Кнопки встают сеткой 2х2 */
+    display: grid;
   }
 
   .btn-green {

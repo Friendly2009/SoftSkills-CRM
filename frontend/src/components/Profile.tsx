@@ -1,5 +1,7 @@
 import React from 'react';
 import styles from './cssmoduls/profile.module.css';
+import { error } from 'console';
+import { resumeToPipeableStream } from 'react-dom/server';
 
 const mockUser = {
   fullname: "Иван Иванов Иванович",
@@ -22,6 +24,24 @@ export const ProfilePage: React.FC = () => {
       .map(word => word[0].toUpperCase())
       .join('');
   };
+  const handleLogoutClick = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/logout");
+    if (!response.ok) {
+      throw new Error("something went wrong...");
+    }
+    const data = await response.json();
+    
+    if (data.success) {
+      window.location.href = "http://localhost:5173/"; 
+    } else {
+      console.log("something went wrong and you was not logout...");
+    }
+  } catch (er) {
+    console.log("something went wrong and you was not logout...");
+    alert("something went wrong and you was not logout...");
+  }
+};
 
   return (
     <div className={styles.pageContainer}>
@@ -29,7 +49,7 @@ export const ProfilePage: React.FC = () => {
         
         <button 
           className={styles.logoutBtn} 
-          onClick={() => console.log('Выход')}
+          onClick={handleLogoutClick}
           title="Выйти из аккаунта"
         >
           Выйти
@@ -60,10 +80,10 @@ export const ProfilePage: React.FC = () => {
             className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={() => console.log('В дашборд')}
           >
-            Панель управления (Dashboard)
+            Панель управления
           </button>
           <button 
-            className={`${styles.btn} ${styles.btnSecondary}`}
+            className={`${styles.btn} ${styles.btnlightblue}`}
             onClick={() => console.log('Редактировать')}
           >
             Редактировать

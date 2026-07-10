@@ -102,13 +102,17 @@
 }
 
 .btn {
-  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
   font-weight: 500;
-  padding: 10px 18px;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
+  transition: all 0.15s ease;
 }
 
 .btnPrimary {
@@ -216,3 +220,8 @@
   color: #dc3545;
   background-color: #fff5f5;
 }
+.btnlightblue {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+.btnlightblue:hover { background-color: #bae6fd; }

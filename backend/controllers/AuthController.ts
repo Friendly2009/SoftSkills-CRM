@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 import bcrypt from "bcrypt";
@@ -75,7 +76,6 @@ export const APIsignup = async (
     }
   }
 };
-
 export const APIsignin = async (
   req: Request,
   res: Response,
@@ -135,4 +135,14 @@ export const APIsignin = async (
       error: "internal server error",
     });
   }
+};
+export const logout = (req: Request, res: Response) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Ошибка сессии:', err);
+      return res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+    res.clearCookie('connect.sid');
+    return res.status(200).json({ success: true, message: 'Вышли!' });
+  });
 };
