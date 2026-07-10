@@ -167,7 +167,6 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // Принимаем из тела запроса массив group_ids вместо одиночного group_id
   const { name, balance, skills, status, contact, company_id, group_ids } = req.body;
 
   const clientFields: Record<string, any> = {};

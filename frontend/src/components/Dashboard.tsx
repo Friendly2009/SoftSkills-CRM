@@ -84,6 +84,7 @@ export const Dashboard: React.FC = () => {
 
         <div className={style['header-center']}>
           <div className={`${style['dropdown-menu']} ${isPlusOpen ? style.active : ''}`}>
+            COMING SOON
             <div className={style['menu-item']}>
               <img src="/img/user/dashboard/list-check-solid.png" alt="" className={style['nav-icon']} />
               Задача
@@ -160,25 +161,11 @@ export const Dashboard: React.FC = () => {
         <aside className={style.sidebar} id="burger-menu">
           <nav className={style['sidebar-nav']}>
             <div
-              className={`${style['nav-item']} ${activeMenu === 'analytics' ? style['nav-item-active'] : ''}`}
-              onClick={() => setActiveMenu('analytics')}
-            >
-              <img src="/img/user/dashboard/chart-line-solid.png" alt="" className={style['nav-icon']} />
-              <span>Аналитика</span>
-            </div>
-            <div
               className={`${style['nav-item']} ${activeMenu === 'groups' ? style['nav-item-active'] : ''}`}
               onClick={() => setActiveMenu('groups')}
             >
               <img src="/img/user/dashboard/user-group-solid.png" alt="" className={style['nav-icon']} />
               <span>Группы</span>
-            </div>
-            <div
-              className={`${style['nav-item']} ${activeMenu === 'tasks' ? style['nav-item-active'] : ''}`}
-              onClick={() => setActiveMenu('tasks')}
-            >
-              <img src="/img/user/dashboard/list-check-solid.png" alt="" className={style['nav-icon']} />
-              <span>Задачи</span>
             </div>
             <div
               className={`${style['nav-item']} ${activeMenu === 'clients' ? style['nav-item-active'] : ''}`}
@@ -232,7 +219,6 @@ export const Dashboard: React.FC = () => {
 
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
-              {activeMenu === 'teachers' && <p>Контент аналитики...</p>}
               {activeMenu === 'users' && <UsersTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></UsersTable>}
               {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></ClientTable>}
               {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction} setUpdateAction={setReSetAction}></GroupTable>}

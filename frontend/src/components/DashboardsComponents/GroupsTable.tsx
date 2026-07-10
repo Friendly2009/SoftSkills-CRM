@@ -194,6 +194,7 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction, setDelAct
             }
             const rows = await response.json();
             setGroups(rows.data || []);
+            console.log(rows);
         } catch (ex) {
             console.log(ex);
             alert('something went wrong...');

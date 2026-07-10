@@ -10,18 +10,49 @@ export const getgroups = async (req: Request, res: Response) => {
     }
 
     const [groups] = await pool.query<RowDataPacket[]>(
-      `SELECT g.*, (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id) AS studentsCount, IF(gs.id IS NULL, JSON_ARRAY(), JSON_ARRAYAGG( JSON_OBJECT('day_of_week', gs.day_of_week, 'start_time', gs.start_time, 'end_time', gs.end_time ))) AS schedules FROM \`groups\` g JOIN users u ON g.users_id = u.id LEFT JOIN group_schedules gs ON g.id = gs.group_id WHERE u.company_id = ? GROUP BY g.id, gs.group_id`,
-      [company_id],
+      `SELECT 
+        g.id,
+        g.name,
+        g.users_id,
+        g.status,
+        g.start_date,
+        g.end_date,
+        g.max_students,
+        (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id) AS studentsCount,
+        IF(COUNT(gs.id) = 0, JSON_ARRAY(), 
+          JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'day_of_week', gs.day_of_week, 
+              'start_time', gs.start_time, 
+              'end_time', gs.end_time
+            )
+          )
+        ) AS schedules
+      FROM \`groups\` g 
+      INNER JOIN users u ON g.users_id = u.id 
+      LEFT JOIN group_schedules gs ON g.id = gs.group_id 
+      WHERE u.company_id = ? 
+      GROUP BY g.id`, 
+      [company_id]
     );
 
-    const formattedGroups = (groups as any[]).map((group) => ({
-      ...group,
-      schedules:
-        typeof group.schedules === "string"
-          ? JSON.parse(group.schedules)
-          : group.schedules,
-      studentsCount: Number(group.studentsCount || 0),
-    }));
+    const formattedGroups = (groups as any[]).map((group) => {
+      let parsedSchedules = group.schedules;
+      
+      if (typeof group.schedules === "string") {
+        try {
+          parsedSchedules = JSON.parse(group.schedules);
+        } catch {
+          parsedSchedules = [];
+        }
+      }
+
+      return {
+        ...group,
+        schedules: parsedSchedules,
+        studentsCount: Number(group.studentsCount || 0),
+      };
+    });
 
     return res.status(200).json({
       success: true,
@@ -31,7 +62,7 @@ export const getgroups = async (req: Request, res: Response) => {
     console.error("Ошибка при получении групп и расписания:", ex);
     return res.status(500).json({
       success: false,
-      message: "Couldn't get list of group",
+      message: "Couldn't get list of groups",
     });
   }
 };
@@ -111,7 +142,10 @@ export const creategroup = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteGroup = async (req: Request, res: Response): Promise<void> => {
+export const deleteGroup = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const groupId = parseInt(req.params.id as string, 10);
   const companyId = req.session.company_id;
 
@@ -171,26 +205,92 @@ export const deleteGroup = async (req: Request, res: Response): Promise<void> =>
   } finally {
     connection.release();
   }
-}
-export const updategroup = (req: Request, res: Response) => {
-  try{
-    
-    const {
-      name,
-      users_id,
-      status,
-      schedules,
-      start_date,
-      end_date,
-      max_students,
-    } = req.body;
+};
+export const updategroup = async (req: Request, res: Response) => {
+  const group_id = req.params.id; 
+  const company_id = req.session.company_id;
 
-    const company_id = req.session.company_id;
-
-    
-
-  } catch (er){
-    console.log(er);
-    return res.status(500).json({success: false, message: 'something went wrong'});
+  if (!company_id) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
   }
-}
+
+  const {
+    name,
+    users_id, 
+    status,
+    schedules,
+    start_date,
+    end_date,
+    max_students,
+  } = req.body;
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [groupCheck] = await connection.query<RowDataPacket[]>(
+      "SELECT id FROM `groups` WHERE id = ?",
+      [group_id],
+    );
+
+    if (groupCheck.length === 0) {
+      await connection.rollback();
+      return res
+        .status(404)
+        .json({ success: false, message: "Группа с таким ID не найдена" });
+    }
+
+    const [userCheck] = await connection.query<RowDataPacket[]>(
+      "SELECT id FROM users WHERE id = ? AND company_id = ?",
+      [users_id, company_id],
+    );
+
+    if (userCheck.length === 0) {
+      await connection.rollback();
+      return res.status(403).json({
+        success: false,
+        message:
+          "Указанный преподаватель не найден в вашей компании или доступ запрещен",
+      });
+    }
+
+    await connection.query(
+      `UPDATE \`groups\` SET name = ?, users_id = ?, status = ?, start_date = ?, end_date = ?, max_students = ? WHERE id = ?`,
+      [name, users_id, status, start_date, end_date, max_students, group_id],
+    );
+
+    if (schedules && Array.isArray(schedules)) {
+      await connection.query("DELETE FROM group_schedules WHERE group_id = ?", [
+        group_id,
+      ]);
+
+      if (schedules.length > 0) {
+        const scheduleValues = schedules.map((s: any) => [
+          s.day_of_week,
+          s.start_time,
+          s.end_time,
+          group_id,
+        ]);
+
+        await connection.query(
+          "INSERT INTO group_schedules (day_of_week, start_time, end_time, group_id) VALUES ?",
+          [scheduleValues],
+        );
+      }
+    }
+
+    await connection.commit();
+    return res
+      .status(200)
+      .json({ success: true, message: "Группа успешно обновлена" });
+  } catch (er) {
+    await connection.rollback();
+    console.error(er);
+    return res
+      .status(500)
+      .json({ success: false, message: "something went wrong" });
+  } finally {
+    connection.release();
+  }
+};
