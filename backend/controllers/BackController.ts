@@ -68,3 +68,39 @@ export const getallsession = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getUserProfile = async (req: Request, res: Response) => {
+  const userId = req.session.user_id;
+  const companyId = req.session.company_id;
+
+  if (!userId || !companyId) {
+    return res.status(401).json({ success: false, message: "Не авторизован" });
+  }
+
+  try {
+    const [rows]: any = await pool.query(
+      `SELECT id, full_name as fullname, role as user_role, \`rank\`, email, contact, gender, 
+       DATE_FORMAT(birthday, "%Y-%m-%d") as birthday, avatar 
+       FROM users 
+       WHERE id = ? AND company_id = ?`,
+      [userId, companyId]
+    );
+
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Пользователь не найден" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        ...rows[0],
+        company_name: req.session.company_name || "AnyCompany"
+      }
+    });
+
+  } catch (error) {
+    console.error("Ошибка при получении профиля:", error);
+    return res.status(500).json({ success: false, message: "Ошибка сервера" });
+  }
+};
+

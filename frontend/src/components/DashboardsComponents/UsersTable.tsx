@@ -34,7 +34,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
         gender: 'Муж',
         password: ''
     });
-
     const [resetFormData, SetResetFormData] = useState({
         id: 0,
         full_name: '',
@@ -46,7 +45,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
         gender: 'Муж',
         password: ''
     });
-
     const getUsers = async () => {
         try {
             const response = await fetch("http://localhost:3000/getusers", {
@@ -62,18 +60,15 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
             console.error(ex);
         }
     }
-
     const handleAddUser = () => {
         setIsModalOpen(true);
     };
-
     const handleDelUser = () => {
         setIsDeleteMode(prev => !prev);
     };
     const handleResetUser = () => {
         setIsReSetMode(prev => !prev);
     }
-
     useEffect(() => {
         setReSetAction({
             isActive: isReSetMode,
@@ -84,7 +79,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
             setReSetAction(null);
         };
     }, [isReSetMode]);
-
     useEffect(() => {
         setPlusAction(() => handleAddUser);
 
@@ -92,7 +86,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
             setPlusAction(null);
         };
     }, []);
-
     useEffect(() => {
         setDelAction({
             isActive: isDeleteMode,
@@ -103,15 +96,12 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
             setDelAction(null);
         };
     }, [isDeleteMode]);
-
     useEffect(() => {
         getUsers();
     }, []);
-
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     };
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -121,7 +111,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
                 : value
         }));
     };
-
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         SetResetFormData(prev => ({

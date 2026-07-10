@@ -200,6 +200,23 @@
     margin-bottom: 16px;
     align-self: flex-end;
   }
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px;
+  }
+  
+  .formInput, .formSelect {
+    max-width: 100%;
+  }
+
+  .formActions {
+    justify-content: center;
+  }
+
+  .formActions .btn {
+    width: 100%;
+  }
 }
 .logoutBtn {
   position: absolute;
@@ -225,3 +242,56 @@
   color: #0369a1;
 }
 .btnlightblue:hover { background-color: #bae6fd; }
+
+.formInput, .formSelect {
+  width: 100%;
+  max-width: 320px; 
+  height: 38px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #212529;
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: all 0.15s ease-in-out;
+}
+
+.formSelect {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://w3.org' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  padding-right: 32px;
+}
+
+.formInput:focus, .formSelect:focus {
+  outline: none;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.formInput::placeholder {
+  color: #adb5bd;
+  font-size: 13px;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f3f5;
+}
+
+.btngray {
+  background-color: #f1f3f5;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+.btngray:hover {
+  background-color: #e9ecef;
+  color: #212529;
+}

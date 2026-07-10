@@ -140,7 +140,7 @@ export const deluser = async (req: Request, res: Response) => {
 };
 
 export const resetuser = async (req: Request, res: Response) => {
-  const { id, full_name, role, rank, email, contact, birthday, gender, password } = req.body;
+  let { id, full_name, role, rank, email, contact, birthday, gender, password } = req.body;
   const company_id = req.session.company_id;
 
   if (!company_id) {
@@ -148,7 +148,10 @@ export const resetuser = async (req: Request, res: Response) => {
   }
 
   if (!id) {
-    return res.status(400).json({ success: false, message: "ID пользователя не указан" });
+    id = req.session.user_id;
+    if (!id) {
+      return res.status(400).json({ success: false, message: "ID пользователя не указан" });
+    }
   }
 
   try {
