@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `group_members` (
 CREATE TABLE IF NOT EXISTS `group_schedules` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `day_of_week` VARCHAR(15) NOT NULL,
-  `start_time` TIME NOT NULL,
+  `start_time` TIME NOT NULL, 
   `end_time` TIME NOT NULL,
   `group_id` INT NOT NULL,
   PRIMARY KEY (`id`),
