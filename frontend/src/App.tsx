@@ -3,11 +3,11 @@ import Index from './components/index';
 import { Dashboard } from './components/Dashboard';
 import { LoginForm } from './components/Aauthorization';
 import { RegisterForm } from './components/registration';
+import { ProfilePage } from './components/Profile';
 import { JSX } from 'react/jsx-runtime';
 
-// Компонент для защиты приватных страниц
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const isAuthenticated = Boolean(localStorage.getItem('token')); // Ваша проверка авторизации
+  const isAuthenticated = Boolean(localStorage.getItem('token'));
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
@@ -18,7 +18,7 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/authorization" element={<LoginForm />} />
         <Route path="/registration" element={<RegisterForm />} />
-
+        <Route path="/profile" element={<ProfilePage/>}/>
         <Route 
           path="/dashboard" 
           element={
