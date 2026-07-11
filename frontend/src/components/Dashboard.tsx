@@ -16,37 +16,12 @@ export const Dashboard: React.FC = () => {
   const [isPlusOpen, setIsPlusOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'desktop' | 'reports'>('desktop');
   const [activeMenu, setActiveMenu] = useState<string>('groups');
 
   const [plusAction, setPlusAction] = useState<(() => void) | null>(null);
   const [delAction, setDelAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
   const [ReSetAction, setReSetAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
 
-
-  const handlePlusClick = () => {
-    if (plusAction) {
-      plusAction();
-    } else {
-      console.log("Для этого экрана кнопка '+' не настроена");
-    }
-  };
-
-  const handleDelClick = () => {
-    if (delAction) {
-      delAction.handler();
-    } else {
-      console.log("Для этого экрана кнопка 'Удалить' не настроена");
-    }
-  };
-
-  const handleResetClick = () => {
-    if (ReSetAction) {
-      ReSetAction.handler();
-    } else {
-      console.log("Для этого экрана кнопка 'Править' не настроена");
-    }
-  }
   const GetGlobalInfo = async () => {
     try {
       const response = await fetch("http://localhost:3000/getglobalinfo", {
@@ -185,41 +160,9 @@ export const Dashboard: React.FC = () => {
         </aside>
 
         <section className={style['main-content']}>
-          <div className={style['content-header']}>
-            <div className={style.tabs}>
-              <button
-                className={`${style.tab} ${activeTab === 'desktop' ? style.active : ''}`}
-                onClick={() => setActiveTab('desktop')}
-              >
-                Рабочий стол
-              </button>
-              <button
-                className={`${style.tab} ${activeTab === 'reports' ? style.active : ''}`}
-                onClick={() => setActiveTab('reports')}
-              >
-                Отчеты
-              </button>
-            </div>
-
-            <div className={style['action-bar']}>
-              <div className={style['btn-group']}>
-                <button className={`${style.btn} ${style['btn-blue']}`} onClick={handlePlusClick}>+ Добавить</button>
-                <button className={`${style.btn} ${ReSetAction?.isActive ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClick}>{ReSetAction?.isActive ? 'Отменить' : 'Править'}</button>
-                <button
-                  className={`${style.btn} ${delAction?.isActive ? style['btn-gray'] : style['btn-red']}`}
-                  onClick={handleDelClick}
-                >
-                  {delAction?.isActive ? 'Отменить' : 'Удалить'}
-                </button>
-                <button className={`${style.btn} ${style['btn-gray']}`}>Другое</button>
-              </div>
-              <button className={`${style.btn} ${style['btn-green']}`}>Личный рабочий стол</button>
-            </div>
-          </div>
-
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
-              {activeMenu === 'users' && <UsersTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></UsersTable>}
+              {activeMenu === 'users' && <UsersTable></UsersTable>}
               {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></ClientTable>}
               {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction} setUpdateAction={setReSetAction}></GroupTable>}
             </div>
