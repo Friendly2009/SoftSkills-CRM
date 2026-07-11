@@ -39,7 +39,37 @@ export const LoginForm = () => {
 
       console.error(ex);
     }
-  }
+  };
+  const SUPPORT_CREDENTIALS = {
+    company: "AnyCompany",
+    login: "mail@mail.com", 
+    password: "1111"
+  };
+  const handleSupportClick = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/signin', {
+        credentials: "include",
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(SUPPORT_CREDENTIALS),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+
+      console.log('Успешный вход:' + JSON.stringify(data));
+
+      navigate('/dashboard');
+    } catch (ex) {
+      alert(ex);
+      console.error(ex);
+    }
+  };
   return (
     <div className={login['page-wrapper']}>
       <div className={login['login-card']}>
@@ -95,7 +125,7 @@ export const LoginForm = () => {
           <p className={login['forgot-text']}>Забыли ключ?</p>
           <p className={login['info-text']}>
             Обратитесь к администрации компании или
-            <a href="/support" className={login['support-link']}> Напишите в поддержку</a>
+            <a className={login['support-link']} onClick={handleSupportClick}> Напишите в поддержку</a>
           </p>
         </div>
       </div>
