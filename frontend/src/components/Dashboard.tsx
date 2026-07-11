@@ -163,7 +163,7 @@ export const Dashboard: React.FC = () => {
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
               {activeMenu === 'users' && <UsersTable></UsersTable>}
-              {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></ClientTable>}
+              {activeMenu === 'clients' && <ClientTable></ClientTable>}
               {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction} setUpdateAction={setReSetAction}></GroupTable>}
             </div>
           </div>

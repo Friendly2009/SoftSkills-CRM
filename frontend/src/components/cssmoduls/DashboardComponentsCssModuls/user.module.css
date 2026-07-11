@@ -156,12 +156,6 @@
   background-color: #cacaca;
   color: var(--text-main);
 }
-
-.btn-green {
-  background-color: #dcfce7;
-  color: #15803d;
-}
-.btn-green:hover { background-color: #bbf7d0; }
 /*-----------------------Add User------------------------------*/
 .modal-overlay {
   position: fixed;
