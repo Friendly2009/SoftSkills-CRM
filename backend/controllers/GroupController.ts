@@ -19,6 +19,25 @@ export const getgroups = async (req: Request, res: Response) => {
         g.end_date,
         g.max_students,
         (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id) AS studentsCount,
+        
+        (
+          SELECT DATE_FORMAT(
+            MIN(
+              CASE gs_sub.day_of_week
+                WHEN 'Понедельник' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (8 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Вторник'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (9 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Среда'       THEN DATE_ADD(CURRENT_DATE(), INTERVAL (10 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Четверг'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (11 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Пятница'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (12 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Суббота'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (13 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Воскресенье' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (14 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              END
+            ), '%d.%m.%Y'
+          )
+          FROM group_schedules gs_sub
+          WHERE gs_sub.group_id = g.id
+        ) AS nextMeeting,
+
         IF(COUNT(gs.id) = 0, JSON_ARRAY(), 
           JSON_ARRAYAGG(
             JSON_OBJECT(
@@ -51,6 +70,8 @@ export const getgroups = async (req: Request, res: Response) => {
         ...group,
         schedules: parsedSchedules,
         studentsCount: Number(group.studentsCount || 0),
+        // Если у группы нет расписания, подставляем пустую строку, чтобы фронт не ругался
+        nextMeeting: group.nextMeeting || "",
       };
     });
 
@@ -66,6 +87,7 @@ export const getgroups = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const creategroup = async (req: Request, res: Response) => {
   const company_id = req.session.company_id;
   if (!company_id) {
@@ -223,7 +245,7 @@ export const updategroup = async (req: Request, res: Response) => {
   } = req.body;
 
   const connection = await pool.getConnection();
-  
+
   const formattedStartDate = start_date === "" ? null : start_date;
   const formattedEndDate = end_date === "" ? null : end_date;
 
@@ -258,7 +280,15 @@ export const updategroup = async (req: Request, res: Response) => {
 
     await connection.query(
       `UPDATE \`groups\` SET name = ?, users_id = ?, status = ?, start_date = ?, end_date = ?, max_students = ? WHERE id = ?`,
-      [name, users_id, status, formattedStartDate, formattedEndDate, max_students, group_id],
+      [
+        name,
+        users_id,
+        status,
+        formattedStartDate,
+        formattedEndDate,
+        max_students,
+        group_id,
+      ],
     );
 
     if (schedules && Array.isArray(schedules)) {

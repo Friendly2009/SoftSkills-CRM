@@ -218,6 +218,14 @@ export const GroupTable: React.FC = () => {
     };
     const handleUpdateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        for (let i = 0; i < updateFormData.schedules.length; i++) {
+            const item = updateFormData.schedules[i];
+
+            if (item.start_time && item.end_time && item.start_time >= item.end_time) {
+                alert(`Ошибка в расписании (${item.day_of_week}): время начала занятия должно быть раньше времени окончания!`);
+                return;
+            }
+        }
         try {
             const { id, ...bodyData } = updateFormData;
             console.log('start updating group');
@@ -418,14 +426,29 @@ export const GroupTable: React.FC = () => {
                                             </select>
 
                                             <input
-                                                type="time" value={schedule.start_time ? schedule.start_time.slice(0, 5) : ''} required className={style['form-input']} style={{ flex: 1.5 }}
+                                                type="time"
+                                                value={schedule.start_time ? schedule.start_time.slice(0, 5) : ''}
+                                                required
+                                                className={style['form-input']}
+                                                style={{
+                                                    flex: 1.5,
+                                                    border: (schedule.start_time && schedule.end_time && schedule.start_time >= schedule.end_time) ? '1px solid #ff4d4d' : undefined
+                                                }}
                                                 onChange={(e) => handleSheduleUpdateChange(index, 'start_time', e.target.value)}
                                             />
                                             <span style={{ alignSelf: 'center' }}>—</span>
                                             <input
-                                                type="time" value={schedule.end_time ? schedule.end_time.slice(0, 5) : ''} required className={style['form-input']} style={{ flex: 1.5 }}
+                                                type="time"
+                                                value={schedule.end_time ? schedule.end_time.slice(0, 5) : ''}
+                                                required
+                                                className={style['form-input']}
+                                                style={{
+                                                    flex: 1.5,
+                                                    border: (schedule.start_time && schedule.end_time && schedule.start_time >= schedule.end_time) ? '1px solid #ff4d4d' : undefined
+                                                }}
                                                 onChange={(e) => handleSheduleUpdateChange(index, 'end_time', e.target.value)}
                                             />
+
 
                                             {updateFormData.schedules.length > 1 && (
                                                 <button
@@ -558,14 +581,29 @@ export const GroupTable: React.FC = () => {
                                             </select>
 
                                             <input
-                                                type="time" value={schedule.start_time ? schedule.start_time.slice(0, 5) : ''} required className={style['form-input']} style={{ flex: 1.5 }}
+                                                type="time"
+                                                value={schedule.start_time ? schedule.start_time.slice(0, 5) : ''}
+                                                required
+                                                className={style['form-input']}
+                                                style={{
+                                                    flex: 1.5,
+                                                    border: (schedule.start_time && schedule.end_time && schedule.start_time >= schedule.end_time) ? '1px solid #ff4d4d' : undefined
+                                                }}
                                                 onChange={(e) => handleScheduleChange(index, 'start_time', e.target.value)}
                                             />
                                             <span style={{ alignSelf: 'center' }}>—</span>
                                             <input
-                                                type="time" value={schedule.end_time ? schedule.end_time.slice(0, 5) : ''} required className={style['form-input']} style={{ flex: 1.5 }}
+                                                type="time"
+                                                value={schedule.end_time ? schedule.end_time.slice(0, 5) : ''}
+                                                required
+                                                className={style['form-input']}
+                                                style={{
+                                                    flex: 1.5,
+                                                    border: (schedule.start_time && schedule.end_time && schedule.start_time >= schedule.end_time) ? '1px solid #ff4d4d' : undefined
+                                                }}
                                                 onChange={(e) => handleScheduleChange(index, 'end_time', e.target.value)}
                                             />
+
 
                                             {formData.schedules.length > 1 && (
                                                 <button
