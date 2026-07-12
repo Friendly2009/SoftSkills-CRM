@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/user.module.css';
 
-interface UsersTableProps {
-    setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
-    setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-    setReSetAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-}
-
 interface UserTemplate {
     id: number;
     full_name: string;
@@ -18,7 +12,7 @@ interface UserTemplate {
     gender: string | null;
 }
 
-export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAction, setReSetAction }) => {
+export const UsersTable: React.FC = () => {
     const [users, setUsers] = useState<UserTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,43 +53,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
         } catch (ex) {
             console.error(ex);
         }
-    }
-    const handleAddUser = () => {
-        setIsModalOpen(true);
     };
-    const handleDelUser = () => {
-        setIsDeleteMode(prev => !prev);
-    };
-    const handleResetUser = () => {
-        setIsReSetMode(prev => !prev);
-    }
-    useEffect(() => {
-        setReSetAction({
-            isActive: isReSetMode,
-            handler: handleResetUser
-        });
-
-        return () => {
-            setReSetAction(null);
-        };
-    }, [isReSetMode]);
-    useEffect(() => {
-        setPlusAction(() => handleAddUser);
-
-        return () => {
-            setPlusAction(null);
-        };
-    }, []);
-    useEffect(() => {
-        setDelAction({
-            isActive: isDeleteMode,
-            handler: handleDelUser
-        });
-
-        return () => {
-            setDelAction(null);
-        };
-    }, [isDeleteMode]);
     useEffect(() => {
         getUsers();
     }, []);
@@ -119,8 +77,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
                 ? (value === 'true' ? 1 : 0)
                 : value
         }));
-    }
-
+    };
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -208,7 +165,15 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
             setIsReSetModalWinOpen(true);
         }
     };
-
+    const handlePlusClick = () => {
+        setIsModalOpen(true);
+    };
+    const handleResetClick = () => {
+        setIsReSetMode(prev => !prev);
+    };
+    const handleDelClick = () => {
+        setIsDeleteMode(prev => !prev);
+    }
     return (
         <>
             {isReSetModalWinOpen && (
@@ -383,6 +348,20 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
                     </div>
                 </div>
             )}
+            <div className={style['content-header']}>
+                <div className={style['action-bar']}>
+                    <div className={style['btn-group']}>
+                        <button className={`${style.btn} ${style['btn-blue']}`} onClick={handlePlusClick}>+ Добавить</button>
+                        <button className={`${style.btn} ${isReSetMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClick}>{isReSetMode ? 'Отменить' : 'Править'}</button>
+                        <button
+                            className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
+                            onClick={handleDelClick}
+                        >
+                            {isDeleteMode ? 'Отменить' : 'Удалить'}
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>

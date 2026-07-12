@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
 
-interface ClientTableProps {
-    setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
-    setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-    setReSetAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-}
-
 interface ClientTemplate {
     id: number;
     name: string;
@@ -18,7 +12,7 @@ interface ClientTemplate {
     group_names: string[];
 }
 
-export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelAction, setReSetAction }) => {
+export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,8 +74,6 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                 if (!response.ok) {
                     throw new Error(`Ошибка сервера: ${response.status}`);
                 }
-
-                alert("User was deleted");
                 console.log("User was deleted");
 
                 setIsDeleteMode(false);
@@ -115,37 +107,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
     };
     const handleResetClient = () => {
         setIsResetMode(prev => !prev);
-    }
-    useEffect(() => {
-        getClient();
-        setPlusAction(() => handleAddClient);
-
-        return () => {
-            setPlusAction(null);
-        };
-    }, []);
-    useEffect(() => {
-        getClient();
-        setReSetAction({
-            isActive: isResetMode,
-            handler: handleResetClient
-        });
-
-        return () => {
-            setReSetAction(null);
-        };
-    }, [isResetMode]);
-    useEffect(() => {
-        getClient();
-        setDelAction({
-            isActive: isDeleteMode,
-            handler: handleDelClient
-        });
-
-        return () => {
-            setDelAction(null);
-        };
-    }, [isDeleteMode]);
+    };
     useEffect(() => {
         getClient();
         getCompanyGroups();
@@ -445,6 +407,20 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                     </div>
                 </div>
             </div>)}
+            <div className={style['content-header']}>
+                <div className={style['action-bar']}>
+                    <div className={style['btn-group']}>
+                        <button className={`${style.btn} ${style['btn-blue']}`} onClick={handleAddClient}>+ Добавить</button>
+                        <button className={`${style.btn} ${isResetMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClient}>{isResetMode ? 'Отменить' : 'Править'}</button>
+                        <button
+                            className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
+                            onClick={handleDelClient}
+                        >
+                            {isDeleteMode ? 'Отменить' : 'Удалить'}
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
                     <thead>
