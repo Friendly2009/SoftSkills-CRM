@@ -4,11 +4,6 @@ interface UserTemplate {
     id: number;
     full_name: string;
 }
-interface GroupTableProps {
-    setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
-    setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-    setUpdateAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-}
 interface ScheduleItem {
     day_of_week: string;
     start_time: string;
@@ -43,7 +38,7 @@ const formatTime = (timeStr: string) => {
     if (parts.length >= 2) return `${parts[0]}:${parts[1]}`;
     return timeStr;
 };
-export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction, setDelAction, setUpdateAction }) => {
+export const GroupTable: React.FC = () => {
     const [groups, setGroups] = useState<GroupTemplate[]>([]);
     const [users, setUsers] = useState<UserTemplate[]>([]);
     const [isAddGroup, setIsAddGroup] = useState(false);
@@ -162,9 +157,6 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction, setDelAct
                 throw new Error('Ошибка при сохранении группы');
             }
 
-            const result = await response.json();
-            alert(result.message || 'Группа успешно создана');
-
             setIsAddGroup(false);
             setHasEndDate(false);
             setFormData({
@@ -198,19 +190,6 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction, setDelAct
         } catch (ex) {
             console.log(ex);
             alert('something went wrong...');
-        }
-    };
-    const getClient = async () => {
-        try {
-            const response = await fetch("http://localhost:3000/getclient", {
-                credentials: "include"
-            });
-
-            if (!response.ok) {
-                throw new Error('oooops, something went wrong');
-            }
-        } catch (ex) {
-            console.error(ex);
         }
     };
     const getUsers = async () => {
@@ -256,39 +235,6 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction, setDelAct
             alert("Something went wrong");
         }
     };
-    useEffect(() => {
-        getGroup();
-        getUsers();
-        setPlusAction(() => handleAddGroup);
-
-        return () => {
-            setPlusAction(null);
-        };
-    }, []);
-    useEffect(() => {
-        getUsers();
-        getGroup();
-        setDelAction({
-            isActive: isDeleteMode,
-            handler: handleDelGroup
-        });
-
-        return () => {
-            setDelAction(null);
-        };
-    }, [isDeleteMode]);
-    useEffect(() => {
-        getUsers();
-        getGroup();
-        setUpdateAction({
-            isActive: isUpdateMode,
-            handler: handleUpdateGroup
-        });
-
-        return () => {
-            setUpdateAction(null);
-        };
-    }, [isUpdateMode]);
     const getStatusLabel = (status: GroupTemplate['status']) => {
         if (status === 2) return 'Активна';
         if (status === 1) return 'Набор';
@@ -328,6 +274,11 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction, setDelAct
             setIsOpenModalWindow(true);
         }
     }
+    useEffect(() => {
+            getUsers();
+            getGroup();
+            getUsers();
+        }, []);
     return (
         <>
             {isOpenModalWindow && (
@@ -607,6 +558,20 @@ export const GroupTable: React.FC<GroupTableProps> = ({ setPlusAction, setDelAct
                     </div>
                 </div>
             )}
+            <div className={style['content-header']}>
+                <div className={style['action-bar']}>
+                    <div className={style['btn-group']}>
+                        <button className={`${style.btn} ${style['btn-blue']}`} onClick={handleAddGroup}>+ Добавить</button>
+                        <button className={`${style.btn} ${isUpdateMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleUpdateGroup}>{isUpdateMode ? 'Отменить' : 'Править'}</button>
+                        <button
+                            className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
+                            onClick={handleDelGroup}
+                        >
+                            {isDeleteMode ? 'Отменить' : 'Удалить'}
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
                     <thead>

@@ -18,10 +18,6 @@ export const Dashboard: React.FC = () => {
 
   const [activeMenu, setActiveMenu] = useState<string>('groups');
 
-  const [plusAction, setPlusAction] = useState<(() => void) | null>(null);
-  const [delAction, setDelAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
-  const [ReSetAction, setReSetAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
-
   const GetGlobalInfo = async () => {
     try {
       const response = await fetch("http://localhost:3000/getglobalinfo", {
@@ -164,7 +160,7 @@ export const Dashboard: React.FC = () => {
             <div className={style['placeholder-content']} id="placeholder-content">
               {activeMenu === 'users' && <UsersTable></UsersTable>}
               {activeMenu === 'clients' && <ClientTable></ClientTable>}
-              {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction} setUpdateAction={setReSetAction}></GroupTable>}
+              {activeMenu === 'groups' && <GroupTable></GroupTable>}
             </div>
           </div>
         </section>
