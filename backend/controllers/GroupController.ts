@@ -32,13 +32,13 @@ export const getgroups = async (req: Request, res: Response) => {
       INNER JOIN users u ON g.users_id = u.id 
       LEFT JOIN group_schedules gs ON g.id = gs.group_id 
       WHERE u.company_id = ? 
-      GROUP BY g.id`, 
-      [company_id]
+      GROUP BY g.id`,
+      [company_id],
     );
 
     const formattedGroups = (groups as any[]).map((group) => {
       let parsedSchedules = group.schedules;
-      
+
       if (typeof group.schedules === "string") {
         try {
           parsedSchedules = JSON.parse(group.schedules);
@@ -66,7 +66,6 @@ export const getgroups = async (req: Request, res: Response) => {
     });
   }
 };
-
 export const creategroup = async (req: Request, res: Response) => {
   const company_id = req.session.company_id;
   if (!company_id) {
@@ -141,7 +140,6 @@ export const creategroup = async (req: Request, res: Response) => {
     }
   }
 };
-
 export const deleteGroup = async (
   req: Request,
   res: Response,
@@ -207,7 +205,7 @@ export const deleteGroup = async (
   }
 };
 export const updategroup = async (req: Request, res: Response) => {
-  const group_id = req.params.id; 
+  const group_id = req.params.id;
   const company_id = req.session.company_id;
 
   if (!company_id) {
@@ -216,7 +214,7 @@ export const updategroup = async (req: Request, res: Response) => {
 
   const {
     name,
-    users_id, 
+    users_id,
     status,
     schedules,
     start_date,
@@ -225,6 +223,9 @@ export const updategroup = async (req: Request, res: Response) => {
   } = req.body;
 
   const connection = await pool.getConnection();
+  
+  const formattedStartDate = start_date === "" ? null : start_date;
+  const formattedEndDate = end_date === "" ? null : end_date;
 
   try {
     await connection.beginTransaction();
@@ -257,7 +258,7 @@ export const updategroup = async (req: Request, res: Response) => {
 
     await connection.query(
       `UPDATE \`groups\` SET name = ?, users_id = ?, status = ?, start_date = ?, end_date = ?, max_students = ? WHERE id = ?`,
-      [name, users_id, status, start_date, end_date, max_students, group_id],
+      [name, users_id, status, formattedStartDate, formattedEndDate, max_students, group_id],
     );
 
     if (schedules && Array.isArray(schedules)) {
@@ -287,9 +288,7 @@ export const updategroup = async (req: Request, res: Response) => {
   } catch (er) {
     await connection.rollback();
     console.error(er);
-    return res
-      .status(500)
-      .json({ success: false, message: "something went wrong" });
+    return res.status(500).json({ success: false, message: er });
   } finally {
     connection.release();
   }
