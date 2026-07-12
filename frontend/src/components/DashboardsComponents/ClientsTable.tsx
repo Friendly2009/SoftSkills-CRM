@@ -10,6 +10,7 @@ interface ClientTemplate {
     contact: string;
     group_ids: number[];
     group_names: string[];
+    next_visit: string;
 }
 
 export const ClientTable: React.FC = () => {
@@ -27,7 +28,8 @@ export const ClientTable: React.FC = () => {
         status: 0,
         contact: "",
         group_ids: [],
-        group_names: []
+        group_names: [],
+        next_visit: ""
     });
     const [formData, setFormData] = useState<ClientTemplate>({
         id: 0,
@@ -37,8 +39,9 @@ export const ClientTable: React.FC = () => {
         status: 0,
         contact: "",
         group_ids: [],
-        group_names: []
-    })
+        group_names: [],
+        next_visit: ""
+    });
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setResetFormData(prev => ({
@@ -47,7 +50,7 @@ export const ClientTable: React.FC = () => {
                 ? (value === 'true' ? 1 : 0)
                 : value
         }));
-    }
+    };
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     };
@@ -61,7 +64,8 @@ export const ClientTable: React.FC = () => {
                 status: client.status,
                 contact: client.contact,
                 group_ids: client.group_ids,
-                group_names: client.group_names
+                group_names: client.group_names,
+                next_visit: ''
             });
             setIsResetModalWinOpen(true);
         }
@@ -99,6 +103,17 @@ export const ClientTable: React.FC = () => {
             console.error(ex);
         }
     };
+    const getCompanyGroups = async () => {
+        try {
+            const response = await fetch("http://localhost:3000/getgroups", { credentials: "include" });
+            if (response.ok) {
+                const data = await response.json();
+                setAllGroups(data.data || []);
+            }
+        } catch (ex) {
+            console.error("Ошибка загрузки групп:", ex);
+        }
+    };
     const handleAddClient = () => {
         setIsModalOpen(true);
     };
@@ -134,17 +149,6 @@ export const ClientTable: React.FC = () => {
                 ? (value === 'true' ? 1 : 0)
                 : value
         }));
-    };
-    const getCompanyGroups = async () => {
-        try {
-            const response = await fetch("http://localhost:3000/getgroups", { credentials: "include" });
-            if (response.ok) {
-                const data = await response.json();
-                setAllGroups(data.data || []);
-            }
-        } catch (ex) {
-            console.error("Ошибка загрузки групп:", ex);
-        }
     };
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -272,7 +276,7 @@ export const ClientTable: React.FC = () => {
                                                 const selectedIds = selectedOptions
                                                     .map(option => parseInt(option.value, 10))
                                                     .filter(id => !isNaN(id));
-                                                                                                         
+
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     group_ids: selectedIds
@@ -474,8 +478,19 @@ export const ClientTable: React.FC = () => {
                                     {renderStatus(client.status)}
                                 </td>
                                 <td>
-                                    coming soon...
+                                    {client.next_visit && client.next_visit.trim() !== "" ? (
+                                        <span className={style['visit-badge']}>
+                                            <span className={style['visit-icon']}>📅</span>
+                                            {client.next_visit}
+                                        </span>
+                                    ) : (
+                                        <span className={`${style['visit-badge']} ${style['visit-empty']}`}>
+                                            Нет занятий
+                                        </span>
+                                    )}
                                 </td>
+
+
                                 <td className={style['actions-cell']}>
                                     <button
                                         className={style['btn-action']}

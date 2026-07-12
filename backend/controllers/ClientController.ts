@@ -23,7 +23,28 @@ export const APIGetClients = async (
         c.contact,
         c.company_id,
         GROUP_CONCAT(DISTINCT g.id) AS group_ids_str,
-        GROUP_CONCAT(DISTINCT g.name SEPARATOR '|||') AS group_names_str
+        GROUP_CONCAT(DISTINCT g.name SEPARATOR '|||') AS group_names_str,
+        
+        -- Динамический расчет ближайшей даты на основе дня недели из расписания
+        (
+          SELECT DATE_FORMAT(
+            MIN(
+              CASE gs.day_of_week
+                WHEN 'Понедельник' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (8 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Вторник'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (9 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Среда'       THEN DATE_ADD(CURRENT_DATE(), INTERVAL (10 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Четверг'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (11 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Пятница'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (12 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Суббота'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (13 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+                WHEN 'Воскресенье' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (14 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              END
+            ), '%d.%m.%Y'
+          )
+          FROM group_members gm_sub
+          JOIN group_schedules gs ON gm_sub.group_id = gs.group_id
+          WHERE gm_sub.client_id = c.id
+        ) AS next_visit
+
       FROM clients c
       LEFT JOIN group_members gm ON c.id = gm.client_id
       LEFT JOIN \`groups\` g ON gm.group_id = g.id
@@ -34,11 +55,11 @@ export const APIGetClients = async (
 
     const formattedClients = clients.map((client) => {
       const group_ids = client.group_ids_str
-        ? client.group_ids_str.split(',').map(Number)
+        ? client.group_ids_str.split(",").map(Number)
         : [];
 
       const group_names = client.group_names_str
-        ? client.group_names_str.split('|||')
+        ? client.group_names_str.split("|||")
         : [];
 
       const { group_ids_str, group_names_str, ...cleanClient } = client;
@@ -46,7 +67,8 @@ export const APIGetClients = async (
       return {
         ...cleanClient,
         group_ids,
-        group_names
+        group_names,
+        next_visit: client.next_visit || "",
       };
     });
 
@@ -62,7 +84,6 @@ export const APIGetClients = async (
     });
   }
 };
-
 
 export const addclient = async (
   req: Request,
@@ -115,7 +136,6 @@ export const addclient = async (
   }
 };
 
-
 export const delclient = async (
   req: Request,
   res: Response,
@@ -167,7 +187,8 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const { name, balance, skills, status, contact, company_id, group_ids } = req.body;
+  const { name, balance, skills, status, contact, company_id, group_ids } =
+    req.body;
 
   const clientFields: Record<string, any> = {};
   if (name !== undefined) clientFields.name = name;
@@ -189,7 +210,7 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
 
     const [rows] = await connection.execute<any[]>(
       `SELECT id FROM clients WHERE id = ?`,
-      [clientId]
+      [clientId],
     );
 
     if (rows.length === 0) {
@@ -207,14 +228,14 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
 
       await connection.execute(
         `UPDATE clients SET ${setClause} WHERE id = ?`,
-        values
+        values,
       );
     }
 
     if (group_ids !== undefined) {
       await connection.execute(
         `DELETE FROM group_members WHERE client_id = ?`,
-        [clientId]
+        [clientId],
       );
 
       if (Array.isArray(group_ids) && group_ids.length > 0) {
@@ -222,7 +243,7 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
 
         await connection.query(
           `INSERT INTO group_members (group_id, client_id) VALUES ?`,
-          [values]
+          [values],
         );
       }
     }
