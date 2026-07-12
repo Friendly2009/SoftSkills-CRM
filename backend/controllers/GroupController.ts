@@ -20,7 +20,6 @@ export const getgroups = async (req: Request, res: Response) => {
         g.max_students,
         (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id) AS studentsCount,
         
-        -- Динамический расчет даты ближайшего занятия для этой конкретной группы
         (
           SELECT DATE_FORMAT(
             MIN(
