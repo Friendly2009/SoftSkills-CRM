@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import styles from '../cssmoduls/DashboardComponentsCssModuls/analytic.module.css';
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    Cell
+} from 'recharts';
 
 interface GroupAnalytics {
     group_id: number;
@@ -12,12 +22,11 @@ interface GroupAnalytics {
 }
 
 export const Analytic: React.FC = () => {
-    const [activeReport, setActiveReport] = useState<string>('groups'); // Переключатель отчетов (Select)
-    const [viewMode, setViewMode] = useState<string>('table'); // Режим отображения: 'table' или 'chart'
+    const [activeReport, setActiveReport] = useState<string>('groups');
+    const [viewMode, setViewMode] = useState<string>('chart');
 
     const [reportData, setReportData] = useState<GroupAnalytics[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-
 
     useEffect(() => {
         if (activeReport !== 'groups') {
@@ -35,12 +44,12 @@ export const Analytic: React.FC = () => {
             .catch((err) => {
                 console.error("Ошибка при получении аналитики:", err);
                 setReportData([
-                    { group_id: 5, group_name: "Data Science & AI", teacher_name: "Светлана Николаева", current_students: 0, max_capacity: 10, occupancy_rate: 0.0, group_status: 1 },
+                    { group_id: 5, group_name: "Data Science", teacher_name: "Светлана Николаева", current_students: 0, max_capacity: 10, occupancy_rate: 0.0, group_status: 1 },
                     { group_id: 6, group_name: "new group", teacher_name: "new director", current_students: 1, max_capacity: 10, occupancy_rate: 10.0, group_status: 1 },
-                    { group_id: 1, group_name: "TypeScript in friday", teacher_name: "Иванов Иванович", current_students: 2, max_capacity: 10, occupancy_rate: 20.0, group_status: 0 },
-                    { group_id: 2, group_name: "C# on monday", teacher_name: "Иванов Иванович", current_students: 3, max_capacity: 10, occupancy_rate: 30.0, group_status: 1 },
-                    { group_id: 3, group_name: "Java in monday", teacher_name: "Иванов Иванович", current_students: 3, max_capacity: 10, occupancy_rate: 30.0, group_status: 1 },
-                    { group_id: 4, group_name: "JavaScript Advanced", teacher_name: "Светлана Николаева", current_students: 4, max_capacity: 8, occupancy_rate: 50.0, group_status: 1 }
+                    { group_id: 1, group_name: "TypeScript", teacher_name: "Иванов Иванович", current_students: 2, max_capacity: 10, occupancy_rate: 20.0, group_status: 0 },
+                    { group_id: 2, group_name: "C#", teacher_name: "Иванов Иванович", current_students: 3, max_capacity: 10, occupancy_rate: 30.0, group_status: 1 },
+                    { group_id: 3, group_name: "Java", teacher_name: "Иванов Иванович", current_students: 3, max_capacity: 10, occupancy_rate: 30.0, group_status: 1 },
+                    { group_id: 4, group_name: "JavaScript Adv.", teacher_name: "Светлана Николаева", current_students: 4, max_capacity: 8, occupancy_rate: 50.0, group_status: 1 }
                 ]);
                 setLoading(false);
             });
@@ -52,6 +61,30 @@ export const Analytic: React.FC = () => {
         return '#10b981';
     };
 
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (active && payload && payload.length) {
+            const data: GroupAnalytics = payload[0].payload;
+            return (
+                <div style={{
+                    backgroundColor: '#fff',
+                    padding: '12px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                }}>
+                    <p style={{ margin: 0, fontWeight: 'bold', color: '#1e293b' }}>{data.group_name}</p>
+                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>Преподаватель: {data.teacher_name || '—'}</p>
+                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#1e293b' }}>
+                        Заполненность: <strong>{data.current_students} из {data.max_capacity} ({data.occupancy_rate}%)</strong>
+                    </p>
+                </div>
+            );
+        }
+        return null;
+    };
+
+    if (loading) return <div className={styles.loading}>Загрузка...</div>;
+
     return (
         <div className={styles['analytics-container']}>
             <div className={styles['analytics-toolbar']}>
@@ -62,9 +95,9 @@ export const Analytic: React.FC = () => {
                         onChange={(e) => setActiveReport(e.target.value)}
                         className={styles['analytics-select']}
                     >
-                        <option value="groups">📈 Заполняемость групп</option>
-                        <option value="finance">💰 Финансовый отчет</option>
-                        <option value="balances">👥 Баланс клиентов</option>
+                        <option value="groups">Заполняемость групп</option>
+                        <option value="finance">Финансовый отчет</option>
+                        <option value="balances">Баланс клиентов</option>
                     </select>
                 </div>
 
@@ -73,13 +106,13 @@ export const Analytic: React.FC = () => {
                         onClick={() => setViewMode('table')}
                         className={`${styles['analytics-toggle-btn']} ${viewMode === 'table' ? styles['analytics-toggle-btn--active'] : ''}`}
                     >
-                        📋 Таблица
+                        Таблица
                     </button>
                     <button
                         onClick={() => setViewMode('chart')}
                         className={`${styles['analytics-toggle-btn']} ${viewMode === 'chart' ? styles['analytics-toggle-btn--active'] : ''}`}
                     >
-                        📊 График
+                        График
                     </button>
                 </div>
             </div>
@@ -88,10 +121,36 @@ export const Analytic: React.FC = () => {
                 {loading ? (
                     <div className={styles['analytics-loading']}>Загрузка данных аналитики...</div>
                 ) : viewMode === 'chart' ? (
-
-                    <div className={styles['analytics-empty']}>
-                        <h3 className={styles['analytics-empty__title']}>Визуализация графиков</h3>
-                        <p className={styles['analytics-empty__text']}>Здесь будет отрисовываться Chart.js / Recharts диаграмма для выбранного отчета.</p>
+                    <div style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', width: '100%', height: 400 }}>
+                        <h3 style={{ margin: '0 0 20px 0', fontSize: '16px', color: '#0f172a', fontWeight: 600 }}>Аналитика заполняемости групп (%)</h3>
+                        <ResponsiveContainer width="100%" height="90%">
+                            <BarChart data={reportData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis
+                                    dataKey="group_name"
+                                    tick={{ fill: '#64748b', fontSize: 12 }}
+                                    axisLine={{ stroke: '#cbd5e1' }}
+                                    tickLine={false}
+                                />
+                                <YAxis
+                                    domain={[0, 100]}
+                                    tick={{ fill: '#64748b', fontSize: 12 }}
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tickCount={6}
+                                />
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+                                <Bar
+                                    dataKey="occupancy_rate"
+                                    radius={[6, 6, 0, 0]} // Сглаженные верхние углы столбиков
+                                    barSize={40}
+                                >
+                                    {reportData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={getBarColor(entry.occupancy_rate)} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
                     </div>
 
                 ) : activeReport === 'groups' ? (
