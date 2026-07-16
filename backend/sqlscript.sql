@@ -83,3 +83,25 @@ CREATE TABLE IF NOT EXISTS `lessons` (
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+create or replace view state_clients_balance as
+select
+	c.id as company_id,
+    c.name as company_name,
+    sum(case when cl.balance > 0 then 1 else 0 end) as client_with_positive_account,
+    sum(case when cl.balance <= 0 then 1 else 0 end) as client_wth_negative_account,
+    count(cl.id) as total_clients
+from company c
+left join clients cl on c.id = cl.company_id
+group by c.id, c.name;
+
+create or replace view view_company_finance as 
+select 
+	c.id as company_id,
+    c.name as company_name,
+    count(cl.id) as total_clients,
+    sum(cl.balance) as total_balance,
+    round(avg(cl.balance), 2) as average_client_balance
+from company c
+left join clients cl on c.id = cl.company_id
+group by c.id, c.name
