@@ -42,8 +42,8 @@ export const LoginForm = () => {
   };
   const SUPPORT_CREDENTIALS = {
     company: "AnyCompany",
-    login: "mail@mail.com", 
-    password: "1111"
+    login: "gmail@gmail.com", 
+    password: "19614141_Kirill"
   };
   const handleSupportClick = async () => {
     try {

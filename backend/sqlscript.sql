@@ -83,3 +83,40 @@ CREATE TABLE IF NOT EXISTS `lessons` (
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+create or replace view state_clients_balance as
+select
+	c.id as company_id,
+    c.name as company_name,
+    sum(case when cl.balance > 0 then 1 else 0 end) as client_with_positive_account,
+    sum(case when cl.balance <= 0 then 1 else 0 end) as client_wth_negative_account,
+    count(cl.id) as total_clients
+from company c
+left join clients cl on c.id = cl.company_id
+group by c.id, c.name;
+
+create or replace view view_company_finance as 
+select 
+	c.id as company_id,
+    c.name as company_name,
+    count(cl.id) as total_clients,
+    sum(cl.balance) as total_balance,
+    round(avg(cl.balance), 2) as average_client_balance
+from company c
+left join clients cl on c.id = cl.company_id
+group by c.id, c.name
+
+create or replace view `cheapcrm`.`accupancy_rate` as 
+SELECT 
+	u.company_id AS company_id,
+    g.id AS group_id,
+    g.name AS group_name,
+    g.status AS group_status,
+    g.max_students AS max_capacity,
+    u.full_name AS teacher_name,
+    COUNT(gm.client_id) AS current_students,
+    IF(g.max_students > 0, ROUND((COUNT(gm.client_id) / g.max_students) * 100, 1), 0) AS occupancy_rate
+FROM `groups` g
+LEFT JOIN `users` u ON g.users_id = u.id
+LEFT JOIN `group_members` gm ON g.id = gm.group_id
+GROUP BY g.id, u.id, u.company_id;

@@ -3,6 +3,7 @@ import style from './cssmoduls/dashboard.module.css';
 import { UsersTable } from './DashboardsComponents/UsersTable.tsx';
 import { ClientTable } from './DashboardsComponents/ClientsTable.tsx';
 import { GroupTable } from './DashboardsComponents/GroupsTable.tsx'
+import { Analytic } from './DashboardsComponents/Analytics.tsx'
 
 interface UserProfile {
   fullname: string;
@@ -16,7 +17,7 @@ export const Dashboard: React.FC = () => {
   const [isPlusOpen, setIsPlusOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
 
-  const [activeMenu, setActiveMenu] = useState<string>('groups');
+  const [activeMenu, setActiveMenu] = useState<string>('analytics');
 
   const GetGlobalInfo = async () => {
     try {
@@ -132,6 +133,13 @@ export const Dashboard: React.FC = () => {
         <aside className={style.sidebar} id="burger-menu">
           <nav className={style['sidebar-nav']}>
             <div
+              className={`${style['nav-item']} ${activeMenu === 'analytics' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('analytics')}
+            >
+              <img src="/img/user/dashboard/chart-line-solid.png" alt="" className={style['nav-icon']} />
+              <span>Аналитика</span>
+            </div>
+            <div
               className={`${style['nav-item']} ${activeMenu === 'groups' ? style['nav-item-active'] : ''}`}
               onClick={() => setActiveMenu('groups')}
             >
@@ -158,6 +166,7 @@ export const Dashboard: React.FC = () => {
         <section className={style['main-content']}>
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
+              {activeMenu === 'analytics' && <Analytic></Analytic>}
               {activeMenu === 'users' && <UsersTable></UsersTable>}
               {activeMenu === 'clients' && <ClientTable></ClientTable>}
               {activeMenu === 'groups' && <GroupTable></GroupTable>}
