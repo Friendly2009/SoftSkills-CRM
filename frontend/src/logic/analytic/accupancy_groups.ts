@@ -11,11 +11,11 @@ export const getAccupancyGroups = async (
             credentials: "include"
         });
         const data = await response.json();
-        
+
         if (!data.success) {
             throw new Error(data.message);
         }
-        
+
         setReportData(data.data || []);
         setLoading(false);
         console.log(JSON.stringify(data));
@@ -24,3 +24,8 @@ export const getAccupancyGroups = async (
         setLoading(false);
     }
 }
+export const getBarColor = (rate: number): string => {
+    if (rate < 30) return '#ef4444';
+    if (rate < 60) return '#f59e0b';
+    return '#10b981';
+};
