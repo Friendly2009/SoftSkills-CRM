@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from '../cssmoduls/DashboardComponentsCssModuls/analytic.module.css';
 import { getAccupancyGroups, getBarColor } from '../../logic/analytic/accupancy_groups';
-import { AnalyticsTable, AnalyticsChart} from '../DashboardsComponents/AnalyticModuls/accupancyGroup';
+import { AnalyticsTable, AnalyticsChart, CustomTooltip } from '../DashboardsComponents/AnalyticModuls/AccupancyGroup';
 export interface GroupAnalytics {
     group_id: number;
     group_name: string;
@@ -24,28 +24,6 @@ export const Analytic: React.FC = () => {
             getAccupancyGroups(setAccupancyGroup, setLoading);
         }
     }, [activeReport]);
-
-    const CustomTooltip = ({ active, payload }: any) => {
-        if (active && payload && payload.length) {
-            const data: GroupAnalytics = payload[0].payload;
-            return (
-                <div style={{
-                    backgroundColor: '#fff',
-                    padding: '12px',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
-                }}>
-                    <p style={{ margin: 0, fontWeight: 'bold', color: '#1e293b' }}>{data.group_name}</p>
-                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>Преподаватель: {data.teacher_name || '—'}</p>
-                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#1e293b' }}>
-                        Заполненность: <strong>{data.current_students} из {data.max_capacity} ({data.occupancy_rate}%)</strong>
-                    </p>
-                </div>
-            );
-        }
-        return null;
-    };
 
     if (loading) return <div className={styles.loading}>Загрузка...</div>;
 
@@ -80,28 +58,28 @@ export const Analytic: React.FC = () => {
             </div>
 
             <div className={styles['analytics-content']}>
-            {loading ? (
-                <div className={styles['analytics-loading']}>Загрузка данных аналитики...</div>
-            ) : viewMode === 'chart' ? (
-                <AnalyticsChart 
-                    data={accupancyGroup} 
-                    getBarColor={getBarColor} 
-                    CustomTooltip={CustomTooltip} 
-                />
-            ) : activeReport === 'groups' ? (
-                <AnalyticsTable 
-                    data={accupancyGroup} 
-                    getBarColor={getBarColor} 
-                />
-            ) : (
-                <div className={styles['analytics-empty']}>
-                    <h3 className={styles['analytics-empty__title']}>Отчет в процессе подключения</h3>
-                    <p className={styles['analytics-empty__text']}>
-                        Табличный вывод для "{activeReport === 'finance' ? 'Финансовый отчет' : 'Баланс клиентов'}" будет настроен на следующем шаге.
-                    </p>
-                </div>
-            )}
-        </div>
+                {loading ? (
+                    <div className={styles['analytics-loading']}>Загрузка данных аналитики...</div>
+                ) : viewMode === 'chart' ? (
+                    <AnalyticsChart
+                        data={accupancyGroup}
+                        getBarColor={getBarColor}
+                        CustomTooltip={CustomTooltip}
+                    />
+                ) : activeReport === 'groups' ? (
+                    <AnalyticsTable
+                        data={accupancyGroup}
+                        getBarColor={getBarColor}
+                    />
+                ) : (
+                    <div className={styles['analytics-empty']}>
+                        <h3 className={styles['analytics-empty__title']}>Отчет в процессе подключения</h3>
+                        <p className={styles['analytics-empty__text']}>
+                            Табличный вывод для "{activeReport === 'finance' ? 'Финансовый отчет' : 'Баланс клиентов'}" будет настроен на следующем шаге.
+                        </p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
