@@ -27,32 +27,29 @@ export const Analytic: React.FC = () => {
 
     const [reportData, setReportData] = useState<GroupAnalytics[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        if (activeReport !== 'groups') {
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        fetch('/api/analytics/groups-occupancy')
-            .then((res) => res.json())
-            .then((data: GroupAnalytics[]) => {
-                setReportData(data);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Ошибка при получении аналитики:", err);
-                setReportData([
-                    { group_id: 5, group_name: "Data Science", teacher_name: "Светлана Николаева", current_students: 0, max_capacity: 10, occupancy_rate: 0.0, group_status: 1 },
-                    { group_id: 6, group_name: "new group", teacher_name: "new director", current_students: 1, max_capacity: 10, occupancy_rate: 10.0, group_status: 1 },
-                    { group_id: 1, group_name: "TypeScript", teacher_name: "Иванов Иванович", current_students: 2, max_capacity: 10, occupancy_rate: 20.0, group_status: 0 },
-                    { group_id: 2, group_name: "C#", teacher_name: "Иванов Иванович", current_students: 3, max_capacity: 10, occupancy_rate: 30.0, group_status: 1 },
-                    { group_id: 3, group_name: "Java", teacher_name: "Иванов Иванович", current_students: 3, max_capacity: 10, occupancy_rate: 30.0, group_status: 1 },
-                    { group_id: 4, group_name: "JavaScript Adv.", teacher_name: "Светлана Николаева", current_students: 4, max_capacity: 8, occupancy_rate: 50.0, group_status: 1 }
-                ]);
-                setLoading(false);
+    const getAccupancyGroups = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/getaccupancygroups', {
+                method: 'GET',
+                credentials: "include"
             });
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message);
+            }
+            setReportData(data.data || []);
+
+            setLoading(false);
+            console.log(JSON.stringify(data));
+        } catch (ex) {
+            console.log(ex);
+        }
+    }
+    useEffect(() => {
+        if (activeReport === 'groups') {
+            setLoading(true);
+            getAccupancyGroups();
+        }
     }, [activeReport]);
 
     const getBarColor = (rate: number): string => {
@@ -96,8 +93,6 @@ export const Analytic: React.FC = () => {
                         className={styles['analytics-select']}
                     >
                         <option value="groups">Заполняемость групп</option>
-                        <option value="finance">Финансовый отчет</option>
-                        <option value="balances">Баланс клиентов</option>
                     </select>
                 </div>
 
@@ -142,7 +137,7 @@ export const Analytic: React.FC = () => {
                                 <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
                                 <Bar
                                     dataKey="occupancy_rate"
-                                    radius={[6, 6, 0, 0]} // Сглаженные верхние углы столбиков
+                                    radius={[6, 6, 0, 0]}
                                     barSize={40}
                                 >
                                     {reportData.map((entry, index) => (

@@ -4,6 +4,7 @@ import { getglobalinfo, checkconnect, getallsession, getUserProfile} from "./con
 import { APIsignup, APIsignin, logout } from './controllers/AuthController.js'
 import { APIGetClients, addclient, delclient, updateClient } from './controllers/ClientController.js'
 import { getgroups, creategroup, deleteGroup, updategroup } from './controllers/GroupController.js'
+import { get_accupancy_groups } from './controllers/AnalyticController.js'
 const router: Router = Router();
 
 router.get('/checkconnect', checkconnect);
@@ -29,4 +30,6 @@ router.get("/getgroups", getgroups);
 router.post('/creategroup', creategroup);
 router.delete('/deletegroup/:id', deleteGroup);
 router.patch('/updategroup/:id', updategroup);
+
+router.get('/getaccupancygroups', get_accupancy_groups);
 export default router;
