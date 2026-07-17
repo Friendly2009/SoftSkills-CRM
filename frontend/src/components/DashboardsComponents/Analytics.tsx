@@ -10,8 +10,8 @@ import {
     ResponsiveContainer,
     Cell
 } from 'recharts';
-
-interface GroupAnalytics {
+import { getAccupancyGroups } from '../../logic/analytic/accupancy_groups'
+export interface GroupAnalytics {
     group_id: number;
     group_name: string;
     teacher_name: string | null;
@@ -27,28 +27,10 @@ export const Analytic: React.FC = () => {
 
     const [reportData, setReportData] = useState<GroupAnalytics[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const getAccupancyGroups = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/getaccupancygroups', {
-                method: 'GET',
-                credentials: "include"
-            });
-            const data = await response.json();
-            if (!data.success) {
-                throw new Error(data.message);
-            }
-            setReportData(data.data || []);
-
-            setLoading(false);
-            console.log(JSON.stringify(data));
-        } catch (ex) {
-            console.log(ex);
-        }
-    }
     useEffect(() => {
         if (activeReport === 'groups') {
             setLoading(true);
-            getAccupancyGroups();
+            getAccupancyGroups(setReportData, setLoading);
         }
     }, [activeReport]);
 
