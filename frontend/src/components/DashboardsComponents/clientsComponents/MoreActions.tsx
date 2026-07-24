@@ -1,6 +1,43 @@
 import React from "react";
 import { MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
-export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose }) => {
+
+const menuStyles = {
+    overlay: {
+        position: 'absolute' as const,
+        backgroundColor: '#ffffff',
+        border: '1px solid #e0e0e0',
+        borderRadius: '8px',
+        padding: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        display: 'flex',
+        flexDirection: 'column' as const,
+        gap: '4px',
+        minWidth: '160px',
+        zIndex: 9999,
+    },
+    btn: {
+        width: '100%',
+        padding: '8px 12px',
+        border: 'none',
+        borderRadius: '6px',
+        textAlign: 'left' as const,
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: 500,
+        backgroundColor: 'transparent',
+    },
+    btnPrimary: { color: '#1a1a1a' },
+    btnSuccess: { color: '#10b981' },
+    btnSecondary: { color: '#4b5563' },
+    btnDanger: { color: '#ef4444' },
+    divider: {
+        height: '1px',
+        backgroundColor: '#e5e7eb',
+        margin: '4px 0',
+    }
+};
+
+export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose, onTopUp }) => {
     if (!isOpen) return null;
 
     const isNearRightEdge = x > window.innerWidth - 180;
@@ -8,73 +45,44 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
 
     return (
         <div
+            // stopPropagation мешает window закрыть меню до того, как обработаются клики по кнопкам
+            onClick={(e) => e.stopPropagation()}
             style={{
-                ...styles.overlay,
+                ...menuStyles.overlay,
                 left: `${x}px`,
                 top: `${y}px`,
-                '--shift-x': isNearRightEdge ? '-100%' : '0%',
-                '--shift-y': isNearBottomEdge ? '-100%' : '0%',
-            } as React.CSSProperties}
+                transform: `translate(${isNearRightEdge ? '-100%' : '0%'}, ${isNearBottomEdge ? '-100%' : '0%'})`,
+            }}
         >
-            <button onClick={() => { }} style={{ ...styles.btn, ...styles.btnPrimary }}>
+            <button onClick={() => { }} style={{ ...menuStyles.btn, ...menuStyles.btnPrimary }}>
                 Открыть
             </button>
-            <button onClick={() => { }} style={{ ...styles.btn, ...styles.btnSuccess }}>
+            <button 
+                onClick={(e) => { 
+                    e.stopPropagation();
+                    if (onTopUp && client) {
+                        onTopUp(client); // Передаем экшен наверх в таблицу
+                    }
+                    onClose(); // Закрываем выпадающее меню кнопок
+                }} 
+                style={{ ...menuStyles.btn, ...menuStyles.btnSuccess }}
+            >
                 Пополнить
             </button>
-            <button onClick={() => { }} style={{ ...styles.btn, ...styles.btnSecondary }}>
+            <button onClick={() => { }} style={{ ...menuStyles.btn, ...menuStyles.btnSecondary }}>
                 Редактировать
             </button>
-            <div style={styles.divider} />
+            <div style={menuStyles.divider} />
             <button
                 onClick={(e) => {
-                    e.stopPropagation(); 
-                    onDelete(client!);   
-                    onClose();      
+                    e.stopPropagation();
+                    onDelete(client!);
+                    onClose();
                 }}
-                style={{ ...styles.btn, ...styles.btnDanger }}
+                style={{ ...menuStyles.btn, ...menuStyles.btnDanger }}
             >
                 Удалить
             </button>
         </div>
     );
-};
-
-
-const styles: { [key: string]: React.CSSProperties } = {
-    overlay: {
-        position: "fixed",
-        zIndex: 9999,
-        backgroundColor: "#ffffff",
-        padding: "6px",
-        borderRadius: "10px",
-        boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.1), 0px 0px 1px rgba(0, 0, 0, 0.2)",
-        border: "1px solid #e5e5e5",
-        display: "flex",
-        flexDirection: "column",
-        gap: "2px",
-        minWidth: "160px",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-        transform: "translate(var(--shift-x, 0%), var(--shift-y, 0%))",
-    },
-    btn: {
-        padding: "8px 12px",
-        fontSize: "13px",
-        fontWeight: 500,
-        borderRadius: "6px",
-        border: "none",
-        cursor: "pointer",
-        textAlign: "left",
-        backgroundColor: "transparent",
-        transition: "background-color 0.15s ease",
-    },
-    btnPrimary: { color: "#0066cc" },
-    btnSuccess: { color: "#28a745" },
-    btnSecondary: { color: "#495057" },
-    btnDanger: { color: "#dc3545" },
-    divider: {
-        height: "1px",
-        backgroundColor: "#eee",
-        margin: "4px 6px",
-    }
 };

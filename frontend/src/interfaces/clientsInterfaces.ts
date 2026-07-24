@@ -10,10 +10,11 @@ export interface ClientTemplate {
   next_visit: string;
 }
 export interface MoreActionProps {
+    isOpen: boolean;
     x: number;
     y: number;
-    isOpen: boolean;
     client: ClientTemplate | null;
+    onClose: () => void;
     onDelete: (client: ClientTemplate) => void;
-    onClose: () => void;     
+    onTopUp?: (client: ClientTemplate) => void; 
 }

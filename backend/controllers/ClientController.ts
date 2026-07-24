@@ -225,6 +225,9 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
       const values = keys.map((key) => clientFields[key]);
 
       values.push(clientId);
+      if (balance !== undefined) {
+        clientFields.balance = parseInt(balance, 10);
+      }
 
       await connection.execute(
         `UPDATE clients SET ${setClause} WHERE id = ?`,

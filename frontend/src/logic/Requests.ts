@@ -16,6 +16,7 @@ export const deleteClient = async (client: ClientTemplate) => {
     console.error(ex);
   }
 };
+
 export const getClient = async () => {
   try {
     const response = await fetch("http://localhost:3000/getclient", {
@@ -31,6 +32,7 @@ export const getClient = async () => {
     console.error(ex);
   }
 };
+
 export const addClient = async (formData: ClientTemplate) => {
   try {
     const response = await fetch("http://localhost:3000/addclients", {
@@ -53,6 +55,7 @@ export const addClient = async (formData: ClientTemplate) => {
     console.error(ex);
   }
 };
+
 export const updateClient = async (updateFormData: ClientTemplate) => {
   try {
     const response = await fetch(

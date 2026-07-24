@@ -3,6 +3,7 @@ import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
 import { MoreAction } from '../DashboardsComponents/clientsComponents/MoreActions.tsx';
 import { deleteClient, getClient, addClient, updateClient } from '../../logic/Requests.ts';
 import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
+import { TopUp } from "./clientsComponents/topUp.tsx";
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
@@ -11,6 +12,7 @@ export const ClientTable: React.FC = () => {
     const [isResetModalWinOpen, setIsResetModalWinOpen] = useState(false);
     const [allGroups, setAllGroups] = useState<{ id: number; name: string }[]>([]);
     const [isMoreAction, setMoreAction] = useState(false);
+    const [topUpClient, setTopUpClient] = useState<ClientTemplate | null>(null);
     const [menu, setMenu] = useState<MoreActionProps>({
         isOpen: false,
         x: 0,
@@ -432,13 +434,12 @@ export const ClientTable: React.FC = () => {
                                     )}
                                 </td>
 
-
                                 <td className={style['actions-cell']}>
                                     <button
                                         className={style['btn-action']}
                                         title="Действия"
                                         onClick={(e) => {
-                                            e.stopPropagation(); // Останавливаем клик по строке tr
+                                            e.stopPropagation();
 
                                             setMenu({
                                                 isOpen: true,
@@ -446,29 +447,23 @@ export const ClientTable: React.FC = () => {
                                                 y: e.clientY,
                                                 client: client,
 
-                                                // 1. Реальная функция закрытия: тушит оба стейта
                                                 onClose: () => {
                                                     setMoreAction(false);
                                                     setMenu(prev => ({ ...prev, isOpen: false }));
                                                 },
 
-                                                // 2. Реальная функция удаления: мы просто объявляем её здесь,
-                                                // а выполнится она внутри компонента MoreAction по клику
                                                 onDelete: async (clientToDelete) => {
                                                     await deleteClient(clientToDelete);
 
-                                                    // Закрываем меню после успешного удаления
                                                     setMoreAction(false);
                                                     setMenu(prev => ({ ...prev, isOpen: false }));
 
-                                                    // Обновляем списки в таблице
                                                     const updatedData = await getClient();
                                                     if (updatedData) setClient(updatedData);
                                                     getCompanyGroups();
                                                 }
                                             });
 
-                                            // Открываем видимость плашки
                                             setMoreAction(true);
                                         }}
                                     >
@@ -481,16 +476,35 @@ export const ClientTable: React.FC = () => {
                     </tbody>
                 </table>
                 {isMoreAction && (
-                    <MoreAction
-                        isOpen={menu.isOpen}
-                        x={menu.x}
-                        y={menu.y}
-                        client={menu.client}
-                        onDelete={menu.onDelete}
-                        onClose={menu.onClose}
-                    />
-                )}
+                    <>
+                        <MoreAction
+                            x={menu.x}
+                            y={menu.y}
+                            isOpen={menu.isOpen}
+                            client={menu.client}
+                            onClose={() => setMenu(prev => ({ ...prev, isOpen: false }))}
+                            onDelete={async (targetClient) => {
+                                await deleteClient(targetClient);
+                                setClient(await getClient());
+                            }}
+                            onTopUp={(targetClient) => {
+                                setTopUpClient(targetClient);
+                            }}
+                        />
+                        {topUpClient && (
+                            <TopUp
+                                client={topUpClient}
+                                onClose={() => setTopUpClient(null)}
+                                onSuccess={async () => {
+                                    const updatedData = await getClient();
+                                    if (updatedData) setClient(updatedData);
+                                    getCompanyGroups();
+                                }}
+                            />
+                        )}
 
+                    </>
+                )}
             </div>
         </>
     );
