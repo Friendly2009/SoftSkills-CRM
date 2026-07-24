@@ -13,7 +13,7 @@ export interface MoreActionProps {
     x: number;
     y: number;
     isOpen: boolean;
-    client: ClientTemplate;
+    client: ClientTemplate | null;
     onDelete: (client: ClientTemplate) => void;
     onClose: () => void;     
 }

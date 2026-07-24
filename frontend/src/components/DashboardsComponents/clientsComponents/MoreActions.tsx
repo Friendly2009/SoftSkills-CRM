@@ -29,7 +29,7 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
             <button
                 onClick={(e) => {
                     e.stopPropagation(); 
-                    onDelete(client);   
+                    onDelete(client!);   
                     onClose();      
                 }}
                 style={{ ...styles.btn, ...styles.btnDanger }}

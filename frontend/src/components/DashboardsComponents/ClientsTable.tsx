@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
 import { MoreAction } from '../DashboardsComponents/clientsComponents/MoreActions.tsx';
-import { deleteClient } from '../../logic/Requests.ts';
-import { ClientTemplate } from "@/interfaces/clientsInterfaces.ts";
-import { getClient } from "../../logic/Requests.ts";
+import { deleteClient, getClient, addClient, updateClient } from '../../logic/Requests.ts';
+import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
@@ -12,16 +11,13 @@ export const ClientTable: React.FC = () => {
     const [isResetModalWinOpen, setIsResetModalWinOpen] = useState(false);
     const [allGroups, setAllGroups] = useState<{ id: number; name: string }[]>([]);
     const [isMoreAction, setMoreAction] = useState(false);
-    const [menu, setMenu] = useState<{
-        isOpen: boolean;
-        x: number;
-        y: number;
-        clientId: number | null;
-    }>({
+    const [menu, setMenu] = useState<MoreActionProps>({
         isOpen: false,
         x: 0,
         y: 0,
-        clientId: null,
+        client: null,
+        onClose: () => { },
+        onDelete: () => { }
     });
     const [resetFormData, setResetFormData] = useState<ClientTemplate>({
         id: 0,
@@ -105,7 +101,6 @@ export const ClientTable: React.FC = () => {
         });
         getCompanyGroups();
     }, []);
-
     useEffect(() => {
         const closeMenu = () => setMenu(prev => ({ ...prev, isOpen: false }));
         window.addEventListener("click", closeMenu);
@@ -137,55 +132,18 @@ export const ClientTable: React.FC = () => {
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log(JSON.stringify(formData));
-        try {
-            const response = await fetch('http://localhost:3000/addclients', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: "include",
-                body: JSON.stringify(formData)
-            });
-
-            if (!response.ok) {
-                throw new Error("something went wrong");
-            }
-
-            const data = await response.json();
-            console.log(data);
-            getCompanyGroups();
-            setClient(await getClient());
-            setIsModalOpen(false);
-        } catch (ex) {
-            alert("Произошла ошибка при отправке данных");
-            console.error(ex);
-        }
+        await addClient(formData);
+        getCompanyGroups();
+        setClient(await getClient());
+        setIsModalOpen(false);
     }
     const handleResetFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const response = await fetch(`http://localhost:3000/updateclient/${resetFormData.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(resetFormData)
-            });
-
-            if (!response) {
-                throw new Error("something went wrong");
-            }
-            const data = await response.json();
-            console.log(data);
-            getCompanyGroups();
-            setClient(await getClient());
-            setIsResetModalWinOpen(false);
-            setIsResetMode(false);
-        } catch (ex) {
-            console.log(ex);
-            alert('something went wrong');
-        }
+        await updateClient(resetFormData)
+        getCompanyGroups();
+        setClient(await getClient());
+        setIsResetModalWinOpen(false);
+        setIsResetMode(false);
     }
     return (
         <>
@@ -480,38 +438,59 @@ export const ClientTable: React.FC = () => {
                                         className={style['btn-action']}
                                         title="Действия"
                                         onClick={(e) => {
-                                            e.stopPropagation();
+                                            e.stopPropagation(); // Останавливаем клик по строке tr
+
                                             setMenu({
                                                 isOpen: true,
                                                 x: e.clientX,
                                                 y: e.clientY,
-                                                clientId: client.id
+                                                client: client,
+
+                                                // 1. Реальная функция закрытия: тушит оба стейта
+                                                onClose: () => {
+                                                    setMoreAction(false);
+                                                    setMenu(prev => ({ ...prev, isOpen: false }));
+                                                },
+
+                                                // 2. Реальная функция удаления: мы просто объявляем её здесь,
+                                                // а выполнится она внутри компонента MoreAction по клику
+                                                onDelete: async (clientToDelete) => {
+                                                    await deleteClient(clientToDelete);
+
+                                                    // Закрываем меню после успешного удаления
+                                                    setMoreAction(false);
+                                                    setMenu(prev => ({ ...prev, isOpen: false }));
+
+                                                    // Обновляем списки в таблице
+                                                    const updatedData = await getClient();
+                                                    if (updatedData) setClient(updatedData);
+                                                    getCompanyGroups();
+                                                }
                                             });
-                                            setMoreAction(prev => !prev)
+
+                                            // Открываем видимость плашки
+                                            setMoreAction(true);
                                         }}
                                     >
                                         •••
                                     </button>
                                 </td>
-                                {isMoreAction && (
-                                    <MoreAction
-                                        isOpen={menu.isOpen}
-                                        x={menu.x}
-                                        y={menu.y}
-                                        client={client}
-                                        onDelete={async () => {
-                                            await deleteClient(client);
-                                            setIsDeleteMode(false);
-                                            setClient(await getClient());
-                                            getCompanyGroups();
-                                        }}
-                                        onClose={() => setMenu(prev => ({ ...prev, isOpen: false }))}
-                                    />
-                                )}
+
                             </tr>
                         ))}
                     </tbody>
                 </table>
+                {isMoreAction && (
+                    <MoreAction
+                        isOpen={menu.isOpen}
+                        x={menu.x}
+                        y={menu.y}
+                        client={menu.client}
+                        onDelete={menu.onDelete}
+                        onClose={menu.onClose}
+                    />
+                )}
+
             </div>
         </>
     );
