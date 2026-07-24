@@ -4,6 +4,7 @@ import { MoreAction } from '../DashboardsComponents/clientsComponents/MoreAction
 import { deleteClient, getClient, addClient, updateClient } from '../../logic/Requests.ts';
 import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
 import { TopUp } from "./clientsComponents/topUp.tsx";
+import { UpdateClientForm } from '@/components/DashboardsComponents/clientsComponents/updateClientForm.tsx';
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
@@ -251,110 +252,16 @@ export const ClientTable: React.FC = () => {
                     </div>
                 </div>
             </div>)}
-            {isResetModalWinOpen && (<div>
-                <div className={style['modal-overlay']} onClick={() => setIsResetModalWinOpen(false)}>
-                    <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
-                        <div className={style['modal-header']}>
-                            <h3>Добавить Клиента</h3>
-                            <button className={style['btn-close']} onClick={() => setIsResetModalWinOpen(false)}>×</button>
-                        </div>
-
-                        <form onSubmit={handleResetFormSubmit}>
-                            <div className={style['form-grid']}>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Имя</label>
-                                    <input
-                                        type="text" name="name" required className={style['form-input']}
-                                        value={resetFormData.name} onChange={handleResetInputChange} placeholder="Иван Иванов Иванович"
-                                    />
-                                </div>
-                                <div className={style['form-group']}>
-                                    <label>Баланс</label>
-                                    <input name="balance" type="number" className={style['form-input']} value={resetFormData.balance} onChange={handleResetInputChange}></input>
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Скилы</label>
-                                    <input
-                                        type="number" name="skills" className={style['form-input']}
-                                        value={resetFormData.skills} onChange={handleResetInputChange}
-                                    />
-                                </div>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Контакт</label>
-                                    <input
-                                        type="text" name="contact" required className={style['form-input']}
-                                        value={resetFormData.contact} onChange={handleResetInputChange} placeholder="+7 000 000 00 00"
-                                    />
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Статус</label>
-                                    <div className={style['radio-container']}>
-                                        <label className={style['radio-label']}>
-                                            <input
-                                                name="status" type="radio" value="true"
-                                                checked={resetFormData.status === 1} onChange={handleResetInputChange}
-                                            />
-                                            Активен
-                                        </label>
-                                        <label className={style['radio-label']}>
-                                            <input
-                                                name="status" type="radio" value="false"
-                                                checked={resetFormData.status === 0} onChange={handleResetInputChange}
-                                            />
-                                            Неактивен
-                                        </label>
-                                    </div>
-                                </div>
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Группы (зажмите Ctrl/Cmd для выбора нескольких)</label>
-                                    <div className={style['select-wrapper']}>
-                                        <select
-                                            multiple
-                                            name="group_ids"
-                                            className={style['form-select']}
-                                            value={resetFormData.group_ids.map(String)}
-                                            onChange={(e) => {
-                                                const selectedOptions = Array.from(e.target.selectedOptions);
-                                                const selectedIds = selectedOptions
-                                                    .map(option => parseInt(option.value, 10))
-                                                    .filter(id => !isNaN(id));
-
-                                                setResetFormData(prev => ({
-                                                    ...prev,
-                                                    group_ids: selectedIds
-                                                }));
-                                            }}
-
-
-                                            style={{ height: 'auto', minHeight: '100px' }}
-                                        >
-                                            <option value="">-- Без группы --</option>
-                                            {allGroups.map(group => (
-                                                <option key={group.id} value={group.id}>
-                                                    {group.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div className={style['form-actions']}>
-                                <button type="button" className={style['btn-secondary']} onClick={() => setIsResetModalWinOpen(false)}>
-                                    Отмена
-                                </button>
-                                <button type="submit" className={style['btn-primary']}>
-                                    Сохранить
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>)}
+            {isResetModalWinOpen && (
+                <UpdateClientForm
+                    setIsResetModalWinOpen={setIsResetModalWinOpen}
+                    handleResetFormSubmit={handleResetFormSubmit}
+                    resetFormData={resetFormData}
+                    handleResetInputChange={handleResetInputChange}
+                    setResetFormData={setResetFormData}
+                    allGroups={allGroups}
+                />
+            )}
             <div className={style['content-header']}>
                 <div className={style['action-bar']}>
                     <div className={style['btn-group']}>
@@ -490,7 +397,22 @@ export const ClientTable: React.FC = () => {
                             onTopUp={(targetClient) => {
                                 setTopUpClient(targetClient);
                             }}
+                            onEdit={(targetClient) => {
+                                setResetFormData({
+                                    id: targetClient.id,
+                                    name: targetClient.name,
+                                    balance: targetClient.balance,
+                                    skills: targetClient.skills,
+                                    status: targetClient.status,
+                                    contact: targetClient.contact,
+                                    group_ids: targetClient.group_ids || [],
+                                    group_names: targetClient.group_names || [],
+                                    next_visit: targetClient.next_visit || ''
+                                });
+                                setIsResetModalWinOpen(true);
+                            }}
                         />
+
                         {topUpClient && (
                             <TopUp
                                 client={topUpClient}

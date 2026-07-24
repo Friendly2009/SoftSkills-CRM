@@ -16,5 +16,7 @@ export interface MoreActionProps {
     client: ClientTemplate | null;
     onClose: () => void;
     onDelete: (client: ClientTemplate) => void;
-    onTopUp?: (client: ClientTemplate) => void; 
+    onTopUp?: (client: ClientTemplate) => void;
+    onEdit?: (client: ClientTemplate) => void;
 }
+

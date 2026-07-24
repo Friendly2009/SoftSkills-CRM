@@ -37,7 +37,7 @@ const menuStyles = {
     }
 };
 
-export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose, onTopUp }) => {
+export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose, onTopUp, onEdit }) => {
     if (!isOpen) return null;
 
     const isNearRightEdge = x > window.innerWidth - 180;
@@ -45,7 +45,6 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
 
     return (
         <div
-            // stopPropagation мешает window закрыть меню до того, как обработаются клики по кнопкам
             onClick={(e) => e.stopPropagation()}
             style={{
                 ...menuStyles.overlay,
@@ -57,21 +56,31 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
             <button onClick={() => { }} style={{ ...menuStyles.btn, ...menuStyles.btnPrimary }}>
                 Открыть
             </button>
-            <button 
-                onClick={(e) => { 
+            <button
+                onClick={(e) => {
                     e.stopPropagation();
                     if (onTopUp && client) {
-                        onTopUp(client); // Передаем экшен наверх в таблицу
+                        onTopUp(client);
                     }
-                    onClose(); // Закрываем выпадающее меню кнопок
-                }} 
+                    onClose();
+                }}
                 style={{ ...menuStyles.btn, ...menuStyles.btnSuccess }}
             >
                 Пополнить
             </button>
-            <button onClick={() => { }} style={{ ...menuStyles.btn, ...menuStyles.btnSecondary }}>
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (onEdit && client) {
+                        onEdit(client); 
+                    }
+                    onClose();
+                }}
+                style={{ ...menuStyles.btn, ...menuStyles.btnSecondary }}
+            >
                 Редактировать
             </button>
+
             <div style={menuStyles.divider} />
             <button
                 onClick={(e) => {
