@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
-import { MoreAction } from '../DashboardsComponents/clientsComponents/MoreActions.tsx'
-interface ClientTemplate {
-    id: number;
-    name: string;
-    balance: number;
-    skills: number;
-    status: number;
-    contact: string;
-    group_ids: number[];
-    group_names: string[];
-    next_visit: string;
-}
+import { MoreAction } from '../DashboardsComponents/clientsComponents/MoreActions.tsx';
+import { deleteClient } from '../../logic/Requests.ts';
+import { ClientTemplate } from "@/interfaces/clientsInterfaces.ts";
 
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
@@ -82,22 +73,10 @@ export const ClientTable: React.FC = () => {
             setIsResetModalWinOpen(true);
         }
         if (isDeleteMode) {
-            try {
-                const response = await fetch(`http://localhost:3000/delclients/${client.id}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Ошибка сервера: ${response.status}`);
-                }
-                console.log("User was deleted");
-
-                setIsDeleteMode(false);
-                getClient();
-                getCompanyGroups();
-            } catch (ex) {
-                console.error(ex);
-            }
+            await deleteClient(client);
+            setIsDeleteMode(false);
+            getClient();
+            getCompanyGroups();
         }
     };
     const getClient = async () => {
@@ -531,10 +510,14 @@ export const ClientTable: React.FC = () => {
                                         isOpen={menu.isOpen}
                                         x={menu.x}
                                         y={menu.y}
-                                        onOpen={() => console.log("Открываем клиента с ID:", menu.clientId)}
-                                        onTopUp={() => console.log("Пополняем баланс клиенту с ID:", menu.clientId)}
-                                        onEdit={() => console.log("Редактируем клиента с ID:", menu.clientId)}
-                                        onDelete={() => console.log("Удаляем клиента с ID:", menu.clientId)}
+                                        client={client}
+                                        onDelete={async () => {
+                                            await deleteClient(client);
+                                            setIsDeleteMode(false);
+                                            getClient();
+                                            getCompanyGroups();
+                                        }}
+                                        onClose={() => setMenu(prev => ({ ...prev, isOpen: false }))}
                                     />
                                 )}
                             </tr>

@@ -1,24 +1,7 @@
 import React from "react";
-
-interface MoreActionProps {
-    x: number;
-    y: number;
-    isOpen: boolean;
-    onTopUp?: () => void;
-    onEdit?: () => void;
-    onOpen?: () => void;
-    onDelete?: () => void;
-}
-
-export const MoreAction: React.FC<MoreActionProps> = ({
-    x,
-    y,
-    isOpen,
-    onTopUp,
-    onEdit,
-    onOpen,
-    onDelete,
-}) => {
+import { MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
+import { deleteClient } from '@/logic/Requests.ts';
+export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose }) => {
     if (!isOpen) return null;
 
     const isNearRightEdge = x > window.innerWidth - 180;
@@ -32,19 +15,26 @@ export const MoreAction: React.FC<MoreActionProps> = ({
                 top: `${y}px`,
                 '--shift-x': isNearRightEdge ? '-100%' : '0%',
                 '--shift-y': isNearBottomEdge ? '-100%' : '0%',
-            } as React.CSSProperties} 
+            } as React.CSSProperties}
         >
-            <button onClick={onOpen} style={{ ...styles.btn, ...styles.btnPrimary }}>
+            <button onClick={() => { }} style={{ ...styles.btn, ...styles.btnPrimary }}>
                 Открыть
             </button>
-            <button onClick={onTopUp} style={{ ...styles.btn, ...styles.btnSuccess }}>
+            <button onClick={() => { }} style={{ ...styles.btn, ...styles.btnSuccess }}>
                 Пополнить
             </button>
-            <button onClick={onEdit} style={{ ...styles.btn, ...styles.btnSecondary }}>
+            <button onClick={() => { }} style={{ ...styles.btn, ...styles.btnSecondary }}>
                 Редактировать
             </button>
             <div style={styles.divider} />
-            <button onClick={onDelete} style={{ ...styles.btn, ...styles.btnDanger }}>
+            <button
+                onClick={(e) => {
+                    e.stopPropagation(); 
+                    onDelete(client);   
+                    onClose();      
+                }}
+                style={{ ...styles.btn, ...styles.btnDanger }}
+            >
                 Удалить
             </button>
         </div>
