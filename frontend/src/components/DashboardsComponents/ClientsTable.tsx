@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
-
+import { MoreAction } from '../DashboardsComponents/clientsComponents/MoreActions.tsx'
 interface ClientTemplate {
     id: number;
     name: string;
@@ -20,6 +20,18 @@ export const ClientTable: React.FC = () => {
     const [isResetMode, setIsResetMode] = useState(false);
     const [isResetModalWinOpen, setIsResetModalWinOpen] = useState(false);
     const [allGroups, setAllGroups] = useState<{ id: number; name: string }[]>([]);
+    const [isMoreAction, setMoreAction] = useState(false);
+    const [menu, setMenu] = useState<{
+        isOpen: boolean;
+        x: number;
+        y: number;
+        clientId: number | null;
+    }>({
+        isOpen: false,
+        x: 0,
+        y: 0,
+        clientId: null,
+    });
     const [resetFormData, setResetFormData] = useState<ClientTemplate>({
         id: 0,
         name: '',
@@ -126,6 +138,11 @@ export const ClientTable: React.FC = () => {
     useEffect(() => {
         getClient();
         getCompanyGroups();
+    }, []);
+    useEffect(() => {
+        const closeMenu = () => setMenu(prev => ({ ...prev, isOpen: false }));
+        window.addEventListener("click", closeMenu);
+        return () => window.removeEventListener("click", closeMenu);
     }, []);
     const formatBalance = (amount: number) => {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
@@ -497,11 +514,29 @@ export const ClientTable: React.FC = () => {
                                         title="Действия"
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            setMenu({
+                                                isOpen: true,
+                                                x: e.clientX,
+                                                y: e.clientY,
+                                                clientId: client.id
+                                            });
+                                            setMoreAction(prev => !prev)
                                         }}
                                     >
                                         •••
                                     </button>
                                 </td>
+                                {isMoreAction && (
+                                    <MoreAction
+                                        isOpen={menu.isOpen}
+                                        x={menu.x}
+                                        y={menu.y}
+                                        onOpen={() => console.log("Открываем клиента с ID:", menu.clientId)}
+                                        onTopUp={() => console.log("Пополняем баланс клиенту с ID:", menu.clientId)}
+                                        onEdit={() => console.log("Редактируем клиента с ID:", menu.clientId)}
+                                        onDelete={() => console.log("Удаляем клиента с ID:", menu.clientId)}
+                                    />
+                                )}
                             </tr>
                         ))}
                     </tbody>
