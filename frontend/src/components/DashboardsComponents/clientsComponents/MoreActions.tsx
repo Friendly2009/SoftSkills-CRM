@@ -1,6 +1,5 @@
 import React from "react";
 import { MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
-import { deleteClient } from '@/logic/Requests.ts';
 export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose }) => {
     if (!isOpen) return null;
 

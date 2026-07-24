@@ -3,7 +3,7 @@ import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
 import { MoreAction } from '../DashboardsComponents/clientsComponents/MoreActions.tsx';
 import { deleteClient } from '../../logic/Requests.ts';
 import { ClientTemplate } from "@/interfaces/clientsInterfaces.ts";
-
+import { getClient } from "../../logic/Requests.ts";
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
@@ -75,23 +75,8 @@ export const ClientTable: React.FC = () => {
         if (isDeleteMode) {
             await deleteClient(client);
             setIsDeleteMode(false);
-            getClient();
+            setClient(await getClient());
             getCompanyGroups();
-        }
-    };
-    const getClient = async () => {
-        try {
-            const response = await fetch("http://localhost:3000/getclient", {
-                credentials: "include"
-            });
-
-            if (!response.ok) {
-                throw new Error('oooops, something went wrong');
-            }
-            const data = await response.json();
-            setClient(data.data || []);
-        } catch (ex) {
-            console.error(ex);
         }
     };
     const getCompanyGroups = async () => {
@@ -115,9 +100,12 @@ export const ClientTable: React.FC = () => {
         setIsResetMode(prev => !prev);
     };
     useEffect(() => {
-        getClient();
+        getClient().then((data) => {
+            if (data) setClient(data);
+        });
         getCompanyGroups();
     }, []);
+
     useEffect(() => {
         const closeMenu = () => setMenu(prev => ({ ...prev, isOpen: false }));
         window.addEventListener("click", closeMenu);
@@ -166,7 +154,7 @@ export const ClientTable: React.FC = () => {
             const data = await response.json();
             console.log(data);
             getCompanyGroups();
-            getClient();
+            setClient(await getClient());
             setIsModalOpen(false);
         } catch (ex) {
             alert("Произошла ошибка при отправке данных");
@@ -191,7 +179,7 @@ export const ClientTable: React.FC = () => {
             const data = await response.json();
             console.log(data);
             getCompanyGroups();
-            getClient();
+            setClient(await getClient());
             setIsResetModalWinOpen(false);
             setIsResetMode(false);
         } catch (ex) {
@@ -514,7 +502,7 @@ export const ClientTable: React.FC = () => {
                                         onDelete={async () => {
                                             await deleteClient(client);
                                             setIsDeleteMode(false);
-                                            getClient();
+                                            setClient(await getClient());
                                             getCompanyGroups();
                                         }}
                                         onClose={() => setMenu(prev => ({ ...prev, isOpen: false }))}
