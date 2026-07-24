@@ -1,6 +1,6 @@
 import React from "react";
 import { MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
-
+import { useNavigate } from "react-router-dom";
 const menuStyles = {
     overlay: {
         position: 'absolute' as const,
@@ -37,9 +37,9 @@ const menuStyles = {
     }
 };
 
-export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose, onTopUp, onEdit }) => {
+export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose, onTopUp, onEdit, onOpenProfile }) => {
     if (!isOpen) return null;
-
+    const navigate = useNavigate();
     const isNearRightEdge = x > window.innerWidth - 180;
     const isNearBottomEdge = y > window.innerHeight - 200;
 
@@ -53,9 +53,18 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
                 transform: `translate(${isNearRightEdge ? '-100%' : '0%'}, ${isNearBottomEdge ? '-100%' : '0%'})`,
             }}
         >
-            <button onClick={() => { }} style={{ ...menuStyles.btn, ...menuStyles.btnPrimary }}>
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (client) navigate(`/dashboard/client/${client.id}`);
+                    onClose();
+                }}
+                style={{ ...menuStyles.btn, ...menuStyles.btnPrimary }}
+            >
                 Открыть
             </button>
+
+
             <button
                 onClick={(e) => {
                     e.stopPropagation();
@@ -72,7 +81,7 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
                 onClick={(e) => {
                     e.stopPropagation();
                     if (onEdit && client) {
-                        onEdit(client); 
+                        onEdit(client);
                     }
                     onClose();
                 }}
