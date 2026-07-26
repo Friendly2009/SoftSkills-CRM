@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
-import { MoreAction } from '../DashboardsComponents/clientsComponents/MoreActions.tsx';
+import { MoreAction } from './ClientsComponents/MoreActions.tsx';
 import { deleteClient, getClient, addClient, updateClient } from '../../logic/Requests.ts';
 import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
-import { TopUp } from "./clientsComponents/topUp.tsx";
-import { UpdateClientForm } from '@/components/DashboardsComponents/clientsComponents/updateClientForm.tsx';
+import { TopUp } from "./ClientsComponents/topUp.tsx";
+import { UpdateClientForm } from '@/components/DashboardsComponents/ClientsComponents/updateClientForm.tsx';
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);

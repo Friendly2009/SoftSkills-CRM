@@ -3,7 +3,7 @@ import style from './cssmoduls/dashboard.module.css';
 import { UsersTable } from './DashboardsComponents/UsersTable.tsx';
 import { ClientTable } from './DashboardsComponents/ClientsTable.tsx';
 import { GroupTable } from './DashboardsComponents/GroupsTable.tsx';
-import { SheduleTable } from './DashboardsComponents/SheduleTable.tsx';
+import { ScheduleTable } from './DashboardsComponents/SheduleTable.tsx';
 
 interface UserProfile {
   fullname: string;
@@ -169,7 +169,7 @@ export const Dashboard: React.FC = () => {
               {activeMenu === 'users' && <UsersTable></UsersTable>}
               {activeMenu === 'clients' && <ClientTable></ClientTable>}
               {activeMenu === 'groups' && <GroupTable></GroupTable>}
-              {activeMenu === 'shedule' && <SheduleTable></SheduleTable>}
+              {activeMenu === 'shedule' && <ScheduleTable></ScheduleTable>}
             </div>
           </div>
         </section>
