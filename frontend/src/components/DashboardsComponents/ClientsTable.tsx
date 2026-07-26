@@ -5,7 +5,6 @@ import { deleteClient, getClient, addClient, updateClient } from '../../logic/Re
 import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
 import { TopUp } from "./clientsComponents/topUp.tsx";
 import { UpdateClientForm } from '@/components/DashboardsComponents/clientsComponents/updateClientForm.tsx';
-import { ClientProfile } from './clientsComponents/ClientProfile.tsx';
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
@@ -15,7 +14,6 @@ export const ClientTable: React.FC = () => {
     const [allGroups, setAllGroups] = useState<{ id: number; name: string }[]>([]);
     const [isMoreAction, setMoreAction] = useState(false);
     const [topUpClient, setTopUpClient] = useState<ClientTemplate | null>(null);
-    const [viewedClient, setViewedClient] = useState<ClientTemplate | null>(null);
     const [menu, setMenu] = useState<MoreActionProps>({
         isOpen: false,
         x: 0,
@@ -412,9 +410,6 @@ export const ClientTable: React.FC = () => {
                                     next_visit: targetClient.next_visit || ''
                                 });
                                 setIsResetModalWinOpen(true);
-                            }}
-                            onOpenProfile={(targetClient) => {
-                                setViewedClient(targetClient);
                             }}
                         />
 
