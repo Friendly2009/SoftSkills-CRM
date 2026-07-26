@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ClientTemplate } from '@/interfaces/clientsInterfaces.ts';
-import { updateClient } from '@/logic/Requests.ts';
+import { updateClient } from '@/logic/ClientRequests';
 interface TopUpProps {
     client: ClientTemplate;
     onClose: () => void;

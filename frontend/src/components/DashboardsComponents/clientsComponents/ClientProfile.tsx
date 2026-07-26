@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ClientTemplate } from '@/interfaces/clientsInterfaces.tsx';
-import { getClient } from '@/logic/Requests.ts'; // твоя рабочая функция запросов
+import { getClient } from '@/logic/ClientRequests'; // твоя рабочая функция запросов
 
 export const ClientProfile: React.FC = () => {
     const { id } = useParams<{ id: string }>(); // достаем id из URL
