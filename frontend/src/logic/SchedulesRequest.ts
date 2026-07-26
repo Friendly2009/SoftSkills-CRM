@@ -3,7 +3,6 @@ import { Lesson, LessonModalData, User, Client, AttendanceRecord, LessonClosePay
 export const getLessons = async (start: string, end: string): Promise<Lesson[]> => {
   const response = await fetch(`/lessons?start=${start}&end=${end}`);
   if (!response.ok) throw new Error('Failed to fetch lessons');
-  console.log(JSON.stringify(response.json));
   return response.json();
 };
 

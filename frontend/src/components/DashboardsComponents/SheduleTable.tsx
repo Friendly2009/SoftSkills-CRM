@@ -14,7 +14,7 @@ export const ScheduleTable: React.FC = () => {
     const day = temp.getDay();
     const diff = temp.getDate() - day + (day === 0 ? -6 : 1);
     temp.setDate(diff);
-    
+
     for (let i = 0; i < 7; i++) {
       days.push(temp.toISOString().split('T')[0]);
       temp.setDate(temp.getDate() + 1);
@@ -27,11 +27,12 @@ export const ScheduleTable: React.FC = () => {
   const loadLessons = () => {
     getLessons(weekDays[0], weekDays[6])
       .then(setLessons)
-      .catch(() => {});
+      .catch(() => { });
   };
 
   useEffect(() => {
     loadLessons();
+    console.log(JSON.stringify(lessons))
   }, [currentDate]);
 
   const changeWeek = (direction: number) => {
@@ -58,7 +59,7 @@ export const ScheduleTable: React.FC = () => {
   return (
     <div style={{ padding: '24px', fontFamily: 'system-ui, sans-serif', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-        
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
             <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#1e293b' }}>Расписание занятий</h2>
@@ -95,17 +96,31 @@ export const ScheduleTable: React.FC = () => {
                 {time}
               </div>
               {weekDays.map((day) => {
-                const hour = parseInt(time.split(':')[0]);
-                const dayLessons = lessons.filter(l => l.lesson_date === day && parseInt(l.start_time.split(':')[0]) === hour);
-                
+                const targetHour = parseInt(time.split(':')[0], 10);
+                const targetDateStr = day.substring(0, 10);
+
+                const dayLessons = lessons.filter(l => {
+                  const lessonDateStr = String(l.lesson_date).substring(0, 10);
+                  const lessonHour = parseInt(String(l.start_time).split(':')[0], 10);
+                  return lessonDateStr === targetDateStr && lessonHour === targetHour;
+                });
+
                 return (
                   <div key={`${day}-${time}`} style={{ padding: '4px', borderBottom: '1px solid #f1f5f9', borderRight: '1px solid #e2e8f0', minHeight: '50px', backgroundColor: '#ffffff', position: 'relative' }}>
                     {dayLessons.map((lesson) => {
                       const styles = getLessonStyles(lesson);
                       return (
-                        <div key={lesson.id} onClick={() => setSelectedLessonId(lesson.id)} style={{ padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', transition: 'box-shadow 0.2s', ...styles }} onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)'} onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}>
+                        <div
+                          key={String(lesson.id)}
+                          onClick={() => setSelectedLessonId(lesson.id)}
+                          style={{ padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', transition: 'box-shadow 0.2s', ...styles }}
+                          onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)'}
+                          onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
+                        >
                           <div style={{ fontWeight: 600 }}>Группа #{lesson.group_id}</div>
-                          <div style={{ marginTop: '2px', opacity: 0.9 }}>{lesson.start_time.substring(0,5)}-{lesson.end_time.substring(0,5)}</div>
+                          <div style={{ marginTop: '2px', opacity: 0.9 }}>
+                            {String(lesson.start_time).substring(0, 5)} - {String(lesson.end_time).substring(0, 5)}
+                          </div>
                         </div>
                       );
                     })}

@@ -94,12 +94,69 @@ export const getLessonsList = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Start and end dates are required' });
     }
 
-    const [rows] = await pool.query(
+    const startDate = new Date(start as string);
+    const endDate = new Date(end as string);
+
+    const [schedules]: any = await pool.query(
+      `SELECT gs.id AS schedule_id, gs.day_of_week, gs.start_time, gs.end_time, gs.group_id, g.users_id AS default_teacher_id 
+       FROM group_schedules gs 
+       JOIN \`groups\` g ON gs.group_id = g.id 
+       WHERE g.status = 1`
+    );
+
+    const [realLessons]: any = await pool.query(
       'SELECT id, lesson_date, start_time, end_time, status, group_id, user_id, teacher_pay FROM lessons WHERE lesson_date BETWEEN ? AND ?',
       [start, end]
     );
 
-    return res.json(rows);
+    const generatedLessons: any[] = [];
+    const dayOfWeekMapping: Record<string, number> = {
+      'воскресенье': 0, 'понедельник': 1, 'вторник': 2, 'среда': 3, 'четверг': 4, 'пятница': 5, 'суббота': 6,
+      'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6
+    };
+
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const currentIsoDate = d.toISOString().split('T')[0];
+      const currentDayIndex = d.getDay();
+
+      schedules.forEach((sched: any) => {
+        const targetDayIndex = dayOfWeekMapping[sched.day_of_week.toLowerCase()];
+        
+        if (targetDayIndex === currentDayIndex) {
+          const existingRealLesson = realLessons.find((l: any) => 
+            l.lesson_date.toISOString().split('T')[0] === currentIsoDate && 
+            l.group_id === sched.group_id &&
+            l.start_time === sched.start_time
+          );
+
+          if (existingRealLesson) {
+            generatedLessons.push({
+              id: existingRealLesson.id,
+              lesson_date: currentIsoDate,
+              start_time: existingRealLesson.start_time,
+              end_time: existingRealLesson.end_time,
+              status: existingRealLesson.status,
+              group_id: existingRealLesson.group_id,
+              user_id: existingRealLesson.user_id,
+              teacher_pay: existingRealLesson.teacher_pay
+            });
+          } else {
+            generatedLessons.push({
+              id: `temp-${sched.schedule_id}-${currentIsoDate}`,
+              lesson_date: currentIsoDate,
+              start_time: sched.start_time,
+              end_time: sched.end_time,
+              status: 1,
+              group_id: sched.group_id,
+              user_id: sched.default_teacher_id,
+              teacher_pay: 0
+            });
+          }
+        }
+      });
+    }
+
+    return res.json(generatedLessons);
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error' });
   }
