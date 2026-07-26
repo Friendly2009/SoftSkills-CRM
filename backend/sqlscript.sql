@@ -83,3 +83,37 @@ CREATE TABLE IF NOT EXISTS `lessons` (
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+ALTER TABLE users ADD COLUMN balance DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER avatar;
+
+ALTER TABLE lessons 
+  ADD COLUMN user_id INT NOT NULL AFTER group_id,
+  ADD COLUMN teacher_pay DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER user_id,
+  ADD KEY fk_lessons_users_idx (user_id),
+  ADD CONSTRAINT fk_lessons_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+CREATE TABLE IF NOT EXISTS lesson_attendance (
+  lesson_id INT NOT NULL,
+  client_id INT NOT NULL,
+  attendance_status TINYINT NOT NULL DEFAULT 1, 
+  amount_charged DECIMAL(10,2) NOT NULL DEFAULT 0.00, 
+  PRIMARY KEY (lesson_id, client_id),
+  KEY fk_attendance_clients_idx (client_id),
+  CONSTRAINT fk_attendance_lessons FOREIGN KEY (lesson_id) REFERENCES lessons (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_attendance_clients FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE IF NOT EXISTS financial_transactions (
+  id INT NOT NULL AUTO_INCREMENT,
+  company_id INT NOT NULL,
+  lesson_id INT NULL,
+  entity_type ENUM('client', 'user') NOT NULL,
+  entity_id INT NOT NULL, 
+  type ENUM('income', 'expense') NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  description VARCHAR(255) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY fk_transactions_company_idx (company_id),
+  CONSTRAINT fk_transactions_company FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
