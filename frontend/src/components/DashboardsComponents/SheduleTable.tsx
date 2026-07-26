@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Lesson, LessonStatus } from '@/interfaces/scheduleInterfaces.ts';
-import { scheduleQuery } from '@/logic/SchedulesRequest.ts';
+import { getLessons } from '../../logic/SchedulesRequest';
 import { LessonModalWindow } from '@/components/DashboardsComponents/SchesuleComponents/LessonModalWindow.tsx';
 
 export const ScheduleTable: React.FC = () => {
@@ -25,7 +25,7 @@ export const ScheduleTable: React.FC = () => {
   const weekDays = getWeekDays(currentDate);
 
   const loadLessons = () => {
-    scheduleQuery.getLessons(weekDays[0], weekDays[6])
+    getLessons(weekDays[0], weekDays[6])
       .then(setLessons)
       .catch(() => {});
   };

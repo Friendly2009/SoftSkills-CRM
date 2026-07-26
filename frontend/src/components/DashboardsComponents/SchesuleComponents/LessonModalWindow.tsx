@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { LessonModalData, AttendanceStatus, LessonStatus, AttendanceRecord } from '@/interfaces/scheduleInterfaces.ts';
-import { scheduleQuery } from '@/logic/SchedulesRequest.ts';
+import { LessonModalData, AttendanceStatus, LessonStatus, AttendanceRecord, Client, User } from '@/interfaces/scheduleInterfaces.ts';
+import { getLessonMainInfo, getLessonStudentsAndAttendance, getAllAvailableTeachers, closeLesson } from '@/logic/SchedulesRequest.ts';
 
 interface LessonModalWindowProps {
   lessonId: number;
@@ -17,15 +17,28 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
-    scheduleQuery.getLessonDetails(lessonId)
-      .then((res) => {
-        setData(res);
-        setSelectedTeacherId(res.lesson.user_id);
-        setTeacherPay(res.lesson.teacher_pay);
+    Promise.all([
+      getLessonMainInfo(lessonId),
+      getLessonStudentsAndAttendance(lessonId),
+      getAllAvailableTeachers()
+    ])
+      .then(([mainData, studentsData, allTeachers]: [Pick<LessonModalData, 'lesson' | 'group' | 'teacher'>, { students: Client[]; attendance: AttendanceRecord[] }, User[]]) => {
+        const fullData: LessonModalData = {
+          lesson: mainData.lesson,
+          group: mainData.group,
+          teacher: mainData.teacher,
+          students: studentsData.students,
+          attendance: studentsData.attendance,
+          allTeachers
+        };
+
+        setData(fullData);
+        setSelectedTeacherId(fullData.lesson.user_id);
+        setTeacherPay(fullData.lesson.teacher_pay);
         
         const initialAttendance: Record<number, { status: AttendanceStatus; price: number }> = {};
-        res.students.forEach((student) => {
-          const existing = res.attendance?.find(a => a.client_id === student.id);
+        fullData.students.forEach((student: Client) => {
+          const existing = fullData.attendance?.find((a: AttendanceRecord) => a.client_id === student.id);
           initialAttendance[student.id] = {
             status: existing ? existing.attendance_status : AttendanceStatus.Present,
             price: existing ? existing.amount_charged : 500
@@ -60,14 +73,14 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
     if (!data || data.lesson.status === LessonStatus.Completed) return;
     setSubmitting(true);
 
-    const attendancePayload: AttendanceRecord[] = data.students.map(student => ({
+    const attendancePayload: AttendanceRecord[] = data.students.map((student: Client) => ({
       client_id: student.id,
       attendance_status: attendanceState[student.id].status,
       amount_charged: attendanceState[student.id].price
     }));
 
     try {
-      await scheduleQuery.closeLesson({
+      await closeLesson({
         lesson_id: data.lesson.id,
         user_id: selectedTeacherId,
         teacher_pay: teacherPay,
@@ -89,7 +102,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
 
   if (!data) return null;
 
-  const isReadOnly = data.lesson.status === LessonStatus.Completed;
+  const isReadOnly = data.lesson.status === LessonStatus.Completed
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1100, fontFamily: 'system-ui, sans-serif' }}>
@@ -124,7 +137,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
             <div>
               <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 600, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Студенты группы</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {data.students.map((student) => {
+                {data.students.map((student: Client) => {
                   const state = attendanceState[student.id] || { status: AttendanceStatus.Present, price: 0 };
                   return (
                     <div key={student.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #f1f5f9' }}>
