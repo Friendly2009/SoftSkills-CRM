@@ -117,3 +117,15 @@ CREATE TABLE IF NOT EXISTS financial_transactions (
   KEY fk_transactions_company_idx (company_id),
   CONSTRAINT fk_transactions_company FOREIGN KEY (company_id) REFERENCES company (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE OR REPLACE VIEW select_schedules_of_groups AS
+SELECT 
+    gs.id AS schedule_id,
+    gs.day_of_week,
+    gs.start_time,
+    gs.end_time,
+    g.name AS group_name,
+    u.full_name AS user_name,
+    u.company_id
+FROM group_schedules gs
+JOIN `groups` g ON gs.group_id = g.id
+JOIN users u ON g.users_id = u.id;
