@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Lesson, LessonStatus } from '@/interfaces/scheduleInterfaces.ts';
 import { getLessons } from '../../logic/SchedulesRequest';
 import { LessonModalWindow } from '@/components/DashboardsComponents/SchesuleComponents/LessonModalWindow.tsx';
@@ -8,15 +8,15 @@ export const ScheduleTable: React.FC = () => {
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
-  const getWeekDays = (start: Date): string[] => {
-    const days: string[] = [];
+  const getWeekDays = (start: Date): Date[] => {
+    const days: Date[] = [];
     const temp = new Date(start);
     const day = temp.getDay();
     const diff = temp.getDate() - day + (day === 0 ? -6 : 1);
     temp.setDate(diff);
 
     for (let i = 0; i < 7; i++) {
-      days.push(temp.toISOString().split('T')[0]);
+      days.push(new Date(temp));
       temp.setDate(temp.getDate() + 1);
     }
     return days;
@@ -32,7 +32,6 @@ export const ScheduleTable: React.FC = () => {
 
   useEffect(() => {
     loadLessons();
-    console.log(JSON.stringify(lessons))
   }, [currentDate]);
 
   const changeWeek = (direction: number) => {
@@ -43,7 +42,12 @@ export const ScheduleTable: React.FC = () => {
 
   const getLessonStyles = (lesson: Lesson) => {
     const now = new Date();
-    const lessonDateTime = new Date(`${lesson.lesson_date}T${lesson.end_time}`);
+    
+    const lessonDateTime = lesson.lesson_date ? new Date(lesson.lesson_date) : new Date();
+    if (lesson.end_time) {
+      const [hours, minutes] = lesson.end_time.split(':').map(Number);
+      lessonDateTime.setHours(hours, minutes, 0, 0);
+    }
 
     if (lesson.status === LessonStatus.Completed) {
       return { backgroundColor: '#f0fdf4', borderLeft: '4px solid #10b981', color: '#166534' };
@@ -63,7 +67,9 @@ export const ScheduleTable: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
             <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#1e293b' }}>Расписание занятий</h2>
-            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Неделя: {weekDays[0]} — {weekDays[6]}</p>
+            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
+              Неделя: {weekDays[0].toLocaleDateString('ru-RU')} — {weekDays[6].toLocaleDateString('ru-RU')}
+            </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button onClick={() => changeWeek(-1)} style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', backgroundColor: '#ffffff', cursor: 'pointer', fontSize: '13px' }}>Назад</button>
@@ -80,11 +86,10 @@ export const ScheduleTable: React.FC = () => {
 
         <div style={{ display: 'grid', gridTemplateColumns: '80px repeat(7, 1fr)', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
           <div style={{ backgroundColor: '#f8fafc', padding: '12px', textAlign: 'center', fontWeight: 600, fontSize: '13px', color: '#64748b', borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>Время</div>
-          {weekDays.map((day) => {
-            const dateObj = new Date(day);
-            const formattedDay = dateObj.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' });
+          {weekDays.map((dayDate) => {
+            const formattedDay = dayDate.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' });
             return (
-              <div key={day} style={{ backgroundColor: '#f8fafc', padding: '12px', textAlign: 'center', fontWeight: 600, fontSize: '13px', color: '#1e293b', borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>
+              <div key={dayDate.getTime()} style={{ backgroundColor: '#f8fafc', padding: '12px', textAlign: 'center', fontWeight: 600, fontSize: '13px', color: '#1e293b', borderBottom: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>
                 {formattedDay}
               </div>
             );
@@ -95,25 +100,27 @@ export const ScheduleTable: React.FC = () => {
               <div style={{ padding: '10px', borderBottom: '1px solid #f1f5f9', borderRight: '1px solid #e2e8f0', fontSize: '12px', color: '#64748b', textAlign: 'center', backgroundColor: '#fafbfc' }}>
                 {time}
               </div>
-              {weekDays.map((day) => {
+              {weekDays.map((dayDate) => {
                 const targetHour = parseInt(time.split(':')[0], 10);
-                const targetDateStr = day.substring(0, 10);
 
                 const dayLessons = lessons.filter(l => {
-                  const lessonDateStr = String(l.lesson_date).substring(0, 10);
+                  if (!l.lesson_date) return false;
+                  
+                  const isSameDay = new Date(l.lesson_date).toDateString() === dayDate.toDateString();
                   const lessonHour = parseInt(String(l.start_time).split(':')[0], 10);
-                  return lessonDateStr === targetDateStr && lessonHour === targetHour;
+                  
+                  return isSameDay && lessonHour === targetHour;
                 });
 
                 return (
-                  <div key={`${day}-${time}`} style={{ padding: '4px', borderBottom: '1px solid #f1f5f9', borderRight: '1px solid #e2e8f0', minHeight: '50px', backgroundColor: '#ffffff', position: 'relative' }}>
+                  <div key={`${dayDate.getTime()}-${time}`} style={{ padding: '4px', borderBottom: '1px solid #f1f5f9', borderRight: '1px solid #e2e8f0', minHeight: '50px', backgroundColor: '#ffffff', position: 'relative' }}>
                     {dayLessons.map((lesson) => {
-                      const styles = getLessonStyles(lesson);
+                      const currentStyles = getLessonStyles(lesson);
                       return (
                         <div
                           key={String(lesson.id)}
-                          onClick={() => setSelectedLessonId(lesson.id)}
-                          style={{ padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', transition: 'box-shadow 0.2s', ...styles }}
+                          onClick={() => setSelectedLessonId(Number(lesson.id))}
+                          style={{ padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', transition: 'box-shadow 0.2s', ...currentStyles }}
                           onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)'}
                           onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
                         >

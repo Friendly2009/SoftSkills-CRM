@@ -20,7 +20,7 @@ export const getLessonMainInfo = async (req: Request, res: Response) => {
     return res.json({
       lesson: {
         id: row.lesson_id,
-        lesson_date: row.lesson_date,
+        lesson_date: row.lesson_date ? new Date(row.lesson_date) : null, // Преобразовали в объект Date
         start_time: row.start_time,
         end_time: row.end_time,
         status: row.lesson_status,
@@ -123,16 +123,17 @@ export const getLessonsList = async (req: Request, res: Response) => {
         const targetDayIndex = dayOfWeekMapping[sched.day_of_week.toLowerCase()];
         
         if (targetDayIndex === currentDayIndex) {
-          const existingRealLesson = realLessons.find((l: any) => 
-            l.lesson_date.toISOString().split('T')[0] === currentIsoDate && 
-            l.group_id === sched.group_id &&
-            l.start_time === sched.start_time
-          );
+          const existingRealLesson = realLessons.find((l: any) => {
+            const lessonDateObj = new Date(l.lesson_date);
+            return lessonDateObj.toISOString().split('T')[0] === currentIsoDate && 
+                   l.group_id === sched.group_id &&
+                   l.start_time === sched.start_time;
+          });
 
           if (existingRealLesson) {
             generatedLessons.push({
               id: existingRealLesson.id,
-              lesson_date: currentIsoDate,
+              lesson_date: new Date(existingRealLesson.lesson_date),
               start_time: existingRealLesson.start_time,
               end_time: existingRealLesson.end_time,
               status: existingRealLesson.status,
@@ -143,7 +144,7 @@ export const getLessonsList = async (req: Request, res: Response) => {
           } else {
             generatedLessons.push({
               id: `temp-${sched.schedule_id}-${currentIsoDate}`,
-              lesson_date: currentIsoDate,
+              lesson_date: new Date(currentIsoDate),
               start_time: sched.start_time,
               end_time: sched.end_time,
               status: 1,
@@ -158,6 +159,7 @@ export const getLessonsList = async (req: Request, res: Response) => {
 
     return res.json(generatedLessons);
   } catch (error) {
+    console.error("Ошибка в getLessonsList:", error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -1,4 +1,5 @@
 import { ClientTemplate } from "../interfaces/clientsInterfaces.ts";
+
 export const deleteClient = async (client: ClientTemplate) => {
   try {
     const response = await fetch(
@@ -27,9 +28,15 @@ export const getClient = async () => {
       throw new Error("oooops, something went wrong");
     }
     const data = await response.json();
-    return data.data || [];
+    const rawClients = data.data || [];
+
+    return rawClients.map((client: any) => ({
+      ...client,
+      next_visit: client.next_visit ? new Date(client.next_visit) : null
+    }));
   } catch (ex) {
     console.error(ex);
+    return [];
   }
 };
 
@@ -41,7 +48,7 @@ export const addClient = async (formData: ClientTemplate) => {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify(formData),
+      body: JSON.stringify(formData), 
     });
 
     if (!response.ok) {
@@ -64,9 +71,9 @@ export const updateClient = async (updateFormData: ClientTemplate) => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-        },
+          },
         credentials: "include",
-        body: JSON.stringify(updateFormData),
+        body: JSON.stringify(updateFormData), 
       },
     );
 

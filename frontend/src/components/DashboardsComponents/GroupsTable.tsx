@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/group.module.css';
+
 interface UserTemplate {
     id: number;
     full_name: string;
@@ -18,9 +19,9 @@ interface GroupTemplate {
     teacher?: string;
     studentsCount?: number;
     max_students: number;
-    nextMeeting?: string;
-    start_date: string;
-    end_date?: string;
+    nextMeeting?: Date | null;
+    start_date: Date | null;
+    end_date?: Date | null;
     is_end_time: boolean;
 }
 interface FormState {
@@ -41,6 +42,7 @@ const formatTime = (timeStr: string) => {
     if (parts.length >= 2) return `${parts[0]}:${parts[1]}`;
     return timeStr;
 };
+
 export const GroupTable: React.FC = () => {
     const [groups, setGroups] = useState<GroupTemplate[]>([]);
     const [users, setUsers] = useState<UserTemplate[]>([]);
@@ -49,6 +51,7 @@ export const GroupTable: React.FC = () => {
     const [isUpdateMode, setIsUpdateMode] = useState(false);
     const [hasEndDate, setHasEndDate] = useState(false);
     const [isOpenModalWindow, setIsOpenModalWindow] = useState(false);
+
     const [formData, setFormData] = useState<FormState>({
         id: 0,
         name: '',
@@ -60,7 +63,7 @@ export const GroupTable: React.FC = () => {
         schedules: [{ day_of_week: 'Понедельник', start_time: '', end_time: '' }],
         is_end_time: false
     });
-    const [updateFormData, setUpdateFormData] = useState({
+    const [updateFormData, setUpdateFormData] = useState<FormState>({
         id: 0,
         name: '',
         users_id: 0,
@@ -71,6 +74,7 @@ export const GroupTable: React.FC = () => {
         schedules: [{ day_of_week: 'Понедельник', start_time: '', end_time: '' }],
         is_end_time: false
     });
+
     const handleDelGroup = () => {
         setIsDeleteMode(prev => !prev);
     };
@@ -85,7 +89,7 @@ export const GroupTable: React.FC = () => {
                 ? Number(value)
                 : value
         }));
-    }
+    };
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -115,6 +119,11 @@ export const GroupTable: React.FC = () => {
             ...prev,
             schedules: [...prev.schedules, { day_of_week: 'Понедельник', start_time: '', end_time: '' }]
         }));
+    };
+    const getStatusLabel = (status: number) => {
+        if (status === 1) return 'Набор';
+        if (status === 2) return 'Активна';
+        return 'Архив';
     };
     const addUpdateSheduleField = () => {
         setUpdateFormData(prev => ({
@@ -171,7 +180,7 @@ export const GroupTable: React.FC = () => {
                 status: 1,
                 start_date: new Date().toISOString().split('T')[0],
                 end_date: '',
-                max_students: 0,
+                max_students: 10,
                 schedules: [{ day_of_week: 'Понедельник', start_time: '', end_time: '' }],
                 is_end_time: false
             });
@@ -191,7 +200,16 @@ export const GroupTable: React.FC = () => {
                 throw new Error('oooops, something went wrong');
             }
             const rows = await response.json();
-            setGroups(rows.data || []);
+            const rawGroups = rows.data || [];
+
+            const formattedGroups = rawGroups.map((group: any) => ({
+                ...group,
+                start_date: group.start_date ? new Date(group.start_date) : null,
+                end_date: group.end_date ? new Date(group.end_date) : null,
+                nextMeeting: group.nextMeeting ? new Date(group.nextMeeting) : null
+            }));
+
+            setGroups(formattedGroups);
             console.log(rows);
         } catch (ex) {
             console.log(ex);
@@ -207,7 +225,6 @@ export const GroupTable: React.FC = () => {
                 throw new Error('Ошибка при загрузке сотрудников');
             }
             const rows = await response.json();
-
             setUsers(rows.data || []);
         } catch (ex) {
             console.error(ex);
@@ -236,55 +253,52 @@ export const GroupTable: React.FC = () => {
             };
 
             const response = await fetch(`http://localhost:3000/updategroup/${id}`, {
-                method: "PATCH",
+                method: 'PATCH',
                 credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(payload)
             });
-            const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(data.message);
-            }
-
-            console.log("Успешно обновлено:", data);
-            setIsOpenModalWindow(false);
+            if (!response.ok) throw new Error('Не удалось обновить группу');
             setIsUpdateMode(false);
             getGroup();
-        } catch (er) {
-            console.error(er);
-            alert(er);
+            setIsOpenModalWindow(false);
+        } catch (error) {
+            console.error(error);
+            alert('Ошибка обновления группы');
         }
-    };
-    const getStatusLabel = (status: GroupTemplate['status']) => {
-        if (status === 2) return 'Активна';
-        if (status === 1) return 'Набор';
-        return 'Архив';
     };
     const handleRowClick = async (group: GroupTemplate) => {
         if (isDeleteMode) {
+            if (!window.confirm(`Вы действительно хотите удалить группу ${group.name}?`)) {
+                return;
+            }
+
             try {
-                const response = await fetch(`http://localhost:3000/deletegroup/${group.id}`,
-                    {
-                        method: 'DELETE',
-                        credentials: 'include'
-                    });
-                if (!response.ok) {
-                    throw new Error("something went wrong...");
+                const response = await fetch(`http://localhost:3000/deletegroup/${group.id}`, {
+                    method: "DELETE",
+                    credentials: "include"
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    setGroups(prev => prev.filter(g => g.id !== group.id));
+                } else {
+                    alert(result.message || "Ошибка при удалении");
                 }
-                console.log('group was be deleted');
-                getGroup();
-                getUsers();
+            } catch (error) {
+                console.error("Ошибка при удалении группы:", error);
+                alert("Не удалось выполнить удаление.");
+            } finally {
                 setIsDeleteMode(false);
-            } catch (er) {
-                alert("something went wrong...");
-                console.log(er);
             }
         }
+
         if (isUpdateMode) {
-            const groupHasEndDate = !!group.end_date && group.end_date !== "";
+            setIsDeleteMode(false);
 
             setUpdateFormData({
                 id: group.id,
@@ -292,20 +306,17 @@ export const GroupTable: React.FC = () => {
                 users_id: group.users_id,
                 status: group.status,
                 max_students: group.max_students,
-                start_date: group.start_date,
-                end_date: group.end_date || '',
+                start_date: group.start_date ? group.start_date.toISOString().split('T')[0] : '',
+                end_date: group.end_date ? group.end_date.toISOString().split('T')[0] : '',
                 schedules: group.schedules,
-                is_end_time: groupHasEndDate
+                is_end_time: !!group.end_date
             });
 
-            setHasEndDate(groupHasEndDate);
-
+            setHasEndDate(!!group.end_date);
             setIsOpenModalWindow(true);
         }
-
-    }
+    };
     useEffect(() => {
-        getUsers();
         getGroup();
         getUsers();
     }, []);
@@ -315,7 +326,7 @@ export const GroupTable: React.FC = () => {
                 <div className={style['modal-overlay']} onClick={() => setIsOpenModalWindow(false)}>
                     <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
                         <div className={style['modal-header']}>
-                            <h3>Изменить группу</h3>
+                            <h3>Редактировать группу</h3>
                             <button className={style['btn-close']} onClick={() => setIsOpenModalWindow(false)}>×</button>
                         </div>
 
@@ -361,8 +372,10 @@ export const GroupTable: React.FC = () => {
                                     <label>Дата начала работы группы</label>
                                     <input
                                         type="date" name="start_date" required className={style['form-input']}
-                                        value={updateFormData.start_date} onChange={handleUpdateInputChange}
+                                        value={typeof updateFormData.start_date === 'string' ? updateFormData.start_date : (updateFormData.start_date as any).toISOString().split('T')[0]}
+                                        onChange={handleUpdateInputChange}
                                     />
+
                                 </div>
                                 <div className={style['form-group']}>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '5px' }}>
@@ -370,20 +383,9 @@ export const GroupTable: React.FC = () => {
                                             type="checkbox"
                                             checked={hasEndDate}
                                             onChange={(e) => {
-                                                const isChecked = e.target.checked;
-                                                setHasEndDate(isChecked);
-
-                                                if (!isChecked) {
-                                                    setUpdateFormData(prev => ({
-                                                        ...prev,
-                                                        end_date: '',
-                                                        is_end_time: false
-                                                    }));
-                                                } else {
-                                                    setUpdateFormData(prev => ({
-                                                        ...prev,
-                                                        is_end_time: true
-                                                    }));
+                                                setHasEndDate(e.target.checked);
+                                                if (!e.target.checked) {
+                                                    setUpdateFormData(prev => ({ ...prev, end_date: '' }));
                                                 }
                                             }}
                                         />
@@ -395,11 +397,11 @@ export const GroupTable: React.FC = () => {
                                         className={style['form-input']}
                                         disabled={!hasEndDate}
                                         required={hasEndDate}
-                                        value={updateFormData.end_date}
+                                        value={typeof updateFormData.end_date === 'string' ? updateFormData.end_date : (updateFormData.end_date as any).toISOString().split('T')[0]}
                                         onChange={handleUpdateInputChange}
                                     />
-                                </div>
 
+                                </div>
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Максимальное количество учеников</label>
                                     <input
@@ -427,37 +429,33 @@ export const GroupTable: React.FC = () => {
 
                                             <input
                                                 type="time"
-                                                value={schedule.start_time ? schedule.start_time.slice(0, 5) : ''}
+                                                value={schedule.start_time && typeof schedule.start_time === 'string' ? schedule.start_time.slice(0, 5) : ''}
                                                 required
                                                 className={style['form-input']}
-                                                style={{
-                                                    flex: 1.5,
-                                                    border: (schedule.start_time && schedule.end_time && schedule.start_time >= schedule.end_time) ? '1px solid #ff4d4d' : undefined
-                                                }}
+                                                style={{ flex: 1.5 }}
                                                 onChange={(e) => handleSheduleUpdateChange(index, 'start_time', e.target.value)}
                                             />
+
                                             <span style={{ alignSelf: 'center' }}>—</span>
+
                                             <input
                                                 type="time"
-                                                value={schedule.end_time ? schedule.end_time.slice(0, 5) : ''}
+                                                value={schedule.end_time && typeof schedule.end_time === 'string' ? schedule.end_time.slice(0, 5) : ''}
                                                 required
                                                 className={style['form-input']}
-                                                style={{
-                                                    flex: 1.5,
-                                                    border: (schedule.start_time && schedule.end_time && schedule.start_time >= schedule.end_time) ? '1px solid #ff4d4d' : undefined
-                                                }}
+                                                style={{ flex: 1.5 }}
                                                 onChange={(e) => handleSheduleUpdateChange(index, 'end_time', e.target.value)}
                                             />
-
 
                                             {updateFormData.schedules.length > 1 && (
                                                 <button
                                                     type="button" onClick={() => removeUpdateSheduleField(index)}
                                                     style={{ padding: '5px 10px', cursor: 'pointer', background: 'none', border: 'none', color: '#ff4d4d', fontSize: '18px' }}
-                                                >X</button>
+                                                >✕</button>
                                             )}
                                         </div>
                                     ))}
+
                                     <button
                                         type="button" onClick={addUpdateSheduleField} className={style['btn-secondary']}
                                         style={{ padding: '5px 10px', fontSize: '13px', marginTop: '5px' }}
@@ -465,7 +463,7 @@ export const GroupTable: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className={style['form-actions']}>
+                            <div className={style['form-actions']} style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                                 <button type="button" className={style['btn-secondary']} onClick={() => setIsOpenModalWindow(false)}>Отмена</button>
                                 <button type="submit" className={style['btn-primary']}>Сохранить</button>
                             </div>
@@ -527,7 +525,8 @@ export const GroupTable: React.FC = () => {
                                     <label>Дата начала работы группы</label>
                                     <input
                                         type="date" name="start_date" required className={style['form-input']}
-                                        value={formData.start_date} onChange={handleInputChange}
+                                        value={typeof formData.start_date === 'string' ? formData.start_date : ''}
+                                        onChange={handleInputChange}
                                     />
                                 </div>
 
@@ -551,10 +550,11 @@ export const GroupTable: React.FC = () => {
                                         className={style['form-input']}
                                         disabled={!hasEndDate}
                                         required={hasEndDate}
-                                        value={formData.end_date}
+                                        value={typeof formData.end_date === 'string' ? formData.end_date : ''}
                                         onChange={handleInputChange}
                                     />
                                 </div>
+
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Максимальное количество учеников</label>
                                     <input
@@ -562,6 +562,7 @@ export const GroupTable: React.FC = () => {
                                         value={formData.max_students} onChange={handleInputChange}
                                     />
                                 </div>
+
                                 <div className={`${style['form-group']} ${style['full-width']}`} style={{ marginTop: '15px' }}>
                                     <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>Расписание занятий</label>
                                     {formData.schedules.map((schedule, index) => (
@@ -603,7 +604,6 @@ export const GroupTable: React.FC = () => {
                                                 }}
                                                 onChange={(e) => handleScheduleChange(index, 'end_time', e.target.value)}
                                             />
-
 
                                             {formData.schedules.length > 1 && (
                                                 <button
@@ -693,13 +693,15 @@ export const GroupTable: React.FC = () => {
                                     {group.studentsCount} / {group.max_students}
                                 </td>
                                 <td>
-                                    <span className={style['date']}>{group.nextMeeting}</span>
+                                    <span className={style['date']}>
+                                        {group.nextMeeting ? group.nextMeeting.toLocaleDateString('ru-RU') : '—'}
+                                    </span>
                                 </td>
                                 <td>
                                     <span className={`
-                  ${style['badge']} 
-                  ${group.status === 2 ? style['is_active'] : style['is_not_active']}
-                `}>
+                                        ${style['badge']} 
+                                        ${group.status === 2 ? style['is_active'] : style['is_not_active']}
+                                    `}>
                                         {getStatusLabel(group.status)}
                                     </span>
                                 </td>

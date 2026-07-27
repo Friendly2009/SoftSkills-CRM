@@ -7,8 +7,9 @@ export interface ClientTemplate {
   contact: string;
   group_ids: number[];
   group_names: string[];
-  next_visit: string;
+  next_visit: Date | null;
 }
+
 export interface MoreActionProps {
     isOpen: boolean;
     x: number;
@@ -20,5 +21,3 @@ export interface MoreActionProps {
     onEdit?: (client: ClientTemplate) => void;
     onOpenProfile?: (client: ClientTemplate) => void; 
 }
-
-

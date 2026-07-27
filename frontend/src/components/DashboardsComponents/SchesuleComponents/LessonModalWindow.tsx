@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LessonModalData, AttendanceStatus, LessonStatus, AttendanceRecord, Client, User } from '@/interfaces/scheduleInterfaces.ts';
 import { getLessonMainInfo, getLessonStudentsAndAttendance, getAllAvailableTeachers, closeLesson } from '@/logic/SchedulesRequest.ts';
 
@@ -35,7 +35,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
         setData(fullData);
         setSelectedTeacherId(fullData.lesson.user_id);
         setTeacherPay(fullData.lesson.teacher_pay);
-        
+
         const initialAttendance: Record<number, { status: AttendanceStatus; price: number }> = {};
         fullData.students.forEach((student: Client) => {
           const existing = fullData.attendance?.find((a: AttendanceRecord) => a.client_id === student.id);
@@ -102,23 +102,26 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
 
   if (!data) return null;
 
-  const isReadOnly = data.lesson.status === LessonStatus.Completed
+  const isReadOnly = data.lesson.status === LessonStatus.Completed;
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1100, fontFamily: 'system-ui, sans-serif' }}>
       <div style={{ backgroundColor: '#ffffff', width: '650px', maxHeight: '90vh', borderRadius: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        
+
         <div style={{ padding: '16px 24px', borderBottom: '1px solid #eef2f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fafbfc' }}>
           <div>
             <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>{data.group.name}</h3>
-            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>Дата: {data.lesson.lesson_date} | Время: {data.lesson.start_time.substring(0,5)} - {data.lesson.end_time.substring(0,5)}</p>
+            {/* Адаптировали вывод объекта Date через .toLocaleDateString */}
+            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
+              Дата: {data.lesson.lesson_date ? data.lesson.lesson_date.toLocaleDateString('ru-RU') : '—'} | Время: {data.lesson.start_time.substring(0, 5)} - {data.lesson.end_time.substring(0, 5)}
+            </p>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
+
             <div style={{ display: 'flex', gap: '16px' }}>
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#475569', marginBottom: '6px' }}>Преподаватель</label>
@@ -145,14 +148,14 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                         <div style={{ fontSize: '14px', fontWeight: 500, color: '#1e293b' }}>{student.name}</div>
                         <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>Баланс: <span style={{ color: student.balance < 0 ? '#ef4444' : '#10b981', fontWeight: 500 }}>{student.balance} руб.</span></div>
                       </div>
-                      
+
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <select value={state.status} onChange={(e) => handleStatusChange(student.id, Number(e.target.value) as AttendanceStatus)} disabled={isReadOnly} style={{ padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', backgroundColor: isReadOnly ? '#f1f5f9' : '#ffffff' }}>
                           <option value={AttendanceStatus.Present}>Был</option>
                           <option value={AttendanceStatus.Excused}>Уважительная</option>
                           <option value={AttendanceStatus.Absent}>Прогул</option>
                         </select>
-                        
+
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <input type="number" value={state.price} onChange={(e) => handlePriceChange(student.id, Number(e.target.value))} disabled={isReadOnly || state.status === AttendanceStatus.Excused} style={{ width: '80px', padding: '6px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', textAlign: 'right', backgroundColor: (isReadOnly || state.status === AttendanceStatus.Excused) ? '#f1f5f9' : '#ffffff' }} min="0" required />
                           <span style={{ fontSize: '13px', color: '#64748b' }}>руб.</span>
@@ -181,4 +184,5 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
       </div>
     </div>
   );
+
 };

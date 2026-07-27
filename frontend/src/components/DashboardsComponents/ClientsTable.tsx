@@ -5,6 +5,7 @@ import { deleteClient, getClient, addClient, updateClient } from '../../logic/Cl
 import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
 import { TopUp } from "./ClientsComponents/topUp.tsx";
 import { UpdateClientForm } from '@/components/DashboardsComponents/ClientsComponents/updateClientForm.tsx';
+
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
@@ -14,6 +15,7 @@ export const ClientTable: React.FC = () => {
     const [allGroups, setAllGroups] = useState<{ id: number; name: string }[]>([]);
     const [isMoreAction, setMoreAction] = useState(false);
     const [topUpClient, setTopUpClient] = useState<ClientTemplate | null>(null);
+
     const [menu, setMenu] = useState<MoreActionProps>({
         isOpen: false,
         x: 0,
@@ -22,6 +24,7 @@ export const ClientTable: React.FC = () => {
         onClose: () => { },
         onDelete: () => { }
     });
+
     const [resetFormData, setResetFormData] = useState<ClientTemplate>({
         id: 0,
         name: '',
@@ -31,8 +34,9 @@ export const ClientTable: React.FC = () => {
         contact: "",
         group_ids: [],
         group_names: [],
-        next_visit: ""
+        next_visit: null
     });
+
     const [formData, setFormData] = useState<ClientTemplate>({
         id: 0,
         name: '',
@@ -42,20 +46,25 @@ export const ClientTable: React.FC = () => {
         contact: "",
         group_ids: [],
         group_names: [],
-        next_visit: ""
+        next_visit: null
     });
+
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setResetFormData(prev => ({
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'next_visit'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
     };
+
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     };
+
     const handleRowClick = async (client: ClientTemplate) => {
         if (isResetMode) {
             setResetFormData({
@@ -67,7 +76,7 @@ export const ClientTable: React.FC = () => {
                 contact: client.contact,
                 group_ids: client.group_ids,
                 group_names: client.group_names,
-                next_visit: ''
+                next_visit: client.next_visit
             });
             setIsResetModalWinOpen(true);
         }
@@ -78,6 +87,7 @@ export const ClientTable: React.FC = () => {
             getCompanyGroups();
         }
     };
+
     const getCompanyGroups = async () => {
         try {
             const response = await fetch("http://localhost:3000/getgroups", { credentials: "include" });
@@ -89,29 +99,36 @@ export const ClientTable: React.FC = () => {
             console.error("Ошибка загрузки групп:", ex);
         }
     };
+
     const handleAddClient = () => {
         setIsModalOpen(true);
     };
+
     const handleDelClient = () => {
         setIsDeleteMode(prev => !prev);
     };
+
     const handleResetClient = () => {
         setIsResetMode(prev => !prev);
     };
+
     useEffect(() => {
         getClient().then((data) => {
             if (data) setClient(data);
         });
         getCompanyGroups();
     }, []);
+
     useEffect(() => {
         const closeMenu = () => setMenu(prev => ({ ...prev, isOpen: false }));
         window.addEventListener("click", closeMenu);
         return () => window.removeEventListener("click", closeMenu);
     }, []);
+
     const formatBalance = (amount: number) => {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
     };
+
     const renderStatus = (status: number) => {
         switch (status) {
             case 1:
@@ -122,6 +139,7 @@ export const ClientTable: React.FC = () => {
                 return <span className={style['text-muted']}>—</span>;
         }
     };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
@@ -129,9 +147,12 @@ export const ClientTable: React.FC = () => {
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'next_visit'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
     };
+
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log(JSON.stringify(formData));
@@ -139,15 +160,16 @@ export const ClientTable: React.FC = () => {
         getCompanyGroups();
         setClient(await getClient());
         setIsModalOpen(false);
-    }
+    };
+
     const handleResetFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await updateClient(resetFormData)
+        await updateClient(resetFormData);
         getCompanyGroups();
         setClient(await getClient());
         setIsResetModalWinOpen(false);
         setIsResetMode(false);
-    }
+    };
     return (
         <>
             {isModalOpen && (<div>
@@ -329,10 +351,10 @@ export const ClientTable: React.FC = () => {
                                     {renderStatus(client.status)}
                                 </td>
                                 <td>
-                                    {client.next_visit && client.next_visit.trim() !== "" ? (
+                                    {client.next_visit instanceof Date ? (
                                         <span className={style['visit-badge']}>
                                             <span className={style['visit-icon']}>📅</span>
-                                            {client.next_visit}
+                                            {client.next_visit.toLocaleDateString('ru-RU')}
                                         </span>
                                     ) : (
                                         <span className={`${style['visit-badge']} ${style['visit-empty']}`}>
@@ -407,7 +429,7 @@ export const ClientTable: React.FC = () => {
                                     contact: targetClient.contact,
                                     group_ids: targetClient.group_ids || [],
                                     group_names: targetClient.group_names || [],
-                                    next_visit: targetClient.next_visit || ''
+                                    next_visit: targetClient.next_visit || null
                                 });
                                 setIsResetModalWinOpen(true);
                             }}
@@ -428,6 +450,7 @@ export const ClientTable: React.FC = () => {
                     </>
                 )}
             </div>
+
         </>
     );
 };

@@ -1,6 +1,7 @@
 import React from "react";
 import { MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
 import { useNavigate } from "react-router-dom";
+
 const menuStyles = {
     overlay: {
         position: 'absolute' as const,
@@ -64,7 +65,6 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
                 Открыть
             </button>
 
-
             <button
                 onClick={(e) => {
                     e.stopPropagation();
@@ -75,7 +75,7 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
                 }}
                 style={{ ...menuStyles.btn, ...menuStyles.btnSuccess }}
             >
-                Пополнить
+                Пополнитель
             </button>
             <button
                 onClick={(e) => {

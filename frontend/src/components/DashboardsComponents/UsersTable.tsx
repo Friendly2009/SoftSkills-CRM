@@ -7,7 +7,7 @@ interface UserTemplate {
     role: string;
     rank: number;
     email: string;
-    birthday: string | null;
+    birthday: Date | null;
     contact: string;
     gender: string | null;
 }
@@ -18,16 +18,18 @@ export const UsersTable: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isReSetModalWinOpen, setIsReSetModalWinOpen] = useState(false);
     const [isReSetMode, setIsReSetMode] = useState(false);
+
     const [formData, setFormData] = useState({
         full_name: '',
         role: '',
         rank: 100,
         email: '',
         contact: '',
-        birthday: '',
+        birthday: null as Date | null, // Типизировали как Date | null
         gender: 'Муж',
         password: ''
     });
+
     const [resetFormData, SetResetFormData] = useState({
         id: 0,
         full_name: '',
@@ -35,10 +37,11 @@ export const UsersTable: React.FC = () => {
         rank: 100,
         email: '',
         contact: '',
-        birthday: '',
+        birthday: null as Date | null,
         gender: 'Муж',
         password: ''
     });
+
     const getUsers = async () => {
         try {
             const response = await fetch("http://localhost:3000/getusers", {
@@ -49,43 +52,65 @@ export const UsersTable: React.FC = () => {
                 throw new Error('oooops, something went wrong');
             }
             const data = await response.json();
-            setUsers(data.data || []);
+            const rawUsers = data.data || [];
+
+            const formattedUsers = rawUsers.map((user: any) => ({
+                ...user,
+                birthday: user.birthday ? new Date(user.birthday) : null
+            }));
+
+            setUsers(formattedUsers);
         } catch (ex) {
             console.error(ex);
         }
     };
+
     useEffect(() => {
         getUsers();
     }, []);
+
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'birthday'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
     };
+
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         SetResetFormData(prev => ({
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'birthday'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
     };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            // Перед отправкой сериализуем объект Date в строку YYYY-MM-DD
+            const payload = {
+                ...formData,
+                birthday: formData.birthday ? formData.birthday.toISOString().split('T')[0] : null
+            };
+
             const response = await fetch("http://localhost:3000/adduser", {
                 credentials: "include",
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
@@ -96,14 +121,20 @@ export const UsersTable: React.FC = () => {
             alert("Произошла ошибка при сохранении сотрудника.");
         }
     };
+
     const handleResetFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const payload = {
+                ...resetFormData,
+                birthday: resetFormData.birthday ? resetFormData.birthday.toISOString().split('T')[0] : null
+            };
+
             const response = await fetch("http://localhost:3000/resetuser", {
                 credentials: "include",
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(resetFormData),
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
@@ -115,9 +146,9 @@ export const UsersTable: React.FC = () => {
             alert("Произошла ошибка при сохранении сотрудника.");
         }
     };
+
     const handleRowClick = async (user: UserTemplate) => {
         if (isDeleteMode) {
-
             if (user.rank === 1000) {
                 alert("Нельзя удалить сотрудника с рангом 1000 (Директор)!");
                 return;
@@ -157,7 +188,7 @@ export const UsersTable: React.FC = () => {
                 rank: user.rank,
                 email: user.email,
                 contact: user.contact,
-                birthday: user.birthday || '',
+                birthday: user.birthday ? new Date(user.birthday) : null,
                 gender: user.gender || 'Муж',
                 password: ''
             });
@@ -165,15 +196,18 @@ export const UsersTable: React.FC = () => {
             setIsReSetModalWinOpen(true);
         }
     };
+
     const handlePlusClick = () => {
         setIsModalOpen(true);
     };
+
     const handleResetClick = () => {
         setIsReSetMode(prev => !prev);
     };
+
     const handleDelClick = () => {
         setIsDeleteMode(prev => !prev);
-    }
+    };
     return (
         <>
             {isReSetModalWinOpen && (
@@ -236,7 +270,7 @@ export const UsersTable: React.FC = () => {
                                     <label>ДР</label>
                                     <input
                                         type="date" name="birthday" className={style['form-input']}
-                                        value={resetFormData.birthday} onChange={handleResetInputChange}
+                                        value={resetFormData.birthday ? resetFormData.birthday.toISOString().split('T')[0] : ""} onChange={handleResetInputChange}
                                     />
                                 </div>
 
@@ -322,7 +356,7 @@ export const UsersTable: React.FC = () => {
                                     <label>ДР</label>
                                     <input
                                         type="date" name="birthday" className={style['form-input']}
-                                        value={formData.birthday} onChange={handleInputChange}
+                                        value={formData.birthday ? formData.birthday.toISOString().split('T')[0] : ""} onChange={handleInputChange}
                                     />
                                 </div>
 
@@ -401,8 +435,9 @@ export const UsersTable: React.FC = () => {
                                 <td>{user.email}</td>
                                 <td>{user.contact}</td>
                                 <td>
-                                    {user.birthday ? user.birthday : <span className={style['text-muted']}>—</span>}
+                                    {user.birthday ? user.birthday.toLocaleDateString('ru-RU') : <span className={style['text-muted']}>—</span>}
                                 </td>
+
                                 <td>
                                     {user.gender ? user.gender : <span className={style['text-muted']}>—</span>}
                                 </td>

@@ -29,7 +29,7 @@ export interface Group {
 
 export interface Lesson {
   id: number;
-  lesson_date: string;
+  lesson_date: Date | null;
   start_time: string;
   end_time: string;
   status: LessonStatus;
