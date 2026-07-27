@@ -59,3 +59,15 @@ export interface LessonClosePayload {
   teacher_pay: number;
   attendance: AttendanceRecord[];
 }
+
+export interface PhantomLesson {
+  id: string;              
+  schedule_id: number;     
+  lesson_date: Date;    
+  start_time: string;      
+  end_time: string;      
+  group_name: string;     
+  user_name: string;       
+  company_id: number;      
+  status: number;          
+}

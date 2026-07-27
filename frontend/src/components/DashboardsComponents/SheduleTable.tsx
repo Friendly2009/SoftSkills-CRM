@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Lesson, LessonStatus } from '@/interfaces/scheduleInterfaces.ts';
-import { getLessons } from '../../logic/SchedulesRequest';
-import { LessonModalWindow } from '@/components/DashboardsComponents/SchesuleComponents/LessonModalWindow.tsx';
+import { PhantomLesson } from '@/interfaces/scheduleInterfaces.ts';
+import { getSchedule } from '../../logic/SchedulesRequest';
 
 export const ScheduleTable: React.FC = () => {
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+  // Теперь храним массив сгенерированных фантомных уроков
+  const [lessons, setLessons] = useState<PhantomLesson[]>([]);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   const getWeekDays = (start: Date): Date[] => {
@@ -24,10 +24,58 @@ export const ScheduleTable: React.FC = () => {
 
   const weekDays = getWeekDays(currentDate);
 
-  const loadLessons = () => {
-    getLessons(weekDays[0], weekDays[6])
-      .then(setLessons)
-      .catch(() => { });
+  // Маппинг текстового дня недели из базы на индекс дня в JavaScript (0 - Воскресенье, 1 - Понедельник...)
+  const dayOfWeekMapping: Record<string, number> = {
+    'воскресенье': 0, 'понедельник': 1, 'вторник': 2, 'среда': 3, 'четверг': 4, 'пятница': 5, 'суббота': 6
+  };
+
+  const loadLessons = async () => {
+    try {
+      const response = await getSchedule();
+      // Если getSchedule возвращает чистый JSON-текст, раскомментируйте строчку ниже:
+      // const result = typeof response === 'string' ? JSON.parse(response) : response;
+      const result = response;
+
+      if (result && result.success && Array.isArray(result.data)) {
+        const scheduleTemplates = result.data;
+        const generatedPhantomLessons: PhantomLesson[] = [];
+
+        // Пробегаемся по 7 дням текущей отображаемой недели
+        weekDays.forEach((dayDate) => {
+          const currentDayIndex = dayDate.getDay(); // 0-6
+
+          // Получаем строку даты в формате YYYY-MM-DD с учетом локального часового пояса
+          const offset = dayDate.getTimezoneOffset();
+          const localDay = new Date(dayDate.getTime() - (offset * 60 * 1000));
+          const dateStr = localDay.toISOString().split('T')[0];
+
+          // Ищем шаблоны расписания, которые подходят под текущий день недели
+          scheduleTemplates.forEach((template: any) => {
+            const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase()];
+
+            if (targetDayIndex === currentDayIndex) {
+              // Создаем полноценный фантомный объект урока
+              generatedPhantomLessons.push({
+                id: `temp-${template.schedule_id}-${dateStr}`,
+                schedule_id: template.schedule_id,
+                lesson_date: new Date(dayDate), // Календарная дата дня
+                start_time: template.start_time,
+                end_time: template.end_time,
+                group_name: template.group_name,
+                user_name: template.user_name,
+                company_id: template.company_id,
+                status: 1 // По умолчанию "Запланирован"
+              });
+            }
+          });
+        });
+
+        // Записываем сгенерированные фантомы в стейт таблицы
+        setLessons(generatedPhantomLessons);
+      }
+    } catch (error) {
+      console.error("Ошибка при генерации фантомной сетки расписания:", error);
+    }
   };
 
   useEffect(() => {
@@ -40,25 +88,24 @@ export const ScheduleTable: React.FC = () => {
     setCurrentDate(next);
   };
 
-  const getLessonStyles = (lesson: Lesson) => {
+  const getLessonStyles = (lesson: PhantomLesson) => {
     const now = new Date();
-    
-    const lessonDateTime = lesson.lesson_date ? new Date(lesson.lesson_date) : new Date();
+    const lessonDateTime = new Date(lesson.lesson_date);
+
     if (lesson.end_time) {
       const [hours, minutes] = lesson.end_time.split(':').map(Number);
       lessonDateTime.setHours(hours, minutes, 0, 0);
     }
 
-    if (lesson.status === LessonStatus.Completed) {
-      return { backgroundColor: '#f0fdf4', borderLeft: '4px solid #10b981', color: '#166534' };
-    }
+    // Так как это фантомы, они все имеют статус 1. Красим на основе времени (прошел урок или только будет)
     if (lessonDateTime < now) {
-      return { backgroundColor: '#fff7ed', borderLeft: '4px solid #f97316', color: '#9a3412' };
+      return { backgroundColor: '#fff7ed', borderLeft: '4px solid #f97316', color: '#9a3412' }; // Требует закрытия
     }
-    return { backgroundColor: '#f0f9ff', borderLeft: '4px solid #3b82f6', color: '#075985' };
+    return { backgroundColor: '#f0f9ff', borderLeft: '4px solid #3b82f6', color: '#075985' }; // Будущий
   };
 
   const timeSlots = Array.from({ length: 14 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
+
 
   return (
     <div style={{ padding: '24px', fontFamily: 'system-ui, sans-serif', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
@@ -105,10 +152,10 @@ export const ScheduleTable: React.FC = () => {
 
                 const dayLessons = lessons.filter(l => {
                   if (!l.lesson_date) return false;
-                  
+
                   const isSameDay = new Date(l.lesson_date).toDateString() === dayDate.toDateString();
                   const lessonHour = parseInt(String(l.start_time).split(':')[0], 10);
-                  
+
                   return isSameDay && lessonHour === targetHour;
                 });
 
@@ -118,13 +165,15 @@ export const ScheduleTable: React.FC = () => {
                       const currentStyles = getLessonStyles(lesson);
                       return (
                         <div
-                          key={String(lesson.id)}
-                          onClick={() => setSelectedLessonId(Number(lesson.id))}
+                          key={lesson.id}
+                          // ИСПРАВЛЕНО: Передаем строку id фантома напрямую без приведения к Number
+                          onClick={() => setSelectedLessonId(lesson.id)}
                           style={{ padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', transition: 'box-shadow 0.2s', ...currentStyles }}
                           onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)'}
                           onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
                         >
-                          <div style={{ fontWeight: 600 }}>Группа #{lesson.group_id}</div>
+                          {/* ИСПРАВЛЕНО: Выводим название группы вместо непонятного юзеру id */}
+                          <div style={{ fontWeight: 600 }}>{lesson.group_name}</div>
                           <div style={{ marginTop: '2px', opacity: 0.9 }}>
                             {String(lesson.start_time).substring(0, 5)} - {String(lesson.end_time).substring(0, 5)}
                           </div>
@@ -137,19 +186,8 @@ export const ScheduleTable: React.FC = () => {
             </React.Fragment>
           ))}
         </div>
-
       </div>
-
-      {selectedLessonId !== null && (
-        <LessonModalWindow
-          lessonId={selectedLessonId}
-          onClose={() => setSelectedLessonId(null)}
-          onSuccess={() => {
-            setSelectedLessonId(null);
-            loadLessons();
-          }}
-        />
-      )}
     </div>
   );
+
 };
