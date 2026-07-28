@@ -81,19 +81,23 @@ export const ScheduleTable: React.FC = () => {
   };
 
   const getLessonStyles = (lesson: PhantomLesson) => {
-    const now = new Date();
-    const lessonDateTime = new Date(lesson.lesson_date);
-
-    if (lesson.end_time) {
-      const [hours, minutes] = lesson.end_time.split(':').map(Number);
-      lessonDateTime.setHours(hours, minutes, 0, 0);
+    if (lesson.status === 2) {
+      return { backgroundColor: '#f0fdf4', borderLeft: '4px solid #10b981', color: '#166534' };
     }
 
-    if (lessonDateTime < now) {
+    const now = new Date();
+
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const lessonDate = new Date(lesson.lesson_date);
+    const lessonDayStart = new Date(lessonDate.getFullYear(), lessonDate.getMonth(), lessonDate.getDate());
+
+    if (lessonDayStart < todayStart || lessonDayStart.getTime() === todayStart.getTime()) {
       return { backgroundColor: '#fff7ed', borderLeft: '4px solid #f97316', color: '#9a3412' };
     }
+
     return { backgroundColor: '#f0f9ff', borderLeft: '4px solid #3b82f6', color: '#075985' };
   };
+
 
   const timeSlots = Array.from({ length: 14 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
 

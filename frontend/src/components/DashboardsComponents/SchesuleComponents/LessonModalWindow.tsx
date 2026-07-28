@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styles from "@/components/cssmoduls/DashboardComponentsCssModuls/lessonModal.module.css";
 interface LessonModalWindowProps {
     lessonId: string;
@@ -7,11 +7,11 @@ interface LessonModalWindowProps {
 }
 
 export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, onClose }) => {
+    
     return (
         <div className={styles['modal-overlay']} onClick={onClose}>
             <div className={styles.drawer} onClick={(e) => e.stopPropagation()}>
 
-                {/* Хедер панели */}
                 <div className={styles.header}>
                     <div className={styles['header-left']}>
                         <span className={styles['status-badge-planned']}>
@@ -22,7 +22,6 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                     <button onClick={onClose} className={styles['btn-close']}>&times;</button>
                 </div>
 
-                {/* Сетка параметров времени и даты */}
                 <div className={styles['meta-grid']}>
                     <div className={styles['meta-card']}>
                         <span className={styles['meta-label']}>Дата проведения урока</span>
@@ -59,7 +58,6 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                             <h4 className={styles['section-title']}>Студенты и фиксация посещаемости</h4>
                             <div className={styles['students-list']}>
 
-                                {/* Ученик 1: Статус "Был" (Выделен темным) */}
                                 <div className={styles['student-card']}>
                                     <div>
                                         <div className={styles['student-name']}>Aлексей Смирнов</div>
@@ -128,7 +126,6 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                         </button>
                     </div>
                 </form>
-
             </div>
         </div>
     );
