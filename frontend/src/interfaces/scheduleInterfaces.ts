@@ -27,8 +27,8 @@ export interface Group {
   name: string;
 }
 
-export interface Lesson {
-  id: number;
+export interface LessonTemplate {
+  id: string;
   lesson_date: Date | null;
   start_time: string;
   end_time: string;
@@ -45,7 +45,7 @@ export interface AttendanceRecord {
 }
 
 export interface LessonModalData {
-  lesson: Lesson;
+  lesson: LessonTemplate;
   group: Group;
   teacher: User;
   students: Client[];
