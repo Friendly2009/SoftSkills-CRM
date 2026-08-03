@@ -2,23 +2,27 @@ import React, { useEffect, useState } from 'react';
 import styles from "@/components/cssmoduls/DashboardComponentsCssModuls/lessonModal.module.css";
 import { LessonModalData } from "@/interfaces/scheduleInterfaces.ts";
 import { getLessonModal, formatDateToString } from "@/logic/SchedulesRequest.ts";
+
 interface LessonModalWindowProps {
     lessonId: string;
+    groupId: number;
     onClose: () => void;
     onSuccess: () => void;
 }
-export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, onClose }) => {
-    const [lesson, setLesson] = useState<LessonModalData>();
 
+export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, onClose, onSuccess }) => {
+    const [lesson, setLesson] = useState<LessonModalData>();
     const [teacherId, setTeacherId] = useState<string>('');
     const [teacherPay, setTeacherPay] = useState<number>(0);
     const [attendance, setAttendance] = useState<Record<number, 'present' | 'absent' | 'excused'>>({});
+    const [studentsPrice, setStudentsPrice] = useState<number>(800);
+
     useEffect(() => {
         getLessonModal(lessonId)
             .then((result) => {
                 if (result && result.success && result.data) {
                     setLesson(result.data);
-                    setTeacherId(result.data.lesson.teacher_id || '1');
+                    setTeacherId(result.data.lesson.teacher_id?.toString() || '1');
                     setTeacherPay(result.data.lesson.teacher_pay || 0);
 
                     const initialAttendance: Record<number, 'present' | 'absent' | 'excused'> = {};
@@ -35,39 +39,93 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
         setAttendance(prev => ({ ...prev, [studentId]: status }));
     };
 
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const payload = {
-            lessonId,
-            teacherId,
-            teacherPay,
-            attendance
+        const convertToISO = (dateVal?: string | Date | null, timeStr?: string) => {
+            const clearTime = timeStr ? timeStr.trim() : "00:00";
+
+            try {
+                let pureDate = "";
+
+                if (!dateVal) {
+                    const today = new Date();
+                    pureDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                } else if (dateVal instanceof Date) {
+                    pureDate = `${dateVal.getFullYear()}-${String(dateVal.getMonth() + 1).padStart(2, '0')}-${String(dateVal.getDate()).padStart(2, '0')}`;
+                } else {
+                    pureDate = String(dateVal).split('T')[0];
+                }
+
+                const localDateTimeStr = `${pureDate}T${clearTime}:00`;
+                const finalDate = new Date(localDateTimeStr);
+
+                if (isNaN(finalDate.getTime())) {
+                    const fallback = new Date();
+                    return new Date(`${fallback.getFullYear()}-${String(fallback.getMonth() + 1).padStart(2, '0')}-${String(fallback.getDate()).padStart(2, '0')}T${clearTime}:00`).toISOString();
+                }
+
+                const tzOffsetMs = finalDate.getTimezoneOffset() * 60000;
+                const correctedDate = new Date(finalDate.getTime() - tzOffsetMs);
+
+                return correctedDate.toISOString();
+            } catch (err) {
+                console.error("Ошибка парсинга даты/времени:", err);
+                return new Date().toISOString();
+            }
         };
 
+        const statusMapping: Record<'present' | 'absent' | 'excused', number> = {
+            present: 1,
+            absent: 2,
+            excused: 3
+        };
+
+        const payload = {
+            lessonId: lessonId,
+            groupId: lesson?.group.id,
+            startDateTime: convertToISO(lesson?.lesson.lesson_date, lesson?.lesson.start_time),
+            endDateTime: convertToISO(lesson?.lesson.lesson_date, lesson?.lesson.end_time),
+            teacherId: Number(teacherId) || 1,
+            teacherPay: Number(teacherPay),
+            students: lesson?.students.map(student => ({
+                clientId: student.id,
+                attendanceStatus: statusMapping[attendance[student.id] || 'present'],
+                amountCharged: Number(studentsPrice)
+            })) || []
+        };
+
+        console.log("=== ОБНОВЛЕННЫЙ PAYLOAD ===");
+        console.log(JSON.stringify(payload, null, 2));
+        console.log("============================");
+
         try {
-            const response = await fetch('http://localhost:3000/closelesson', {
+            const response = await fetch('http://localhost:3000/lessons/close', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
-                throw new Error(`Ошибка сервера: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Ошибка сервера: ${response.status}`);
             }
 
             const data = await response.json();
             console.log('Урок успешно закрыт:', data);
 
+            onSuccess();
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Ошибка при отправке формы:', error);
-            alert('Не удалось сохранить данные. Попробуйте еще раз.');
+            alert(error.message || 'Не удалось сохранить данные. Попробуйте еще раз.');
         }
     };
+
+
 
     return (
         <div className={styles['modal-overlay']} onClick={onClose}>
@@ -78,7 +136,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                         <span className={styles['status-badge-planned']}></span>
                         <h3 className={styles['group-name']}>{lesson?.group.name}</h3>
                     </div>
-                    <button onClick={onClose} className={styles['btn-close']}>&times;</button>
+                    <button type="button" onClick={onClose} className={styles['btn-close']}>&times;</button>
                 </div>
 
                 <div className={styles['meta-grid']}>
@@ -102,6 +160,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                         value={teacherId}
                                         onChange={(e) => setTeacherId(e.target.value)}
                                         className={styles['teacher-select']}
+                                        name='teacherId'
                                     >
                                         {lesson?.allTeachers.map((teach) => (
                                             <option key={teach.id} value={teach.id}>{teach.full_name}</option>
@@ -115,6 +174,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                             value={teacherPay}
                                             onChange={(e) => setTeacherPay(Number(e.target.value))}
                                             className={styles['teacher-pay-input']}
+                                            name='teacherPay'
                                         />
                                         <span className={styles['price-symbol']}>₽</span>
                                     </div>
@@ -165,8 +225,8 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                 <div className={styles['price-input-container']}>
                                     <input
                                         type="number"
-                                        value={800} 
-                                        onChange={(e) => setStudentPrice(Number(e.target.value))}
+                                        value={studentsPrice}
+                                        onChange={(e) => setStudentsPrice(Number(e.target.value))}
                                         className={styles['price-field']}
                                         placeholder="0"
                                         min="0"
@@ -176,7 +236,6 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                         <span className={styles['price-unit']}>/ чел</span>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>

@@ -6,6 +6,7 @@ import { LessonModalWindow } from '@/components/DashboardsComponents/SchesuleCom
 export const ScheduleTable: React.FC = () => {
   const [lessons, setLessons] = useState<PhantomLesson[]>([]);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
 
   const getWeekDays = (start: Date): Date[] => {
@@ -55,6 +56,7 @@ export const ScheduleTable: React.FC = () => {
                 start_time: template.start_time,
                 end_time: template.end_time,
                 group_name: template.group_name,
+                group_id: template.group_id,
                 user_name: template.user_name,
                 company_id: template.company_id,
                 status: 1
@@ -161,7 +163,7 @@ export const ScheduleTable: React.FC = () => {
                       return (
                         <div
                           key={lesson.id}
-                          onClick={() => setSelectedLessonId(lesson.id)}
+                          onClick={() => {setSelectedLessonId(lesson.id); setSelectedGroupId(lesson.group_id) }}
                           style={{ padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', transition: 'box-shadow 0.2s', ...currentStyles }}
                           onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)'}
                           onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
@@ -180,9 +182,10 @@ export const ScheduleTable: React.FC = () => {
           ))}
         </div>
       </div>
-      {selectedLessonId !== null && (
+      {selectedLessonId !== null && selectedGroupId !== null && (
         <LessonModalWindow
           lessonId={selectedLessonId}
+          groupId={selectedGroupId}
           onClose={() => setSelectedLessonId(null)}
           onSuccess={() => {
             setSelectedLessonId(null);

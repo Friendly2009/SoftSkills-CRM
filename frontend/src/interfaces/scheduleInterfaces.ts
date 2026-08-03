@@ -66,7 +66,8 @@ export interface PhantomLesson {
   lesson_date: Date;    
   start_time: string;      
   end_time: string;      
-  group_name: string;     
+  group_name: string;
+  group_id: number;     
   user_name: string;       
   company_id: number;      
   status: number;          

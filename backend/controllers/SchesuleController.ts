@@ -3,7 +3,7 @@ import pool from "../data_base_connect.js";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 export const getSchedule = async (req: Request, res: Response) => {
   try {
-    const company_id = req.session.company_id || -1;
+    const company_id = req.session.company_id;
     if (company_id === -1) {
       return res.status(401).json({
         success: false,
@@ -30,8 +30,7 @@ export const getSchedule = async (req: Request, res: Response) => {
 export const getLessonDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const company_id = req.session.company_id || 1; // Заглушка 1, если нет в сессии
-
+    const company_id = req.session.company_id;
     if (!company_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
@@ -40,9 +39,6 @@ export const getLessonDetails = async (req: Request, res: Response) => {
     let groupId: number = 0;
     let attendanceData: any[] = [];
 
-    // =========================================================================
-    // ЛОГИКА ДЛЯ ФАНТОМНОГО УРОКА
-    // =========================================================================
     if (id.startsWith("temp-")) {
       const [, scheduleId, year, month, day] = id.split("-");
       const dateStr = `${year}-${month}-${day}`;
@@ -169,19 +165,19 @@ export const closeLesson = async (
     lessonId,
     groupId,
     startDateTime,
-    endDateTime,
+    endDateTime, //считываем данные
     teacherId,
     teacherPay,
     students,
   } = req.body;
 
-  const companyId = req.session?.company_id;
+  const company_id = req.session.company_id; //то же самое
 
   if (
     !lessonId ||
     !groupId ||
     !startDateTime ||
-    !endDateTime ||
+    !endDateTime ||//проверочка
     !teacherId ||
     !students
   ) {
@@ -191,30 +187,30 @@ export const closeLesson = async (
     return;
   }
 
-  const start: Date = new Date(startDateTime);
-  const end: Date = new Date(endDateTime);
-  const now: Date = new Date();
+  const start: Date = new Date(startDateTime); // |
+  const end: Date = new Date(endDateTime);//      | Преобразования
+  const now: Date = new Date();//                 |
 
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-    res.status(400).json({ error: "Неверный формат даты и времени" });
+    res.status(400).json({ error: "Неверный формат даты и времени" }); //если время херовое то откатываем все
     return;
   }
 
-  const strLessonDate = start.toISOString().split("T")[0];
-  const strStartTime = start.toISOString().split("T")[1].substring(0, 8);
-  const strEndTime = end.toISOString().split("T")[1].substring(0, 8);
+  const strLessonDate = start.toISOString().split("T")[0];//                 |
+  const strStartTime = start.toISOString().split("T")[1].substring(0, 8); // |
+  const strEndTime = end.toISOString().split("T")[1].substring(0, 8); //     | Преобразования
 
-  const connection = await pool.getConnection();
+  const connection = await pool.getConnection(); // вот тут пиздец начинается, получаем коннект с бд)
 
   try {
-    await connection.beginTransaction();
+    await connection.beginTransaction(); 
     let realLessonId: number;
 
     if (isNaN(Number(lessonId))) {
       const [insertLessonResult] = await connection.query<ResultSetHeader>(
-        `INSERT INTO lessons (lesson_date, start_time, end_time, status, group_id, user_id, teacher_pay)
+        `INSERT INTO lessons (lesson_date, start_time, end_time, status, group_id, user_id, teacher_pay) 
                  VALUES (?, ?, ?, 1, ?, ?, ?)`,
-        [
+        [ //если айди фантомное то пополняем таблицу уроков
           strLessonDate,
           strStartTime,
           strEndTime,
@@ -223,22 +219,22 @@ export const closeLesson = async (
           teacherPay,
         ],
       );
-      realLessonId = insertLessonResult.insertId;
-    } else {
+      realLessonId = insertLessonResult.insertId; //получаем айди из добавленного урока
+    } else { //если урок уже существует
       realLessonId = Number(lessonId);
 
       const [rows] = await connection.query<RowDataPacket[]>(
         "SELECT status FROM lessons WHERE id = ?",
-        [realLessonId],
+        [realLessonId], //получаем урок по айди
       );
 
-      if (rows.length > 0 && rows[0].status === 2) {
+      if (rows.length > 0 && rows[0].status === 2) { //если есть хоть одна запись и эта статус этой записи равен проведен то откатываем
         res.status(400).json({ error: "Этот урок уже проведен и закрыт" });
         await connection.rollback();
         return;
       }
 
-      await connection.query(
+      await connection.query( //обновляем данные
         `UPDATE lessons 
          SET lesson_date = ?, start_time = ?, end_time = ?, user_id = ?, teacher_pay = ?
          WHERE id = ?`,
@@ -253,7 +249,7 @@ export const closeLesson = async (
       );
     }
 
-    for (const student of students) {
+    for (const student of students) { //проходимся по всем ученикам в группе и добавляем в посещаемость 
       await connection.query(
         `INSERT INTO lesson_attendance (lesson_id, client_id, attendance_status, amount_charged)
                  VALUES (?, ?, ?, ?)
@@ -271,46 +267,46 @@ export const closeLesson = async (
 
     const todayDateOnly = new Date(
       now.getFullYear(),
-      now.getMonth(),
+      now.getMonth(), //сегодняшний день
       now.getDate(),
     );
     const lessonDateOnly = new Date(
       start.getFullYear(),
-      start.getMonth(),
+      start.getMonth(),//день урока
       start.getDate(),
     );
 
-    if (lessonDateOnly > todayDateOnly) {
+    if (lessonDateOnly > todayDateOnly) { 
       await connection.commit();
       res.status(200).json({
-        success: true,
+        success: true, //если время урока позже текущего момента то заканчиваем со статусом 200
         realLessonId: realLessonId,
         message: `Урок успешно зафиксирован на будущее (ID: ${realLessonId}). Финансы не тронуты.`,
       });
       return;
     }
     await connection.query("UPDATE lessons SET status = 2 WHERE id = ?", [
-      realLessonId,
+      realLessonId, //если урок уже был то этот урок теперь со статусом проведен
     ]);
 
     const [txResult] = await connection.query<ResultSetHeader>(
       `INSERT INTO financial_transactions (company_id, lessons_id, description) 
-             VALUES (?, ?, ?)`,
-      [companyId, realLessonId, `Проведение и закрытие урока №${realLessonId}`],
+             VALUES (?, ?, ?)`, // фиксируем транзакцию в бд
+      [company_id, realLessonId, `Проведение и закрытие урока №${realLessonId}`],
     );
 
-    const transactionId = txResult.insertId;
+    const transactionId = txResult.insertId; //достаем айди транзакции
 
     for (const student of students) {
       if (student.attendanceStatus === 1 && student.amountCharged > 0) {
         await connection.query(
           `INSERT INTO transaction_participants (transaction_id, client_id, user_id, role, amount) 
-                     VALUES (?, ?, NULL, 'payer', ?)`,
+                     VALUES (?, ?, NULL, 'payer', ?)`, //клиент отдает деньги
           [transactionId, student.clientId, student.amountCharged],
         );
 
         await connection.query(
-          "UPDATE clients SET balance = balance - ? WHERE id = ?",
+          "UPDATE clients SET balance = balance - ? WHERE id = ?", //тоже отдает деньги
           [student.amountCharged, student.clientId],
         );
       }
@@ -319,28 +315,28 @@ export const closeLesson = async (
     if (teacherPay > 0) {
       await connection.query(
         `INSERT INTO transaction_participants (transaction_id, client_id, user_id, role, amount) 
-                 VALUES (?, NULL, ?, 'recipient', ?)`,
+                 VALUES (?, NULL, ?, 'recipient', ?)`, //учитель получает деньги
         [transactionId, teacherId, teacherPay],
       );
 
       await connection.query(
         "UPDATE users SET balance = balance + ? WHERE id = ?",
-        [teacherPay, teacherId],
+        [teacherPay, teacherId], //тоже получает
       );
     }
 
-    await connection.commit();
+    await connection.commit(); //в кое веки фиксируем всю эту мазню
 
     res.status(200).json({
       success: true,
-      realLessonId: realLessonId,
+      realLessonId: realLessonId, //туууудаааа его
       message: `Урок №${realLessonId} успешно проведен сегодня/в прошлом. Списания завершены.`,
     });
   } catch (error: any) {
     await connection.rollback();
-    console.error("Ошибка в closeLesson:", error);
+    console.error("Ошибка в closeLesson:", error); //а это для уебков
     res.status(500).json({ error: error.message || "Ошибка сервера" });
   } finally {
-    connection.release();
+    connection.release(); //это по базе
   }
 };
