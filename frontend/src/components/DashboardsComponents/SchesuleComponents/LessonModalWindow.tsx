@@ -220,23 +220,86 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                 ))}
                             </div>
 
-                            <div style={{ marginTop: 20 }}>
-                                <h4 className={styles['section-title']}>Фиксированная цена за одно посещение</h4>
-                                <div className={styles['price-input-container']}>
-                                    <input
-                                        type="number"
-                                        value={studentsPrice}
-                                        onChange={(e) => setStudentsPrice(Number(e.target.value))}
-                                        className={styles['price-field']}
-                                        placeholder="0"
-                                        min="0"
-                                    />
-                                    <div className={styles['price-addons']}>
-                                        <span className={styles['currency-symbol']}>₽</span>
-                                        <span className={styles['price-unit']}>/ чел</span>
+                            <div style={{ marginTop: 24 }}>
+                                <h4 className={styles['section-title']}>Финансовый расчет занятия</h4>
+                                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <span className={styles['meta-label']} style={{ display: 'block', marginBottom: '8px' }}>
+                                            Цена за одно посещение
+                                        </span>
+
+                                        <div style={{
+                                            position: 'relative',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            backgroundColor: '#ffffff',
+                                            border: '1px solid #dcdfe6',
+                                            borderRadius: '12px',
+                                            padding: '0 16px',
+                                            height: '52px', 
+                                            transition: 'border-color 0.2s',
+                                        }}>
+                                            <input
+                                                type="number"
+                                                value={studentsPrice}
+                                                onChange={(e) => setStudentsPrice(Number(e.target.value))}
+                                                placeholder="0"
+                                                min="0"
+                                                style={{
+                                                    border: 'none',
+                                                    outline: 'none',
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    fontSize: '16px',
+                                                    color: '#303133',
+                                                    fontWeight: '500',
+                                                    backgroundColor: 'transparent',
+                                                    paddingRight: '60px'
+                                                }}
+                                            />
+                                            <div style={{
+                                                position: 'absolute',
+                                                right: '16px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                color: '#909399',
+                                                fontSize: '14px',
+                                                pointerEvents: 'none',
+                                                userSelect: 'none'
+                                            }}>
+                                                <span style={{ fontWeight: '600', color: '#303133' }}>₽</span>
+                                                <span>/ чел</span>
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    <div style={{
+                                        flex: 1,
+                                        backgroundColor: '#f8f9fa',
+                                        borderRadius: '12px',
+                                        padding: '0 16px',
+                                        height: '52px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'center',
+                                        border: '1px solid #e9ecef'
+                                    }}>
+                                        <span className={styles['meta-label']} style={{ fontSize: '11px', marginBottom: '2px' }}>
+                                        Итог за занятие
+                                        </span>
+                                        <div style={{
+                                            fontSize: '18px',
+                                            fontWeight: '600',
+                                            color: '#212529'
+                                        }}>
+                                            {(((lesson?.students.length || 0) * studentsPrice) - teacherPay).toLocaleString('ru-RU')} ₽
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
