@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `groups` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `users_id` INT NOT NULL,
   `name` VARCHAR(45) NOT NULL,
-  `status` TINYINT NOT NULL,
+  `status` TINYINT NOT NULL,   -- 1 активен 2 набор 3 архив
   `start_date` DATE NOT NULL DEFAULT (CURRENT_DATE()),
   `end_date` DATE DEFAULT NULL,
   `max_students` INT NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `lessons` (
   `lesson_date` DATE NOT NULL,
   `start_time` TIME NOT NULL,
   `end_time` TIME NOT NULL,
-  `status` TINYINT NOT NULL,
+  `status` TINYINT NOT NULL, -- 1 = запланирован 2 = проведен (если проведен то бекенд при повторной попытке не даст закрыть урок)
   `group_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_lessons_groups_idx` (`group_id`),
@@ -92,7 +92,7 @@ ALTER TABLE lessons
 CREATE TABLE IF NOT EXISTS lesson_attendance (
   lesson_id INT NOT NULL,
   client_id INT NOT NULL,
-  attendance_status TINYINT NOT NULL DEFAULT 1, 
+  attendance_status TINYINT NOT NULL DEFAULT 1, --1 = был 2 = прогул 3 = уважительная причина  
   amount_charged DECIMAL(10,2) NOT NULL DEFAULT 0.00, 
   PRIMARY KEY (lesson_id, client_id),
   KEY fk_attendance_clients_idx (client_id),

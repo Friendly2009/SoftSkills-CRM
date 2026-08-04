@@ -95,7 +95,7 @@ export const getLessonDetails = async (req: Request, res: Response) => {
         status: 1,
         group_id: s.group_id,
         user_id: s.teacher_id,
-        teacher_pay: s.default_pay > 0 ? s.default_pay : 1500.0,
+        teacher_pay: 1500.00,
       };
       const [groupStudents]: any = await pool.query(
         "SELECT client_id FROM group_members WHERE group_id = ?",
@@ -218,23 +218,23 @@ export const closeLesson = async (
     res.status(400).json({ error: "Неверный формат даты и времени" }); //если время херовое то откатываем все
     return;
   }
-
-  const strLessonDate = start.toISOString().split("T")[0]; //                 |
-  const strStartTime = start.toISOString().split("T")[1].substring(0, 8); // |
-  const strEndTime = end.toISOString().split("T")[1].substring(0, 8); //     | Преобразования
+  const strLessonDate = String(startDateTime).split("T")[0];
+  const strStartTime = String(startDateTime).split("T")[1].substring(0, 8);
+  const strEndTime = String(endDateTime).split("T")[1].substring(0, 8);
 
   const connection = await pool.getConnection(); // вот тут пиздец начинается, получаем коннект с бд)
 
   try {
     await connection.beginTransaction();
     let realLessonId: number;
+    let isAlreadyClosed = false;
 
     if (isNaN(Number(lessonId))) {
+      // Фантомный урок -> Создаем новую запись со статусом 1 (Запланирован)
       const [insertLessonResult] = await connection.query<ResultSetHeader>(
         `INSERT INTO lessons (lesson_date, start_time, end_time, status, group_id, user_id, teacher_pay) 
-                 VALUES (?, ?, ?, 1, ?, ?, ?)`,
+         VALUES (?, ?, ?, 1, ?, ?, ?)`,
         [
-          //если айди фантомное то пополняем таблицу уроков
           strLessonDate,
           strStartTime,
           strEndTime,
@@ -243,25 +243,62 @@ export const closeLesson = async (
           teacherPay,
         ],
       );
-      realLessonId = insertLessonResult.insertId; //получаем айди из добавленного урока
+      realLessonId = insertLessonResult.insertId;
     } else {
-      //если урок уже существует
+      // Реальный урок -> Проверяем его текущий статус в базе
       realLessonId = Number(lessonId);
 
-      const [rows] = await connection.query<RowDataPacket[]>(
+      const [rows]: any = await connection.query<RowDataPacket[]>(
         "SELECT status FROM lessons WHERE id = ?",
-        [realLessonId], //получаем урок по айди
+        [realLessonId],
       );
 
-      if (rows.length > 0 && rows[0].status === 2) {
-        //если есть хоть одна запись и эта статус этой записи равен проведен то откатываем
-        res.status(400).json({ error: "Этот урок уже проведен и закрыт" });
-        await connection.rollback();
-        return;
+      // Если урок в базе уже имел статус 2 (Проведен), значит по нему были списания
+      if (rows.length > 0 && Number(rows[0].status) === 2) {
+        isAlreadyClosed = true;
+
+        // Находим старую финансовую транзакцию для этого урока
+        const [oldTx]: any = await connection.query(
+          "SELECT id FROM financial_transactions WHERE lessons_id = ?",
+          [realLessonId],
+        );
+
+        if (oldTx.length > 0) {
+          const oldTxId = oldTx[0].id;
+
+          // Получаем участников старой транзакции и делаем ПОЛНЫЙ ВОЗВРАТ балансов
+          const [participants]: any = await connection.query(
+            "SELECT client_id, user_id, role, amount FROM transaction_participants WHERE transaction_id = ?",
+            [oldTxId],
+          );
+
+          for (const p of participants) {
+            if (p.role === "payer" && p.client_id) {
+              // Возвращаем деньги студенту
+              await connection.query(
+                "UPDATE clients SET balance = balance + ? WHERE id = ?",
+                [p.amount, p.client_id],
+              );
+            }
+            if (p.role === "recipient" && p.user_id) {
+              // Забираем деньги у преподавателя
+              await connection.query(
+                "UPDATE users SET balance = balance - ? WHERE id = ?",
+                [p.amount, p.user_id],
+              );
+            }
+          }
+
+          // Удаляем участников старой транзакции и саму финансовую операцию
+          await connection.query(
+            "DELETE FROM financial_transactions WHERE id = ?",
+            [oldTxId],
+          );
+        }
       }
 
+      // Обновляем параметры урока (пока оставляем старый статус, обновим его ниже)
       await connection.query(
-        //обновляем данные
         `UPDATE lessons 
          SET lesson_date = ?, start_time = ?, end_time = ?, user_id = ?, teacher_pay = ?
          WHERE id = ?`,
@@ -276,12 +313,12 @@ export const closeLesson = async (
       );
     }
 
+    // Сохраняем или обновляем отметки посещаемости студентов
     for (const student of students) {
-      //проходимся по всем ученикам в группе и добавляем в посещаемость
       await connection.query(
         `INSERT INTO lesson_attendance (lesson_id, client_id, attendance_status, amount_charged)
-                 VALUES (?, ?, ?, ?)
-                 ON DUPLICATE KEY UPDATE attendance_status = ?, amount_charged = ?`,
+         VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE attendance_status = ?, amount_charged = ?`,
         [
           realLessonId,
           student.clientId,
@@ -293,33 +330,34 @@ export const closeLesson = async (
       );
     }
 
-    const todayDateOnly = new Date(
-      now.getFullYear(),
-      now.getMonth(), //сегодняшний день
-      now.getDate(),
-    );
-    const lessonDateOnly = new Date(
-      start.getFullYear(),
-      start.getMonth(), //день урока
-      start.getDate(),
-    );
+    // Текущая дата сервера в локальном формате YYYY-MM-DD
+    const strTodayDate = now.toLocaleDateString("en-CA");
 
-    if (lessonDateOnly > todayDateOnly) {
+    // Если дата урока СТРОГО БОЛЬШЕ сегодняшней (Урок в будущем)
+    if (strLessonDate > strTodayDate) {
+      // Принудительно выставляем статус 1 (Запланирован)
+      await connection.query("UPDATE lessons SET status = 1 WHERE id = ?", [
+        realLessonId,
+      ]);
+
       await connection.commit();
       res.status(200).json({
-        success: true, //если время урока позже текущего момента то заканчиваем со статусом 200
+        success: true,
         realLessonId: realLessonId,
-        message: `Урок успешно зафиксирован на будущее (ID: ${realLessonId}). Финансы не тронуты.`,
+        message: `Урок №${realLessonId} успешно зафиксирован на будущее. Статус: Запланирован (1). Финансы не тронуты.`,
       });
       return;
     }
+
+    // Урок прошел или идет сегодня -> ставим статус 2 (Проведен)
     await connection.query("UPDATE lessons SET status = 2 WHERE id = ?", [
-      realLessonId, //если урок уже был то этот урок теперь со статусом проведен
+      realLessonId,
     ]);
 
+    // Создаем одну чистую запись финансовой транзакции
     const [txResult] = await connection.query<ResultSetHeader>(
       `INSERT INTO financial_transactions (company_id, lessons_id, description) 
-             VALUES (?, ?, ?)`, // фиксируем транзакцию в бд
+       VALUES (?, ?, ?)`,
       [
         company_id,
         realLessonId,
@@ -327,48 +365,52 @@ export const closeLesson = async (
       ],
     );
 
-    const transactionId = txResult.insertId; //достаем айди транзакции
+    const transactionId = txResult.insertId;
 
+    // Списываем деньги со студентов, которые БЫЛИ на занятии (attendanceStatus === 1)
     for (const student of students) {
-      if (student.attendanceStatus === 1 && student.amountCharged > 0) {
+      if (Number(student.attendanceStatus) === 1 && student.amountCharged > 0) {
         await connection.query(
           `INSERT INTO transaction_participants (transaction_id, client_id, user_id, role, amount) 
-                     VALUES (?, ?, NULL, 'payer', ?)`, //клиент отдает деньги
+           VALUES (?, ?, NULL, 'payer', ?)`,
           [transactionId, student.clientId, student.amountCharged],
         );
 
         await connection.query(
-          "UPDATE clients SET balance = balance - ? WHERE id = ?", //тоже отдает деньги
+          "UPDATE clients SET balance = balance - ? WHERE id = ?",
           [student.amountCharged, student.clientId],
         );
       }
     }
 
+    // Начисляем выплату преподавателю
     if (teacherPay > 0) {
       await connection.query(
         `INSERT INTO transaction_participants (transaction_id, client_id, user_id, role, amount) 
-                 VALUES (?, NULL, ?, 'recipient', ?)`, //учитель получает деньги
+         VALUES (?, NULL, ?, 'recipient', ?)`,
         [transactionId, teacherId, teacherPay],
       );
 
       await connection.query(
         "UPDATE users SET balance = balance + ? WHERE id = ?",
-        [teacherPay, teacherId], //тоже получает
+        [teacherPay, teacherId],
       );
     }
 
-    await connection.commit(); //в кое веки фиксируем всю эту мазню
+    await connection.commit();
 
     res.status(200).json({
       success: true,
-      realLessonId: realLessonId, //туууудаааа его
-      message: `Урок №${realLessonId} успешно проведен сегодня/в прошлом. Списания завершены.`,
+      realLessonId: realLessonId,
+      message: isAlreadyClosed
+        ? `Урок №${realLessonId} успешно пересчитан. Балансы обновлены.`
+        : `Урок №${realLessonId} успешно проведен. Списания завершены.`,
     });
   } catch (error: any) {
-    await connection.rollback();
-    console.error("Ошибка в closeLesson:", error); //а это для уебков
+    await connection.rollback();//а это для уебков и будущих тестеров (им пизда)
+    console.error("Ошибка в closeLesson:", error);
     res.status(500).json({ error: error.message || "Ошибка сервера" });
   } finally {
-    connection.release(); //это по базе
+    connection.release();
   }
 };

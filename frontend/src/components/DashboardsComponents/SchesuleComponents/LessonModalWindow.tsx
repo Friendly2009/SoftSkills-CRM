@@ -26,9 +26,24 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                     setTeacherPay(result.data.lesson.teacher_pay || 0);
 
                     const initialAttendance: Record<number, 'present' | 'absent' | 'excused'> = {};
+                    const backendAttendance = result.data.attendance || [];
+
+                    const reverseStatusMapping: Record<number, 'present' | 'absent' | 'excused'> = {
+                        1: 'present',
+                        2: 'absent',
+                        3: 'excused'
+                    };
+
                     result.data.students.forEach((student: { id: number;[key: string]: any }) => {
-                        initialAttendance[student.id] = 'present';
+                        const savedRecord = backendAttendance.find((a: any) => Number(a.client_id) === Number(student.id));
+
+                        if (savedRecord) {
+                            initialAttendance[student.id] = reverseStatusMapping[savedRecord.attendance_status] || 'present';
+                        } else {
+                            initialAttendance[student.id] = 'present';
+                        }
                     });
+
                     setAttendance(initialAttendance);
                 }
             })
@@ -43,37 +58,24 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
         e.preventDefault();
 
         const convertToISO = (dateVal?: string | Date | null, timeStr?: string) => {
-            const clearTime = timeStr ? timeStr.trim() : "00:00";
+            if (!dateVal) return "";
 
-            try {
-                let pureDate = "";
-
-                if (!dateVal) {
-                    const today = new Date();
-                    pureDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                } else if (dateVal instanceof Date) {
-                    pureDate = `${dateVal.getFullYear()}-${String(dateVal.getMonth() + 1).padStart(2, '0')}-${String(dateVal.getDate()).padStart(2, '0')}`;
-                } else {
-                    pureDate = String(dateVal).split('T')[0];
-                }
-
-                const localDateTimeStr = `${pureDate}T${clearTime}:00`;
-                const finalDate = new Date(localDateTimeStr);
-
-                if (isNaN(finalDate.getTime())) {
-                    const fallback = new Date();
-                    return new Date(`${fallback.getFullYear()}-${String(fallback.getMonth() + 1).padStart(2, '0')}-${String(fallback.getDate()).padStart(2, '0')}T${clearTime}:00`).toISOString();
-                }
-
-                const tzOffsetMs = finalDate.getTimezoneOffset() * 60000;
-                const correctedDate = new Date(finalDate.getTime() - tzOffsetMs);
-
-                return correctedDate.toISOString();
-            } catch (err) {
-                console.error("Ошибка парсинга даты/времени:", err);
-                return new Date().toISOString();
+            let pureDate = "";
+            if (dateVal instanceof Date) {
+                pureDate = dateVal.toLocaleDateString('en-CA');
+            } else {
+                pureDate = String(dateVal).split('T')[0];
             }
+
+            let cleanTime = timeStr ? timeStr.trim() : "00:00";
+            if (cleanTime.includes(':') && cleanTime.split(':').length === 3) {
+                const parts = cleanTime.split(':');
+                cleanTime = `${parts[0]}:${parts[1]}`;
+            }
+
+            return `${pureDate}T${cleanTime}:00.000Z`;
         };
+
 
         const statusMapping: Record<'present' | 'absent' | 'excused', number> = {
             present: 1,
@@ -124,7 +126,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
             alert(error.message || 'Не удалось сохранить данные. Попробуйте еще раз.');
         }
     };
-    
+
     return (
         <div className={styles['modal-overlay']} onClick={onClose}>
             <div className={styles.drawer} onClick={(e) => e.stopPropagation()}>
@@ -187,9 +189,16 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                         <div>
                                             <div className={styles['student-name']}>{student.name}</div>
                                             <div className={styles['student-balance']}>
-                                                Баланс: <span className={styles['balance-positive']}>{student.balance}₽</span>
+                                                Баланс:{' '}
+                                                <span
+                                                    className={student.balance < 0 ? styles['balance-negative'] : styles['balance-positive']}
+                                                    style={{ color: student.balance < 0 ? '#ef4444' : '#10b981', fontWeight: '600' }}
+                                                >
+                                                    {student.balance}₽
+                                                </span>
                                             </div>
                                         </div>
+
                                         <div className={styles['enum-group']}>
                                             <button
                                                 type="button"
@@ -232,7 +241,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                             border: '1px solid #dcdfe6',
                                             borderRadius: '12px',
                                             padding: '0 16px',
-                                            height: '52px', 
+                                            height: '52px',
                                             transition: 'border-color 0.2s',
                                         }}>
                                             <input
@@ -282,7 +291,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                         border: '1px solid #e9ecef'
                                     }}>
                                         <span className={styles['meta-label']} style={{ fontSize: '11px', marginBottom: '2px' }}>
-                                        Итог за занятие
+                                            Итог за занятие
                                         </span>
                                         <div style={{
                                             fontSize: '18px',

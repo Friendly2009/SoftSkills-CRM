@@ -31,16 +31,13 @@ export const ScheduleTable: React.FC = () => {
 
   const loadLessons = async () => {
     try {
-      // Функция для получения даты в чистом формате YYYY-MM-DD локально
       const formatToLocalDateStr = (d: Date) => {
-        // en-CA возвращает строку в формате YYYY-MM-DD
         return d.toLocaleDateString('en-CA');
       };
 
-      const weekStartDateStr = formatToLocalDateStr(weekDays[0]); // Понедельник
-      const weekEndDateStr = formatToLocalDateStr(weekDays[6]);   // Воскресенье
+      const weekStartDateStr = formatToLocalDateStr(weekDays[0]);
+      const weekEndDateStr = formatToLocalDateStr(weekDays[6]);
 
-      // Передаем параметры диапазона недель на бэкенд
       const result = await getSchedule(weekStartDateStr, weekEndDateStr);
 
       if (result && result.success && result.data) {
@@ -55,16 +52,14 @@ export const ScheduleTable: React.FC = () => {
             const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase()];
 
             if (targetDayIndex === currentDayIndex) {
-              // Ищем: создавался ли уже реальный урок для этой группы на эту конкретную дату?
               const realLesson = Array.isArray(realLessons) && realLessons.find((rl: any) => {
                 const rlDateStr = formatToLocalDateStr(new Date(rl.lesson_date));
                 return Number(rl.group_id) === Number(template.group_id) && rlDateStr === dateStr;
               });
 
               if (realLesson) {
-                // Если урок РЕАЛЬНЫЙ (уже сохранен в базе)
                 generatedLessonsList.push({
-                  id: String(realLesson.id), // Передаем чистый реальный ID (например "6")
+                  id: String(realLesson.id),
                   schedule_id: template.schedule_id,
                   lesson_date: new Date(dayDate),
                   start_time: realLesson.start_time,
@@ -72,10 +67,9 @@ export const ScheduleTable: React.FC = () => {
                   group_name: template.group_name,
                   group_id: template.group_id,
                   user_name: template.user_name,
-                  status: Number(realLesson.status) // Настоящий статус из БД (1 или 2)
+                  status: Number(realLesson.status)
                 });
               } else {
-                // Если урок ФАНТОМНЫЙ (просто пустой слот расписания)
                 generatedLessonsList.push({
                   id: `temp-${template.schedule_id}-${dateStr}`,
                   schedule_id: template.schedule_id,
@@ -85,7 +79,7 @@ export const ScheduleTable: React.FC = () => {
                   group_name: template.group_name,
                   group_id: template.group_id,
                   user_name: template.user_name,
-                  status: 1 // Шаблон изначально запланирован
+                  status: 1
                 });
               }
             }
@@ -112,7 +106,6 @@ export const ScheduleTable: React.FC = () => {
   };
 
   const getLessonStyles = (lesson: PhantomLesson) => {
-    // Если статус равен 2 — урок проведен и списан, красим в зеленый
     if (Number(lesson.status) === 2) {
       return { backgroundColor: '#f0fdf4', borderLeft: '4px solid #10b981', color: '#166534' };
     }
@@ -122,12 +115,10 @@ export const ScheduleTable: React.FC = () => {
     const lessonDate = new Date(lesson.lesson_date);
     const lessonDayStart = new Date(lessonDate.getFullYear(), lessonDate.getMonth(), lessonDate.getDate());
 
-    // Если урок прошел (дата меньше или равна сегодняшней), но статус всё еще 1 (не проведен) — оранжевый
     if (lessonDayStart <= todayStart) {
       return { backgroundColor: '#fff7ed', borderLeft: '4px solid #f97316', color: '#9a3412' };
     }
 
-    // Будущие запланированные уроки — синие
     return { backgroundColor: '#f0f9ff', borderLeft: '4px solid #3b82f6', color: '#075985' };
   };
 
@@ -147,10 +138,94 @@ export const ScheduleTable: React.FC = () => {
               Неделя: {weekDays[0].toLocaleDateString('ru-RU')} — {weekDays[6].toLocaleDateString('ru-RU')}
             </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button onClick={() => changeWeek(-1)} style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', backgroundColor: '#ffffff', cursor: 'pointer', fontSize: '13px' }}>Назад</button>
-            <button onClick={() => setCurrentDate(new Date())} style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', backgroundColor: '#ffffff', cursor: 'pointer', fontSize: '13px' }}>Текущая</button>
-            <button onClick={() => changeWeek(1)} style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', backgroundColor: '#ffffff', cursor: 'pointer', fontSize: '13px' }}>Вперед</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Кнопка Назад */}
+            <button
+              onClick={() => changeWeek(-1)}
+              style={{
+                padding: '7px 14px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                backgroundColor: '#ffffff',
+                color: '#475569',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: '13px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f1f5f9';
+                e.currentTarget.style.color = '#0f172a';
+                e.currentTarget.style.borderColor = '#cbd5e1';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.color = '#475569';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+              }}
+            >
+              <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>←</span> Назад
+            </button>
+            <button
+              onClick={() => setCurrentDate(new Date())}
+              style={{
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '8px',
+                backgroundColor: '#3b82f6',
+                color: '#ffffff',
+                fontWeight: 600,
+                boxShadow: '0 2px 4px rgba(59, 130, 246, 0.25)',
+                cursor: 'pointer',
+                fontSize: '13px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#2563eb'; 
+                e.currentTarget.style.boxShadow = '0 4px 8px rgba(37, 99, 235, 0.35)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#3b82f6';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.25)';
+              }}
+            >
+              Текущая неделя
+            </button>
+
+            <button
+              onClick={() => changeWeek(1)}
+              style={{
+                padding: '7px 14px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                backgroundColor: '#ffffff',
+                color: '#475569',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: '13px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f1f5f9';
+                e.currentTarget.style.color = '#0f172a';
+                e.currentTarget.style.borderColor = '#cbd5e1';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.color = '#475569';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+              }}
+            >
+              Вперед <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>→</span>
+            </button>
           </div>
         </div>
 
