@@ -124,9 +124,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
             alert(error.message || 'Не удалось сохранить данные. Попробуйте еще раз.');
         }
     };
-
-
-
+    
     return (
         <div className={styles['modal-overlay']} onClick={onClose}>
             <div className={styles.drawer} onClick={(e) => e.stopPropagation()}>
@@ -181,7 +179,6 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                 </div>
                             </div>
                         </div>
-
                         <div>
                             <h4 className={styles['section-title']}>Студенты и фиксация посещаемости</h4>
                             <div className={styles['students-list']}>
@@ -219,7 +216,6 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                     </div>
                                 ))}
                             </div>
-
                             <div style={{ marginTop: 24 }}>
                                 <h4 className={styles['section-title']}>Финансовый расчет занятия</h4>
                                 <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
@@ -299,7 +295,6 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
 
                                 </div>
                             </div>
-
                         </div>
                     </div>
 

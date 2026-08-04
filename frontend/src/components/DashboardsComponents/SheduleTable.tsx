@@ -31,46 +31,70 @@ export const ScheduleTable: React.FC = () => {
 
   const loadLessons = async () => {
     try {
-      const response = await getSchedule();
-      const result = response;
+      const formatToISOString = (d: Date) => {
+        const offset = d.getTimezoneOffset();
+        const local = new Date(d.getTime() - (offset * 60 * 1000));
+        return local.toISOString().split('T')[0];
+      };
 
-      if (result && result.success && Array.isArray(result.data)) {
-        const scheduleTemplates = result.data;
-        const generatedPhantomLessons: PhantomLesson[] = [];
+      const weekStartDateStr = formatToISOString(weekDays[0]); 
+      const weekEndDateStr = formatToISOString(weekDays[6]); 
+
+      const result = await getSchedule(weekStartDateStr, weekEndDateStr);
+
+      if (result && result.success && result.data) {
+        const { templates, realLessons } = result.data;
+        const generatedLessonsList: PhantomLesson[] = [];
 
         weekDays.forEach((dayDate) => {
           const currentDayIndex = dayDate.getDay();
+          const dateStr = formatToISOString(dayDate);
 
-          const offset = dayDate.getTimezoneOffset();
-          const localDay = new Date(dayDate.getTime() - (offset * 60 * 1000));
-          const dateStr = localDay.toISOString().split('T')[0];
-
-          scheduleTemplates.forEach((template: any) => {
+          templates.forEach((template: any) => {
             const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase()];
 
             if (targetDayIndex === currentDayIndex) {
-              generatedPhantomLessons.push({
-                id: `temp-${template.schedule_id}-${dateStr}`,
-                schedule_id: template.schedule_id,
-                lesson_date: new Date(dayDate),
-                start_time: template.start_time,
-                end_time: template.end_time,
-                group_name: template.group_name,
-                group_id: template.group_id,
-                user_name: template.user_name,
-                company_id: template.company_id,
-                status: 1
+              const realLesson = Array.isArray(realLessons) && realLessons.find((rl: any) => {
+                const rlDateStr = new Date(rl.lesson_date).toISOString().split('T')[0];
+                return Number(rl.group_id) === Number(template.group_id) && rlDateStr === dateStr;
               });
+
+              if (realLesson) {
+                generatedLessonsList.push({
+                  id: String(realLesson.id), 
+                  schedule_id: template.schedule_id,
+                  lesson_date: new Date(dayDate),
+                  start_time: realLesson.start_time,
+                  end_time: realLesson.end_time,
+                  group_name: template.group_name,
+                  group_id: template.group_id,
+                  user_name: template.user_name,
+                  status: realLesson.status 
+                });
+              } else {
+                generatedLessonsList.push({
+                  id: `temp-${template.schedule_id}-${dateStr}`,
+                  schedule_id: template.schedule_id,
+                  lesson_date: new Date(dayDate),
+                  start_time: template.start_time,
+                  end_time: template.end_time,
+                  group_name: template.group_name,
+                  group_id: template.group_id,
+                  user_name: template.user_name,
+                  status: 1
+                });
+              }
             }
           });
         });
 
-        setLessons(generatedPhantomLessons);
+        setLessons(generatedLessonsList);
       }
     } catch (error) {
-      console.error("Ошибка при генерации фантомной сетки расписания:", error);
+      console.error("Ошибка при генерации умной сетки расписания:", error);
     }
   };
+
 
   useEffect(() => {
     loadLessons();
@@ -99,8 +123,6 @@ export const ScheduleTable: React.FC = () => {
 
     return { backgroundColor: '#f0f9ff', borderLeft: '4px solid #3b82f6', color: '#075985' };
   };
-
-
   const timeSlots = Array.from({ length: 14 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
 
 
@@ -163,7 +185,7 @@ export const ScheduleTable: React.FC = () => {
                       return (
                         <div
                           key={lesson.id}
-                          onClick={() => {setSelectedLessonId(lesson.id); setSelectedGroupId(lesson.group_id) }}
+                          onClick={() => { setSelectedLessonId(lesson.id); setSelectedGroupId(lesson.group_id) }}
                           style={{ padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', transition: 'box-shadow 0.2s', ...currentStyles }}
                           onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)'}
                           onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}

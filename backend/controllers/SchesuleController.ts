@@ -4,22 +4,45 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 export const getSchedule = async (req: Request, res: Response) => {
   try {
     const company_id = req.session.company_id;
-    if (company_id === -1) {
+    if (!company_id || company_id === -1) {
       return res.status(401).json({
         success: false,
         message: "user is unauthorized",
       });
     }
-    const [rows] = await pool.query(
-      "select * from select_schedules_of_groups WHERE company_id = ?",
+
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing startDate or endDate parameters",
+      });
+    }
+
+    const [templates] = await pool.query(
+      "SELECT * FROM select_schedules_of_groups WHERE company_id = ?",
       [company_id],
     );
+
+    const [realLessons] = await pool.query(
+      `SELECT l.id, l.lesson_date, l.start_time, l.end_time, l.status, l.group_id, g.name AS group_name
+       FROM lessons l
+       JOIN \`groups\` g ON l.group_id = g.id
+       JOIN users u ON g.users_id = u.id
+       WHERE u.company_id = ? AND l.lesson_date BETWEEN ? AND ?`,
+      [company_id, startDate, endDate],
+    );
+
     return res.status(200).json({
       success: true,
-      data: rows,
+      data: {
+        templates,
+        realLessons,
+      },
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error in getSchedule:", error);
     return res.status(500).json({
       success: false,
       message: "something went wrong",
@@ -65,14 +88,14 @@ export const getLessonDetails = async (req: Request, res: Response) => {
       const lessonDateObj = new Date(dateStr);
 
       lessonData = {
-        id: id, 
+        id: id,
         lesson_date: lessonDateObj,
         start_time: s.start_time,
         end_time: s.end_time,
-        status: 1, 
+        status: 1,
         group_id: s.group_id,
         user_id: s.teacher_id,
-        teacher_pay: s.default_pay > 0 ? s.default_pay : 1500.0, 
+        teacher_pay: s.default_pay > 0 ? s.default_pay : 1500.0,
       };
       const [groupStudents]: any = await pool.query(
         "SELECT client_id FROM group_members WHERE group_id = ?",
@@ -81,8 +104,8 @@ export const getLessonDetails = async (req: Request, res: Response) => {
 
       attendanceData = groupStudents.map((student: any) => ({
         client_id: student.client_id,
-        attendance_status: 1, 
-        amount_charged: 800.0, 
+        attendance_status: 1,
+        amount_charged: 800.0,
       }));
     } else {
       const lessonId = parseInt(id, 10);
@@ -110,7 +133,7 @@ export const getLessonDetails = async (req: Request, res: Response) => {
 
       lessonData = {
         id: l.id,
-        lesson_date: new Date(l.lesson_date), 
+        lesson_date: new Date(l.lesson_date),
         start_time: l.start_time,
         end_time: l.end_time,
         status: l.status,
@@ -146,7 +169,7 @@ export const getLessonDetails = async (req: Request, res: Response) => {
         group: groupRows[0] || { id: groupId, name: "Без названия" },
         students: studentsData,
         allTeachers,
-        attendance: attendanceData, 
+        attendance: attendanceData,
       },
     });
   } catch (error) {
@@ -177,7 +200,7 @@ export const closeLesson = async (
     !lessonId ||
     !groupId ||
     !startDateTime ||
-    !endDateTime ||//проверочка
+    !endDateTime || //проверочка
     !teacherId ||
     !students
   ) {
@@ -188,29 +211,30 @@ export const closeLesson = async (
   }
 
   const start: Date = new Date(startDateTime); // |
-  const end: Date = new Date(endDateTime);//      | Преобразования
-  const now: Date = new Date();//                 |
+  const end: Date = new Date(endDateTime); //      | Преобразования
+  const now: Date = new Date(); //                 |
 
   if (isNaN(start.getTime()) || isNaN(end.getTime())) {
     res.status(400).json({ error: "Неверный формат даты и времени" }); //если время херовое то откатываем все
     return;
   }
 
-  const strLessonDate = start.toISOString().split("T")[0];//                 |
+  const strLessonDate = start.toISOString().split("T")[0]; //                 |
   const strStartTime = start.toISOString().split("T")[1].substring(0, 8); // |
   const strEndTime = end.toISOString().split("T")[1].substring(0, 8); //     | Преобразования
 
   const connection = await pool.getConnection(); // вот тут пиздец начинается, получаем коннект с бд)
 
   try {
-    await connection.beginTransaction(); 
+    await connection.beginTransaction();
     let realLessonId: number;
 
     if (isNaN(Number(lessonId))) {
       const [insertLessonResult] = await connection.query<ResultSetHeader>(
         `INSERT INTO lessons (lesson_date, start_time, end_time, status, group_id, user_id, teacher_pay) 
                  VALUES (?, ?, ?, 1, ?, ?, ?)`,
-        [ //если айди фантомное то пополняем таблицу уроков
+        [
+          //если айди фантомное то пополняем таблицу уроков
           strLessonDate,
           strStartTime,
           strEndTime,
@@ -220,7 +244,8 @@ export const closeLesson = async (
         ],
       );
       realLessonId = insertLessonResult.insertId; //получаем айди из добавленного урока
-    } else { //если урок уже существует
+    } else {
+      //если урок уже существует
       realLessonId = Number(lessonId);
 
       const [rows] = await connection.query<RowDataPacket[]>(
@@ -228,13 +253,15 @@ export const closeLesson = async (
         [realLessonId], //получаем урок по айди
       );
 
-      if (rows.length > 0 && rows[0].status === 2) { //если есть хоть одна запись и эта статус этой записи равен проведен то откатываем
+      if (rows.length > 0 && rows[0].status === 2) {
+        //если есть хоть одна запись и эта статус этой записи равен проведен то откатываем
         res.status(400).json({ error: "Этот урок уже проведен и закрыт" });
         await connection.rollback();
         return;
       }
 
-      await connection.query( //обновляем данные
+      await connection.query(
+        //обновляем данные
         `UPDATE lessons 
          SET lesson_date = ?, start_time = ?, end_time = ?, user_id = ?, teacher_pay = ?
          WHERE id = ?`,
@@ -249,7 +276,8 @@ export const closeLesson = async (
       );
     }
 
-    for (const student of students) { //проходимся по всем ученикам в группе и добавляем в посещаемость 
+    for (const student of students) {
+      //проходимся по всем ученикам в группе и добавляем в посещаемость
       await connection.query(
         `INSERT INTO lesson_attendance (lesson_id, client_id, attendance_status, amount_charged)
                  VALUES (?, ?, ?, ?)
@@ -272,11 +300,11 @@ export const closeLesson = async (
     );
     const lessonDateOnly = new Date(
       start.getFullYear(),
-      start.getMonth(),//день урока
+      start.getMonth(), //день урока
       start.getDate(),
     );
 
-    if (lessonDateOnly > todayDateOnly) { 
+    if (lessonDateOnly > todayDateOnly) {
       await connection.commit();
       res.status(200).json({
         success: true, //если время урока позже текущего момента то заканчиваем со статусом 200
@@ -292,7 +320,11 @@ export const closeLesson = async (
     const [txResult] = await connection.query<ResultSetHeader>(
       `INSERT INTO financial_transactions (company_id, lessons_id, description) 
              VALUES (?, ?, ?)`, // фиксируем транзакцию в бд
-      [company_id, realLessonId, `Проведение и закрытие урока №${realLessonId}`],
+      [
+        company_id,
+        realLessonId,
+        `Проведение и закрытие урока №${realLessonId}`,
+      ],
     );
 
     const transactionId = txResult.insertId; //достаем айди транзакции

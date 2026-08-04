@@ -69,6 +69,5 @@ export interface PhantomLesson {
   group_name: string;
   group_id: number;     
   user_name: string;       
-  company_id: number;      
   status: number;          
 }

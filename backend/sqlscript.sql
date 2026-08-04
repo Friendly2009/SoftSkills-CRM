@@ -120,15 +120,22 @@ CREATE TABLE transaction_participants (
     CONSTRAINT fk_part_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT chk_participant CHECK (client_id IS NOT NULL OR user_id IS NOT NULL)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-CREATE OR REPLACE VIEW select_schedules_of_groups AS
-SELECT 
-    gs.id AS schedule_id,
-    gs.day_of_week,
-    gs.start_time,
-    gs.end_time,
-    g.name AS group_name,
-    u.full_name AS user_name,
-    u.company_id
-FROM group_schedules gs
-JOIN `groups` g ON gs.group_id = g.id
-JOIN users u ON g.users_id = u.id;
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `root`@`localhost` 
+    SQL SECURITY DEFINER
+VIEW `cheapcrm`.`select_schedules_of_groups` AS
+    SELECT 
+        `gs`.`id` AS `schedule_id`,
+        `gs`.`day_of_week` AS `day_of_week`,
+        `gs`.`start_time` AS `start_time`,
+        `gs`.`end_time` AS `end_time`,
+        `g`.`name` AS `group_name`,
+        `u`.`full_name` AS `user_name`,
+        `u`.`company_id` AS `company_id`,
+        `l`.`id` AS `lesson_id`
+    FROM
+        (((`cheapcrm`.`group_schedules` `gs`
+        JOIN `cheapcrm`.`groups` `g` ON ((`gs`.`group_id` = `g`.`id`)))
+        JOIN `cheapcrm`.`users` `u` ON ((`g`.`users_id` = `u`.`id`)))
+        LEFT JOIN `cheapcrm`.`lessons` `l` ON ((`l`.`group_id` = `g`.`id`)));
