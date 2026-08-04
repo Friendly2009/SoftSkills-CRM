@@ -25,20 +25,18 @@ export const APIGetClients = async (
         GROUP_CONCAT(DISTINCT g.id) AS group_ids_str,
         GROUP_CONCAT(DISTINCT g.name SEPARATOR '|||') AS group_names_str,
         
-        -- Динамический расчет ближайшей даты на основе дня недели из расписания
+        -- Убрали DATE_FORMAT, чтобы MIN() возвращал чистый тип DATE бд
         (
-          SELECT DATE_FORMAT(
-            MIN(
-              CASE gs.day_of_week
-                WHEN 'Понедельник' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (8 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Вторник'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (9 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Среда'       THEN DATE_ADD(CURRENT_DATE(), INTERVAL (10 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Четверг'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (11 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Пятница'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (12 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Суббота'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (13 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Воскресенье' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (14 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-              END
-            ), '%d.%m.%Y'
+          SELECT MIN(
+            CASE gs.day_of_week
+              WHEN 'Понедельник' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (8 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Вторник'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (9 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Среда'       THEN DATE_ADD(CURRENT_DATE(), INTERVAL (10 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Четверг'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (11 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Пятница'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (12 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Суббота'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (13 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Воскресенье' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (14 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+            END
           )
           FROM group_members gm_sub
           JOIN group_schedules gs ON gm_sub.group_id = gs.group_id
@@ -64,11 +62,13 @@ export const APIGetClients = async (
 
       const { group_ids_str, group_names_str, ...cleanClient } = client;
 
+      const nextVisitDate = client.next_visit ? new Date(client.next_visit) : null;
+
       return {
         ...cleanClient,
         group_ids,
         group_names,
-        next_visit: client.next_visit || "",
+        next_visit: nextVisitDate,
       };
     });
 
@@ -225,6 +225,9 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
       const values = keys.map((key) => clientFields[key]);
 
       values.push(clientId);
+      if (balance !== undefined) {
+        clientFields.balance = parseInt(balance, 10);
+      }
 
       await connection.execute(
         `UPDATE clients SET ${setClause} WHERE id = ?`,

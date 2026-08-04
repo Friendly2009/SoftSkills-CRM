@@ -80,7 +80,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
   try {
     const [rows]: any = await pool.query(
       `SELECT id, full_name as fullname, role as user_role, \`rank\`, email, contact, gender, 
-       DATE_FORMAT(birthday, "%Y-%m-%d") as birthday, avatar 
+       birthday, avatar 
        FROM users 
        WHERE id = ? AND company_id = ?`,
       [userId, companyId]
@@ -90,11 +90,16 @@ export const getUserProfile = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "Пользователь не найден" });
     }
 
+    const userData = rows[0];
+    
+    const birthdayDate = userData.birthday ? new Date(userData.birthday) : null;
+
     return res.status(200).json({
       success: true,
       user: {
-        ...rows[0],
-        company_name: req.session.company_name || "AnyCompany"
+        ...userData,
+        birthday: birthdayDate,
+        company_name: req.session.company_name
       }
     });
 
@@ -103,4 +108,3 @@ export const getUserProfile = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Ошибка сервера" });
   }
 };
-

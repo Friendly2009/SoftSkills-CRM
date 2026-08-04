@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import style from './cssmoduls/dashboard.module.css';
 import { UsersTable } from './DashboardsComponents/UsersTable.tsx';
 import { ClientTable } from './DashboardsComponents/ClientsTable.tsx';
-import { GroupTable } from './DashboardsComponents/GroupsTable.tsx'
+import { GroupTable } from './DashboardsComponents/GroupsTable.tsx';
+import { ScheduleTable } from './DashboardsComponents/SheduleTable.tsx';
 
 interface UserProfile {
   fullname: string;
@@ -152,6 +153,13 @@ export const Dashboard: React.FC = () => {
               <img src="/img/user/dashboard/chalkboard-user-solid.png" alt="" className={style['nav-icon']} />
               <span>Сотрудники</span>
             </div>
+            <div
+              className={`${style['nav-item']} ${activeMenu === 'shedule' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('shedule')}
+            >
+              <img src="/img/user/dashboard/calendar-regular.png" alt="" className={style['nav-icon']} />
+              <span>Расписание</span>
+            </div>
           </nav>
         </aside>
 
@@ -161,6 +169,7 @@ export const Dashboard: React.FC = () => {
               {activeMenu === 'users' && <UsersTable></UsersTable>}
               {activeMenu === 'clients' && <ClientTable></ClientTable>}
               {activeMenu === 'groups' && <GroupTable></GroupTable>}
+              {activeMenu === 'shedule' && <ScheduleTable></ScheduleTable>}
             </div>
           </div>
         </section>

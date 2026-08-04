@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
-
-interface ClientTemplate {
-    id: number;
-    name: string;
-    balance: number;
-    skills: number;
-    status: number;
-    contact: string;
-    group_ids: number[];
-    group_names: string[];
-    next_visit: string;
-}
+import { MoreAction } from './ClientsComponents/MoreActions.tsx';
+import { deleteClient, getClient, addClient, updateClient } from '../../logic/ClientRequests.ts';
+import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
+import { TopUp } from "./ClientsComponents/topUp.tsx";
+import { UpdateClientForm } from '@/components/DashboardsComponents/ClientsComponents/updateClientForm.tsx';
 
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
@@ -20,6 +13,18 @@ export const ClientTable: React.FC = () => {
     const [isResetMode, setIsResetMode] = useState(false);
     const [isResetModalWinOpen, setIsResetModalWinOpen] = useState(false);
     const [allGroups, setAllGroups] = useState<{ id: number; name: string }[]>([]);
+    const [isMoreAction, setMoreAction] = useState(false);
+    const [topUpClient, setTopUpClient] = useState<ClientTemplate | null>(null);
+
+    const [menu, setMenu] = useState<MoreActionProps>({
+        isOpen: false,
+        x: 0,
+        y: 0,
+        client: null,
+        onClose: () => { },
+        onDelete: () => { }
+    });
+
     const [resetFormData, setResetFormData] = useState<ClientTemplate>({
         id: 0,
         name: '',
@@ -29,8 +34,9 @@ export const ClientTable: React.FC = () => {
         contact: "",
         group_ids: [],
         group_names: [],
-        next_visit: ""
+        next_visit: null
     });
+
     const [formData, setFormData] = useState<ClientTemplate>({
         id: 0,
         name: '',
@@ -40,20 +46,25 @@ export const ClientTable: React.FC = () => {
         contact: "",
         group_ids: [],
         group_names: [],
-        next_visit: ""
+        next_visit: null
     });
+
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setResetFormData(prev => ({
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'next_visit'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
     };
+
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     };
+
     const handleRowClick = async (client: ClientTemplate) => {
         if (isResetMode) {
             setResetFormData({
@@ -65,44 +76,18 @@ export const ClientTable: React.FC = () => {
                 contact: client.contact,
                 group_ids: client.group_ids,
                 group_names: client.group_names,
-                next_visit: ''
+                next_visit: client.next_visit
             });
             setIsResetModalWinOpen(true);
         }
         if (isDeleteMode) {
-            try {
-                const response = await fetch(`http://localhost:3000/delclients/${client.id}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Ошибка сервера: ${response.status}`);
-                }
-                console.log("User was deleted");
-
-                setIsDeleteMode(false);
-                getClient();
-                getCompanyGroups();
-            } catch (ex) {
-                console.error(ex);
-            }
+            await deleteClient(client);
+            setIsDeleteMode(false);
+            setClient(await getClient());
+            getCompanyGroups();
         }
     };
-    const getClient = async () => {
-        try {
-            const response = await fetch("http://localhost:3000/getclient", {
-                credentials: "include"
-            });
 
-            if (!response.ok) {
-                throw new Error('oooops, something went wrong');
-            }
-            const data = await response.json();
-            setClient(data.data || []);
-        } catch (ex) {
-            console.error(ex);
-        }
-    };
     const getCompanyGroups = async () => {
         try {
             const response = await fetch("http://localhost:3000/getgroups", { credentials: "include" });
@@ -114,22 +99,36 @@ export const ClientTable: React.FC = () => {
             console.error("Ошибка загрузки групп:", ex);
         }
     };
+
     const handleAddClient = () => {
         setIsModalOpen(true);
     };
+
     const handleDelClient = () => {
         setIsDeleteMode(prev => !prev);
     };
+
     const handleResetClient = () => {
         setIsResetMode(prev => !prev);
     };
+
     useEffect(() => {
-        getClient();
+        getClient().then((data) => {
+            if (data) setClient(data);
+        });
         getCompanyGroups();
     }, []);
+
+    useEffect(() => {
+        const closeMenu = () => setMenu(prev => ({ ...prev, isOpen: false }));
+        window.addEventListener("click", closeMenu);
+        return () => window.removeEventListener("click", closeMenu);
+    }, []);
+
     const formatBalance = (amount: number) => {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
     };
+
     const renderStatus = (status: number) => {
         switch (status) {
             case 1:
@@ -140,6 +139,7 @@ export const ClientTable: React.FC = () => {
                 return <span className={style['text-muted']}>—</span>;
         }
     };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
@@ -147,62 +147,29 @@ export const ClientTable: React.FC = () => {
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'next_visit'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
     };
+
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log(JSON.stringify(formData));
-        try {
-            const response = await fetch('http://localhost:3000/addclients', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: "include",
-                body: JSON.stringify(formData)
-            });
+        await addClient(formData);
+        getCompanyGroups();
+        setClient(await getClient());
+        setIsModalOpen(false);
+    };
 
-            if (!response.ok) {
-                throw new Error("something went wrong");
-            }
-
-            const data = await response.json();
-            console.log(data);
-            getCompanyGroups();
-            getClient();
-            setIsModalOpen(false);
-        } catch (ex) {
-            alert("Произошла ошибка при отправке данных");
-            console.error(ex);
-        }
-    }
     const handleResetFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const response = await fetch(`http://localhost:3000/updateclient/${resetFormData.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(resetFormData)
-            });
-
-            if (!response) {
-                throw new Error("something went wrong");
-            }
-            const data = await response.json();
-            console.log(data);
-            getCompanyGroups();
-            getClient();
-            setIsResetModalWinOpen(false);
-            setIsResetMode(false);
-        } catch (ex) {
-            console.log(ex);
-            alert('something went wrong');
-        }
-    }
+        await updateClient(resetFormData);
+        getCompanyGroups();
+        setClient(await getClient());
+        setIsResetModalWinOpen(false);
+        setIsResetMode(false);
+    };
     return (
         <>
             {isModalOpen && (<div>
@@ -307,110 +274,16 @@ export const ClientTable: React.FC = () => {
                     </div>
                 </div>
             </div>)}
-            {isResetModalWinOpen && (<div>
-                <div className={style['modal-overlay']} onClick={() => setIsResetModalWinOpen(false)}>
-                    <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
-                        <div className={style['modal-header']}>
-                            <h3>Добавить Клиента</h3>
-                            <button className={style['btn-close']} onClick={() => setIsResetModalWinOpen(false)}>×</button>
-                        </div>
-
-                        <form onSubmit={handleResetFormSubmit}>
-                            <div className={style['form-grid']}>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Имя</label>
-                                    <input
-                                        type="text" name="name" required className={style['form-input']}
-                                        value={resetFormData.name} onChange={handleResetInputChange} placeholder="Иван Иванов Иванович"
-                                    />
-                                </div>
-                                <div className={style['form-group']}>
-                                    <label>Баланс</label>
-                                    <input name="balance" type="number" className={style['form-input']} value={resetFormData.balance} onChange={handleResetInputChange}></input>
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Скилы</label>
-                                    <input
-                                        type="number" name="skills" className={style['form-input']}
-                                        value={resetFormData.skills} onChange={handleResetInputChange}
-                                    />
-                                </div>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Контакт</label>
-                                    <input
-                                        type="text" name="contact" required className={style['form-input']}
-                                        value={resetFormData.contact} onChange={handleResetInputChange} placeholder="+7 000 000 00 00"
-                                    />
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Статус</label>
-                                    <div className={style['radio-container']}>
-                                        <label className={style['radio-label']}>
-                                            <input
-                                                name="status" type="radio" value="true"
-                                                checked={resetFormData.status === 1} onChange={handleResetInputChange}
-                                            />
-                                            Активен
-                                        </label>
-                                        <label className={style['radio-label']}>
-                                            <input
-                                                name="status" type="radio" value="false"
-                                                checked={resetFormData.status === 0} onChange={handleResetInputChange}
-                                            />
-                                            Неактивен
-                                        </label>
-                                    </div>
-                                </div>
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Группы (зажмите Ctrl/Cmd для выбора нескольких)</label>
-                                    <div className={style['select-wrapper']}>
-                                        <select
-                                            multiple
-                                            name="group_ids"
-                                            className={style['form-select']}
-                                            value={resetFormData.group_ids.map(String)}
-                                            onChange={(e) => {
-                                                const selectedOptions = Array.from(e.target.selectedOptions);
-                                                const selectedIds = selectedOptions
-                                                    .map(option => parseInt(option.value, 10))
-                                                    .filter(id => !isNaN(id));
-
-                                                setResetFormData(prev => ({
-                                                    ...prev,
-                                                    group_ids: selectedIds
-                                                }));
-                                            }}
-
-
-                                            style={{ height: 'auto', minHeight: '100px' }}
-                                        >
-                                            <option value="">-- Без группы --</option>
-                                            {allGroups.map(group => (
-                                                <option key={group.id} value={group.id}>
-                                                    {group.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div className={style['form-actions']}>
-                                <button type="button" className={style['btn-secondary']} onClick={() => setIsResetModalWinOpen(false)}>
-                                    Отмена
-                                </button>
-                                <button type="submit" className={style['btn-primary']}>
-                                    Сохранить
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>)}
+            {isResetModalWinOpen && (
+                <UpdateClientForm
+                    setIsResetModalWinOpen={setIsResetModalWinOpen}
+                    handleResetFormSubmit={handleResetFormSubmit}
+                    resetFormData={resetFormData}
+                    handleResetInputChange={handleResetInputChange}
+                    setResetFormData={setResetFormData}
+                    allGroups={allGroups}
+                />
+            )}
             <div className={style['content-header']}>
                 <div className={style['action-bar']}>
                     <div className={style['btn-group']}>
@@ -478,10 +351,10 @@ export const ClientTable: React.FC = () => {
                                     {renderStatus(client.status)}
                                 </td>
                                 <td>
-                                    {client.next_visit && client.next_visit.trim() !== "" ? (
+                                    {client.next_visit instanceof Date ? (
                                         <span className={style['visit-badge']}>
                                             <span className={style['visit-icon']}>📅</span>
-                                            {client.next_visit}
+                                            {client.next_visit.toLocaleDateString('ru-RU')}
                                         </span>
                                     ) : (
                                         <span className={`${style['visit-badge']} ${style['visit-empty']}`}>
@@ -490,23 +363,94 @@ export const ClientTable: React.FC = () => {
                                     )}
                                 </td>
 
-
                                 <td className={style['actions-cell']}>
                                     <button
                                         className={style['btn-action']}
                                         title="Действия"
                                         onClick={(e) => {
                                             e.stopPropagation();
+
+                                            setMenu({
+                                                isOpen: true,
+                                                x: e.clientX,
+                                                y: e.clientY,
+                                                client: client,
+
+                                                onClose: () => {
+                                                    setMoreAction(false);
+                                                    setMenu(prev => ({ ...prev, isOpen: false }));
+                                                },
+
+                                                onDelete: async (clientToDelete) => {
+                                                    await deleteClient(clientToDelete);
+
+                                                    setMoreAction(false);
+                                                    setMenu(prev => ({ ...prev, isOpen: false }));
+
+                                                    const updatedData = await getClient();
+                                                    if (updatedData) setClient(updatedData);
+                                                    getCompanyGroups();
+                                                }
+                                            });
+
+                                            setMoreAction(true);
                                         }}
                                     >
                                         •••
                                     </button>
                                 </td>
+
                             </tr>
                         ))}
                     </tbody>
                 </table>
+                {isMoreAction && (
+                    <>
+                        <MoreAction
+                            x={menu.x}
+                            y={menu.y}
+                            isOpen={menu.isOpen}
+                            client={menu.client}
+                            onClose={() => setMenu(prev => ({ ...prev, isOpen: false }))}
+                            onDelete={async (targetClient) => {
+                                await deleteClient(targetClient);
+                                setClient(await getClient());
+                            }}
+                            onTopUp={(targetClient) => {
+                                setTopUpClient(targetClient);
+                            }}
+                            onEdit={(targetClient) => {
+                                setResetFormData({
+                                    id: targetClient.id,
+                                    name: targetClient.name,
+                                    balance: targetClient.balance,
+                                    skills: targetClient.skills,
+                                    status: targetClient.status,
+                                    contact: targetClient.contact,
+                                    group_ids: targetClient.group_ids || [],
+                                    group_names: targetClient.group_names || [],
+                                    next_visit: targetClient.next_visit || null
+                                });
+                                setIsResetModalWinOpen(true);
+                            }}
+                        />
+
+                        {topUpClient && (
+                            <TopUp
+                                client={topUpClient}
+                                onClose={() => setTopUpClient(null)}
+                                onSuccess={async () => {
+                                    const updatedData = await getClient();
+                                    if (updatedData) setClient(updatedData);
+                                    getCompanyGroups();
+                                }}
+                            />
+                        )}
+
+                    </>
+                )}
             </div>
+
         </>
     );
 };

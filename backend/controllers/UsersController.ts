@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 import bcrypt from "bcrypt";
-import { RowDataPacket, ResultSetHeader } from "mysql2";
 
 export const getusers = async (
   req: Request,
@@ -13,14 +12,19 @@ export const getusers = async (
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const [users] = await pool.query(
+    const [users]: any = await pool.query(
       "SELECT id, company_id, full_name, role, `rank`, email, contact, birthday, gender FROM users WHERE company_id = ?",
       [company_id],
     );
 
+    const formattedUsers = users.map((user: any) => ({
+      ...user,
+      birthday: user.birthday ? new Date(user.birthday) : null
+    }));
+
     return res.status(200).json({
       success: true,
-      data: users,
+      data: formattedUsers,
     });
   } catch (ex) {
     console.error("Ошибка при получении пользователей:", ex);
@@ -47,9 +51,11 @@ export const adduser = async (req: Request, res: Response) => {
     const saltRounds = 10;
     const password_hash = await bcrypt.hash(password, saltRounds);
 
+    const birthdayDate = birthday ? new Date(birthday) : null;
+
     await pool.query(
       "INSERT INTO users (company_id, full_name, role, `rank`, email, password_hash, birthday, contact, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [company_id, full_name, role, rank, email, password_hash, birthday || null, contact || null, gender || null]
+      [company_id, full_name, role, rank, email, password_hash, birthdayDate, contact || null, gender || null]
     );
 
     return res.status(200).json({
@@ -61,7 +67,7 @@ export const adduser = async (req: Request, res: Response) => {
         rank,
         email,
         contact,
-        birthday,
+        birthday: birthdayDate,
         gender,
       },
     });
@@ -156,7 +162,7 @@ export const resetuser = async (req: Request, res: Response) => {
 
   try {
     const [currentUsers]: any = await pool.query(
-      'SELECT full_name, role, `rank`, email, contact, password_hash, DATE_FORMAT(birthday, "%Y-%m-%d") as birthday, gender FROM users WHERE id = ? AND company_id = ?',
+      'SELECT full_name, role, `rank`, email, contact, password_hash, birthday, gender FROM users WHERE id = ? AND company_id = ?',
       [id, company_id]
     );
 
@@ -172,9 +178,12 @@ export const resetuser = async (req: Request, res: Response) => {
     const finalEmail = email !== undefined ? email : currentUser.email;
     const finalContact = contact !== undefined ? contact : currentUser.contact;
 
-    let finalBirthday = (birthday && birthday.trim() !== '') ? birthday : currentUser.birthday;
-    if (finalBirthday && typeof finalBirthday === 'string' && finalBirthday.includes('T')) {
-      finalBirthday = finalBirthday.split('T')[0];
+    let finalBirthday: Date | null = null;
+
+    if (birthday !== undefined) {
+      finalBirthday = (birthday && birthday.trim() !== '') ? new Date(birthday) : null;
+    } else {
+      finalBirthday = currentUser.birthday ? new Date(currentUser.birthday) : null;
     }
 
     const finalGender = (gender && gender.trim() !== '') ? gender : currentUser.gender;

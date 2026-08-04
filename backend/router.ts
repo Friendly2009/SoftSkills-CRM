@@ -4,6 +4,8 @@ import { getglobalinfo, checkconnect, getallsession, getUserProfile} from "./con
 import { APIsignup, APIsignin, logout } from './controllers/AuthController.js'
 import { APIGetClients, addclient, delclient, updateClient } from './controllers/ClientController.js'
 import { getgroups, creategroup, deleteGroup, updategroup } from './controllers/GroupController.js'
+import { getSchedule, getLessonDetails, closeLesson } from './controllers/SchesuleController.js';
+
 const router: Router = Router();
 
 router.get('/checkconnect', checkconnect);
@@ -29,4 +31,8 @@ router.get("/getgroups", getgroups);
 router.post('/creategroup', creategroup);
 router.delete('/deletegroup/:id', deleteGroup);
 router.patch('/updategroup/:id', updategroup);
+
+router.get('/schedule', getSchedule);
+router.get('/getlessons/:id', getLessonDetails);
+router.post('/lessons/close', closeLesson);
 export default router;
