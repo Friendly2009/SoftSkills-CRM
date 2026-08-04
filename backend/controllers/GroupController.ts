@@ -21,18 +21,16 @@ export const getgroups = async (req: Request, res: Response) => {
         (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id) AS studentsCount,
         
         (
-          SELECT DATE_FORMAT(
-            MIN(
-              CASE gs_sub.day_of_week
-                WHEN 'Понедельник' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (8 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Вторник'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (9 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Среда'       THEN DATE_ADD(CURRENT_DATE(), INTERVAL (10 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Четверг'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (11 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Пятница'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (12 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Суббота'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (13 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-                WHEN 'Воскресенье' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (14 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
-              END
-            ), '%d.%m.%Y'
+          SELECT MIN(
+            CASE gs_sub.day_of_week
+              WHEN 'Понедельник' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (8 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Вторник'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (9 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Среда'       THEN DATE_ADD(CURRENT_DATE(), INTERVAL (10 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Четверг'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (11 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Пятница'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (12 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Суббота'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (13 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Воскресенье' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (14 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+            END
           )
           FROM group_schedules gs_sub
           WHERE gs_sub.group_id = g.id
@@ -66,12 +64,17 @@ export const getgroups = async (req: Request, res: Response) => {
         }
       }
 
+      const startDateObj = group.start_date ? new Date(group.start_date) : null;
+      const endDateObj = group.end_date ? new Date(group.end_date) : null;
+      const nextMeetingObj = group.nextMeeting ? new Date(group.nextMeeting) : null;
+
       return {
         ...group,
         schedules: parsedSchedules,
         studentsCount: Number(group.studentsCount || 0),
-        // Если у группы нет расписания, подставляем пустую строку, чтобы фронт не ругался
-        nextMeeting: group.nextMeeting || "",
+        start_date: startDateObj,       
+        end_date: endDateObj,        
+        nextMeeting: nextMeetingObj,   
       };
     });
 
@@ -87,6 +90,7 @@ export const getgroups = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 export const creategroup = async (req: Request, res: Response) => {
   const company_id = req.session.company_id;
@@ -113,6 +117,10 @@ export const creategroup = async (req: Request, res: Response) => {
         .json({ message: "Не все обязательные поля заполнены" });
     }
 
+    // Преобразуем входящие строки дат в полноценные экземпляры класса Date
+    const startDateObj = new Date(start_date);
+    const endDateObj = end_date ? new Date(end_date) : null;
+
     connect = await pool.getConnection();
     await connect.beginTransaction();
 
@@ -122,8 +130,8 @@ export const creategroup = async (req: Request, res: Response) => {
         name,
         users_id,
         status,
-        start_date,
-        end_date || null,
+        startDateObj, // Передаем объект Date
+        endDateObj,   // Передаем объект Date или null
         max_students || null,
       ],
     );
@@ -162,6 +170,7 @@ export const creategroup = async (req: Request, res: Response) => {
     }
   }
 };
+
 export const deleteGroup = async (
   req: Request,
   res: Response,
@@ -226,6 +235,7 @@ export const deleteGroup = async (
     connection.release();
   }
 };
+
 export const updategroup = async (req: Request, res: Response) => {
   const group_id = req.params.id;
   const company_id = req.session.company_id;
@@ -246,8 +256,8 @@ export const updategroup = async (req: Request, res: Response) => {
 
   const connection = await pool.getConnection();
 
-  const formattedStartDate = start_date === "" ? null : start_date;
-  const formattedEndDate = end_date === "" ? null : end_date;
+  const formattedStartDate = (start_date === "" || !start_date) ? null : new Date(start_date);
+  const formattedEndDate = (end_date === "" || !end_date) ? null : new Date(end_date);
 
   try {
     await connection.beginTransaction();
@@ -285,7 +295,7 @@ export const updategroup = async (req: Request, res: Response) => {
         users_id,
         status,
         formattedStartDate,
-        formattedEndDate,
+        formattedEndDate,  
         max_students,
         group_id,
       ],

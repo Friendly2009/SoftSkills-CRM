@@ -4,12 +4,7 @@ import { Dashboard } from './components/Dashboard';
 import { LoginForm } from './components/Aauthorization';
 import { RegisterForm } from './components/registration';
 import { ProfilePage } from './components/Profile';
-import { JSX } from 'react/jsx-runtime';
-
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const isAuthenticated = Boolean(localStorage.getItem('token'));
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
+import { ClientProfile } from './components/DashboardsComponents/ClientsComponents/ClientProfile';
 
 function App() {
   return (
@@ -25,7 +20,7 @@ function App() {
             <Dashboard />
           } 
         />
-
+        <Route path="/dashboard/client/:id" element={<ClientProfile />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

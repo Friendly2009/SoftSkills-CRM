@@ -3,6 +3,8 @@ import styles from './cssmoduls/profile.module.css';
 
 export const ProfilePage: React.FC = () => {
   const [isUpdateMode, setIsUpdateMode] = useState(false);
+
+  // Изменили тип birthday на Date | null в стейте пользователя
   const [user, setUser] = useState({
     fullname: "",
     email: "",
@@ -10,12 +12,13 @@ export const ProfilePage: React.FC = () => {
     rank: 0,
     contact: "",
     gender: "Муж",
-    birthday: "",
+    birthday: null as Date | null,
     password: '',
     avatar: '',
     company_name: ''
   });
-  
+
+  // Изменили тип birthday на Date | null в стейте формы
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
@@ -23,7 +26,7 @@ export const ProfilePage: React.FC = () => {
     rank: 0,
     contact: "",
     gender: "Муж",
-    birthday: "",
+    birthday: null as Date | null,
     password: ''
   });
 
@@ -61,7 +64,12 @@ export const ProfilePage: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'rank' ? Number(value) : value
+      // Если меняется дата, записываем её как объект Date или null
+      [name]: name === 'rank'
+        ? Number(value)
+        : name === 'birthday'
+          ? (value ? new Date(value) : null)
+          : value
     }));
   };
 
@@ -73,7 +81,8 @@ export const ProfilePage: React.FC = () => {
       email: formData.email,
       contact: formData.contact,
       rank: formData.rank,
-      birthday: formData.birthday,
+      // Сериализуем объект даты обратно в строку YYYY-MM-DD для отправки на бэкенд
+      birthday: formData.birthday ? formData.birthday.toISOString().split('T')[0] : null,
       gender: formData.gender,
       password: formData.password,
       role: formData.user_role
@@ -85,7 +94,7 @@ export const ProfilePage: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", 
+        credentials: "include",
         body: JSON.stringify(updateData),
       });
 
@@ -133,6 +142,8 @@ export const ProfilePage: React.FC = () => {
 
         if (data.success && data.user) {
           const fetchedUser = data.user;
+          // Парсим полученную строку даты в полноценный объект Date
+          const birthdayDate = fetchedUser.birthday ? new Date(fetchedUser.birthday) : null;
 
           setUser({
             fullname: fetchedUser.fullname || "",
@@ -141,7 +152,7 @@ export const ProfilePage: React.FC = () => {
             rank: fetchedUser.rank || 0,
             contact: fetchedUser.contact || "",
             gender: fetchedUser.gender || "Муж",
-            birthday: fetchedUser.birthday || "",
+            birthday: birthdayDate,
             password: "",
             avatar: fetchedUser.avatar || "",
             company_name: fetchedUser.company_name || ""
@@ -154,7 +165,7 @@ export const ProfilePage: React.FC = () => {
             rank: fetchedUser.rank || 0,
             contact: fetchedUser.contact || "",
             gender: fetchedUser.gender || "Муж",
-            birthday: fetchedUser.birthday || "",
+            birthday: birthdayDate,
             password: ""
           });
         }
@@ -305,10 +316,11 @@ export const ProfilePage: React.FC = () => {
                 type='date'
                 name='birthday'
                 className={styles.formInput}
-                value={formData.birthday}
+                value={formData.birthday ? formData.birthday.toISOString().split('T')[0] : ""}
                 onChange={handleOnChange}
               />
             </div>
+
 
             <div className={styles.infoRow}>
               <label className={styles.infoLabel}>Пол</label>

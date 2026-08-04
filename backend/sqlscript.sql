@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `groups` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `users_id` INT NOT NULL,
   `name` VARCHAR(45) NOT NULL,
-  `status` TINYINT NOT NULL,
+  `status` TINYINT NOT NULL,   -- 1 активен 2 набор 3 архив
   `start_date` DATE NOT NULL DEFAULT (CURRENT_DATE()),
   `end_date` DATE DEFAULT NULL,
   `max_students` INT NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `lessons` (
   `lesson_date` DATE NOT NULL,
   `start_time` TIME NOT NULL,
   `end_time` TIME NOT NULL,
-  `status` TINYINT NOT NULL,
+  `status` TINYINT NOT NULL, -- 1 = запланирован 2 = проведен (если проведен то бекенд при повторной попытке не даст закрыть урок)
   `group_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_lessons_groups_idx` (`group_id`),
@@ -83,40 +83,59 @@ CREATE TABLE IF NOT EXISTS `lessons` (
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
-create or replace view state_clients_balance as
-select
-	c.id as company_id,
-    c.name as company_name,
-    sum(case when cl.balance > 0 then 1 else 0 end) as client_with_positive_account,
-    sum(case when cl.balance <= 0 then 1 else 0 end) as client_wth_negative_account,
-    count(cl.id) as total_clients
-from company c
-left join clients cl on c.id = cl.company_id
-group by c.id, c.name;
-
-create or replace view view_company_finance as 
-select 
-	c.id as company_id,
-    c.name as company_name,
-    count(cl.id) as total_clients,
-    sum(cl.balance) as total_balance,
-    round(avg(cl.balance), 2) as average_client_balance
-from company c
-left join clients cl on c.id = cl.company_id
-group by c.id, c.name
-
-create or replace view `cheapcrm`.`accupancy_rate` as 
-SELECT 
-	u.company_id AS company_id,
-    g.id AS group_id,
-    g.name AS group_name,
-    g.status AS group_status,
-    g.max_students AS max_capacity,
-    u.full_name AS teacher_name,
-    COUNT(gm.client_id) AS current_students,
-    IF(g.max_students > 0, ROUND((COUNT(gm.client_id) / g.max_students) * 100, 1), 0) AS occupancy_rate
-FROM `groups` g
-LEFT JOIN `users` u ON g.users_id = u.id
-LEFT JOIN `group_members` gm ON g.id = gm.group_id
-GROUP BY g.id, u.id, u.company_id;
+ALTER TABLE users ADD COLUMN balance DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER avatar;
+ALTER TABLE lessons 
+  ADD COLUMN user_id INT NOT NULL AFTER group_id,
+  ADD COLUMN teacher_pay DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER user_id,
+  ADD KEY fk_lessons_users_idx (user_id),
+  ADD CONSTRAINT fk_lessons_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE;
+CREATE TABLE IF NOT EXISTS lesson_attendance (
+  lesson_id INT NOT NULL,
+  client_id INT NOT NULL,
+  attendance_status TINYINT NOT NULL DEFAULT 1, --1 = был 2 = прогул 3 = уважительная причина  
+  amount_charged DECIMAL(10,2) NOT NULL DEFAULT 0.00, 
+  PRIMARY KEY (lesson_id, client_id),
+  KEY fk_attendance_clients_idx (client_id),
+  CONSTRAINT fk_attendance_lessons FOREIGN KEY (lesson_id) REFERENCES lessons (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_attendance_clients FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE financial_transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    company_id INT NOT NULL,
+    lesson_id INT NULL,
+    description VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tx_main_company FOREIGN KEY (company_id) REFERENCES company(id) ON DELETE CASCADE,
+    CONSTRAINT fk_tx_main_lesson FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE TABLE transaction_participants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    transaction_id INT NOT NULL,
+    client_id INT NULL,
+    user_id INT NULL,  
+    `role` ENUM('payer', 'recipient') NOT NULL, 
+    amount DECIMAL(10, 2) NOT NULL, 
+    CONSTRAINT fk_part_tx FOREIGN KEY (transaction_id) REFERENCES financial_transactions(id) ON DELETE CASCADE,
+    CONSTRAINT fk_part_client FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE SET NULL,
+    CONSTRAINT fk_part_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT chk_participant CHECK (client_id IS NOT NULL OR user_id IS NOT NULL)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `root`@`localhost` 
+    SQL SECURITY DEFINER
+VIEW `cheapcrm`.`select_schedules_of_groups` AS
+    SELECT 
+        `gs`.`id` AS `schedule_id`,
+        `gs`.`day_of_week` AS `day_of_week`,
+        `gs`.`start_time` AS `start_time`,
+        `gs`.`end_time` AS `end_time`,
+        `g`.`name` AS `group_name`,
+        `u`.`full_name` AS `user_name`,
+        `u`.`company_id` AS `company_id`,
+        `l`.`id` AS `lesson_id`
+    FROM
+        (((`cheapcrm`.`group_schedules` `gs`
+        JOIN `cheapcrm`.`groups` `g` ON ((`gs`.`group_id` = `g`.`id`)))
+        JOIN `cheapcrm`.`users` `u` ON ((`g`.`users_id` = `u`.`id`)))
+        LEFT JOIN `cheapcrm`.`lessons` `l` ON ((`l`.`group_id` = `g`.`id`)));
