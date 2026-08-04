@@ -31,15 +31,16 @@ export const ScheduleTable: React.FC = () => {
 
   const loadLessons = async () => {
     try {
-      const formatToISOString = (d: Date) => {
-        const offset = d.getTimezoneOffset();
-        const local = new Date(d.getTime() - (offset * 60 * 1000));
-        return local.toISOString().split('T')[0];
+      // Функция для получения даты в чистом формате YYYY-MM-DD локально
+      const formatToLocalDateStr = (d: Date) => {
+        // en-CA возвращает строку в формате YYYY-MM-DD
+        return d.toLocaleDateString('en-CA');
       };
 
-      const weekStartDateStr = formatToISOString(weekDays[0]); 
-      const weekEndDateStr = formatToISOString(weekDays[6]); 
+      const weekStartDateStr = formatToLocalDateStr(weekDays[0]); // Понедельник
+      const weekEndDateStr = formatToLocalDateStr(weekDays[6]);   // Воскресенье
 
+      // Передаем параметры диапазона недель на бэкенд
       const result = await getSchedule(weekStartDateStr, weekEndDateStr);
 
       if (result && result.success && result.data) {
@@ -48,20 +49,22 @@ export const ScheduleTable: React.FC = () => {
 
         weekDays.forEach((dayDate) => {
           const currentDayIndex = dayDate.getDay();
-          const dateStr = formatToISOString(dayDate);
+          const dateStr = formatToLocalDateStr(dayDate);
 
           templates.forEach((template: any) => {
             const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase()];
 
             if (targetDayIndex === currentDayIndex) {
+              // Ищем: создавался ли уже реальный урок для этой группы на эту конкретную дату?
               const realLesson = Array.isArray(realLessons) && realLessons.find((rl: any) => {
-                const rlDateStr = new Date(rl.lesson_date).toISOString().split('T')[0];
+                const rlDateStr = formatToLocalDateStr(new Date(rl.lesson_date));
                 return Number(rl.group_id) === Number(template.group_id) && rlDateStr === dateStr;
               });
 
               if (realLesson) {
+                // Если урок РЕАЛЬНЫЙ (уже сохранен в базе)
                 generatedLessonsList.push({
-                  id: String(realLesson.id), 
+                  id: String(realLesson.id), // Передаем чистый реальный ID (например "6")
                   schedule_id: template.schedule_id,
                   lesson_date: new Date(dayDate),
                   start_time: realLesson.start_time,
@@ -69,9 +72,10 @@ export const ScheduleTable: React.FC = () => {
                   group_name: template.group_name,
                   group_id: template.group_id,
                   user_name: template.user_name,
-                  status: realLesson.status 
+                  status: Number(realLesson.status) // Настоящий статус из БД (1 или 2)
                 });
               } else {
+                // Если урок ФАНТОМНЫЙ (просто пустой слот расписания)
                 generatedLessonsList.push({
                   id: `temp-${template.schedule_id}-${dateStr}`,
                   schedule_id: template.schedule_id,
@@ -81,7 +85,7 @@ export const ScheduleTable: React.FC = () => {
                   group_name: template.group_name,
                   group_id: template.group_id,
                   user_name: template.user_name,
-                  status: 1
+                  status: 1 // Шаблон изначально запланирован
                 });
               }
             }
@@ -96,6 +100,7 @@ export const ScheduleTable: React.FC = () => {
   };
 
 
+
   useEffect(() => {
     loadLessons();
   }, [currentDate]);
@@ -107,22 +112,27 @@ export const ScheduleTable: React.FC = () => {
   };
 
   const getLessonStyles = (lesson: PhantomLesson) => {
-    if (lesson.status === 2) {
+    // Если статус равен 2 — урок проведен и списан, красим в зеленый
+    if (Number(lesson.status) === 2) {
       return { backgroundColor: '#f0fdf4', borderLeft: '4px solid #10b981', color: '#166534' };
     }
 
     const now = new Date();
-
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const lessonDate = new Date(lesson.lesson_date);
     const lessonDayStart = new Date(lessonDate.getFullYear(), lessonDate.getMonth(), lessonDate.getDate());
 
-    if (lessonDayStart < todayStart || lessonDayStart.getTime() === todayStart.getTime()) {
+    // Если урок прошел (дата меньше или равна сегодняшней), но статус всё еще 1 (не проведен) — оранжевый
+    if (lessonDayStart <= todayStart) {
       return { backgroundColor: '#fff7ed', borderLeft: '4px solid #f97316', color: '#9a3412' };
     }
 
+    // Будущие запланированные уроки — синие
     return { backgroundColor: '#f0f9ff', borderLeft: '4px solid #3b82f6', color: '#075985' };
   };
+
+
+
   const timeSlots = Array.from({ length: 14 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
 
 
