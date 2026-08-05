@@ -54,8 +54,9 @@ export const Dashboard: React.FC = () => {
             <img src="/img/index/brand-logo-2024.webp" alt="SoftSkills CRM" />
           </div>
         </div>
-
         <div className={style['header-center']}>
+          {/* ... 
+        
           <div className={`${style['dropdown-menu']} ${isPlusOpen ? style.active : ''}`}>
             COMING SOON
             <div className={style['menu-item']}>
@@ -80,7 +81,6 @@ export const Dashboard: React.FC = () => {
               Доход
             </div>
           </div>
-
           <div
             className={style['icon-box']}
             id="plusBtn"
@@ -99,6 +99,7 @@ export const Dashboard: React.FC = () => {
           <div className={style['search-container']}>
             <input type="text" placeholder="Поиск клиента" />
           </div>
+          */}
         </div>
 
         <div
