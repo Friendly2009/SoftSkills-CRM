@@ -143,14 +143,10 @@ CREATE OR REPLACE VIEW `view_financial_summary` AS
 SELECT 
     c.id AS company_id,
     c.name AS company_name,
-    -- Сколько всего денег поступило от клиентов
     COALESCE(SUM(CASE WHEN tp.role = 'payer' AND tp.client_id IS NOT NULL THEN tp.amount ELSE 0 END), 0) AS total_revenue,
-    -- Сколько всего денег выплачено персоналу/расходы
     COALESCE(SUM(CASE WHEN tp.role = 'recipient' AND tp.user_id IS NOT NULL THEN tp.amount ELSE 0 END), 0) AS total_expenses,
-    -- Чистая прибыль
     (COALESCE(SUM(CASE WHEN tp.role = 'payer' AND tp.client_id IS NOT NULL THEN tp.amount ELSE 0 END), 0) - 
      COALESCE(SUM(CASE WHEN tp.role = 'recipient' AND tp.user_id IS NOT NULL THEN tp.amount ELSE 0 END), 0)) AS net_profit,
-    -- Общая сумма долгов клиентов (отрицательные балансы)
     COALESCE((SELECT SUM(ABS(cl.balance)) FROM clients cl WHERE cl.company_id = c.id AND cl.balance < 0), 0) AS total_client_debt
 FROM company c
 LEFT JOIN financial_transactions ft ON ft.company_id = c.id

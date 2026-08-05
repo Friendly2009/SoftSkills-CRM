@@ -2,15 +2,8 @@ import React, { useEffect, useState } from 'react';
 import styles from '../cssmoduls/DashboardComponentsCssModuls/analytic.module.css';
 import { getAccupancyGroups, getBarColor } from '../../logic/analytic/accupancy_groups';
 import { AnalyticsTable, AnalyticsChart, CustomTooltip } from '../DashboardsComponents/AnalyticModuls/AccupancyGroup';
-export interface GroupAnalytics {
-    group_id: number;
-    group_name: string;
-    teacher_name: string | null;
-    current_students: number;
-    max_capacity: number;
-    occupancy_rate: number;
-    group_status: number;
-}
+import { FinancialAnalyticsDashboard } from '@/components/DashboardsComponents/AnalyticModuls/FinancialAnalyticsDashboard';
+import { GroupAnalytics } from '@/interfaces/analyticsInterfaces';
 
 export const Analytic: React.FC = () => {
     const [activeReport, setActiveReport] = useState<string>('groups');
@@ -19,9 +12,16 @@ export const Analytic: React.FC = () => {
     const [accupancyGroup, setAccupancyGroup] = useState<GroupAnalytics[]>([]);
 
     useEffect(() => {
-        if (activeReport === 'groups') {
-            setLoading(true);
-            getAccupancyGroups(setAccupancyGroup, setLoading);
+        switch (activeReport) {
+            case "groups":
+                setLoading(true);
+                setViewMode('chart');
+                getAccupancyGroups(setAccupancyGroup, setLoading);
+                break;
+            case "main_finance":
+                setLoading(false);
+                setViewMode('finance_chart'); // Переключение сразу на мульти-график по умолчанию
+                break;
         }
     }, [activeReport]);
 
@@ -38,46 +38,38 @@ export const Analytic: React.FC = () => {
                         className={styles['analytics-select']}
                     >
                         <option value="groups">Заполняемость групп</option>
+                        <option value="main_finance">Общая выручка</option>
                     </select>
                 </div>
 
                 <div className={styles['analytics-view-toggle']}>
-                    <button
-                        onClick={() => setViewMode('table')}
-                        className={`${styles['analytics-toggle-btn']} ${viewMode === 'table' ? styles['analytics-toggle-btn--active'] : ''}`}
-                    >
-                        Таблица
-                    </button>
-                    <button
-                        onClick={() => setViewMode('chart')}
-                        className={`${styles['analytics-toggle-btn']} ${viewMode === 'chart' ? styles['analytics-toggle-btn--active'] : ''}`}
-                    >
-                        График
-                    </button>
+                    {activeReport === 'groups' ? (
+                        <>
+                            <button onClick={() => setViewMode('table')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'table' ? styles['analytics-toggle-btn--active'] : ''}`}>Таблица</button>
+                            <button onClick={() => setViewMode('chart')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'chart' ? styles['analytics-toggle-btn--active'] : ''}`}>График</button>
+                        </>
+                    ) : (
+                        <>
+                            <button onClick={() => setViewMode('revenue')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'revenue' ? styles['analytics-toggle-btn--active'] : ''}`}>Выручка</button>
+                            <button onClick={() => setViewMode('profit')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'profit' ? styles['analytics-toggle-btn--active'] : ''}`}>Чистая прибыль</button>
+                            <button onClick={() => setViewMode('expenses')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'expenses' ? styles['analytics-toggle-btn--active'] : ''}`}>Расходы</button>
+                            <button onClick={() => setViewMode('debts')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'debts' ? styles['analytics-toggle-btn--active'] : ''}`}>Долги клиентов</button>
+                            <button onClick={() => setViewMode('transactions')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'transactions' ? styles['analytics-toggle-btn--active'] : ''}`}>Лента транзакций</button>
+                            <button onClick={() => setViewMode('finance_chart')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'finance_chart' ? styles['analytics-toggle-btn--active'] : ''}`}>Общий график</button>
+                        </>
+                    )}
                 </div>
             </div>
 
             <div className={styles['analytics-content']}>
-                {loading ? (
-                    <div className={styles['analytics-loading']}>Загрузка данных аналитики...</div>
-                ) : viewMode === 'chart' ? (
-                    <AnalyticsChart
-                        data={accupancyGroup}
-                        getBarColor={getBarColor}
-                        CustomTooltip={CustomTooltip}
-                    />
-                ) : activeReport === 'groups' ? (
-                    <AnalyticsTable
-                        data={accupancyGroup}
-                        getBarColor={getBarColor}
-                    />
+                {activeReport === 'groups' ? (
+                    viewMode === 'chart' ? (
+                        <AnalyticsChart data={accupancyGroup} getBarColor={getBarColor} CustomTooltip={CustomTooltip} />
+                    ) : (
+                        <AnalyticsTable data={accupancyGroup} getBarColor={getBarColor} />
+                    )
                 ) : (
-                    <div className={styles['analytics-empty']}>
-                        <h3 className={styles['analytics-empty__title']}>Отчет в процессе подключения</h3>
-                        <p className={styles['analytics-empty__text']}>
-                            Табличный вывод для "{activeReport === 'finance' ? 'Финансовый отчет' : 'Баланс клиентов'}" будет настроен на следующем шаге.
-                        </p>
-                    </div>
+                    <FinancialAnalyticsDashboard subView={viewMode} />
                 )}
             </div>
         </div>
