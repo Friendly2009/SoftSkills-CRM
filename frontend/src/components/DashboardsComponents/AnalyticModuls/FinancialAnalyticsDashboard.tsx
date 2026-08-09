@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { DollarSign, TrendingUp, CreditCard, Users, Building2 } from 'lucide-react';
 import { FinancialAnalyticsDashboardProps } from '@/interfaces/analyticsInterfaces';
-import { FinanceChart } from './FinanceComponents/FinanceChart'; // Проверь путь к новому компоненту
-
+import { FinanceChart } from './FinanceComponents/FinanceChart'; 
+import { Revenue } from './FinanceComponents/Revenue';
+import { Profit } from './FinanceComponents/Profit';
+import { Expenses } from './FinanceComponents/Expenses';
+import { Debts } from './FinanceComponents/Debts';
+import { Transactions } from './FinanceComponents/Transactions';
 interface FinancialSummary {
     company_id: number;
     company_name: string;
@@ -38,9 +42,8 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
 
     return (
         <div style={{ padding: '4px 0', fontFamily: 'sans-serif', color: BRAND_COLORS.textMain }}>
-            {/* Сетка карточек с динамической рамкой (border) фокуса */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                
+
                 <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: subView === 'revenue' ? `2px solid ${BRAND_COLORS.revenue}` : `1px solid ${BRAND_COLORS.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <span style={{ fontSize: '13px', color: BRAND_COLORS.textMuted, fontWeight: 500 }}>Общая выручка</span>
@@ -82,20 +85,14 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
                 </div>
             </div>
 
-            {/* Рендеринг нижней контентной части */}
-            {subView === 'finance_chart' ? (
-                <FinanceChart companyId={selectedCompanyId} />
-            ) : subView === 'transactions' ? (
-                <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '12px', border: `1px solid ${BRAND_COLORS.border}`, textAlign: 'center', color: BRAND_COLORS.textMuted }}>
-                    <h3>Лента финансовых транзакций</h3>
-                    <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>Здесь развернем таблицу на основе представления <code>view_company_financial_flow</code>.</p>
-                </div>
-            ) : (
-                <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '12px', border: `1px solid ${BRAND_COLORS.border}`, textAlign: 'center', color: BRAND_COLORS.textMuted }}>
-                    Выбран детальный просмотр категории: <strong>{subView}</strong>
-                    <p style={{ fontSize: '13px', margin: '4px 0 0 0' }}>Нажмите вкладку <strong>«Общий график»</strong> для вывода совмещенных кривых аналитики.</p>
-                </div>
-            )}
+            <div style={{ marginTop: '16px' }}>
+                {subView === 'finance_chart' && <FinanceChart companyId={selectedCompanyId} />}
+                {subView === 'revenue' && <Revenue />}
+                {subView === 'profit' && <Profit />}
+                {subView === 'expenses' && <Expenses />}
+                {subView === 'debts' && <Debts />}
+                {subView === 'transactions' && <Transactions />}
+            </div>
         </div>
     );
 };
