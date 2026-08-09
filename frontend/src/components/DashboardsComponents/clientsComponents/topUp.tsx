@@ -12,7 +12,7 @@ export const TopUp: React.FC<TopUpProps> = ({ client, onClose, onSuccess }) => {
     const [loading, setLoading] = useState<boolean>(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-    const presets: number[] = [];
+    const presets: number[] = [500, 1000, 2000, 5000];
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -197,5 +197,4 @@ export const TopUp: React.FC<TopUpProps> = ({ client, onClose, onSuccess }) => {
             </div>
         </div>
     );
-
 };

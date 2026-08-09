@@ -52,8 +52,9 @@ export const ScheduleTable: React.FC = () => {
             const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase()];
 
             if (targetDayIndex === currentDayIndex) {
+              // ИСПРАВЛЕНО: Безопасный строковый сплит даты из базы без мутаций часовых поясов
               const realLesson = Array.isArray(realLessons) && realLessons.find((rl: any) => {
-                const rlDateStr = formatToLocalDateStr(new Date(rl.lesson_date));
+                const rlDateStr = String(rl.lesson_date).split('T')[0];
                 return Number(rl.group_id) === Number(template.group_id) && rlDateStr === dateStr;
               });
 
@@ -62,8 +63,8 @@ export const ScheduleTable: React.FC = () => {
                   id: String(realLesson.id),
                   schedule_id: template.schedule_id,
                   lesson_date: new Date(dayDate),
-                  start_time: realLesson.start_time,
-                  end_time: realLesson.end_time,
+                  start_time: String(realLesson.start_time).substring(0, 5), // Отрезаем секунды до "HH:MM"
+                  end_time: String(realLesson.end_time).substring(0, 5),
                   group_name: template.group_name,
                   group_id: template.group_id,
                   user_name: template.user_name,
@@ -74,8 +75,8 @@ export const ScheduleTable: React.FC = () => {
                   id: `temp-${template.schedule_id}-${dateStr}`,
                   schedule_id: template.schedule_id,
                   lesson_date: new Date(dayDate),
-                  start_time: template.start_time,
-                  end_time: template.end_time,
+                  start_time: String(template.start_time).substring(0, 5), // Отрезаем секунды до "HH:MM"
+                  end_time: String(template.end_time).substring(0, 5),
                   group_name: template.group_name,
                   group_id: template.group_id,
                   user_name: template.user_name,
@@ -92,8 +93,6 @@ export const ScheduleTable: React.FC = () => {
       console.error("Ошибка при генерации умной сетки расписания:", error);
     }
   };
-
-
 
   useEffect(() => {
     loadLessons();
@@ -122,10 +121,7 @@ export const ScheduleTable: React.FC = () => {
     return { backgroundColor: '#f0f9ff', borderLeft: '4px solid #3b82f6', color: '#075985' };
   };
 
-
-
   const timeSlots = Array.from({ length: 14 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
-
 
   return (
     <div style={{ padding: '24px', fontFamily: 'system-ui, sans-serif', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
@@ -185,7 +181,7 @@ export const ScheduleTable: React.FC = () => {
                 transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#2563eb'; 
+                e.currentTarget.style.backgroundColor = '#2563eb';
                 e.currentTarget.style.boxShadow = '0 4px 8px rgba(37, 99, 235, 0.35)';
               }}
               onMouseLeave={(e) => {
