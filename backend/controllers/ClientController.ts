@@ -229,7 +229,6 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
     const clientCompanyId =
       company_id !== undefined ? company_id : clientRows[0].company_id;
 
-    // 2. Обновляем данные в таблице клиентов
     if (Object.keys(clientFields).length > 0) {
       const keys = Object.keys(clientFields);
       const setClause = keys.map((key) => `${key} = ?`).join(", ");

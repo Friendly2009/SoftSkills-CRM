@@ -20,7 +20,7 @@ export const Analytic: React.FC = () => {
                 break;
             case "main_finance":
                 setLoading(false);
-                setViewMode('finance_chart'); // Переключение сразу на мульти-график по умолчанию
+                setViewMode('finance_chart');
                 break;
         }
     }, [activeReport]);

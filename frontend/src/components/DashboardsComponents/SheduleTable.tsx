@@ -52,7 +52,6 @@ export const ScheduleTable: React.FC = () => {
             const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase()];
 
             if (targetDayIndex === currentDayIndex) {
-              // ИСПРАВЛЕНО: Безопасный строковый сплит даты из базы без мутаций часовых поясов
               const realLesson = Array.isArray(realLessons) && realLessons.find((rl: any) => {
                 const rlDateStr = String(rl.lesson_date).split('T')[0];
                 return Number(rl.group_id) === Number(template.group_id) && rlDateStr === dateStr;
@@ -63,7 +62,7 @@ export const ScheduleTable: React.FC = () => {
                   id: String(realLesson.id),
                   schedule_id: template.schedule_id,
                   lesson_date: new Date(dayDate),
-                  start_time: String(realLesson.start_time).substring(0, 5), // Отрезаем секунды до "HH:MM"
+                  start_time: String(realLesson.start_time).substring(0, 5),
                   end_time: String(realLesson.end_time).substring(0, 5),
                   group_name: template.group_name,
                   group_id: template.group_id,
@@ -75,7 +74,7 @@ export const ScheduleTable: React.FC = () => {
                   id: `temp-${template.schedule_id}-${dateStr}`,
                   schedule_id: template.schedule_id,
                   lesson_date: new Date(dayDate),
-                  start_time: String(template.start_time).substring(0, 5), // Отрезаем секунды до "HH:MM"
+                  start_time: String(template.start_time).substring(0, 5),
                   end_time: String(template.end_time).substring(0, 5),
                   group_name: template.group_name,
                   group_id: template.group_id,

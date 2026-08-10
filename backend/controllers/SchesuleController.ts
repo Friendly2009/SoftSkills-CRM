@@ -214,7 +214,6 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
     return;
   }
 
-  // Строковый парсинг строк дат (фронт шлет в конце Z)
   const strLessonDate = String(startDateTime).split("T")[0];
   const strStartTime = String(startDateTime).split("T")[1].substring(0, 8);
   const strEndTime = String(endDateTime).split("T")[1].substring(0, 8);
@@ -227,7 +226,6 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
     let isAlreadyClosed = false;
 
     if (isNaN(Number(lessonId))) {
-      // Фантомный урок -> Создаем новую строчку в lessons со статусом 1 (Запланирован)
       const [insertLessonResult] = await connection.query<ResultSetHeader>(
         `INSERT INTO lessons (lesson_date, start_time, end_time, status, group_id, user_id, teacher_pay) 
          VALUES (?, ?, ?, 1, ?, ?, ?)`,
@@ -235,7 +233,6 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       );
       realLessonId = insertLessonResult.insertId;
     } else {
-      // Реальный существующий урок
       realLessonId = Number(lessonId);
 
       const [rows]: any = await connection.query<RowDataPacket[]>(
@@ -243,11 +240,9 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
         [realLessonId],
       );
 
-      // Если урок уже был проведен и закрыт (status === 2), откатываем старые балансы
       if (rows.length > 0 && Number(rows[0].status) === 2) {
         isAlreadyClosed = true;
 
-        // Находим абсолютно все старые строки начислений/списаний по этому lesson_id из одной таблицы
         const [oldTransactions]: any = await connection.query(
           "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ?",
           [realLessonId]
@@ -255,20 +250,16 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
 
         for (const tx of oldTransactions) {
           if (tx.type === 'revenue' && tx.client_id) {
-            // Возвращаем списанные за урок деньги обратно на баланс клиента
             await connection.query("UPDATE clients SET balance = balance + ? WHERE id = ?", [tx.amount, tx.client_id]);
           }
           if (tx.type === 'expense' && tx.user_id) {
-            // Изымаем начисленную зарплату с баланса преподавателя
             await connection.query("UPDATE users SET balance = balance - ? WHERE id = ?", [tx.amount, tx.user_id]);
           }
         }
 
-        // В один клик стираем старые финансовые операции по уроку из одной таблицы
         await connection.query("DELETE FROM financial_transactions WHERE lesson_id = ?", [realLessonId]);
       }
 
-      // Обновляем параметры урока
       await connection.query(
         `UPDATE lessons 
          SET lesson_date = ?, start_time = ?, end_time = ?, user_id = ?, teacher_pay = ?
@@ -277,7 +268,6 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       );
     }
 
-    // Фиксируем или обновляем отметки посещаемости в lesson_attendance
     for (const student of students) {
       await connection.query(
         `INSERT INTO lesson_attendance (lesson_id, client_id, attendance_status, amount_charged)
@@ -294,9 +284,8 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       );
     }
 
-    const strTodayDate = now.toLocaleDateString('en-CA'); // Формат YYYY-MM-DD локально на сервере
+    const strTodayDate = now.toLocaleDateString('en-CA'); 
 
-    // Проверяем: если дата урока в будущем, транзакции не проводим, сохраняем статус 1
     if (strLessonDate > strTodayDate) {
       await connection.query("UPDATE lessons SET status = 1 WHERE id = ?", [realLessonId]);
       await connection.commit();
@@ -308,13 +297,10 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Если урок сегодня или в прошлом — переводим в статус 2 (Проведен) и запускаем расчеты
     await connection.query("UPDATE lessons SET status = 2 WHERE id = ?", [realLessonId]);
 
-    // Цикл генерации транзакций списания со студентов (Тип: revenue)
     for (const student of students) {
       if (Number(student.attendanceStatus) === 1 && student.amountCharged > 0) {
-        // Записываем строчку выручки в общую таблицу
         await connection.query(
           `INSERT INTO financial_transactions (company_id, lesson_id, client_id, user_id, amount, type, description) 
            VALUES (?, ?, ?, NULL, ?, 'revenue', ?)`,
@@ -327,7 +313,6 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
           ]
         );
 
-        // Физически уменьшаем баланс кошелька студента
         await connection.query(
           "UPDATE clients SET balance = balance - ? WHERE id = ?",
           [student.amountCharged, student.clientId],
@@ -335,9 +320,7 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       }
     }
 
-    // Generation транзакции начисления преподавателю (Тип: expense)
     if (teacherPay > 0) {
-      // Записываем строчку расхода в эту же общую таблицу
       await connection.query(
         `INSERT INTO financial_transactions (company_id, lesson_id, client_id, user_id, amount, type, description) 
          VALUES (?, ?, NULL, ?, ?, 'expense', ?)`,
@@ -350,7 +333,6 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
         ]
       );
 
-      // Физически увеличиваем кошелек преподавателя
       await connection.query(
         "UPDATE users SET balance = balance + ? WHERE id = ?",
         [teacherPay, teacherId],
