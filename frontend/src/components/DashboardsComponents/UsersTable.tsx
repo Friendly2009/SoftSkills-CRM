@@ -25,7 +25,7 @@ export const UsersTable: React.FC = () => {
         rank: 100,
         email: '',
         contact: '',
-        birthday: null as Date | null, // Типизировали как Date | null
+        birthday: null as Date | null,
         gender: 'Муж',
         password: ''
     });
@@ -100,7 +100,6 @@ export const UsersTable: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // Перед отправкой сериализуем объект Date в строку YYYY-MM-DD
             const payload = {
                 ...formData,
                 birthday: formData.birthday ? formData.birthday.toISOString().split('T')[0] : null

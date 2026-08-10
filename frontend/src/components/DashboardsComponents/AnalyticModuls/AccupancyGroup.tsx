@@ -1,6 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, Cell } from 'recharts';
-import { GroupAnalytics } from '../../DashboardsComponents/Analytics';
+import { GroupAnalytics } from '@/interfaces/analyticsInterfaces';
 import styles from '../../cssmoduls/DashboardComponentsCssModuls/analytic.module.css'
 interface AnalyticsChartProps {
     data: GroupAnalytics[];

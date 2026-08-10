@@ -4,7 +4,6 @@ import styles from './cssmoduls/profile.module.css';
 export const ProfilePage: React.FC = () => {
   const [isUpdateMode, setIsUpdateMode] = useState(false);
 
-  // Изменили тип birthday на Date | null в стейте пользователя
   const [user, setUser] = useState({
     fullname: "",
     email: "",
@@ -18,7 +17,6 @@ export const ProfilePage: React.FC = () => {
     company_name: ''
   });
 
-  // Изменили тип birthday на Date | null в стейте формы
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
@@ -64,7 +62,6 @@ export const ProfilePage: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      // Если меняется дата, записываем её как объект Date или null
       [name]: name === 'rank'
         ? Number(value)
         : name === 'birthday'
@@ -81,7 +78,6 @@ export const ProfilePage: React.FC = () => {
       email: formData.email,
       contact: formData.contact,
       rank: formData.rank,
-      // Сериализуем объект даты обратно в строку YYYY-MM-DD для отправки на бэкенд
       birthday: formData.birthday ? formData.birthday.toISOString().split('T')[0] : null,
       gender: formData.gender,
       password: formData.password,
@@ -142,7 +138,6 @@ export const ProfilePage: React.FC = () => {
 
         if (data.success && data.user) {
           const fetchedUser = data.user;
-          // Парсим полученную строку даты в полноценный объект Date
           const birthdayDate = fetchedUser.birthday ? new Date(fetchedUser.birthday) : null;
 
           setUser({

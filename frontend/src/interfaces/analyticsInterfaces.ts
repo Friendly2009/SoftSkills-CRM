@@ -9,11 +9,11 @@ export interface GroupAnalytics {
 }
 
 export interface FinancialTimelineData {
-    period: string;       // "Янв", "Фев", "Март" и т.д.
-    revenue: number;      // Выручка
-    profit: number;       // Чистая прибыль
-    expenses: number;     // Расходы
-    debts: number;        // Долги клиентов
+    period: string;    
+    revenue: number;    
+    profit: number;    
+    expenses: number;   
+    debts: number;       
 }
 
 export interface FinancialAnalyticsDashboardProps {
@@ -22,4 +22,17 @@ export interface FinancialAnalyticsDashboardProps {
 
 export interface FinanceChartProps {
     companyId: number;
+}
+
+export interface TransactionsFrontend {
+    id: number;
+    lesson_id: number | null;
+    client_id: number | null;
+    client_name: string | null;
+    user_id: number | null;
+    user_name: string | null;
+    amount: number;
+    type: string;
+    description: string;
+    created_at: Date;
 }

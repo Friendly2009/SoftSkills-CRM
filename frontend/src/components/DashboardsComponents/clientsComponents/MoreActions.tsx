@@ -75,7 +75,7 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
                 }}
                 style={{ ...menuStyles.btn, ...menuStyles.btnSuccess }}
             >
-                Пополнитель
+                Пополнить
             </button>
             <button
                 onClick={(e) => {
