@@ -175,7 +175,9 @@ export const getExpensesStructure = async (req: Request, res: Response) => {
   try {
     const company_id = req.session.company_id;
     if (!company_id || isNaN(company_id)) {
-      return res.status(401).json({ success: false, message: "User is not authorized" });
+      return res
+        .status(401)
+        .json({ success: false, message: "User is not authorized" });
     }
 
     const [rows]: any = await pool.query(
@@ -192,12 +194,49 @@ export const getExpensesStructure = async (req: Request, res: Response) => {
        FROM financial_transactions
        WHERE company_id = ? AND type IN ('expense', 'correction')
        GROUP BY name`,
-      [company_id]
+      [company_id],
     );
 
     return res.status(200).json({ success: true, data: rows });
   } catch (error) {
     console.error("Ошибка в getExpensesStructure:", error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getClientDebtors = async (req: Request, res: Response) => {
+  try {
+    const company_id = req.session.company_id;
+    if (!company_id || isNaN(company_id)) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User is not authorized" });
+    }
+
+    const [rows]: any = await pool.query(
+      `SELECT 
+    c.id,
+    c.name,
+    c.balance AS debt,
+    c.contact,
+    COALESCE(GROUP_CONCAT(g.name SEPARATOR ', '), 'Без группы') AS group_names
+FROM cheapcrm.clients c
+LEFT JOIN cheapcrm.group_members gm ON c.id = gm.client_id
+LEFT JOIN cheapcrm.\`groups\` g ON gm.group_id = g.id
+WHERE c.company_id = ? AND c.balance < 0
+GROUP BY c.id, c.name, c.balance, c.contact
+ORDER BY c.balance ASC;
+`,
+      [company_id],
+    );
+
+    return res.status(200).json({ success: true, data: rows });
+  } catch (error) {
+    console.error("Ошибка в getClientDebtors:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
