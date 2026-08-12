@@ -170,3 +170,34 @@ export const getFinancialTimeline = async (req: Request, res: Response) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
+export const getExpensesStructure = async (req: Request, res: Response) => {
+  try {
+    const company_id = req.session.company_id;
+    if (!company_id || isNaN(company_id)) {
+      return res.status(401).json({ success: false, message: "User is not authorized" });
+    }
+
+    const [rows]: any = await pool.query(
+      `SELECT 
+        CASE 
+          WHEN type = 'expense' AND (lesson_id IS NOT NULL OR description LIKE 'Категория: [ФОТ]%') THEN 'ФОТ Преподавателей'
+          WHEN type = 'expense' AND description LIKE 'Категория: [АРЕНДА]%' THEN 'Аренда помещений'
+          WHEN type = 'expense' AND description LIKE 'Категория: [МАРКЕТИНГ]%' THEN 'Маркетинг и реклама'
+          WHEN type = 'expense' AND description LIKE 'Категория: [ХОЗЯЙСТВЕННЫЕ]%' THEN 'Хозяйственные расходы'
+          WHEN type = 'correction' THEN 'Ручные корректировки баланса'
+          ELSE 'Прочие расходы'
+        END AS name,
+        COALESCE(SUM(amount), 0) AS value
+       FROM financial_transactions
+       WHERE company_id = ? AND type IN ('expense', 'correction')
+       GROUP BY name`,
+      [company_id]
+    );
+
+    return res.status(200).json({ success: true, data: rows });
+  } catch (error) {
+    console.error("Ошибка в getExpensesStructure:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
