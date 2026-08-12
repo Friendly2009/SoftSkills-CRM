@@ -71,14 +71,48 @@ WHERE ft.type != 'revenue' and ft.company_id = ?`,
         .json({ success: false, message: "data nor found" });
     }
     return res.status(200).json({
-        success: true,
-        data: rows
-    })
+      success: true,
+      data: rows,
+    });
   } catch (error) {
     console.log(error);
     return res.json({
       success: false,
       message: error,
     });
+  }
+};
+
+export const getRevenueSources = async (req: Request, res: Response) => {
+  try {
+    const company_id = req.session.company_id;
+    if (!company_id || company_id === -1) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const [rows]: any = await pool.query(
+      `SELECT 
+    CASE 
+        WHEN g.name IS NOT NULL THEN CONCAT('Группа ', g.name) 
+        ELSE 'Индивидуальные занятия' 
+    END AS name,
+    COALESCE(SUM(ft.amount), 0) AS value
+FROM financial_transactions ft
+LEFT JOIN lessons l ON ft.lesson_id = l.id
+LEFT JOIN \`groups\` g ON l.group_id = g.id  
+WHERE ft.company_id = ? AND ft.type = 'revenue'
+GROUP BY g.id, g.name`,
+      [company_id],
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: rows,
+    });
+  } catch (error) {
+    console.error("Ошибка в getRevenueSources:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };

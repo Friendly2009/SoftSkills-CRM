@@ -5,7 +5,7 @@ import { APIsignup, APIsignin, logout } from './controllers/AuthController.js'
 import { APIGetClients, addclient, delclient, updateClient } from './controllers/ClientController.js'
 import { getgroups, creategroup, deleteGroup, updategroup } from './controllers/GroupController.js'
 import { getSchedule, getLessonDetails, closeLesson } from './controllers/SchesuleController.js';
-import { get_accupancy_groups, get_transactions_list } from './controllers/AnalyticController.js'
+import { get_accupancy_groups, get_transactions_list, getRevenueSources } from './controllers/AnalyticController.js'
 
 const router: Router = Router();
 
@@ -39,4 +39,5 @@ router.post('/lessons/close', closeLesson);
 
 router.get('/getaccupancygroups', get_accupancy_groups);
 router.get('/get_transactions_list', get_transactions_list);
+router.get('/revenue-sources', getRevenueSources);
 export default router;
