@@ -5,7 +5,7 @@ import { ClientTable } from './DashboardsComponents/ClientsTable.tsx';
 import { GroupTable } from './DashboardsComponents/GroupsTable.tsx'
 import { Analytic } from './DashboardsComponents/Analytics.tsx'
 import { ScheduleTable } from './DashboardsComponents/SheduleTable.tsx';
-
+import { Expenses } from './DashboardsComponents/Finance.tsx';
 interface UserProfile {
   fullname: string;
   email: string;
@@ -14,10 +14,7 @@ interface UserProfile {
 export const Dashboard: React.FC = () => {
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-
-  const [isPlusOpen, setIsPlusOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
-
   const [activeMenu, setActiveMenu] = useState<string>('analytics');
 
   const GetGlobalInfo = async () => {
@@ -169,6 +166,13 @@ export const Dashboard: React.FC = () => {
               <img src="/img/user/dashboard/calendar-regular.png" alt="" className={style['nav-icon']} />
               <span>Расписание</span>
             </div>
+            <div
+              className={`${style['nav-item']} ${activeMenu === 'finance' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('finance')}
+            >
+              <img src="/img/user/dashboard/coins-solid.png" alt="" className={style['nav-icon']} />
+              <span>Финансы</span>
+            </div>
           </nav>
         </aside>
 
@@ -180,6 +184,7 @@ export const Dashboard: React.FC = () => {
               {activeMenu === 'clients' && <ClientTable></ClientTable>}
               {activeMenu === 'groups' && <GroupTable></GroupTable>}
               {activeMenu === 'shedule' && <ScheduleTable></ScheduleTable>}
+              {activeMenu === 'finance' && <Expenses></Expenses>}
             </div>
           </div>
         </section>
