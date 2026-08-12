@@ -110,3 +110,20 @@ export const getExpensesStructureData = async () => {
     return [];
   }
 }; //группировка трат
+
+export const getDebtClient = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:3000/finance/client-debtors",
+      {
+        method: "GET",
+        credentials: "include",
+      },
+    );
+    const result = await response.json();
+    return result.success ? result.data : [];
+  } catch (error) {
+    console.error("Ошибка при вызове getExpensesStructureData:", error);
+    return [];
+  }
+};
