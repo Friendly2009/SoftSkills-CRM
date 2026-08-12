@@ -88,7 +88,7 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
             <div style={{ marginTop: '16px' }}>
                 {subView === 'finance_chart' && <FinanceChart companyId={selectedCompanyId} />}
                 {subView === 'revenue' && <Revenue />}
-                {subView === 'profit' && <Profit />}
+                {subView === 'profit' && <Profit companyId={selectedCompanyId} />}
                 {subView === 'expenses' && <Expenses />}
                 {subView === 'debts' && <Debts />}
                 {subView === 'transactions' && <Transactions />}
