@@ -3,16 +3,17 @@ import { getExpensesStructureData, addManualExpenseRequest } from '@/logic/analy
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { PlusCircle, Wallet, FileText, ArrowRight, CheckCircle2 } from 'lucide-react';
 
-interface ExpenseItem {
-    name: string;
-    value: number;
+interface ExpenseTransactionItem {
+    transaction_id: number;
+    date: string;
+    expense_amount: string | number;
+    operation_description: string;
+    lesson_id: number | null;
+    teacher_id: number | null;
 }
 
-const COLORS = ['#f43f5e', '#fb923c', '#8b5cf6', '#64748b'];
-
-
 export const Expenses: React.FC = () => {
-    const [data, setData] = useState<ExpenseItem[]>([]);
+    const [transactions, setTransactions] = useState<ExpenseTransactionItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     const [amount, setAmount] = useState<string>('');
@@ -25,7 +26,7 @@ export const Expenses: React.FC = () => {
     const loadExpensesData = () => {
         getExpensesStructureData().then(res => {
             if (Array.isArray(res)) {
-                setData(res);
+                setTransactions(res);
             }
             setLoading(false);
         });
@@ -55,61 +56,49 @@ export const Expenses: React.FC = () => {
         }
     };
 
-    const totalExpenses = data.reduce((sum, item) => sum + Number(item.value), 0);
-
     if (loading) {
         return (
             <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '16px', border: '1px solid #e2e8f0', textAlign: 'center', color: '#64748b' }}>
-                <p style={{ fontSize: '14px', margin: 0, fontWeight: 500 }}>Загрузка структуры расходов...</p>
+                <p style={{ fontSize: '14px', margin: 0, fontWeight: 500 }}>Загрузка ленты расходов...</p>
             </div>
         );
     }
+
     return (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px', marginTop: '16px' }}>
-
-            <div style={{ backgroundColor: '#ffffff', padding: '28px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.01)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.01)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <div>
-                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: 600, color: '#1e293b' }}>Structuring Cost</h3>
-                    <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#64748b' }}>Операционные расходы филиала из единой кассы</p>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: 600, color: '#1e293b' }}>История расходов</h3>
+                    <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: '#64748b' }}>Список всех начислений и списаний со счета компании</p>
 
-                    {data.length === 0 ? (
-                        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '60px 0', fontSize: '14px', fontWeight: 500 }}>Расходы за текущий период отсутствуют</div>
+                    {transactions.length === 0 ? (
+                        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '40px 0', fontSize: '14px', fontWeight: 500 }}>Нет трат</div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
-                            <div style={{ width: '200px', height: 180, position: 'relative' }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={85} paddingAngle={4} dataKey="value">
-                                            {data.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} style={{ outline: 'none' }} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip formatter={(v) => `${Number(v).toLocaleString()} ₽`} />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
-                                    <span style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px' }}>Всего трат</span>
-                                    <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>{totalExpenses.toLocaleString()} ₽</div>
-                                </div>
-                            </div>
-
-                            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {data.map((item, index) => {
-                                    const percentage = totalExpenses > 0 ? ((item.value / totalExpenses) * 100).toFixed(1) : '0';
-                                    return (
-                                        <div key={item.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #f1f5f9' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <span style={{ width: '8px', height: '8px', backgroundColor: COLORS[index % COLORS.length], borderRadius: '50%' }}></span>
-                                                <span style={{ fontSize: '13px', fontWeight: 500, color: '#475569' }}>{item.name}</span>
-                                            </div>
-                                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
-                                                {Number(item.value).toLocaleString()} ₽
-                                                <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '6px', fontWeight: 500 }}>({percentage}%)</span>
-                                            </span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                        <div style={{ overflowX: 'auto', maxHeight: '340px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
+                                <thead style={{ position: 'sticky', top: 0, backgroundColor: '#ffffff', zIndex: 1 }}>
+                                    <tr style={{ borderBottom: '2px solid #f1f5f9', color: '#64748b' }}>
+                                        <th style={{ padding: '8px 4px', fontWeight: 600 }}>Дата</th>
+                                        <th style={{ padding: '8px 4px', fontWeight: 600 }}>Описание</th>
+                                        <th style={{ padding: '8px 4px', fontWeight: 600, textAlign: 'right' }}>Сумма</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {transactions.map((tx) => (
+                                        <tr key={tx.transaction_id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background-color 0.15s' }}>
+                                            <td style={{ padding: '10px 4px', color: '#64748b', whiteSpace: 'nowrap' }}>
+                                                {tx.date}
+                                            </td>
+                                            <td style={{ padding: '10px 4px', fontWeight: 500, color: '#334155', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={tx.operation_description}>
+                                                {tx.operation_description}
+                                            </td>
+                                            <td style={{ padding: '10px 4px', textAlign: 'right', fontWeight: 600, color: '#f43f5e', whiteSpace: 'nowrap' }}>
+                                                - {Number(tx.expense_amount).toLocaleString('ru-RU')} ₽
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>

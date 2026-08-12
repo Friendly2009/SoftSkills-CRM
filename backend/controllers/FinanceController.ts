@@ -77,7 +77,7 @@ ORDER BY
     created_at DESC`,
       [company_id],
     );
-    return res.status(200).json({ success: false, data: rows });
+    return res.status(200).json({ success: true, data: rows });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
