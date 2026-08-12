@@ -50,3 +50,39 @@ export const addManualExpense = async (req: Request, res: Response) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
+export const getExpenses = async (req: Request, res: Response) => {
+  try {
+    const company_id = req.session.company_id;
+    if (!company_id || isNaN(company_id)) {
+      return res
+        .status(401)
+        .json({ success: false, message: "user is not authorized" });
+    }
+    const [rows] = await pool.query(
+      `SELECT 
+    id AS transaction_id,
+    DATE_FORMAT(created_at, '%d.%m.%Y %H:%i') AS date,
+    amount AS expense_amount,
+    description AS operation_description,
+    
+    lesson_id,
+    user_id AS teacher_id
+FROM 
+    cheapcrm.financial_transactions
+WHERE 
+    company_id = ?   
+    AND type = 'expense' 
+ORDER BY 
+    created_at DESC`,
+      [company_id],
+    );
+    return res.status(200).json({ success: false, data: rows });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "something went wrong and the data was be not delevery",
+    });
+  }
+};
