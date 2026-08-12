@@ -53,3 +53,20 @@ export const getFinancialTimelineData = async () => {
         return [];
     }
 };
+
+export const addManualExpenseRequest = async (expenseData: { amount: number; category: string; comment: string }) => {
+    try {
+        const response = await fetch('http://localhost:3000/addManualExpense', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: "include"
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Ошибка при вызове addManualExpenseRequest:", error);
+        return { success: false, message: "Ошибка сети" };
+    }
+};
+

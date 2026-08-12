@@ -128,7 +128,7 @@ export const getFinancialTimeline = async (req: Request, res: Response) => {
       `SELECT COALESCE(SUM(ABS(balance)), 0) AS total_client_debt 
        FROM clients 
        WHERE company_id = ? AND balance < 0`,
-      [company_id]
+      [company_id],
     );
     const currentDebt = Number(debtRows[0]?.total_client_debt || 0);
 
@@ -148,7 +148,7 @@ export const getFinancialTimeline = async (req: Request, res: Response) => {
        GROUP BY raw_month, period
        ORDER BY raw_month ASC
        LIMIT 6`,
-      [company_id]
+      [company_id],
     );
 
     const timelineData = rows.map((row: any) => ({
@@ -156,15 +156,17 @@ export const getFinancialTimeline = async (req: Request, res: Response) => {
       revenue: Number(row.revenue),
       expenses: Number(row.expenses),
       profit: Number(row.profit),
-      debts: currentDebt
+      debts: currentDebt,
     }));
 
     return res.status(200).json({
       success: true,
-      data: timelineData
+      data: timelineData,
     });
   } catch (error) {
     console.error("Ошибка в getFinancialTimeline:", error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
