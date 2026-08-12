@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getExpensesStructureData, addManualExpenseRequest } from '@/logic/analytic/Finance';
+import { getExpensesData, addManualExpenseRequest } from '@/logic/analytic/Finance';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { PlusCircle, Wallet, FileText, ArrowRight, CheckCircle2 } from 'lucide-react';
 
@@ -24,7 +24,7 @@ export const Expenses: React.FC = () => {
 
 
     const loadExpensesData = () => {
-        getExpensesStructureData().then(res => {
+        getExpensesData().then(res => {
             if (Array.isArray(res)) {
                 setTransactions(res);
             }

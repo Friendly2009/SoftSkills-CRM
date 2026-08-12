@@ -36,3 +36,17 @@ export interface TransactionsFrontend {
     description: string;
     created_at: Date;
 }
+
+export interface ExpenseStructureItem {
+    name: string;
+    value: number;
+}
+
+export interface ExpenseTransactionItem {
+    transaction_id: number;
+    date: string;
+    expense_amount: string | number;
+    operation_description: string;
+    lesson_id: number | null;
+    teacher_id: number | null;
+}
