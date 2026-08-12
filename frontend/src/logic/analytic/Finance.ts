@@ -34,3 +34,22 @@ export const getRevenueSources = async () => {
         return null;
     }
 };
+
+export const getFinancialTimelineData = async () => {
+    try {
+        const response = await fetch('http://localhost:3000/getFinancialTimeline', {
+            method: 'GET',
+            credentials: "include"
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || "Не удалось загрузить таймлайн");
+        }
+
+        return result.data;
+    } catch (error) {
+        console.error("Ошибка при вызове getFinancialTimelineData:", error);
+        return [];
+    }
+};
