@@ -1,11 +1,11 @@
-import style from './cssmoduls/index.module.css'
+import style from './cssmoduls/index.module.css';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
-    <div>
+    <div className={style['page-wrapper']}>
       <header className={style['main-header']}>
         <div className={style['container']}>
           <div className={style['header-inner']}>
@@ -19,8 +19,8 @@ const navigate = useNavigate();
               <a href="#" className={style['header-nav-link']}>Контакты</a>
             </nav>
             <div className={style['header-actions']}>
-              <button className={style['header-main-btn']} type="button" onClick={() => { navigate('/registration') }}>Создать компанию</button>
-              <button className={style['header-sec-btn']} type="button" onClick={() => { navigate('/authorization') }}>Войти в компанию</button>
+              <button className={style['header-sec-btn']} type="button" onClick={() => navigate('/authorization')}>Войти</button>
+              <button className={style['header-main-btn']} type="button" onClick={() => navigate('/registration')}>Создать компанию</button>
             </div>
           </div>
         </div>
@@ -37,33 +37,45 @@ const navigate = useNavigate();
 
               <div className={style['hero-features']}>
                 <div className={style['feature-item']}>
-                  <img src="/img/index/benefits/benefit-1-1024.png" alt="" />
+                  <div className={style['icon-wrapper']}>
+                    <img src="/img/index/benefits/benefit-1-1024.png" alt="" />
+                  </div>
                   <p>Аналитика и контроль за сотрудниками</p>
                 </div>
                 <div className={style['feature-item']}>
-                  <img src="/img/index/benefits/benefit-2-1024.png" alt="" />
+                  <div className={style['icon-wrapper']}>
+                    <img src="/img/index/benefits/benefit-2-1024.png" alt="" />
+                  </div>
                   <p>Удобное начисление зарплат педагогам</p>
                 </div>
                 <div className={style['feature-item']}>
-                  <img src="/img/index/benefits/benefit-3-1024.png" alt="" />
+                  <div className={style['icon-wrapper']}>
+                    <img src="/img/index/benefits/benefit-3-1024.png" alt="" />
+                  </div>
                   <p>Система лояльности и накопление баллов</p>
                 </div>
                 <div className={style['feature-item']}>
-                  <img src="/img/index/benefits/benefit-4-1024.png" alt="" />
+                  <div className={style['icon-wrapper']}>
+                    <img src="/img/index/benefits/benefit-4-1024.png" alt="" />
+                  </div>
                   <p>Мобильное приложение ученика</p>
                 </div>
                 <div className={style['feature-item']}>
-                  <img src="/img/index/benefits/benefit-5-1024.png" alt="" />
+                  <div className={style['icon-wrapper']}>
+                    <img src="/img/index/benefits/benefit-5-1024.png" alt="" />
+                  </div>
                   <p>Простая настройка и бесплатная поддержка</p>
                 </div>
                 <div className={style['feature-item']}>
-                  <img src="/img/index/benefits/benefit-6-1024.png" alt="" />
+                  <div className={style['icon-wrapper']}>
+                    <img src="/img/index/benefits/benefit-6-1024.png" alt="" />
+                  </div>
                   <p>Онлайн оплата по QR коду</p>
                 </div>
               </div>
 
               <div className={style['hero-btns']}>
-                <button className={style['hero-cta-btn']} onClick={() => { navigate('/authorization') }}>Начать бесплатно</button>
+                <button className={style['hero-cta-btn']} onClick={() => navigate('/authorization')}>Начать бесплатно</button>
               </div>
             </div>
           </div>
@@ -74,43 +86,36 @@ const navigate = useNavigate();
         <div className={style['container']}>
           <div className={style['footer-top']}>
             <div className={style['footer-brand']}>
-              <img
-                src="/img/index/alfacrm-bw-2024.svg"
-                alt="AlfaCRM"
-                className={style['footer-logo-img']}
-              />
-              <p className={style['footer-desc']}>
-                SoftSkills CRM — CRM система для учебного центра.
-              </p>
+              <img src="/img/index/alfacrm-bw-2024.svg" alt="AlfaCRM" className={style['footer-logo-img']} />
+              <p className={style['footer-desc']}>SoftSkills CRM — CRM система для учебного центра.</p>
             </div>
-
-            <nav className={style['footer-nav']}>
-              <a href="#">Главная</a>
-              <a href="#">Тарифы</a>
-              <a href="#">База знаний</a>
-              <a href="#">Контакты</a>
-            </nav>
-
-            <nav className={style['footer-nav']}>
-              <a href="#">Договор-оферта</a>
-              <a href="#">Политика cookie</a>
-              <a href="#">Конфиденциальность</a>
-              <a href="#">Юридическая информация</a>
-            </nav>
+            <div className={style['footer-links-group']}>
+              <nav className={style['footer-nav']}>
+                <h4>Навигация</h4>
+                <a href="#">Главная</a>
+                <a href="#">Тарифы</a>
+                <a href="#">База знаний</a>
+                <a href="#">Контакты</a>
+              </nav>
+              <nav className={style['footer-nav']}>
+                <h4>Документы</h4>
+                <a href="#">Договор-оферта</a>
+                <a href="#">Политика cookie</a>
+                <a href="#">Конфиденциальность</a>
+                <a href="#">Юридическая информация</a>
+              </nav>
+            </div>
           </div>
-
           <div className={style['footer-bottom']}>
+            <p className={style['footer-copy']}>© 2026, ООО «Soft Skills»</p>
             <div className={style['footer-socials']}>
               <a href="#"><img src="/img/index/vk.svg" alt="VK" /></a>
               <a href="#"><img src="/img/index/tg.svg" alt="TG" /></a>
             </div>
-            <p className={style['footer-copy']}>© 2026, ООО «Soft Skills»</p>
-            <p className={style['footer-author']}>made with me</p>
           </div>
         </div>
       </footer>
     </div>
-
   );
 };
 
