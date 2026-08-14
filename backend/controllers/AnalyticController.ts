@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
+import { Query, QueryResult } from "mysql2";
 
 export const get_accupancy_groups = async (
   req: Request,
@@ -239,4 +240,49 @@ ORDER BY c.balance ASC;
       .status(500)
       .json({ success: false, message: "Internal server error" });
   }
-};
+}
+
+export const getAllState = async (req: Request, res: Response) => {
+  try {
+    const company_id = req.session.company_id;
+    if(!company_id || isNaN(company_id)){
+      return res.status(401).json({success: false, message: "user is unauthorized"});
+    }
+    const [revenue]: QueryResult | any = await pool.query(`SELECT 
+    COALESCE(SUM(ft.amount), 0) AS value
+FROM financial_transactions ft
+WHERE ft.company_id = ? AND ft.type = 'revenue'`, [company_id]);
+
+    const [debt]: QueryResult | any = await pool.query(`
+SELECT 
+    ABS(COALESCE(SUM(c.balance), 0)) AS total_debt
+FROM cheapcrm.clients c
+WHERE c.company_id = ? AND c.balance < 0
+`, [company_id]);
+
+    const [expense]: QueryResult | any = await pool.query(`SELECT 
+    COALESCE(SUM(amount), 0) AS value
+FROM financial_transactions
+WHERE company_id = ? AND type IN ('expense', 'correction');
+`, [company_id]);
+
+    const [profit]: QueryResult | any = await pool.query(`SELECT 
+    COALESCE(
+        SUM(CASE WHEN type = 'revenue' THEN amount ELSE 0 END) - 
+        SUM(CASE WHEN type IN ('expense', 'correction') THEN amount ELSE 0 END), 
+        0
+    ) AS value
+FROM financial_transactions
+WHERE company_id = ?`, [company_id]);
+    return res.status(200).json({ 
+      success: true,
+      revenue: revenue[0].value,
+      debt: debt[0].value,
+      expense: expense[0].value,
+      profit: profit[0].value
+     });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: error });
+  }
+}
