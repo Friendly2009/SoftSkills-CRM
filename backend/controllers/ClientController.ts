@@ -62,7 +62,9 @@ export const APIGetClients = async (
 
       const { group_ids_str, group_names_str, ...cleanClient } = client;
 
-      const nextVisitDate = client.next_visit ? new Date(client.next_visit) : null;
+      const nextVisitDate = client.next_visit
+        ? new Date(client.next_visit)
+        : null;
 
       return {
         ...cleanClient,
@@ -190,9 +192,12 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
   const { name, balance, skills, status, contact, company_id, group_ids } =
     req.body;
 
+  const targetBalance =
+    balance !== undefined ? parseInt(String(balance), 10) : undefined;
+
   const clientFields: Record<string, any> = {};
   if (name !== undefined) clientFields.name = name;
-  if (balance !== undefined) clientFields.balance = balance;
+  if (targetBalance !== undefined) clientFields.balance = targetBalance;
   if (skills !== undefined) clientFields.skills = skills;
   if (status !== undefined) clientFields.status = status;
   if (contact !== undefined) clientFields.contact = contact;
@@ -208,16 +213,21 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
   try {
     await connection.beginTransaction();
 
-    const [rows] = await connection.execute<any[]>(
-      `SELECT id FROM clients WHERE id = ?`,
+    const [clientRows]: any = await connection.execute(
+      `SELECT name, balance, company_id FROM clients WHERE id = ?`,
       [clientId],
     );
 
-    if (rows.length === 0) {
+    if (!clientRows || clientRows.length === 0) {
       await connection.rollback();
       res.status(404).json({ error: "Клиент не найден" });
       return;
     }
+
+    const oldAmountNum = Number(clientRows[0].balance);
+    const clientName = clientRows[0].name;
+    const clientCompanyId =
+      company_id !== undefined ? company_id : clientRows[0].company_id;
 
     if (Object.keys(clientFields).length > 0) {
       const keys = Object.keys(clientFields);
@@ -225,14 +235,36 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
       const values = keys.map((key) => clientFields[key]);
 
       values.push(clientId);
-      if (balance !== undefined) {
-        clientFields.balance = parseInt(balance, 10);
-      }
 
       await connection.execute(
         `UPDATE clients SET ${setClause} WHERE id = ?`,
         values,
       );
+
+      if (targetBalance !== undefined) {
+        const diffAmount = targetBalance - oldAmountNum;
+
+        if (diffAmount !== 0) {
+          const txType = diffAmount > 0 ? "wallet_topup" : "correction";
+          const txDescription =
+            diffAmount > 0
+              ? `Пополнение счета через личный кабинет (Клиент: ${clientName}, ID: ${clientId})`
+              : `Ручная корректировка/списание баланса (Клиент: ${clientName}, ID: ${clientId})`;
+
+          await connection.execute(
+            `INSERT INTO financial_transactions 
+                (company_id, lesson_id, client_id, user_id, amount, type, description) 
+             VALUES (?, NULL, ?, NULL, ?, ?, ?)`,
+            [
+              clientCompanyId,
+              clientId,
+              Math.abs(diffAmount), 
+              txType,
+              txDescription,
+            ],
+          );
+        }
+      }
     }
 
     if (group_ids !== undefined) {

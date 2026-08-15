@@ -117,7 +117,6 @@ export const creategroup = async (req: Request, res: Response) => {
         .json({ message: "Не все обязательные поля заполнены" });
     }
 
-    // Преобразуем входящие строки дат в полноценные экземпляры класса Date
     const startDateObj = new Date(start_date);
     const endDateObj = end_date ? new Date(end_date) : null;
 
@@ -130,8 +129,8 @@ export const creategroup = async (req: Request, res: Response) => {
         name,
         users_id,
         status,
-        startDateObj, // Передаем объект Date
-        endDateObj,   // Передаем объект Date или null
+        startDateObj,
+        endDateObj,  
         max_students || null,
       ],
     );

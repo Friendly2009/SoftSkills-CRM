@@ -1,0 +1,20 @@
+import { AttendanceTrendData } from "@/interfaces/analyticsInterfaces";
+export const fetchAttendanceTrends = async (range: string): Promise<AttendanceTrendData[]> => {
+  try {
+    const response = await fetch(`http://localhost:3000/hr/get-attendance-trends?range=${range}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Failed to fetch attendance trends");
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error("API Error in fetchAttendanceTrends:", error);
+    return [];
+  }
+};

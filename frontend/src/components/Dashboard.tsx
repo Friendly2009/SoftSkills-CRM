@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import style from './cssmoduls/dashboard.module.css';
 import { UsersTable } from './DashboardsComponents/UsersTable.tsx';
 import { ClientTable } from './DashboardsComponents/ClientsTable.tsx';
-import { GroupTable } from './DashboardsComponents/GroupsTable.tsx';
+import { GroupTable } from './DashboardsComponents/GroupsTable.tsx'
+import { Analytic } from './DashboardsComponents/Analytics.tsx'
 import { ScheduleTable } from './DashboardsComponents/SheduleTable.tsx';
-
+import { Expenses } from './DashboardsComponents/Finance.tsx';
 interface UserProfile {
   fullname: string;
   email: string;
@@ -13,11 +14,8 @@ interface UserProfile {
 export const Dashboard: React.FC = () => {
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-
-  const [isPlusOpen, setIsPlusOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
-
-  const [activeMenu, setActiveMenu] = useState<string>('groups');
+  const [activeMenu, setActiveMenu] = useState<string>('analytics');
 
   const GetGlobalInfo = async () => {
     try {
@@ -53,8 +51,9 @@ export const Dashboard: React.FC = () => {
             <img src="/img/index/brand-logo-2024.webp" alt="SoftSkills CRM" />
           </div>
         </div>
-
         <div className={style['header-center']}>
+          {/* ... 
+        
           <div className={`${style['dropdown-menu']} ${isPlusOpen ? style.active : ''}`}>
             COMING SOON
             <div className={style['menu-item']}>
@@ -79,7 +78,6 @@ export const Dashboard: React.FC = () => {
               Доход
             </div>
           </div>
-
           <div
             className={style['icon-box']}
             id="plusBtn"
@@ -98,6 +96,7 @@ export const Dashboard: React.FC = () => {
           <div className={style['search-container']}>
             <input type="text" placeholder="Поиск клиента" />
           </div>
+          */}
         </div>
 
         <div
@@ -133,6 +132,13 @@ export const Dashboard: React.FC = () => {
         <aside className={style.sidebar} id="burger-menu">
           <nav className={style['sidebar-nav']}>
             <div
+              className={`${style['nav-item']} ${activeMenu === 'analytics' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('analytics')}
+            >
+              <img src="/img/user/dashboard/chart-line-solid.png" alt="" className={style['nav-icon']} />
+              <span>Аналитика</span>
+            </div>
+            <div
               className={`${style['nav-item']} ${activeMenu === 'groups' ? style['nav-item-active'] : ''}`}
               onClick={() => setActiveMenu('groups')}
             >
@@ -160,16 +166,25 @@ export const Dashboard: React.FC = () => {
               <img src="/img/user/dashboard/calendar-regular.png" alt="" className={style['nav-icon']} />
               <span>Расписание</span>
             </div>
+            <div
+              className={`${style['nav-item']} ${activeMenu === 'finance' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('finance')}
+            >
+              <img src="/img/user/dashboard/coins-solid.png" alt="" className={style['nav-icon']} />
+              <span>Финансы</span>
+            </div>
           </nav>
         </aside>
 
         <section className={style['main-content']}>
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
+              {activeMenu === 'analytics' && <Analytic></Analytic>}
               {activeMenu === 'users' && <UsersTable></UsersTable>}
               {activeMenu === 'clients' && <ClientTable></ClientTable>}
               {activeMenu === 'groups' && <GroupTable></GroupTable>}
               {activeMenu === 'shedule' && <ScheduleTable></ScheduleTable>}
+              {activeMenu === 'finance' && <Expenses></Expenses>}
             </div>
           </div>
         </section>
