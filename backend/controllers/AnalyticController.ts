@@ -406,3 +406,59 @@ export const getTeachersWorkload = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+export const getAttendanceTrends = async (req: Request, res: Response) => {
+  try {
+    const company_id = req.session?.company_id;
+    const parsedCompanyId = parseInt(String(company_id), 10);
+    const range = (req.query.range as string) || 'month';
+
+    if (!company_id || isNaN(parsedCompanyId)) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    let interval = '1 MONTH';
+    let dateFormat = '%d.%m'; 
+
+    if (range === 'week') {
+      interval = '7 DAY';
+    } else if (range === 'quarter') {
+      interval = '3 MONTH';
+      dateFormat = 'Неделя %v'; 
+    }
+
+    const [rows] = await pool.query<RowDataPacket[]>(`
+      SELECT 
+        DATE_FORMAT(l.lesson_date, ?) AS period_label,
+        l.lesson_date AS raw_date,
+        COUNT(la.client_id) AS total_scheduled,
+        SUM(CASE WHEN la.attendance_status = 1 THEN 1 ELSE 0 END) AS total_attended
+      FROM lessons l
+      JOIN lesson_attendance la ON la.lesson_id = l.id
+      WHERE l.status = 2 
+        AND l.lesson_date >= DATE_SUB(CURRENT_DATE(), INTERVAL ${interval})
+        AND l.id IN (SELECT id FROM lessons WHERE group_id IN (SELECT id FROM \`groups\` WHERE users_id IN (SELECT id FROM users WHERE company_id = ?)))
+      GROUP BY period_label, raw_date
+      ORDER BY raw_date ASC
+    `, [dateFormat, parsedCompanyId]);
+
+    const formattedData = rows.map(row => {
+      const total = Number(row.total_scheduled);
+      const attended = Number(row.total_attended);
+      const rate = total > 0 ? Math.round((attended / total) * 100) : 100;
+
+      return {
+        period: row.period_label,
+        rate: rate
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: formattedData
+    });
+  } catch (error: any) {
+    console.error("Error in getAttendanceTrends:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
