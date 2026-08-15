@@ -4,6 +4,7 @@ import { getAccupancyGroups, getBarColor } from '../../logic/analytic/accupancy_
 import { AnalyticsTable, AnalyticsChart, CustomTooltip } from '../DashboardsComponents/AnalyticModuls/AccupancyGroup';
 import { FinancialAnalyticsDashboard } from '@/components/DashboardsComponents/AnalyticModuls/FinancialAnalyticsDashboard';
 import { GroupAnalytics } from '@/interfaces/analyticsInterfaces';
+import { TeacherBurnoutTracker } from '@/components/DashboardsComponents/AnalyticModuls/TeacherBurnoutTracker';
 
 export const Analytic: React.FC = () => {
     const [activeReport, setActiveReport] = useState<string>('main_finance');
@@ -18,6 +19,8 @@ export const Analytic: React.FC = () => {
             getAccupancyGroups(setAccupancyGroup, setGroupsLoading);
         } else if (activeReport === "main_finance") {
             setViewMode('finance_chart');
+        } else if (activeReport === "teachers"){
+            setViewMode("default");
         }
     }, [activeReport]);
 
@@ -33,16 +36,19 @@ export const Analytic: React.FC = () => {
                     >
                         <option value="groups">Заполняемость групп</option>
                         <option value="main_finance">Общая выручка</option>
+                        <option value="teachers">Нагрузка преподавателей</option>
                     </select>
                 </div>
 
                 <div className={styles['analytics-view-toggle']}>
-                    {activeReport === 'groups' ? (
+                    {activeReport === 'groups' && (
                         <>
                             <button onClick={() => setViewMode('table')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'table' ? styles['analytics-toggle-btn--active'] : ''}`}>Таблица</button>
                             <button onClick={() => setViewMode('chart')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'chart' ? styles['analytics-toggle-btn--active'] : ''}`}>График</button>
                         </>
-                    ) : (
+                    )}
+                    
+                    {activeReport === 'main_finance' && (
                         <>
                             <button onClick={() => setViewMode('revenue')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'revenue' ? styles['analytics-toggle-btn--active'] : ''}`}>Выручка</button>
                             <button onClick={() => setViewMode('profit')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'profit' ? styles['analytics-toggle-btn--active'] : ''}`}>Чистая прибыль</button>
@@ -52,11 +58,12 @@ export const Analytic: React.FC = () => {
                             <button onClick={() => setViewMode('finance_chart')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'finance_chart' ? styles['analytics-toggle-btn--active'] : ''}`}>Общий график</button>
                         </>
                     )}
+
                 </div>
             </div>
 
             <div className={styles['analytics-content']}>
-                {activeReport === 'groups' ? (
+                {activeReport === 'groups' && (
                     groupsLoading ? (
                         <div className={styles.loading}>Загрузка групп...</div>
                     ) : viewMode === 'chart' ? (
@@ -64,8 +71,14 @@ export const Analytic: React.FC = () => {
                     ) : (
                         <AnalyticsTable data={accupancyGroup} getBarColor={getBarColor} />
                     )
-                ) : (
+                )}
+
+                {activeReport === 'main_finance' && (
                     <FinancialAnalyticsDashboard subView={viewMode} />
+                )}
+
+                {activeReport === 'teachers' && (
+                    <TeacherBurnoutTracker />
                 )}
             </div>
         </div>

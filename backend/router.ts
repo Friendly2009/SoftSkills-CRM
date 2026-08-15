@@ -53,5 +53,5 @@ router.get("/finance/expenses-structure-by-group", getExpensesStructure);
 router.get('/finance/client-debtors', getClientDebtors);
 router.get('/finance/get-all-state', getAllState);
 router.get('/get-chart-state', getChartState);
-router.get('/finance/get-teachers-workload', getTeachersWorkload);
+router.get('/hr/get-teachers-workload', getTeachersWorkload);
 export default router;

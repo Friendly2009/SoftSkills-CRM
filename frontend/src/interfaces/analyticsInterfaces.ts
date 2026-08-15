@@ -46,3 +46,9 @@ export interface ExpenseTransactionItem {
     lesson_id: number | null;
     teacher_id: number | null;
 }
+
+export interface TeacherWorkloadData {
+    teacherId: number;
+    name: string;
+    hours: number;
+}
