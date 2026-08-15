@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
-import { GroupAnalytics } from '../../components/DashboardsComponents/Analytics';
+import { GroupAnalytics } from '@/interfaces/analyticsInterfaces';
 
 export const getAccupancyGroups = async (
     setReportData: Dispatch<SetStateAction<GroupAnalytics[]>>,

@@ -58,6 +58,7 @@ export const Revenue: React.FC = () => {
                             tickFormatter={(v) => `${v / 1000}к`}
                         />
                         <Tooltip
+                            cursor={{ fill: '#f8fafc', opacity: 0.5 }}
                             formatter={(v) => [`${Number(v).toLocaleString()} ₽`, 'Выручка']}
                             contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                         />

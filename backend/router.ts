@@ -6,9 +6,10 @@ import { APIGetClients, addclient, delclient, updateClient } from './controllers
 import { getgroups, creategroup, deleteGroup, updategroup } from './controllers/GroupController.js'
 import { getSchedule, getLessonDetails, closeLesson } from './controllers/SchesuleController.js';
 import { get_accupancy_groups, get_transactions_list, 
-         getRevenueSources, getFinancialTimeline, 
-         getExpensesStructure, getClientDebtors, 
-         getAllState, getChartState } 
+         getRevenueSources,     getFinancialTimeline, 
+         getExpensesStructure,      getClientDebtors, 
+         getAllState,                  getChartState,
+         getTeachersWorkload } 
 from './controllers/AnalyticController.js';
 import { addManualExpense, getExpenses } from './controllers/FinanceController.js';
 
@@ -52,4 +53,5 @@ router.get("/finance/expenses-structure-by-group", getExpensesStructure);
 router.get('/finance/client-debtors', getClientDebtors);
 router.get('/finance/get-all-state', getAllState);
 router.get('/get-chart-state', getChartState);
+router.get('/hr/get-teachers-workload', getTeachersWorkload);
 export default router;
