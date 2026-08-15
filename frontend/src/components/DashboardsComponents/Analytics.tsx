@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import styles from '../cssmoduls/DashboardComponentsCssModuls/analytic.module.css';
-import { getAccupancyGroups, getBarColor } from '../../logic/analytic/accupancy_groups';
+import { getAccupancyGroups, getBarColor } from '@/logic/analytic/Accupancy_groups';
 import { AnalyticsTable, AnalyticsChart, CustomTooltip } from '../DashboardsComponents/AnalyticModuls/AccupancyGroup';
 import { FinancialAnalyticsDashboard } from '@/components/DashboardsComponents/AnalyticModuls/FinancialAnalyticsDashboard';
 import { GroupAnalytics } from '@/interfaces/analyticsInterfaces';
 import { TeacherBurnoutTracker } from '@/components/DashboardsComponents/AnalyticModuls/TeacherBurnoutTracker';
-
+import { AttendanceTrendTracker } from '@/components/DashboardsComponents/AnalyticModuls/AttendanceTrendTracker';
 export const Analytic: React.FC = () => {
     const [activeReport, setActiveReport] = useState<string>('main_finance');
     const [viewMode, setViewMode] = useState<string>('finance_chart');
@@ -19,7 +19,7 @@ export const Analytic: React.FC = () => {
             getAccupancyGroups(setAccupancyGroup, setGroupsLoading);
         } else if (activeReport === "main_finance") {
             setViewMode('finance_chart');
-        } else if (activeReport === "teachers"){
+        } else if (activeReport === "teachers") {
             setViewMode("default");
         }
     }, [activeReport]);
@@ -34,8 +34,9 @@ export const Analytic: React.FC = () => {
                         onChange={(e) => setActiveReport(e.target.value)}
                         className={styles['analytics-select']}
                     >
+                        <option value="main_finance">Финансы</option>
                         <option value="groups">Заполняемость групп</option>
-                        <option value="main_finance">Общая выручка</option>
+                        <option value="attendance">Посещаемость</option>
                         <option value="teachers">Нагрузка преподавателей</option>
                     </select>
                 </div>
@@ -47,7 +48,7 @@ export const Analytic: React.FC = () => {
                             <button onClick={() => setViewMode('chart')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'chart' ? styles['analytics-toggle-btn--active'] : ''}`}>График</button>
                         </>
                     )}
-                    
+
                     {activeReport === 'main_finance' && (
                         <>
                             <button onClick={() => setViewMode('revenue')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'revenue' ? styles['analytics-toggle-btn--active'] : ''}`}>Выручка</button>
@@ -79,6 +80,9 @@ export const Analytic: React.FC = () => {
 
                 {activeReport === 'teachers' && (
                     <TeacherBurnoutTracker />
+                )}
+                {activeReport === 'attendance' && (
+                    <AttendanceTrendTracker />
                 )}
             </div>
         </div>
