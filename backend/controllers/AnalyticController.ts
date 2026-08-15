@@ -278,7 +278,6 @@ export const getAllState = async (req: Request, res: Response) => {
     const debt = Number(debtData.debt || 0);
 
     const profit = revenue - expense;
-    console.log("ОТВЕТ БАЗЫ:", { revenue, expense, debt, profit });
 
     return res.status(200).json({
       success: true,
@@ -364,5 +363,46 @@ export const getChartState = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getTeachersWorkload = async (req: Request, res: Response) => {
+  try {
+    const company_id = req.session?.company_id;
+    const parsedCompanyId = parseInt(String(company_id), 10);
+
+    if (!company_id || isNaN(parsedCompanyId)) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const [rows] = await pool.query<RowDataPacket[]>(`
+      SELECT 
+        u.id AS teacher_id,
+        u.full_name AS teacher_name,
+        COALESCE(
+          SUM(TIME_TO_SEC(TIMEDIFF(gs.end_time, gs.start_time)) / 3600), 
+          0
+        ) AS weekly_hours
+      FROM users u
+      JOIN \`groups\` g ON g.users_id = u.id
+      JOIN group_schedules gs ON gs.group_id = g.id
+      WHERE u.company_id = ? AND g.status IN (1, 2)
+      GROUP BY u.id, u.full_name
+      ORDER BY weekly_hours DESC
+    `, [parsedCompanyId]);
+
+    const formattedData = rows.map(row => ({
+      teacherId: row.teacher_id,
+      name: row.teacher_name,
+      hours: parseFloat(Number(row.weekly_hours).toFixed(1))
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: formattedData
+    });
+  } catch (error: any) {
+    console.error("Error in getTeachersWorkload:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
