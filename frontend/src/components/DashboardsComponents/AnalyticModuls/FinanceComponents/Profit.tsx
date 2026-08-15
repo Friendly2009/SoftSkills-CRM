@@ -10,21 +10,32 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
-import { FinancialTimelineData, FinanceChartProps } from '@/interfaces/analyticsInterfaces';
+import { FinancialTimelineData } from '@/interfaces/analyticsInterfaces';
 
-export const Profit: React.FC<FinanceChartProps> = ({ companyId }) => {
+export const Profit: React.FC = () => {
     const [chartData, setChartData] = useState<FinancialTimelineData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
+        let isMounted = true; // Защита от утечки памяти при переключении табов
         setLoading(true);
+
         getFinancialTimelineData().then(res => {
-            if (Array.isArray(res)) {
-                setChartData(res);
+            if (isMounted) {
+                if (Array.isArray(res)) {
+                    setChartData(res);
+                }
+                setLoading(false);
             }
-            setLoading(false);
+        }).catch(err => {
+            console.error("Ошибка загрузки графика прибыли:", err);
+            if (isMounted) setLoading(false);
         });
-    }, [companyId]);
+
+        return () => {
+            isMounted = false; // Срабатывает при размонтировании вкладки
+        };
+    }, []); // ⬅️ ИСПРАВЛЕНО: Добавлен пустой массив зависимостей!
 
     if (loading) {
         return (

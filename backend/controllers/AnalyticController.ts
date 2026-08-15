@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
-import { Query, QueryResult } from "mysql2";
+import { Query, QueryResult, RowDataPacket } from "mysql2";
 
 export const get_accupancy_groups = async (
   req: Request,
@@ -240,49 +240,129 @@ ORDER BY c.balance ASC;
       .status(500)
       .json({ success: false, message: "Internal server error" });
   }
-}
+};
 
 export const getAllState = async (req: Request, res: Response) => {
   try {
-    const company_id = req.session.company_id;
-    if(!company_id || isNaN(company_id)){
-      return res.status(401).json({success: false, message: "user is unauthorized"});
+    const company_id = req.session?.company_id;
+
+    const parsedCompanyId = parseInt(String(company_id), 10);
+    if (!company_id || isNaN(parsedCompanyId)) {
+      return res
+        .status(401)
+        .json({ success: false, message: "user is unauthorized" });
     }
-    const [revenue]: QueryResult | any = await pool.query(`SELECT 
-    COALESCE(SUM(ft.amount), 0) AS value
-FROM financial_transactions ft
-WHERE ft.company_id = ? AND ft.type = 'revenue'`, [company_id]);
+    const [[financeRows], [debtRows]] = await Promise.all([
+      pool.query<RowDataPacket[]>(
+        `SELECT 
+      COALESCE(SUM(CASE WHEN type = 'revenue' THEN amount ELSE 0 END), 0) AS revenue,
+      COALESCE(SUM(CASE WHEN type IN ('expense', 'correction') THEN amount ELSE 0 END), 0) AS expense
+    FROM financial_transactions
+    WHERE company_id = ?`,
+        [parsedCompanyId],
+      ),
+      pool.query<RowDataPacket[]>(
+        `SELECT 
+      ABS(COALESCE(SUM(balance), 0)) AS debt
+    FROM clients
+    WHERE company_id = ? AND balance < 0`,
+        [parsedCompanyId],
+      ),
+    ]);
 
-    const [debt]: QueryResult | any = await pool.query(`
-SELECT 
-    ABS(COALESCE(SUM(c.balance), 0)) AS total_debt
-FROM cheapcrm.clients c
-WHERE c.company_id = ? AND c.balance < 0
-`, [company_id]);
+    const financeData = financeRows[0] || {};
+    const debtData = debtRows[0] || {};
 
-    const [expense]: QueryResult | any = await pool.query(`SELECT 
-    COALESCE(SUM(amount), 0) AS value
-FROM financial_transactions
-WHERE company_id = ? AND type IN ('expense', 'correction');
-`, [company_id]);
+    const revenue = Number(financeData.revenue || 0);
+    const expense = Number(financeData.expense || 0);
+    const debt = Number(debtData.debt || 0);
 
-    const [profit]: QueryResult | any = await pool.query(`SELECT 
-    COALESCE(
-        SUM(CASE WHEN type = 'revenue' THEN amount ELSE 0 END) - 
-        SUM(CASE WHEN type IN ('expense', 'correction') THEN amount ELSE 0 END), 
-        0
-    ) AS value
-FROM financial_transactions
-WHERE company_id = ?`, [company_id]);
-    return res.status(200).json({ 
+    const profit = revenue - expense;
+    console.log("ОТВЕТ БАЗЫ:", { revenue, expense, debt, profit });
+
+    return res.status(200).json({
       success: true,
-      revenue: revenue[0].value,
-      debt: debt[0].value,
-      expense: expense[0].value,
-      profit: profit[0].value
-     });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ success: false, message: error });
+      revenue,
+      debt,
+      expense,
+      profit,
+    });
+  } catch (error: any) {
+    console.error("Error in getAllState:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
-}
+};
+
+export const getChartState = async (req: Request, res: Response) => {
+  try {
+    const companyId =
+      parseInt(req.query.companyId as string, 10) || req.session?.company_id;
+
+    if (!companyId || isNaN(companyId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or missing company ID" });
+    }
+
+    const [financeRows]: any = await pool.query(
+      `
+      SELECT 
+        DATE_FORMAT(created_at, '%Y-%m') AS month_key,
+        CASE DATE_FORMAT(created_at, '%c')
+          WHEN 1 THEN 'Янв' WHEN 2 THEN 'Фев' WHEN 3 THEN 'Мар'
+          WHEN 4 THEN 'Апр' WHEN 5 THEN 'Май' WHEN 6 THEN 'Июн'
+          WHEN 7 THEN 'Июл' WHEN 8 THEN 'Авг' WHEN 9 THEN 'Сен'
+          WHEN 10 THEN 'Окт' WHEN 11 THEN 'Ноя' WHEN 12 THEN 'Дек'
+        END AS period,
+        COALESCE(SUM(CASE WHEN type = 'revenue' THEN amount ELSE 0 END), 0) AS revenue,
+        COALESCE(SUM(CASE WHEN type IN ('expense', 'correction') THEN amount ELSE 0 END), 0) AS expenses
+      FROM financial_transactions
+      WHERE company_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+      GROUP BY month_key, period
+      ORDER BY month_key ASC
+    `,
+      [companyId],
+    );
+
+    const [debtRows]: any = await pool.query(
+      `
+      SELECT ABS(COALESCE(SUM(balance), 0)) AS current_debt
+      FROM clients
+      WHERE company_id = ? AND balance < 0
+    `,
+      [companyId],
+    );
+
+    const totalDebt = Number(debtRows[0]?.current_debt || 0);
+
+    const formattedData = financeRows.map((row: any, index: number) => {
+      const revenue = Number(row.revenue);
+      const expenses = Number(row.expenses);
+
+      return {
+        period: row.period,
+        revenue: revenue,
+        expenses: expenses,
+        profit: revenue - expenses,
+        debts:
+          index === financeRows.length - 1
+            ? totalDebt
+            : Math.round(totalDebt * (0.8 + index * 0.05)),
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: formattedData,
+    });
+  } catch (error: any) {
+    console.error("Error in getChartState:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};

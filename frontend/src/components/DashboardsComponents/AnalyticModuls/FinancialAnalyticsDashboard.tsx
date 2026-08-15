@@ -1,26 +1,21 @@
-import React, { useState } from 'react';
-import { DollarSign, TrendingUp, CreditCard, Users, Building2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { DollarSign, TrendingUp, CreditCard, Users } from 'lucide-react';
 import { FinancialAnalyticsDashboardProps } from '@/interfaces/analyticsInterfaces';
-import { FinanceChart } from './FinanceComponents/FinanceChart'; 
+import { FinanceChart } from './FinanceComponents/FinanceChart';
 import { Revenue } from './FinanceComponents/Revenue';
 import { Profit } from './FinanceComponents/Profit';
 import { Expenses } from './FinanceComponents/Expenses';
 import { Debts } from './FinanceComponents/Debts';
 import { Transactions } from './FinanceComponents/Transactions';
-interface FinancialSummary {
-    company_id: number;
-    company_name: string;
-    total_revenue: number;
-    total_expenses: number;
-    net_profit: number;
-    total_client_debt: number;
-}
+import { fetchFinanceSummary } from '@/logic/analytic/Finance';
 
-const mockFinancialData: FinancialSummary[] = [
-    { company_id: 1, company_name: 'CheapCRM HQ (Основной филиал)', total_revenue: 450000, total_expenses: 180000, net_profit: 270000, total_client_debt: 35000 },
-    { company_id: 2, company_name: 'CheapCRM West (Западный филиал)', total_revenue: 290000, total_expenses: 145000, net_profit: 145000, total_client_debt: 62000 },
-    { company_id: 3, company_name: 'CheapCRM Soft (Онлайн направление)', total_revenue: 610000, total_expenses: 210000, net_profit: 400000, total_client_debt: 12000 }
-];
+interface AllDataInterface {
+    success: boolean;
+    revenue: number;
+    debt: number;
+    expense: number;
+    profit: number;
+}
 
 const BRAND_COLORS = {
     textMain: '#1e293b',
@@ -33,12 +28,43 @@ const BRAND_COLORS = {
 };
 
 export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardProps> = ({ subView }) => {
-    const [selectedCompanyId, setSelectedCompanyId] = useState<number>(1);
-    const currentCompanyData = mockFinancialData.find(c => c.company_id === selectedCompanyId) || mockFinancialData[0];
-
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(value);
     };
+    const [allData, setAllData] = useState<AllDataInterface>({
+        success: false,
+        revenue: 0,
+        debt: 0,
+        expense: 0,
+        profit: 0
+    });
+
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        let isMounted = true;
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                const data = await fetchFinanceSummary();
+                if (isMounted && data && data.success) {
+                    setAllData({
+                        success: true,
+                        revenue: data.revenue,
+                        debt: data.debt,
+                        expense: data.expense,
+                        profit: data.profit
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                if (isMounted) setIsLoading(false);
+            }
+        };
+        fetchData();
+        return () => { isMounted = false; };
+    }, []);
 
     return (
         <div style={{ padding: '4px 0', fontFamily: 'sans-serif', color: BRAND_COLORS.textMain }}>
@@ -47,7 +73,9 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
                 <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: subView === 'revenue' ? `2px solid ${BRAND_COLORS.revenue}` : `1px solid ${BRAND_COLORS.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <span style={{ fontSize: '13px', color: BRAND_COLORS.textMuted, fontWeight: 500 }}>Общая выручка</span>
-                        <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '4px 0 0 0' }}>{formatCurrency(currentCompanyData.total_revenue)}</h3>
+                        <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '4px 0 0 0' }}>
+                            {isLoading ? 'Загрузка...' : formatCurrency(allData.revenue)}
+                        </h3>
                     </div>
                     <div style={{ backgroundColor: '#eff6ff', padding: '10px', borderRadius: '8px' }}>
                         <DollarSign size={20} color={BRAND_COLORS.revenue} />
@@ -57,7 +85,9 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
                 <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: subView === 'profit' ? `2px solid ${BRAND_COLORS.profit}` : `1px solid ${BRAND_COLORS.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <span style={{ fontSize: '13px', color: BRAND_COLORS.textMuted, fontWeight: 500 }}>Чистая прибыль</span>
-                        <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '4px 0 0 0', color: BRAND_COLORS.profit }}>{formatCurrency(currentCompanyData.net_profit)}</h3>
+                        <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '4px 0 0 0', color: BRAND_COLORS.profit }}>
+                            {isLoading ? 'Загрузка...' : formatCurrency(allData.profit)}
+                        </h3>
                     </div>
                     <div style={{ backgroundColor: '#ecfdf5', padding: '10px', borderRadius: '8px' }}>
                         <TrendingUp size={20} color={BRAND_COLORS.profit} />
@@ -67,7 +97,9 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
                 <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: subView === 'expenses' ? `2px solid ${BRAND_COLORS.expenses}` : `1px solid ${BRAND_COLORS.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <span style={{ fontSize: '13px', color: BRAND_COLORS.textMuted, fontWeight: 500 }}>Расходы</span>
-                        <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '4px 0 0 0' }}>{formatCurrency(currentCompanyData.total_expenses)}</h3>
+                        <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '4px 0 0 0' }}>
+                            {isLoading ? 'Загрузка...' : formatCurrency(allData.expense)}
+                        </h3>
                     </div>
                     <div style={{ backgroundColor: '#fff1f2', padding: '10px', borderRadius: '8px' }}>
                         <CreditCard size={20} color={BRAND_COLORS.expenses} />
@@ -77,7 +109,9 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
                 <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: subView === 'debts' ? `2px solid ${BRAND_COLORS.debt}` : `1px solid ${BRAND_COLORS.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                         <span style={{ fontSize: '13px', color: BRAND_COLORS.textMuted, fontWeight: 500 }}>Долги клиентов</span>
-                        <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '4px 0 0 0' }}>{formatCurrency(currentCompanyData.total_client_debt)}</h3>
+                        <h3 style={{ fontSize: '22px', fontWeight: 600, margin: '4px 0 0 0' }}>
+                            {isLoading ? 'Загрузка...' : formatCurrency(allData.debt)}
+                        </h3>
                     </div>
                     <div style={{ backgroundColor: '#f5f3ff', padding: '10px', borderRadius: '8px' }}>
                         <Users size={20} color={BRAND_COLORS.debt} />
@@ -86,9 +120,9 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
             </div>
 
             <div style={{ marginTop: '16px' }}>
-                {subView === 'finance_chart' && <FinanceChart companyId={selectedCompanyId} />}
+                {subView === 'finance_chart' && <FinanceChart />}
                 {subView === 'revenue' && <Revenue />}
-                {subView === 'profit' && <Profit companyId={selectedCompanyId} />}
+                {subView === 'profit' && <Profit />}
                 {subView === 'expenses' && <Expenses />}
                 {subView === 'debts' && <Debts />}
                 {subView === 'transactions' && <Transactions />}

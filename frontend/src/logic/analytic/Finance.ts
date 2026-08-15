@@ -1,3 +1,4 @@
+import { FinancialTimelineData } from "@/interfaces/analyticsInterfaces";
 export const get_transactions_list = async () => {
   try {
     const response = await fetch(
@@ -66,7 +67,7 @@ export const addManualExpenseRequest = async (expenseData: {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include", 
+      credentials: "include",
       body: JSON.stringify(expenseData),
     });
 
@@ -92,7 +93,7 @@ export const getExpensesData = async () => {
     console.error("Ошибка при вызове getExpensesData:", error);
     return [];
   }
-};//список трат
+}; //список трат
 
 export const getExpensesStructureData = async () => {
   try {
@@ -124,6 +125,52 @@ export const getDebtClient = async () => {
     return result.success ? result.data : [];
   } catch (error) {
     console.error("Ошибка при вызове getExpensesStructureData:", error);
+    return [];
+  }
+};
+
+export const fetchFinanceSummary = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/finance/get-all-state", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "something went wrong");
+    }
+
+    return {
+      success: true,
+      revenue: result.revenue,
+      debt: result.debt,
+      expense: result.expense,
+      profit: result.profit,
+    };
+  } catch (error) {
+    console.error("API Error in getAllState:", error);
+    return { success: false };
+  }
+};
+
+export const getFinanceChartData = async (): Promise<FinancialTimelineData[]> => {
+  try {
+    const response = await fetch(`http://localhost:3000/get-chart-state`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Failed to fetch chart data");
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error("API Error in getFinanceChartData:", error);
     return [];
   }
 };

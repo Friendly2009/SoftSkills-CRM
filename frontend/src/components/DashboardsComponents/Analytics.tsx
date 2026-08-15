@@ -6,26 +6,20 @@ import { FinancialAnalyticsDashboard } from '@/components/DashboardsComponents/A
 import { GroupAnalytics } from '@/interfaces/analyticsInterfaces';
 
 export const Analytic: React.FC = () => {
-    const [activeReport, setActiveReport] = useState<string>('groups');
-    const [viewMode, setViewMode] = useState<string>('chart');
-    const [loading, setLoading] = useState<boolean>(true);
+    const [activeReport, setActiveReport] = useState<string>('main_finance');
+    const [viewMode, setViewMode] = useState<string>('finance_chart');
+    const [groupsLoading, setGroupsLoading] = useState<boolean>(true);
     const [accupancyGroup, setAccupancyGroup] = useState<GroupAnalytics[]>([]);
 
     useEffect(() => {
-        switch (activeReport) {
-            case "groups":
-                setLoading(true);
-                setViewMode('chart');
-                getAccupancyGroups(setAccupancyGroup, setLoading);
-                break;
-            case "main_finance":
-                setLoading(false);
-                setViewMode('finance_chart');
-                break;
+        if (activeReport === "groups") {
+            setGroupsLoading(true);
+            setViewMode('chart');
+            getAccupancyGroups(setAccupancyGroup, setGroupsLoading);
+        } else if (activeReport === "main_finance") {
+            setViewMode('finance_chart');
         }
     }, [activeReport]);
-
-    if (loading) return <div className={styles.loading}>Загрузка...</div>;
 
     return (
         <div className={styles['analytics-container']}>
@@ -63,7 +57,9 @@ export const Analytic: React.FC = () => {
 
             <div className={styles['analytics-content']}>
                 {activeReport === 'groups' ? (
-                    viewMode === 'chart' ? (
+                    groupsLoading ? (
+                        <div className={styles.loading}>Загрузка групп...</div>
+                    ) : viewMode === 'chart' ? (
                         <AnalyticsChart data={accupancyGroup} getBarColor={getBarColor} CustomTooltip={CustomTooltip} />
                     ) : (
                         <AnalyticsTable data={accupancyGroup} getBarColor={getBarColor} />

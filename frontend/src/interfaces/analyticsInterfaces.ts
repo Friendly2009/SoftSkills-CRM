@@ -20,10 +20,6 @@ export interface FinancialAnalyticsDashboardProps {
     subView: string;
 }
 
-export interface FinanceChartProps {
-    companyId: number;
-}
-
 export interface TransactionsFrontend {
     id: number;
     lesson_id: number | null;
