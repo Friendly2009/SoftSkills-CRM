@@ -118,3 +118,59 @@ export const get_lead_by_id = async (
         });
     }
 };
+
+export const update_lead = async (
+    req: Request,
+    res: Response
+): Promise<Response | void> => {
+    try {
+        const company_id = req.session?.company_id;
+        if (!company_id) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Сессия не найдена или истекла" });
+        }
+
+        const { id } = req.params;
+        const { user_id, name, contact, status, source, loss_reason_id, description } = req.body;
+
+        if (status === 'lost' && !loss_reason_id) {
+            return res.status(400).json({ 
+                success: false,
+                message: "Ошибка валидации: Поле 'loss_reason_id' строго обязательно, если статус равен 'lost'." 
+            });
+        }
+
+        const fields: string[] = [];
+        const values: any[] = [];
+
+        if (user_id !== undefined) { fields.push('user_id = ?'); values.push(user_id); }
+        if (name !== undefined) { fields.push('name = ?'); values.push(name); }
+        if (contact !== undefined) { fields.push('contact = ?'); values.push(contact); }
+        if (status !== undefined) { fields.push('status = ?'); values.push(status); }
+        if (source !== undefined) { fields.push('source = ?'); values.push(source); }
+        if (loss_reason_id !== undefined) { fields.push('loss_reason_id = ?'); values.push(loss_reason_id); }
+        if (description !== undefined) { fields.push('description = ?'); values.push(description); }
+
+        if (fields.length === 0) {
+            return res.status(400).json({ success: false, message: "Нет данных для обновления" });
+        }
+
+        const query = `UPDATE leads SET ${fields.join(', ')} WHERE id = ? AND company_id = ?`;
+        values.push(id, company_id);
+
+        const [result] = await pool.query<ResultSetHeader>(query, values);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Лид не найден или не принадлежит вашей компании" });
+        }
+
+        return res.status(200).json({ success: true, message: "Данные лида успешно обновлены" });
+    } catch (er: any) {
+        console.log(er);
+        return res.status(500).json({
+            success: false,
+            message: er.message || er
+        });
+    }
+};
