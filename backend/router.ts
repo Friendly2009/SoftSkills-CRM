@@ -12,7 +12,7 @@ import { get_accupancy_groups, get_transactions_list,
          getTeachersWorkload,   getAttendanceTrends } 
 from './controllers/AnalyticController.js';
 import { addManualExpense, getExpenses } from './controllers/FinanceController.js';
-
+import { createLead, getLeads, getLeadById, updateLead, deleteLead } from './controllers/LeadController.js';
 const router: Router = Router();
 
 router.get('/checkconnect', checkconnect);
@@ -42,6 +42,14 @@ router.patch('/updategroup/:id', updategroup);
 router.get('/schedule', getSchedule);
 router.get('/getlessons/:id', getLessonDetails);
 router.post('/lessons/close', closeLesson);
+
+router.post('/create-lead', createLead);
+router.get('/get-lead', getLeads);
+router.get('/get-lead-by-id/:id', getLeadById);
+router.patch('/update-lead/:id', updateLead);
+router.delete('/delete-lead/:id', deleteLead);
+
+module.exports = router;
 
 router.get('/getaccupancygroups', get_accupancy_groups);
 router.get('/get_transactions_list', get_transactions_list);

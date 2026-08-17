@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import pool from "../data_base_connect.js";
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
-export const create_lead = async (
+export const createLead = async (
     req: Request,
     res: Response
 ): Promise<Response | void> => {
@@ -56,7 +56,7 @@ export const create_lead = async (
     }
 };
 
-export const get_leads = async (
+export const getLeads = async (
     req: Request,
     res: Response
 ): Promise<Response | void> => {
@@ -87,7 +87,7 @@ export const get_leads = async (
     }
 };
 
-export const get_lead_by_id = async (
+export const getLeadById = async (
     req: Request,
     res: Response
 ): Promise<Response | void> => {
@@ -119,7 +119,7 @@ export const get_lead_by_id = async (
     }
 };
 
-export const update_lead = async (
+export const updateLead = async (
     req: Request,
     res: Response
 ): Promise<Response | void> => {
@@ -175,7 +175,7 @@ export const update_lead = async (
     }
 };
 
-export const delete_lead = async (
+export const deleteLead = async (
     req: Request,
     res: Response
 ): Promise<Response | void> => {
