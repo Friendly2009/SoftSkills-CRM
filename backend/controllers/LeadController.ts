@@ -174,3 +174,33 @@ export const update_lead = async (
         });
     }
 };
+
+export const delete_lead = async (
+    req: Request,
+    res: Response
+): Promise<Response | void> => {
+    try {
+        const company_id = req.session?.company_id;
+        if (!company_id) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Сессия не найдена или истекла" });
+        }
+
+        const { id } = req.params;
+        const query = `DELETE FROM leads WHERE id = ? AND company_id = ?`;
+        const [result] = await pool.query<ResultSetHeader>(query, [id, company_id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Лид не найден или уже удален" });
+        }
+
+        return res.status(200).json({ success: true, message: "Лид успешно удален" });
+    } catch (er: any) {
+        console.log(er);
+        return res.status(500).json({
+            success: false,
+            message: er.message || er
+        });
+    }
+};
