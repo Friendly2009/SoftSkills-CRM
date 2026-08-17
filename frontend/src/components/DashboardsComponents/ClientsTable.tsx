@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
 import { MoreAction } from './ClientsComponents/MoreActions.tsx';
 import { deleteClient, getClient, addClient, updateClient } from '../../logic/ClientRequests.ts';
-import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
+import { ClientTemplate, MoreActionProps } from "@/interfaces/ClientsInterfaces.ts";
 import { TopUp } from "./ClientsComponents/topUp.tsx";
 import { UpdateClientForm } from '@/components/DashboardsComponents/ClientsComponents/updateClientForm.tsx';
 

@@ -10,7 +10,7 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
-import { FinancialTimelineData } from '@/interfaces/analyticsInterfaces';
+import { FinancialTimelineData } from '@/interfaces/AnalyticsInterfaces';
 
 export const Profit: React.FC = () => {
     const [chartData, setChartData] = useState<FinancialTimelineData[]>([]);

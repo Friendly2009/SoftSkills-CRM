@@ -1,4 +1,4 @@
-import { FinancialTimelineData } from "@/interfaces/analyticsInterfaces";
+import { FinancialTimelineData } from "@/interfaces/AnalyticsInterfaces";
 export const get_transactions_list = async () => {
   try {
     const response = await fetch(

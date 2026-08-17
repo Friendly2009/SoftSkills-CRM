@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TransactionsFrontend } from '@/interfaces/analyticsInterfaces';
+import { TransactionsFrontend } from '@/interfaces/AnalyticsInterfaces';
 import { get_transactions_list } from '@/logic/analytic/Finance';
 
 export const Transactions: React.FC = () => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
+import { MoreActionProps } from "@/interfaces/ClientsInterfaces";
 import { useNavigate } from "react-router-dom";
 
 const menuStyles = {

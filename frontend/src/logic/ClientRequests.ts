@@ -1,4 +1,4 @@
-import { ClientTemplate } from "../interfaces/clientsInterfaces.ts";
+import { ClientTemplate } from "../interfaces/ClientsInterfaces.ts";
 
 export const deleteClient = async (client: ClientTemplate) => {
   try {

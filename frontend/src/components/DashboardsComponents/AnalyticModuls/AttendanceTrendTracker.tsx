@@ -9,7 +9,7 @@ import {
     ResponsiveContainer
 } from 'recharts';
 import { fetchAttendanceTrends } from '@/logic/analytic/Clients';
-import { AttendanceTrendData } from '@/interfaces/analyticsInterfaces'
+import { AttendanceTrendData } from '@/interfaces/AnalyticsInterfaces'
 export const AttendanceTrendTracker: React.FC = () => {
     const [data, setData] = useState<AttendanceTrendData[]>([]);
     const [range, setRange] = useState<string>('month');

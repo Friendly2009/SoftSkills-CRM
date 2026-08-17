@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ClientTemplate } from '@/interfaces/clientsInterfaces.ts';
+import { ClientTemplate } from '@/interfaces/ClientsInterfaces';
 import { updateClient } from '@/logic/ClientRequests';
 interface TopUpProps {
     client: ClientTemplate;
