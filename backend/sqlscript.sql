@@ -137,36 +137,25 @@ CREATE TABLE IF NOT EXISTS `financial_transactions` (
     CONSTRAINT `fk_tx_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
 
-use cheapcrm;
 CREATE TABLE IF NOT EXISTS `lead_loss_reasons` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `reason_text` VARCHAR(255) NOT NULL COMMENT 'Причина потери лида (например: Дорого, Неудобное время)',
+    `reason_text` VARCHAR(255) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
 
 CREATE TABLE IF NOT EXISTS `leads` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `company_id` INT NOT NULL COMMENT 'Привязка к компании в CRM',
-    `user_id` INT DEFAULT NULL COMMENT 'Ответственный менеджер / сотрудник',
-    `loss_reason_id` INT DEFAULT NULL COMMENT 'Заполняется только при статусе lost',
-    `name` VARCHAR(255) NOT NULL COMMENT 'Имя потенциального клиента',
-    `contact` VARCHAR(45) NOT NULL COMMENT 'Телефон, Telegram, Email или соцсеть',
-    `status` ENUM('new', 'in_progress', 'trial_scheduled', 'trial_attended', 'won', 'lost') NOT NULL DEFAULT 'new' COMMENT 'Текущий этап воронки продаж',
-    `source` VARCHAR(100) DEFAULT NULL COMMENT 'Источник заявки (например: Website, VK, Реклама)',
-    `description` TEXT DEFAULT NULL COMMENT 'Свободные заметки менеджера по лиду',
+    `company_id` INT NOT NULL,
+    `user_id` INT DEFAULT NULL,
+    `loss_reason_id` INT DEFAULT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `contact` VARCHAR(45) NOT NULL,
+    `status` ENUM('new', 'in_progress', 'trial_scheduled', 'trial_attended', 'won', 'lost') NOT NULL DEFAULT 'new',
+    `source` VARCHAR(100) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
     `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
     PRIMARY KEY (`id`),
-    KEY `fk_leads_company_idx` (`company_id`),
-    KEY `fk_leads_users_idx` (`user_id`),
-    KEY `fk_leads_loss_reason_idx` (`loss_reason_id`),
-    
-    -- Внешние ключи (Ограничения целостности данных)
-    CONSTRAINT `fk_leads_company` FOREIGN KEY (`company_id`) 
-        REFERENCES `company` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_leads_users` FOREIGN KEY (`user_id`) 
-        REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT `fk_leads_loss_reason` FOREIGN KEY (`loss_reason_id`) 
         REFERENCES `lead_loss_reasons` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;

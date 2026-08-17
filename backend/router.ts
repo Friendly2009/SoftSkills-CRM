@@ -49,8 +49,6 @@ router.get('/get-lead-by-id/:id', getLeadById);
 router.patch('/update-lead/:id', updateLead);
 router.delete('/delete-lead/:id', deleteLead);
 
-module.exports = router;
-
 router.get('/getaccupancygroups', get_accupancy_groups);
 router.get('/get_transactions_list', get_transactions_list);
 router.get('/revenue-sources', getRevenueSources);
