@@ -1,4 +1,4 @@
-import { AttendanceTrendData } from "@/interfaces/analyticsInterfaces";
+import { AttendanceTrendData } from "@/interfaces/AnalyticsInterfaces";
 export const fetchAttendanceTrends = async (range: string): Promise<AttendanceTrendData[]> => {
   try {
     const response = await fetch(`http://localhost:3000/hr/get-attendance-trends?range=${range}`, {

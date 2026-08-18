@@ -1,4 +1,4 @@
-import { TeacherWorkloadData } from '@/interfaces/analyticsInterfaces.ts';
+import { TeacherWorkloadData } from '@/interfaces/AnalyticsInterfaces';
 export const fetchTeachersWorkload = async (): Promise<TeacherWorkloadData[]> => {
   try {
     const response = await fetch("http://localhost:3000/hr/get-teachers-workload", {

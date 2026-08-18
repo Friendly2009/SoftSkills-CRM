@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { DollarSign, TrendingUp, CreditCard, Users } from 'lucide-react';
-import { FinancialAnalyticsDashboardProps } from '@/interfaces/analyticsInterfaces';
+import { FinancialAnalyticsDashboardProps } from '@/interfaces/AnalyticsInterfaces';
 import { FinanceChart } from './FinanceComponents/FinanceChart';
 import { Revenue } from './FinanceComponents/Revenue';
 import { Profit } from './FinanceComponents/Profit';

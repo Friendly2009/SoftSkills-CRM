@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { PhantomLesson } from '@/interfaces/scheduleInterfaces.ts';
+import { PhantomLesson } from '@/interfaces/ScheduleInterfaces';
 import { getSchedule } from '../../logic/SchedulesRequest';
 import { LessonModalWindow } from '@/components/DashboardsComponents/SchesuleComponents/LessonModalWindow.tsx';
 

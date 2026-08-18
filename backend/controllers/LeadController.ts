@@ -179,7 +179,6 @@ export const updateLead = async (
       description,
     } = req.body;
 
-    // 1. Валидация входных данных для статуса "lost"
     if (status === "lost" && !loss_reason_id) {
       connection.release();
       return res.status(400).json({
@@ -188,7 +187,6 @@ export const updateLead = async (
       });
     }
 
-    // 2. Проверка текущего статуса лида в БД перед изменениями (Бизнес-защита)
     const [currentLeadRows] = await connection.query<RowDataPacket[]>(
       `SELECT status FROM leads WHERE id = ? AND company_id = ?`,
       [id, company_id],
@@ -203,7 +201,6 @@ export const updateLead = async (
 
     const currentStatus = currentLeadRows[0].status;
 
-    // Если лид уже в финальной точке воронки, запрещаем менять статус на другой
     if (
       (currentStatus === "won" || currentStatus === "lost") && 
       status !== undefined && 
@@ -216,10 +213,8 @@ export const updateLead = async (
       });
     }
 
-    // Открываем транзакцию для атомарного обновления лида и создания клиента
     await connection.beginTransaction();
 
-    // 3. Динамическая сборка SQL-запроса на обновление
     const fields: string[] = [];
     const values: any[] = [];
 
@@ -248,7 +243,6 @@ export const updateLead = async (
       values.push(description);
     }
 
-    // Логика управления полем причины отказа
     if (status !== undefined && status !== "lost") {
       fields.push("loss_reason_id = ?");
       values.push(null);
@@ -274,7 +268,6 @@ export const updateLead = async (
       }
     }
 
-    // 4. Логика авто-конвертации лида в действующего клиента
     if (status === "won") {
       const [leadRows] = await connection.query<RowDataPacket[]>(
         `SELECT name, contact FROM leads WHERE id = ? AND company_id = ?`,
@@ -292,7 +285,6 @@ export const updateLead = async (
         });
       }
 
-      // Проверка на дублирование клиента по контакту внутри компании
       const [existingClient] = await connection.query<RowDataPacket[]>(
         `SELECT id FROM clients WHERE contact = ? AND company_id = ?`,
         [leadContact, company_id],
@@ -312,7 +304,6 @@ export const updateLead = async (
       }
     }
 
-    // Подтверждаем все изменения в базе данных
     await connection.commit();
     return res.status(200).json({
       success: true,

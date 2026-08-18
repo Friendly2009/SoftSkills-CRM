@@ -9,7 +9,7 @@ import {
     Legend, 
     ResponsiveContainer 
 } from 'recharts';
-import { FinancialTimelineData } from '@/interfaces/analyticsInterfaces';
+import { FinancialTimelineData } from '@/interfaces/AnalyticsInterfaces';
 import { getFinanceChartData } from '@/logic/analytic/Finance';
 
 export const FinanceChart: React.FC = () => {
