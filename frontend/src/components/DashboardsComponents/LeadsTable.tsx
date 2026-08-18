@@ -2,6 +2,27 @@ import { ILead } from '@/interfaces/LeadInterfaces';
 import React, { useState, useEffect } from 'react';
 import { LeadKanban } from './LeadComponents/Kanban';
 const styles = {
+    segmentedContainer: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        backgroundColor: '#f1f5f9', 
+        padding: '4px',
+        borderRadius: '8px',
+        gap: '4px',
+        fontFamily: "'Inter', system-ui, sans-serif",
+    },
+    segmentedButton: (isActive: boolean) => ({
+        padding: '6px 16px',
+        fontSize: '13px',
+        fontWeight: 500,
+        borderRadius: '6px',
+        border: 'none',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        backgroundColor: isActive ? '#ffffff' : 'transparent',
+        color: isActive ? '#0369a1' : '#475569',
+        boxShadow: isActive ? '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)' : 'none',
+    }),
     tableContainer: {
         width: '100%',
         overflowX: 'auto' as const,
@@ -54,15 +75,14 @@ const styles = {
         fontWeight: 600,
         color: '#1e3d59',
     },
-    // Стильные бэйджи статусов на основе ваших .badge классов
     badge: (status: string) => {
         const config: Record<string, { bg: string; color: string }> = {
-            new: { bg: '#e0f2fe', color: '#0369a1' },          // Голубой
-            in_progress: { bg: '#fef3c7', color: '#d97706' },  // Янтарный
-            trial_scheduled: { bg: '#f3e8ff', color: '#7e22ce' }, // Фиолетовый
-            trial_attended: { bg: '#ecfeff', color: '#0891b2' },  // Бирюзовый
-            won: { bg: '#dcfce7', color: '#15803d' },          // Зеленый
-            lost: { bg: '#fee2e2', color: '#b91c1c' },         // Красный
+            new: { bg: '#e0f2fe', color: '#0369a1' },
+            in_progress: { bg: '#fef3c7', color: '#d97706' },
+            trial_scheduled: { bg: '#f3e8ff', color: '#7e22ce' },
+            trial_attended: { bg: '#ecfeff', color: '#0891b2' },
+            won: { bg: '#dcfce7', color: '#15803d' },
+            lost: { bg: '#fee2e2', color: '#b91c1c' },
         };
         const current = config[status] || { bg: '#f1f5f9', color: '#475569' };
         return {
@@ -92,7 +112,6 @@ const styles = {
     actionsCell: {
         textAlign: 'right' as const,
     },
-    // Конфигурация кнопок панели инструментов
     btnBlue: (isActive: boolean) => ({
         display: 'inline-flex',
         alignItems: 'center',
@@ -104,7 +123,7 @@ const styles = {
         border: '1px solid transparent',
         borderRadius: '6px',
         cursor: 'pointer',
-        backgroundColor: isActive ? '#12293f' : '#1e3d59', // Имитируем var(--alfa-primary)
+        backgroundColor: isActive ? '#12293f' : '#1e3d59',
         color: '#ffffff',
         marginBottom: '10px', marginRight: '5px', marginLeft: '5px',
     }),
@@ -146,7 +165,6 @@ const styles = {
         cursor: 'pointer',
         padding: '6px 10px',
     },
-    /*----------------------- Модальные окна (Светлые) ------------------------------*/
     modalOverlay: {
         position: 'fixed' as const,
         top: 0, left: 0, width: '100vw', height: '100vh',
@@ -386,33 +404,36 @@ export const LeadsTable: React.FC = () => {
     };
     return (
         <div>
-            <div style={{ display: 'flex', gap: '5px', marginBottom: '10px', alignItems: 'center' }}>
-                <button style={styles.btnBlue(false)} onClick={handlePlusClick}>
-                    + Добавить
-                </button>
-                <button style={styles.btnLightBlue(isReSetMode)} onClick={handleResetClick}>
-                    {isReSetMode ? 'Выбор лида...' : 'Править'}
-                </button>
-                <button style={styles.btnRed(isDeleteMode)} onClick={handleDelClick}>
-                    {isDeleteMode ? 'Выберите лида' : 'Удалить'}
-                </button>
+            <div style={{ display: 'flex', marginBottom: '16px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '5px' }}>
+                    <button style={styles.btnBlue(false)} onClick={handlePlusClick}>
+                        + Добавить
+                    </button>
+                    <button style={styles.btnLightBlue(isReSetMode)} onClick={handleResetClick}>
+                        {isReSetMode ? 'Выбор лида...' : 'Править'}
+                    </button>
+                    <button style={styles.btnRed(isDeleteMode)} onClick={handleDelClick}>
+                        {isDeleteMode ? 'Выберите лида' : 'Удалить'}
+                    </button>
+                </div>
 
-                <div style={{ marginRight: 'auto' }}></div>
+                <div style={{ flexGrow: 1 }}></div>
 
-                <button
-                    style={styles.btnLightBlue(viewMode === 'table')}
-                    onClick={() => setViewMode('table')}
-                >
-                    Список
-                </button>
-                <button
-                    style={styles.btnLightBlue(viewMode === 'kanban')}
-                    onClick={() => setViewMode('kanban')}
-                >
-                    Канбан
-                </button>
+                <div style={styles.segmentedContainer}>
+                    <button
+                        style={styles.segmentedButton(viewMode === 'table')}
+                        onClick={() => setViewMode('table')}
+                    >
+                        Список
+                    </button>
+                    <button
+                        style={styles.segmentedButton(viewMode === 'kanban')}
+                        onClick={() => setViewMode('kanban')}
+                    >
+                        Канбан
+                    </button>
+                </div>
             </div>
-
 
             {viewMode === 'table' && (
                 <>

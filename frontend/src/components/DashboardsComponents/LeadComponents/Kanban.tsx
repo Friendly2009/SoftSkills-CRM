@@ -9,7 +9,7 @@ const styles = {
     },
     boardGrid: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)', // 5 колонок воронки (won и lost объединим или выведем отдельно)
+        gridTemplateColumns: 'repeat(5, 1fr)',
         gap: '16px',
         alignItems: 'start',
     },
@@ -73,7 +73,6 @@ const styles = {
         backgroundColor: '#f1f5f9',
         color: '#475569',
     },
-    /* Стили светлой модалки для причины отказа */
     modalOverlay: {
         position: 'fixed' as const,
         top: 0, left: 0, width: '100vw', height: '100vh',
@@ -106,8 +105,8 @@ export const LeadKanban: React.FC = () => {
         { id: 'in_progress', title: 'В работе' },
         { id: 'trial_scheduled', title: 'Пробный назначен' },
         { id: 'trial_attended', title: 'Пробный посещен' },
-        { id: 'won', title: 'Выигран (Won)' },
-        { id: 'lost', title: 'Проигран (Lost)' }
+        { id: 'won', title: 'Выигран' },
+        { id: 'lost', title: 'Проигран' }
     ];
 
     const [leads, setLeads] = useState<any[]>([]);
@@ -280,10 +279,10 @@ export const LeadKanban: React.FC = () => {
                                 required
                             >
                                 <option value="">Выберите причину...</option>
-                                <option value="1">Too expensive (Дорого)</option>
-                                <option value="2">Inconvenient schedule (Неудобно)</option>
-                                <option value="3">Chose competitors (Конкуренты)</option>
-                                <option value="4">Not interested (Передумал)</option>
+                                <option value="1">Дорого</option>
+                                <option value="2">Неудобное расписание</option>
+                                <option value="3">Выбрал конкурентов</option>
+                                <option value="4">Передумал</option>
                             </select>
 
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
