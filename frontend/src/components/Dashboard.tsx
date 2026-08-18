@@ -6,6 +6,7 @@ import { GroupTable } from './DashboardsComponents/GroupsTable.tsx'
 import { Analytic } from './DashboardsComponents/Analytics.tsx'
 import { ScheduleTable } from './DashboardsComponents/SheduleTable.tsx';
 import { Expenses } from './DashboardsComponents/Finance.tsx';
+import { LeadsTable } from './DashboardsComponents/LeadsTable.tsx';
 interface UserProfile {
   fullname: string;
   email: string;
@@ -173,6 +174,13 @@ export const Dashboard: React.FC = () => {
               <img src="/img/user/dashboard/coins-solid.png" alt="" className={style['nav-icon']} />
               <span>Финансы</span>
             </div>
+            <div
+              className={`${style['nav-item']} ${activeMenu === 'leads' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('leads')}
+            >
+              <img src="/img/user/dashboard/user-plus-solid.png" alt="" className={style['nav-icon']} />
+              <span>Лиды</span>
+            </div>
           </nav>
         </aside>
 
@@ -185,6 +193,7 @@ export const Dashboard: React.FC = () => {
               {activeMenu === 'groups' && <GroupTable></GroupTable>}
               {activeMenu === 'shedule' && <ScheduleTable></ScheduleTable>}
               {activeMenu === 'finance' && <Expenses></Expenses>}
+              {activeMenu === 'leads' && <LeadsTable></LeadsTable>}
             </div>
           </div>
         </section>

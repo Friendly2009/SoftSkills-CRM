@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ClientTemplate } from '@/interfaces/clientsInterfaces.tsx';
+import { ClientTemplate } from '@/interfaces/ClientsInterfaces';
 import { getClient } from '@/logic/ClientRequests';
 
 export const ClientProfile: React.FC = () => {

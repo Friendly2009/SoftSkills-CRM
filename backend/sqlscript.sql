@@ -137,6 +137,28 @@ CREATE TABLE IF NOT EXISTS `financial_transactions` (
     CONSTRAINT `fk_tx_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
 
+CREATE TABLE IF NOT EXISTS `lead_loss_reasons` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `reason_text` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+
+CREATE TABLE IF NOT EXISTS `leads` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `company_id` INT NOT NULL,
+    `user_id` INT DEFAULT NULL,
+    `loss_reason_id` INT DEFAULT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `contact` VARCHAR(45) NOT NULL,
+    `status` ENUM('new', 'in_progress', 'trial_scheduled', 'trial_attended', 'won', 'lost') NOT NULL DEFAULT 'new',
+    `source` VARCHAR(100) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `fk_leads_loss_reason` FOREIGN KEY (`loss_reason_id`) 
+        REFERENCES `lead_loss_reasons` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
 
 CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`accupancy_rate` AS
 SELECT  
@@ -235,6 +257,43 @@ LEFT JOIN `cheapcrm`.`group_members` `gm` ON `g`.`id` = `gm`.`group_id`
 LEFT JOIN `cheapcrm`.`lessons` `l` ON `g`.`id` = `l`.`group_id`
 LEFT JOIN `cheapcrm`.`lesson_attendance` `la` ON `l`.`id` = `la`.`lesson_id`
 GROUP BY `g`.`id`, `g`.`name`, `g`.`status`, `u`.`company_id`, `u`.`full_name`, `g`.`max_students`;
+
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`view_leads_conversion` AS
+SELECT 
+    `c`.`id` AS `company_id`,
+    `c`.`name` AS `company_name`,
+    COUNT(`l`.`id`) AS `total_leads`,
+    SUM(CASE WHEN `l`.`status` = 'new' THEN 1 ELSE 0 END) AS `leads_new`,
+    SUM(CASE WHEN `l`.`status` = 'in_progress' THEN 1 ELSE 0 END) AS `leads_in_progress`,
+    SUM(CASE WHEN `l`.`status` = 'trial_scheduled' THEN 1 ELSE 0 END) AS `leads_trial_scheduled`,
+    SUM(CASE WHEN `l`.`status` = 'trial_attended' THEN 1 ELSE 0 END) AS `leads_trial_attended`,
+    SUM(CASE WHEN `l`.`status` = 'won' THEN 1 ELSE 0 END) AS `leads_won`,
+    SUM(CASE WHEN `l`.`status` = 'lost' THEN 1 ELSE 0 END) AS `leads_lost`,
+    ROUND(
+        (SUM(CASE WHEN `l`.`status` = 'won' THEN 1 ELSE 0 END) / 
+        NULLIF(SUM(CASE WHEN `l`.`status` IN ('won', 'lost') THEN 1 ELSE 0 END), 0)) * 100, 
+        2
+    ) AS `conversion_rate_percent`
+FROM `cheapcrm`.`company` `c`
+LEFT JOIN `cheapcrm`.`leads` `l` ON `c`.`id` = `l`.`company_id`
+GROUP BY `c`.`id`, `c`.`name`;
+
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`view_leads_loss_analytics` AS
+SELECT 
+    `l`.`company_id` AS `company_id`,
+    `llr`.`id` AS `reason_id`,
+    `llr`.`reason_text` AS `loss_reason`,
+    COUNT(`l`.`id`) AS `total_dropped_leads`,
+    ROUND(
+        (COUNT(`l`.`id`) / 
+        NULLIF((SELECT COUNT(1) FROM `cheapcrm`.`leads` WHERE `status` = 'lost' AND `company_id` = `l`.`company_id`), 0)) * 100, 
+        2
+    ) AS `reason_share_percent`
+FROM `cheapcrm`.`lead_loss_reasons` `llr`
+JOIN `cheapcrm`.`leads` `l` ON `llr`.`id` = `l`.`loss_reason_id`
+WHERE `l`.`status` = 'lost'
+GROUP BY `l`.`company_id`, `llr`.`id`, `llr`.`reason_text`
+ORDER BY `total_dropped_leads` DESC;
 
 SET SQL_MODE = @OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS = @OLD_FOREIGN_KEY_CHECKS;

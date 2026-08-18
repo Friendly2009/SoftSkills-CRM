@@ -10,7 +10,7 @@ import {
     ReferenceLine,
     Cell
 } from 'recharts';
-import { TeacherWorkloadData } from '@/interfaces/analyticsInterfaces';
+import { TeacherWorkloadData } from '@/interfaces/AnalyticsInterfaces';
 import { fetchTeachersWorkload } from '@/logic/analytic/Teachers';
 export const TeacherBurnoutTracker: React.FC = () => {
     const [data, setData] = useState<TeacherWorkloadData[]>([]);

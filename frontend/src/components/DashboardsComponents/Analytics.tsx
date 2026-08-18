@@ -3,7 +3,7 @@ import styles from '../cssmoduls/DashboardComponentsCssModuls/analytic.module.cs
 import { getAccupancyGroups, getBarColor } from '@/logic/analytic/Accupancy_groups';
 import { AnalyticsTable, AnalyticsChart, CustomTooltip } from '../DashboardsComponents/AnalyticModuls/AccupancyGroup';
 import { FinancialAnalyticsDashboard } from '@/components/DashboardsComponents/AnalyticModuls/FinancialAnalyticsDashboard';
-import { GroupAnalytics } from '@/interfaces/analyticsInterfaces';
+import { GroupAnalytics } from '@/interfaces/AnalyticsInterfaces';
 import { TeacherBurnoutTracker } from '@/components/DashboardsComponents/AnalyticModuls/TeacherBurnoutTracker';
 import { AttendanceTrendTracker } from '@/components/DashboardsComponents/AnalyticModuls/AttendanceTrendTracker';
 export const Analytic: React.FC = () => {
