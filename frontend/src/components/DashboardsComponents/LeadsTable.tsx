@@ -1,6 +1,28 @@
 import { ILead } from '@/interfaces/LeadInterfaces';
 import React, { useState, useEffect } from 'react';
+import { LeadKanban } from './LeadComponents/Kanban';
 const styles = {
+    segmentedContainer: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        backgroundColor: '#f1f5f9', 
+        padding: '4px',
+        borderRadius: '8px',
+        gap: '4px',
+        fontFamily: "'Inter', system-ui, sans-serif",
+    },
+    segmentedButton: (isActive: boolean) => ({
+        padding: '6px 16px',
+        fontSize: '13px',
+        fontWeight: 500,
+        borderRadius: '6px',
+        border: 'none',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        backgroundColor: isActive ? '#ffffff' : 'transparent',
+        color: isActive ? '#0369a1' : '#475569',
+        boxShadow: isActive ? '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)' : 'none',
+    }),
     tableContainer: {
         width: '100%',
         overflowX: 'auto' as const,
@@ -53,15 +75,14 @@ const styles = {
         fontWeight: 600,
         color: '#1e3d59',
     },
-    // Стильные бэйджи статусов на основе ваших .badge классов
     badge: (status: string) => {
         const config: Record<string, { bg: string; color: string }> = {
-            new: { bg: '#e0f2fe', color: '#0369a1' },          // Голубой
-            in_progress: { bg: '#fef3c7', color: '#d97706' },  // Янтарный
-            trial_scheduled: { bg: '#f3e8ff', color: '#7e22ce' }, // Фиолетовый
-            trial_attended: { bg: '#ecfeff', color: '#0891b2' },  // Бирюзовый
-            won: { bg: '#dcfce7', color: '#15803d' },          // Зеленый
-            lost: { bg: '#fee2e2', color: '#b91c1c' },         // Красный
+            new: { bg: '#e0f2fe', color: '#0369a1' },
+            in_progress: { bg: '#fef3c7', color: '#d97706' },
+            trial_scheduled: { bg: '#f3e8ff', color: '#7e22ce' },
+            trial_attended: { bg: '#ecfeff', color: '#0891b2' },
+            won: { bg: '#dcfce7', color: '#15803d' },
+            lost: { bg: '#fee2e2', color: '#b91c1c' },
         };
         const current = config[status] || { bg: '#f1f5f9', color: '#475569' };
         return {
@@ -91,7 +112,6 @@ const styles = {
     actionsCell: {
         textAlign: 'right' as const,
     },
-    // Конфигурация кнопок панели инструментов
     btnBlue: (isActive: boolean) => ({
         display: 'inline-flex',
         alignItems: 'center',
@@ -103,7 +123,7 @@ const styles = {
         border: '1px solid transparent',
         borderRadius: '6px',
         cursor: 'pointer',
-        backgroundColor: isActive ? '#12293f' : '#1e3d59', // Имитируем var(--alfa-primary)
+        backgroundColor: isActive ? '#12293f' : '#1e3d59',
         color: '#ffffff',
         marginBottom: '10px', marginRight: '5px', marginLeft: '5px',
     }),
@@ -145,7 +165,6 @@ const styles = {
         cursor: 'pointer',
         padding: '6px 10px',
     },
-    /*----------------------- Модальные окна (Светлые) ------------------------------*/
     modalOverlay: {
         position: 'fixed' as const,
         top: 0, left: 0, width: '100vw', height: '100vh',
@@ -218,6 +237,8 @@ export const LeadsTable: React.FC = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isReSetModalWinOpen, setIsReSetModalWinOpen] = useState(false);
+
+    const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
 
     const [formData, setFormData] = useState({
         name: '',
@@ -383,183 +404,208 @@ export const LeadsTable: React.FC = () => {
     };
     return (
         <div>
-            <div style={{ display: 'flex', gap: '0px', marginBottom: '10px' }}>
-                <button style={styles.btnBlue(false)} onClick={handlePlusClick}>
-                    + Добавить
-                </button>
-                <button style={styles.btnLightBlue(isReSetMode)} onClick={handleResetClick}>
-                    {isReSetMode ? 'Выбор лида...' : 'Править'}
-                </button>
-                <button style={styles.btnRed(isDeleteMode)} onClick={handleDelClick}>
-                    {isDeleteMode ? 'Выберите лида' : 'Удалить'}
-                </button>
-            </div>
-
-
-            <div style={styles.tableContainer}>
-                <table style={styles.crmTable}>
-                    <thead>
-                        <tr>
-                            <th style={styles.th}>Лид / Потенциальный клиент</th>
-                            <th style={styles.th}>Источник</th>
-                            <th style={styles.th}>Контакты</th>
-                            <th style={styles.th}>Заметки менеджера</th>
-                            <th style={styles.th}>Статус воронки</th>
-                            <th style={{ ...styles.th, textAlign: 'right' }}>Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading && (
-                            <tr>
-                                <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
-                                    Загрузка списка лидов...
-                                </td>
-                            </tr>
-                        )}
-                        {!loading && leads.length === 0 && (
-                            <tr>
-                                <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
-                                    Список лидов пуст.
-                                </td>
-                            </tr>
-                        )}
-                        {!loading && leads.map((lead) => (
-                            <tr
-                                key={lead.id}
-                                onClick={() => handleRowClick(lead)}
-                                style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #f1f5f9' }}
-                            >
-                                <td style={styles.td(isDeleteMode, isReSetMode)}>
-                                    <div style={styles.userInfo}>
-                                        <div style={styles.avatarPlaceholder}>
-                                            {getInitials(lead.name)}
-                                        </div>
-                                        <span style={styles.userFullname}>{lead.name}</span>
-                                    </div>
-                                </td>
-                                <td style={styles.td(isDeleteMode, isReSetMode)}>
-                                    <span style={styles.sourceBadge}>{lead.source || 'Не указан'}</span>
-                                </td>
-                                <td style={styles.td(isDeleteMode, isReSetMode)}>{lead.contact}</td>
-                                <td style={styles.td(isDeleteMode, isReSetMode)}>
-                                    {lead.description ? (
-                                        <span style={{ color: '#334155' }}>{lead.description}</span>
-                                    ) : (
-                                        <span style={styles.textMuted}>Нет заметок</span>
-                                    )}
-                                </td>
-                                <td style={styles.td(isDeleteMode, isReSetMode)}>
-                                    <span style={styles.badge(lead.status)}>
-                                        {translateStatus(lead.status)}
-                                    </span>
-                                </td>
-                                <td style={{ ...styles.td(isDeleteMode, isReSetMode), ...styles.actionsCell }}>
-                                    <button style={styles.btnAction}>•••</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {isModalOpen && (
-                <div style={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
-                    <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div style={styles.modalHeader}>
-                            <h3 style={styles.modalHeaderTitle}>Добавить нового лида</h3>
-                            <button style={styles.btnClose} onClick={() => setIsModalOpen(false)}>×</button>
-                        </div>
-                        <form onSubmit={handleSubmit}>
-                            <div style={styles.formGrid}>
-                                <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                    <label style={styles.formGroupLabel}>Имя лида *</label>
-                                    <input type="text" name="name" style={styles.formInput} value={formData.name} onChange={handleInputChange} required placeholder="Иван Иванов" />
-                                </div>
-                                <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                    <label style={styles.formGroupLabel}>Контакты *</label>
-                                    <input type="text" name="contact" style={styles.formInput} value={formData.contact} onChange={handleInputChange} required placeholder="Телефон или Telegram" />
-                                </div>
-                                <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                    <label style={styles.formGroupLabel}>Источник</label>
-                                    <select name="source" style={styles.formInput} value={formData.source} onChange={handleInputChange}>
-                                        <option value="">Выберите источник...</option>
-                                        <option value="Website">Сайт</option>
-                                        <option value="VK">ВКонтакте</option>
-                                        <option value="Telegram">Telegram</option>
-                                        <option value="Recommendation">Рекомендация</option>
-                                    </select>
-                                </div>
-                                <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                    <label style={styles.formGroupLabel}>Заметки менеджера</label>
-                                    <textarea name="description" style={{ ...styles.formInput, minHeight: '80px', resize: 'vertical' }} value={formData.description} onChange={handleInputChange} placeholder="Дополнительная информация..." />
-                                </div>
-                            </div>
-                            <div style={styles.formActions}>
-                                <button type="button" style={styles.btnSecondary} onClick={() => setIsModalOpen(false)}>Отмена</button>
-                                <button type="submit" style={styles.btnPrimary}>Создать</button>
-                            </div>
-                        </form>
-                    </div>
+            <div style={{ display: 'flex', marginBottom: '16px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '5px' }}>
+                    <button style={styles.btnBlue(false)} onClick={handlePlusClick}>
+                        + Добавить
+                    </button>
+                    <button style={styles.btnLightBlue(isReSetMode)} onClick={handleResetClick}>
+                        {isReSetMode ? 'Выбор лида...' : 'Править'}
+                    </button>
+                    <button style={styles.btnRed(isDeleteMode)} onClick={handleDelClick}>
+                        {isDeleteMode ? 'Выберите лида' : 'Удалить'}
+                    </button>
                 </div>
-            )}
-            {isReSetModalWinOpen && (
-                <div style={styles.modalOverlay} onClick={() => { setIsReSetModalWinOpen(false); setIsReSetMode(false); }}>
-                    <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div style={styles.modalHeader}>
-                            <h3 style={styles.modalHeaderTitle}>Редактирование лида</h3>
-                            <button style={styles.btnClose} onClick={() => { setIsReSetModalWinOpen(false); setIsReSetMode(false); }}>×</button>
-                        </div>
-                        <form onSubmit={handleResetFormSubmit}>
-                            <div style={styles.formGrid}>
-                                <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                    <label style={styles.formGroupLabel}>Имя лида</label>
-                                    <input type="text" name="name" style={styles.formInput} value={resetFormData.name} onChange={handleResetInputChange} required />
-                                </div>
-                                <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                    <label style={styles.formGroupLabel}>Контакты</label>
-                                    <input type="text" name="contact" style={styles.formInput} value={resetFormData.contact} onChange={handleResetInputChange} required />
-                                </div>
-                                <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                    <label style={styles.formGroupLabel}>Источник</label>
-                                    <input type="text" name="source" style={styles.formInput} value={resetFormData.source} onChange={handleResetInputChange} />
-                                </div>
-                                <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                    <label style={styles.formGroupLabel}>Статус воронки</label>
-                                    <select name="status" style={styles.formInput} value={resetFormData.status} onChange={handleResetInputChange}>
-                                        <option value="new">Новый</option>
-                                        <option value="in_progress">В работе</option>
-                                        <option value="trial_scheduled">Пробный назначен</option>
-                                        <option value="trial_attended">Пробный посещен</option>
-                                        <option value="won">Выигран</option>
-                                        <option value="lost">Проигран</option>
-                                    </select>
-                                </div>
 
-                                {resetFormData.status === 'lost' && (
-                                    <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                        <label style={styles.formGroupLabel}>Причина отказа *</label>
-                                        <select name="loss_reason_id" style={styles.formInput} value={resetFormData.loss_reason_id} onChange={handleResetInputChange} required>
-                                            <option value="">Выберите причину...</option>
-                                            <option value="1">Дорого</option>
-                                            <option value="2">Неудобное расписание</option>
-                                            <option value="3">Выбрал конкурентов</option>
-                                            <option value="4">Передумал</option>
-                                        </select>
-                                    </div>
+                <div style={{ flexGrow: 1 }}></div>
+
+                <div style={styles.segmentedContainer}>
+                    <button
+                        style={styles.segmentedButton(viewMode === 'table')}
+                        onClick={() => setViewMode('table')}
+                    >
+                        Список
+                    </button>
+                    <button
+                        style={styles.segmentedButton(viewMode === 'kanban')}
+                        onClick={() => setViewMode('kanban')}
+                    >
+                        Канбан
+                    </button>
+                </div>
+            </div>
+
+            {viewMode === 'table' && (
+                <>
+                    <div style={styles.tableContainer}>
+                        <table style={styles.crmTable}>
+                            <thead>
+                                <tr>
+                                    <th style={styles.th}>Лид / Потенциальный клиент</th>
+                                    <th style={styles.th}>Источник</th>
+                                    <th style={styles.th}>Контакты</th>
+                                    <th style={styles.th}>Заметки менеджера</th>
+                                    <th style={styles.th}>Статус воронки</th>
+                                    <th style={{ ...styles.th, textAlign: 'right' }}>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading && (
+                                    <tr>
+                                        <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
+                                            Загрузка списка лидов...
+                                        </td>
+                                    </tr>
                                 )}
-
-                                <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
-                                    <label style={styles.formGroupLabel}>Заметки менеджера</label>
-                                    <textarea name="description" style={{ ...styles.formInput, minHeight: '80px', resize: 'vertical' }} value={resetFormData.description} onChange={handleResetInputChange} />
-                                </div>
-                            </div>
-                            <div style={styles.formActions}>
-                                <button type="button" style={styles.btnSecondary} onClick={() => { setIsReSetModalWinOpen(false); setIsReSetMode(false); }}>Отмена</button>
-                                <button type="submit" style={styles.btnPrimary}>Сохранить</button>
-                            </div>
-                        </form>
+                                {!loading && leads.length === 0 && (
+                                    <tr>
+                                        <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
+                                            Список лидов пуст.
+                                        </td>
+                                    </tr>
+                                )}
+                                {!loading && leads.map((lead) => (
+                                    <tr
+                                        key={lead.id}
+                                        onClick={() => handleRowClick(lead)}
+                                        style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #f1f5f9' }}
+                                    >
+                                        <td style={styles.td(isDeleteMode, isReSetMode)}>
+                                            <div style={styles.userInfo}>
+                                                <div style={styles.avatarPlaceholder}>
+                                                    {getInitials(lead.name)}
+                                                </div>
+                                                <span style={styles.userFullname}>{lead.name}</span>
+                                            </div>
+                                        </td>
+                                        <td style={styles.td(isDeleteMode, isReSetMode)}>
+                                            <span style={styles.sourceBadge}>{lead.source || 'Не указан'}</span>
+                                        </td>
+                                        <td style={styles.td(isDeleteMode, isReSetMode)}>{lead.contact}</td>
+                                        <td style={styles.td(isDeleteMode, isReSetMode)}>
+                                            {lead.description ? (
+                                                <span style={{ color: '#334155' }}>{lead.description}</span>
+                                            ) : (
+                                                <span style={styles.textMuted}>Нет заметок</span>
+                                            )}
+                                        </td>
+                                        <td style={styles.td(isDeleteMode, isReSetMode)}>
+                                            <span style={styles.badge(lead.status)}>
+                                                {translateStatus(lead.status)}
+                                            </span>
+                                        </td>
+                                        <td style={{ ...styles.td(isDeleteMode, isReSetMode), ...styles.actionsCell }}>
+                                            <button style={styles.btnAction}>•••</button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-                </div>
+
+                    {isModalOpen && (
+                        <div style={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
+                            <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                                <div style={styles.modalHeader}>
+                                    <h3 style={styles.modalHeaderTitle}>Добавить нового лида</h3>
+                                    <button style={styles.btnClose} onClick={() => setIsModalOpen(false)}>×</button>
+                                </div>
+                                <form onSubmit={handleSubmit}>
+                                    <div style={styles.formGrid}>
+                                        <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                            <label style={styles.formGroupLabel}>Имя лида *</label>
+                                            <input type="text" name="name" style={styles.formInput} value={formData.name} onChange={handleInputChange} required placeholder="Иван Иванов" />
+                                        </div>
+                                        <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                            <label style={styles.formGroupLabel}>Контакты *</label>
+                                            <input type="text" name="contact" style={styles.formInput} value={formData.contact} onChange={handleInputChange} required placeholder="Телефон или Telegram" />
+                                        </div>
+                                        <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                            <label style={styles.formGroupLabel}>Источник</label>
+                                            <select name="source" style={styles.formInput} value={formData.source} onChange={handleInputChange}>
+                                                <option value="">Выберите источник...</option>
+                                                <option value="Website">Сайт</option>
+                                                <option value="VK">ВКонтакте</option>
+                                                <option value="Telegram">Telegram</option>
+                                                <option value="Recommendation">Рекомендация</option>
+                                            </select>
+                                        </div>
+                                        <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                            <label style={styles.formGroupLabel}>Заметки менеджера</label>
+                                            <textarea name="description" style={{ ...styles.formInput, minHeight: '80px', resize: 'vertical' }} value={formData.description} onChange={handleInputChange} placeholder="Дополнительная информация..." />
+                                        </div>
+                                    </div>
+                                    <div style={styles.formActions}>
+                                        <button type="button" style={styles.btnSecondary} onClick={() => setIsModalOpen(false)}>Отмена</button>
+                                        <button type="submit" style={styles.btnPrimary}>Создать</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                    {isReSetModalWinOpen && (
+                        <div style={styles.modalOverlay} onClick={() => { setIsReSetModalWinOpen(false); setIsReSetMode(false); }}>
+                            <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                                <div style={styles.modalHeader}>
+                                    <h3 style={styles.modalHeaderTitle}>Редактирование лида</h3>
+                                    <button style={styles.btnClose} onClick={() => { setIsReSetModalWinOpen(false); setIsReSetMode(false); }}>×</button>
+                                </div>
+                                <form onSubmit={handleResetFormSubmit}>
+                                    <div style={styles.formGrid}>
+                                        <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                            <label style={styles.formGroupLabel}>Имя лида</label>
+                                            <input type="text" name="name" style={styles.formInput} value={resetFormData.name} onChange={handleResetInputChange} required />
+                                        </div>
+                                        <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                            <label style={styles.formGroupLabel}>Контакты</label>
+                                            <input type="text" name="contact" style={styles.formInput} value={resetFormData.contact} onChange={handleResetInputChange} required />
+                                        </div>
+                                        <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                            <label style={styles.formGroupLabel}>Источник</label>
+                                            <input type="text" name="source" style={styles.formInput} value={resetFormData.source} onChange={handleResetInputChange} />
+                                        </div>
+                                        <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                            <label style={styles.formGroupLabel}>Статус воронки</label>
+                                            <select name="status" style={styles.formInput} value={resetFormData.status} onChange={handleResetInputChange}>
+                                                <option value="new">Новый</option>
+                                                <option value="in_progress">В работе</option>
+                                                <option value="trial_scheduled">Пробный назначен</option>
+                                                <option value="trial_attended">Пробный посещен</option>
+                                                <option value="won">Выигран</option>
+                                                <option value="lost">Проигран</option>
+                                            </select>
+                                        </div>
+
+                                        {resetFormData.status === 'lost' && (
+                                            <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                                <label style={styles.formGroupLabel}>Причина отказа *</label>
+                                                <select name="loss_reason_id" style={styles.formInput} value={resetFormData.loss_reason_id} onChange={handleResetInputChange} required>
+                                                    <option value="">Выберите причину...</option>
+                                                    <option value="1">Дорого</option>
+                                                    <option value="2">Неудобное расписание</option>
+                                                    <option value="3">Выбрал конкурентов</option>
+                                                    <option value="4">Передумал</option>
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        <div style={{ ...styles.formGroup, ...styles.fullWidth }}>
+                                            <label style={styles.formGroupLabel}>Заметки менеджера</label>
+                                            <textarea name="description" style={{ ...styles.formInput, minHeight: '80px', resize: 'vertical' }} value={resetFormData.description} onChange={handleResetInputChange} />
+                                        </div>
+                                    </div>
+                                    <div style={styles.formActions}>
+                                        <button type="button" style={styles.btnSecondary} onClick={() => { setIsReSetModalWinOpen(false); setIsReSetMode(false); }}>Отмена</button>
+                                        <button type="submit" style={styles.btnPrimary}>Сохранить</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
+            {viewMode === 'kanban' && (
+                <LeadKanban></LeadKanban>
             )}
         </div>
     )
