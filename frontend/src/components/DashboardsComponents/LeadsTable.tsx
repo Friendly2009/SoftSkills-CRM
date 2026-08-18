@@ -1,7 +1,6 @@
 import { ILead, ICreateLeadDto } from '@/interfaces/LeadInterfaces';
 import React, { useState, useEffect } from 'react';
 import { CreateLeadModal } from './LeadsComponents/CreateLeadModal';
-
 const styles = {
     container: {
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -25,26 +24,28 @@ const styles = {
         fontWeight: 500,
         fontSize: '14px',
     },
-    btnEdit: {
-        backgroundColor: '#e2f0fd',
-        color: '#1d3557',
+    btnEdit: (isActive: boolean) => ({
+        backgroundColor: isActive ? '#1d3557' : '#e2f0fd',
+        color: isActive ? '#ffffff' : '#1d3557',
         border: 'none',
         padding: '8px 16px',
         borderRadius: '6px',
         cursor: 'pointer',
         fontWeight: 500,
         fontSize: '14px',
-    },
-    btnDelete: {
-        backgroundColor: '#ffebee',
-        color: '#c62828',
+        transition: 'all 0.2s ease',
+    }),
+    btnDelete: (isActive: boolean) => ({
+        backgroundColor: isActive ? '#c62828' : '#ffebee',
+        color: isActive ? '#ffffff' : '#c62828',
         border: 'none',
         padding: '8px 16px',
         borderRadius: '6px',
         cursor: 'pointer',
         fontWeight: 500,
         fontSize: '14px',
-    },
+        transition: 'all 0.2s ease',
+    }),
     tableWrapper: {
         border: '1px solid #eef2f5',
         borderRadius: '8px',
@@ -53,7 +54,7 @@ const styles = {
     },
     headerRow: {
         display: 'grid',
-        gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr 1fr 1.5fr 0.5fr',
+        gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr 1fr 0.5fr',
         backgroundColor: '#f8fafc',
         padding: '12px 16px',
         borderBottom: '1px solid #eef2f5',
@@ -63,9 +64,9 @@ const styles = {
         textTransform: 'uppercase' as const,
         letterSpacing: '0.5px',
     },
-    row: {
+    row: (isDelete: boolean, isEdit: boolean) => ({
         display: 'grid',
-        gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr 1fr 1.5fr 0.5fr',
+        gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr 1fr 0.5fr',
         padding: '14px 16px',
         borderBottom: '1px solid #eef2f5',
         alignItems: 'center',
@@ -73,11 +74,11 @@ const styles = {
         color: '#2c3e50',
         backgroundColor: '#ffffff',
         transition: 'background-color 0.2s',
-        cursor: 'pointer',
-    },
-    rowSelected: {
-        backgroundColor: '#f1f5f9',
-    },
+        cursor: isDelete || isEdit ? 'pointer' : 'default',
+        ':hover': {
+            backgroundColor: isDelete ? '#fff5f5' : isEdit ? '#f0f7ff' : '#ffffff'
+        }
+    }),
     avatarCircle: {
         width: '32px',
         height: '32px',
@@ -123,114 +124,195 @@ const styles = {
         fontWeight: 'bold' as const,
         textAlign: 'right' as const,
     },
-    inlineSelect: {
-        padding: '4px 8px',
-        borderRadius: '4px',
-        border: '1px solid #cbd5e1',
+    overlay: {
+        position: 'fixed' as const,
+        top: 0, left: 0, width: '100vw', height: '100vh',
+        backgroundColor: 'rgba(15, 23, 42, 0.3)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
+        zIndex: 1000,
+    },
+    modal: {
         backgroundColor: '#ffffff',
-        fontSize: '12px',
-        outline: 'none',
-    }
+        border: '1px solid #eef2f5',
+        borderRadius: '12px',
+        padding: '24px',
+        width: '100%', maxWidth: '480px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+        color: '#2c3e50',
+    },
+    title: {
+        margin: '0 0 20px 0', fontSize: '20px', fontWeight: 600, color: '#1d3557',
+        borderBottom: '1px solid #eef2f5', paddingBottom: '12px'
+    },
+    formGroup: { marginBottom: '16px', display: 'flex', flexDirection: 'column' as const, gap: '6px' },
+    label: { fontSize: '14px', fontWeight: 500, color: '#64748b' },
+    input: { backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '10px 12px', color: '#334155', fontSize: '14px', outline: 'none' },
+    textarea: { backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '10px 12px', color: '#334155', fontSize: '14px', minHeight: '80px', resize: 'vertical' as const, outline: 'none' },
+    actions: { display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', borderTop: '1px solid #eef2f5', paddingTop: '16px' },
+    btnCancel: { backgroundColor: '#f1f5f9', border: 'none', color: '#475569', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' },
+    btnSubmit: { backgroundColor: '#1d3557', border: 'none', color: '#ffffff', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }
 };
 
 export const LeadsTable: React.FC = () => {
     const [leads, setLeads] = useState<ILead[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
-    const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+    const [isDeleteMode, setIsDeleteMode] = useState(false);
+    const [isReSetMode, setIsReSetMode] = useState(false);
 
-    const baseUrl = '/api/leads';
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isReSetModalWinOpen, setIsReSetModalWinOpen] = useState(false);
 
-    const fetchLeads = async () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        contact: '',
+        source: '',
+        description: ''
+    });
+
+    const [resetFormData, setResetFormData] = useState({
+        id: 0,
+        name: '',
+        contact: '',
+        status: 'new',
+        source: '',
+        loss_reason_id: '' as string | number,
+        description: ''
+    });
+
+    const getLeads = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${baseUrl}/get-lead`);
-            const result = await response.json();
-            if (result.success) {
-                setLeads(result.data);
-            }
-        } catch (error) {
-            console.error('Ошибка при загрузке лидов:', error);
+            const response = await fetch("http://localhost:3000/get-lead", {
+                credentials: "include"
+            });
+            if (!response.ok) throw new Error('Something went wrong');
+
+            const data = await response.json();
+            setLeads(data.data || []);
+        } catch (ex) {
+            console.error(ex);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchLeads();
+        getLeads();
     }, []);
 
-    const handleCreateLead = async (dto: ICreateLeadDto) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setResetFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
         try {
-            const response = await fetch(`${baseUrl}/create-lead`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dto),
+            const response = await fetch("http://localhost:3000/create-lead", {
+                credentials: "include",
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
             });
-            const result = await response.json();
-            if (result.success) {
-                await fetchLeads();
-            } else {
-                alert(result.message);
-            }
+
+            if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
+            setIsModalOpen(false);
+            setFormData({ name: '', contact: '', source: '', description: '' });
+            getLeads();
         } catch (error) {
-            console.error('Ошибка создания лида:', error);
+            console.error(error);
+            alert("Произошла ошибка при сохранении лида.");
         }
     };
 
-    const handleStatusChange = async (id: number, nextStatus: ILead['status']) => {
-        let loss_reason_id: number | null = null;
+    const handleResetFormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-        if (nextStatus === 'lost') {
-            const reasonInput = prompt(
-                'Укажите ID причины отказа:\n1 - Too expensive\n2 - Inconvenient schedule\n3 - Chose competitors\n4 - Not interested'
-            );
-            if (!reasonInput) return;
-            loss_reason_id = parseInt(reasonInput, 10);
-            if (isNaN(loss_reason_id)) {
-                alert('Некорректный ID причины');
+        if (resetFormData.status === 'lost' && !resetFormData.loss_reason_id) {
+            alert("Пожалуйста, выберите причину отказа!");
+            return;
+        }
+
+        try {
+            const payload = {
+                ...resetFormData,
+                loss_reason_id: resetFormData.status === 'lost' ? Number(resetFormData.loss_reason_id) : null
+            };
+
+            const response = await fetch(`http://localhost:3000/update-lead/${resetFormData.id}`, {
+                credentials: "include",
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
+
+            setIsReSetModalWinOpen(false);
+            setIsReSetMode(false);
+            getLeads();
+        } catch (error) {
+            console.error(error);
+            alert("Произошла ошибка при обновлении данных лида.");
+        }
+    };
+
+    const handleRowClick = async (lead: ILead) => {
+        if (isDeleteMode) {
+            if (!window.confirm(`Вы действительно хотите удалить лида ${lead.name}?`)) {
                 return;
             }
-        }
 
-        try {
-            const response = await fetch(`${baseUrl}/update-lead/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: nextStatus, loss_reason_id }),
-            });
-            const result = await response.json();
+            try {
+                const response = await fetch(`http://localhost:3000/delete-lead/${lead.id}`, {
+                    method: "DELETE",
+                    credentials: "include"
+                });
+                const result = await response.json();
 
-            alert(result.message);
-            await fetchLeads();
-        } catch (error) {
-            console.error('Ошибка обновления статуса:', error);
-        }
-    };
-
-    const handleDeleteLead = async () => {
-        if (!selectedLeadId) return;
-        if (!confirm('Вы уверены, что хотите удалить выбранного лида?')) return;
-
-        try {
-            const response = await fetch(`${baseUrl}/delete-lead/${selectedLeadId}`, {
-                method: 'DELETE',
-            });
-            const result = await response.json();
-            if (result.success) {
-                setSelectedLeadId(null);
-                await fetchLeads();
-            } else {
-                alert(result.message);
+                if (response.ok && result.success) {
+                    setLeads(prev => prev.filter(l => l.id !== lead.id));
+                } else {
+                    alert(result.message || "Ошибка при удалении");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Не удалось выполнить удаление.");
+            } finally {
+                setIsDeleteMode(false);
             }
-        } catch (error) {
-            console.error('Ошибка при удалении лида:', error);
+        }
+
+        if (isReSetMode) {
+            setIsDeleteMode(false);
+
+            setResetFormData({
+                id: lead.id,
+                name: lead.name,
+                contact: lead.contact,
+                status: lead.status,
+                source: lead.source || '',
+                loss_reason_id: lead.loss_reason_id || '',
+                description: lead.description || ''
+            });
+
+            setIsReSetModalWinOpen(true);
         }
     };
+
+    const handlePlusClick = () => { setIsModalOpen(true); };
+    const handleResetClick = () => { setIsReSetMode(prev => !prev); setIsDeleteMode(false); };
+    const handleDelClick = () => { setIsDeleteMode(prev => !prev); setIsReSetMode(false); };
 
     const getInitials = (name: string) => {
-        return name ? name.slice(0, 2).toUpperCase() : 'LD';
+        return name ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'LD';
     };
 
     const getStatusStyle = (status: ILead['status']) => {
@@ -251,7 +333,7 @@ export const LeadsTable: React.FC = () => {
             case 'in_progress': return 'В работе';
             case 'trial_scheduled': return 'Пробный назначен';
             case 'trial_attended': return 'Пробный посещен';
-            case 'won': return 'Конвертирован (Won)';
+            case 'won': return 'Активен (Won)';
             case 'lost': return 'Проигран';
             default: return status;
         }
@@ -261,33 +343,21 @@ export const LeadsTable: React.FC = () => {
             <div style={styles.actionBar}>
                 <button
                     style={styles.btnCreate}
-                    onClick={() => setIsCreateModalOpen(true)}
+                    onClick={handlePlusClick}
                 >
                     + Добавить
                 </button>
                 <button
-                    style={styles.btnEdit}
-                    onClick={() => {
-                        if (!selectedLeadId) return alert('Выберите лида из списка для редактирования');
-                        const target = leads.find(l => l.id === selectedLeadId);
-                        if (target) {
-                            const next = prompt('Введите новый статус лида:\nnew, in_progress, trial_scheduled, trial_attended, won, lost', target.status);
-                            if (next) handleStatusChange(target.id, next as any);
-                        }
-                    }}
+                    style={styles.btnEdit(isReSetMode)}
+                    onClick={handleResetClick}
                 >
-                    Править
+                    {isReSetMode ? 'Выбор лида...' : 'Править'}
                 </button>
                 <button
-                    style={{
-                        ...styles.btnDelete,
-                        opacity: selectedLeadId ? 1 : 0.6,
-                        cursor: selectedLeadId ? 'pointer' : 'not-allowed'
-                    }}
-                    onClick={handleDeleteLead}
-                    disabled={!selectedLeadId}
+                    style={styles.btnDelete(isDeleteMode)}
+                    onClick={handleDelClick}
                 >
-                    Удалить
+                    {isDeleteMode ? 'Выберите кого удалить' : 'Удалить'}
                 </button>
             </div>
 
@@ -298,7 +368,6 @@ export const LeadsTable: React.FC = () => {
                     <div>КОНТАКТЫ</div>
                     <div>ЗАМЕТКИ МЕНЕДЖЕРА</div>
                     <div>СТАТУС ВОРОНКИ</div>
-                    <div>БЫСТРАЯ СМЕНА ЭТАПА</div>
                     <div style={{ textAlign: 'right' }}>ДЕЙСТВИЯ</div>
                 </div>
 
@@ -310,82 +379,136 @@ export const LeadsTable: React.FC = () => {
 
                 {!loading && leads.length === 0 && (
                     <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
-                        Список лидов пуст. Нажмите «+ Добавить», чтобы создать первую запись.
+                        Список лидов пуст.
                     </div>
                 )}
 
-                {!loading && leads.map((lead) => {
-                    const isSelected = lead.id === selectedLeadId;
-                    return (
-                        <div
-                            key={lead.id}
-                            style={{
-                                ...styles.row,
-                                ...(isSelected ? styles.rowSelected : {})
-                            }}
-                            onClick={() => setSelectedLeadId(lead.id === selectedLeadId ? null : lead.id)}
-                        >
-                            <div style={styles.clientCell}>
-                                <div style={styles.avatarCircle}>
-                                    {getInitials(lead.name)}
-                                </div>
-                                <span style={styles.clientName}>{lead.name}</span>
+                {!loading && leads.map((lead) => (
+                    <div
+                        key={lead.id}
+                        style={styles.row(isDeleteMode, isReSetMode)}
+                        onClick={() => handleRowClick(lead)}
+                    >
+                        <div style={styles.clientCell}>
+                            <div style={styles.avatarCircle}>
+                                {getInitials(lead.name)}
                             </div>
+                            <span style={styles.clientName}>{lead.name}</span>
+                        </div>
 
-                            <div>
-                                <span style={styles.sourceTag}>
-                                    {lead.source || 'Не указан'}
-                                </span>
+                        <div>
+                            <span style={styles.sourceTag}>
+                                {lead.source || 'Не указан'}
+                            </span>
+                        </div>
+
+                        <div style={{ color: '#475569', fontWeight: 500 }}>
+                            {lead.contact}
+                        </div>
+
+                        <div style={{ color: '#64748b', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', paddingRight: '10px' }} title={lead.description || ''}>
+                            {lead.description || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Нет заметок</span>}
+                        </div>
+
+                        <div style={getStatusStyle(lead.status)}>
+                            {translateStatus(lead.status)}
+                        </div>
+
+                        <div style={{ textAlign: 'right' }}>
+                            <button style={styles.actionsBtn}>•••</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            {isModalOpen && (
+                <div style={styles.overlay} onClick={() => setIsModalOpen(false)}>
+                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <h3 style={styles.title}>Добавить нового лида</h3>
+                        <form onSubmit={handleSubmit}>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Имя лида *</label>
+                                <input type="text" name="name" style={styles.input} value={formData.name} onChange={handleInputChange} required placeholder="Иван Иванов" />
                             </div>
-
-                            <div style={{ color: '#475569', fontWeight: 500 }}>
-                                {lead.contact}
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Контакты *</label>
+                                <input type="text" name="contact" style={styles.input} value={formData.contact} onChange={handleInputChange} required placeholder="Телефон или Telegram" />
                             </div>
-
-                            <div style={{ color: '#64748b', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', paddingRight: '10px' }} title={lead.description || ''}>
-                                {lead.description || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Нет заметок</span>}
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Источник</label>
+                                <select name="source" style={styles.input} value={formData.source} onChange={handleInputChange}>
+                                    <option value="">Выберите источник...</option>
+                                    <option value="Website">Сайт</option>
+                                    <option value="VK">ВКонтакте</option>
+                                    <option value="Telegram">Telegram</option>
+                                    <option value="Recommendation">Рекомендация</option>
+                                </select>
                             </div>
-
-                            <div style={getStatusStyle(lead.status)}>
-                                • {translateStatus(lead.status)}
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Заметки менеджера</label>
+                                <textarea name="description" style={styles.textarea} value={formData.description} onChange={handleInputChange} placeholder="Дополнительная информация..." />
                             </div>
-
-                            <div onClick={(e) => e.stopPropagation()}>
-                                <select
-                                    style={styles.inlineSelect}
-                                    value={lead.status}
-                                    onChange={(e) => handleStatusChange(lead.id, e.target.value as any)}
-                                >
+                            <div style={styles.actions}>
+                                <button type="button" style={styles.btnCancel} onClick={() => setIsModalOpen(false)}>Отмена</button>
+                                <button type="submit" style={styles.btnSubmit}>Создать лид</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+            {isReSetModalWinOpen && (
+                <div style={styles.overlay} onClick={() => { setIsReSetModalWinOpen(false); setIsReSetMode(false); }}>
+                    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <h3 style={styles.title}>Редактирование лида</h3>
+                        <form onSubmit={handleResetFormSubmit}>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Имя лида</label>
+                                <input type="text" name="name" style={styles.input} value={resetFormData.name} onChange={handleResetInputChange} required />
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Контакты</label>
+                                <input type="text" name="contact" style={styles.input} value={resetFormData.contact} onChange={handleResetInputChange} required />
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Источник</label>
+                                <input type="text" name="source" style={styles.input} value={resetFormData.source} onChange={handleResetInputChange} />
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Статус воронки</label>
+                                <select name="status" style={styles.input} value={resetFormData.status} onChange={handleResetInputChange}>
                                     <option value="new">Новый</option>
                                     <option value="in_progress">В работе</option>
                                     <option value="trial_scheduled">Пробный назначен</option>
                                     <option value="trial_attended">Пробный посещен</option>
-                                    <option value="won">Выигран (Won)</option>
-                                    <option value="lost">Проигран (Lost)</option>
+                                    <option value="won">Выигран</option>
+                                    <option value="lost">Проигран</option>
                                 </select>
                             </div>
 
-                            <div style={{ textAlign: 'right' }}>
-                                <button
-                                    style={styles.actionsBtn}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedLeadId(lead.id);
-                                    }}
-                                >
-                                    •••
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                            {resetFormData.status === 'lost' && (
+                                <div style={styles.formGroup}>
+                                    <label style={styles.label}>Причина отказа *</label>
+                                    <select name="loss_reason_id" style={styles.input} value={resetFormData.loss_reason_id} onChange={handleResetInputChange} required>
+                                        <option value="">Выберите причину...</option>
+                                        <option value="1">Too expensive (Дорого)</option>
+                                        <option value="2">Inconvenient schedule (Неудобно)</option>
+                                        <option value="3">Chose competitors (Конкуренты)</option>
+                                        <option value="4">Not interested (Передумал)</option>
+                                    </select>
+                                </div>
+                            )}
 
-            <CreateLeadModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={handleCreateLead}
-            />
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Заметки менеджера</label>
+                                <textarea name="description" style={styles.textarea} value={resetFormData.description} onChange={handleResetInputChange} />
+                            </div>
+                            <div style={styles.actions}>
+                                <button type="button" style={styles.btnCancel} onClick={() => { setIsReSetModalWinOpen(false); setIsReSetMode(false); }}>Отмена</button>
+                                <button type="submit" style={styles.btnSubmit}>Сохранить изменения</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
