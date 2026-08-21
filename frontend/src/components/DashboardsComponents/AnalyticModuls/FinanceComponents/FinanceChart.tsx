@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    LineChart, 
-    Line, 
-    XAxis, 
-    YAxis, 
-    CartesianGrid, 
-    Tooltip, 
-    Legend, 
-    ResponsiveContainer 
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+    ResponsiveContainer
 } from 'recharts';
 import { FinancialTimelineData } from '@/interfaces/AnalyticsInterfaces';
 import { getFinanceChartData } from '@/logic/analytic/Finance';
@@ -15,6 +15,7 @@ import { getFinanceChartData } from '@/logic/analytic/Finance';
 export const FinanceChart: React.FC = () => {
     const [chartData, setChartData] = useState<FinancialTimelineData[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -22,11 +23,18 @@ export const FinanceChart: React.FC = () => {
             try {
                 setIsLoading(true);
                 const data = await getFinanceChartData();
-                if (isMounted && data) {
-                    setChartData(data);
+                if (isMounted) {
+                    if (data && (data as any).status === 403) {
+                        setIsForbidden(true);
+                    } else if (Array.isArray(data)) {
+                        setChartData(data);
+                    }
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Ошибка при загрузке графика:", error);
+                if (isMounted && (error?.status === 403 || error?.message?.includes('403'))) {
+                    setIsForbidden(true);
+                }
             } finally {
                 if (isMounted) setIsLoading(false);
             }
@@ -34,7 +42,19 @@ export const FinanceChart: React.FC = () => {
 
         fetchChartData();
         return () => { isMounted = false; };
-    }, []); 
+    }, []);
+
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли недостаточно прав для просмотра графиков финансовых потоков.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div style={{
@@ -75,43 +95,43 @@ export const FinanceChart: React.FC = () => {
                             />
                             <Legend verticalAlign="top" height={40} iconType="circle" />
 
-                            <Line 
-                                type="monotone" 
-                                dataKey="revenue" 
-                                name="Выручка" 
-                                stroke="#3b82f6" 
-                                strokeWidth={3} 
-                                dot={{ r: 4 }} 
-                                activeDot={{ r: 7 }} 
+                            <Line
+                                type="monotone"
+                                dataKey="revenue"
+                                name="Выручка"
+                                stroke="#3b82f6"
+                                strokeWidth={3}
+                                dot={{ r: 4 }}
+                                activeDot={{ r: 7 }}
                             />
-                            
-                            <Line 
-                                type="monotone" 
-                                dataKey="profit" 
-                                name="Чистая прибыль" 
-                                stroke="#10b981" 
-                                strokeWidth={3} 
-                                dot={{ r: 4 }} 
-                                activeDot={{ r: 7 }} 
+
+                            <Line
+                                type="monotone"
+                                dataKey="profit"
+                                name="Чистая прибыль"
+                                stroke="#10b981"
+                                strokeWidth={3}
+                                dot={{ r: 4 }}
+                                activeDot={{ r: 7 }}
                             />
-                            
-                            <Line 
-                                type="monotone" 
-                                dataKey="expenses" 
-                                name="Расходы" 
-                                stroke="#f43f5e" 
-                                strokeWidth={2} 
+
+                            <Line
+                                type="monotone"
+                                dataKey="expenses"
+                                name="Расходы"
+                                stroke="#f43f5e"
+                                strokeWidth={2}
                                 strokeDasharray="4 4"
-                                dot={{ r: 3 }} 
+                                dot={{ r: 3 }}
                             />
-                            
-                            <Line 
-                                type="monotone" 
-                                dataKey="debts" 
-                                name="Долги клиентов" 
-                                stroke="#8b5cf6" 
-                                strokeWidth={2} 
-                                dot={{ r: 3 }} 
+
+                            <Line
+                                type="monotone"
+                                dataKey="debts"
+                                name="Долги клиентов"
+                                stroke="#8b5cf6"
+                                strokeWidth={2}
+                                dot={{ r: 3 }}
                             />
                         </LineChart>
                     </ResponsiveContainer>

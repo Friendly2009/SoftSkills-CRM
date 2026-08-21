@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
-import { Query, QueryResult, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 
 export const get_accupancy_groups = async (
   req: Request,
@@ -47,6 +47,9 @@ export const get_transactions_list = async (
         .status(401)
         .json({ success: false, message: "Сессия не найдена или истекла" });
     }
+    if (req.session?.rank! < 1000) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [rows]: any = await pool.query(
       `SELECT 
     ft.id, 
@@ -90,7 +93,9 @@ export const getRevenueSources = async (req: Request, res: Response) => {
     if (!company_id || company_id === -1) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
+    if (req.session?.rank! < 1000) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [rows]: any = await pool.query(
       `SELECT 
     CASE 
@@ -124,7 +129,9 @@ export const getFinancialTimeline = async (req: Request, res: Response) => {
     if (!company_id || company_id === -1) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
+    if (req.session?.rank! < 1000) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [debtRows]: any = await pool.query(
       `SELECT COALESCE(SUM(ABS(balance)), 0) AS total_client_debt 
        FROM clients 
@@ -180,7 +187,9 @@ export const getExpensesStructure = async (req: Request, res: Response) => {
         .status(401)
         .json({ success: false, message: "User is not authorized" });
     }
-
+    if (req.session?.rank! < 1000) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [rows]: any = await pool.query(
       `SELECT 
         CASE 
@@ -215,7 +224,9 @@ export const getClientDebtors = async (req: Request, res: Response) => {
         .status(401)
         .json({ success: false, message: "User is not authorized" });
     }
-
+    if (req.session?.rank! < 500) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [rows]: any = await pool.query(
       `SELECT 
     c.id,
@@ -251,6 +262,9 @@ export const getAllState = async (req: Request, res: Response) => {
       return res
         .status(401)
         .json({ success: false, message: "user is unauthorized" });
+    }
+    if (req.session?.rank! < 500) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
     }
     const [[financeRows], [debtRows]] = await Promise.all([
       pool.query<RowDataPacket[]>(
@@ -298,15 +312,16 @@ export const getAllState = async (req: Request, res: Response) => {
 
 export const getChartState = async (req: Request, res: Response) => {
   try {
-    const companyId =
-      parseInt(req.query.companyId as string, 10) || req.session?.company_id;
+    const companyId = parseInt(req.query.companyId as string, 10) || req.session?.company_id;
 
     if (!companyId || isNaN(companyId)) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid or missing company ID" });
     }
-
+    if (req.session?.rank! < 500) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [financeRows]: any = await pool.query(
       `
       SELECT 
@@ -374,7 +389,9 @@ export const getTeachersWorkload = async (req: Request, res: Response) => {
     if (!company_id || isNaN(parsedCompanyId)) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
+    if (req.session?.rank! < 500) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [rows] = await pool.query<RowDataPacket[]>(`
       SELECT 
         u.id AS teacher_id,
@@ -418,13 +435,13 @@ export const getAttendanceTrends = async (req: Request, res: Response) => {
     }
 
     let interval = '1 MONTH';
-    let dateFormat = '%d.%m'; 
+    let dateFormat = '%d.%m';
 
     if (range === 'week') {
       interval = '7 DAY';
     } else if (range === 'quarter') {
       interval = '3 MONTH';
-      dateFormat = 'Неделя %v'; 
+      dateFormat = 'Неделя %v';
     }
 
     const [rows] = await pool.query<RowDataPacket[]>(`

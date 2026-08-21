@@ -51,6 +51,7 @@ export interface TeacherWorkloadData {
     teacherId: number;
     name: string;
     hours: number;
+    status: number;
 }
 
 export interface AttendanceTrendData {

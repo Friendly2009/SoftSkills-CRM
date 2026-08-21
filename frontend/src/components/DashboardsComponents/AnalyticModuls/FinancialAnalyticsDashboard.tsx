@@ -40,6 +40,7 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
     });
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -47,17 +48,24 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
             try {
                 setIsLoading(true);
                 const data = await fetchFinanceSummary();
-                if (isMounted && data && data.success) {
-                    setAllData({
-                        success: true,
-                        revenue: data.revenue,
-                        debt: data.debt,
-                        expense: data.expense,
-                        profit: data.profit
-                    });
+                if (isMounted) {
+                    if (data && (data as any).status === 403) {
+                        setIsForbidden(true);
+                    } else if (data && data.success) {
+                        setAllData({
+                            success: true,
+                            revenue: data.revenue,
+                            debt: data.debt,
+                            expense: data.expense,
+                            profit: data.profit
+                        });
+                    }
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error(error);
+                if (isMounted && (error?.status === 403 || error?.message?.includes('403'))) {
+                    setIsForbidden(true);
+                }
             } finally {
                 if (isMounted) setIsLoading(false);
             }
@@ -65,6 +73,18 @@ export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardPr
         fetchData();
         return () => { isMounted = false; };
     }, []);
+
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли недостаточно прав для просмотра сводных финансовых показателей.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div style={{ padding: '4px 0', fontFamily: 'sans-serif', color: BRAND_COLORS.textMain }}>

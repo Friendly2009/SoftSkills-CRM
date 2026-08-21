@@ -1,4 +1,5 @@
 import { FinancialTimelineData } from "@/interfaces/AnalyticsInterfaces";
+
 export const get_transactions_list = async () => {
   try {
     const response = await fetch(
@@ -8,15 +9,23 @@ export const get_transactions_list = async () => {
         credentials: "include",
       },
     );
+
+    if (response.status === 403) {
+      return { status: 403 };
+    }
+
     const result = await response.json();
+
     if (!result.success) {
       throw new Error(result.message);
     }
+
     return result.data;
-  } catch (error) {
-    return [];
+  } catch (error: any) {
+    console.error("Ошибка в get_transactions_list:", error);
+    throw error;
   }
-}; //лист транзакций
+};
 
 export const getRevenueSources = async () => {
   try {
@@ -24,6 +33,10 @@ export const getRevenueSources = async () => {
       method: "GET",
       credentials: "include",
     });
+
+    if (response.status === 403) {
+      return { status: 403 };
+    }
 
     const result = await response.json();
     if (!result.success) {
@@ -33,9 +46,9 @@ export const getRevenueSources = async () => {
     return result.data;
   } catch (error) {
     console.error("Ошибка при вызове getFinancialDashboardData:", error);
-    return null;
+    throw error;
   }
-}; //доход
+};
 
 export const getFinancialTimelineData = async () => {
   try {
@@ -43,6 +56,10 @@ export const getFinancialTimelineData = async () => {
       method: "GET",
       credentials: "include",
     });
+
+    if (response.status === 403) {
+      return { status: 403 };
+    }
 
     const result = await response.json();
     if (!result.success) {
@@ -52,9 +69,9 @@ export const getFinancialTimelineData = async () => {
     return result.data;
   } catch (error) {
     console.error("Ошибка при вызове getFinancialTimelineData:", error);
-    return [];
+    throw error;
   }
-}; // прибыль
+};
 
 export const addManualExpenseRequest = async (expenseData: {
   amount: number;
@@ -71,12 +88,16 @@ export const addManualExpenseRequest = async (expenseData: {
       body: JSON.stringify(expenseData),
     });
 
+    if (response.status === 403) {
+      return { success: false, status: 403, message: "Доступ запрещен" };
+    }
+
     return await response.json();
   } catch (error) {
     console.error("Ошибка при вызове addManualExpenseRequest:", error);
     return { success: false, message: "Ошибка сети при отправке расхода" };
   }
-}; //добавление новой траты
+};
 
 export const getExpensesData = async () => {
   try {
@@ -87,13 +108,21 @@ export const getExpensesData = async () => {
         credentials: "include",
       },
     );
+
+    if (response.status === 403) {
+      return { status: 403 };
+    }
+
     const result = await response.json();
-    return result.success ? result.data : [];
+    if (!result.success) {
+      throw new Error(result.message || "Ошибка загрузки структуры расходов");
+    }
+    return result.data;
   } catch (error) {
     console.error("Ошибка при вызове getExpensesData:", error);
-    return [];
+    throw error;
   }
-}; //список трат
+};
 
 export const getExpensesStructureData = async () => {
   try {
@@ -104,13 +133,21 @@ export const getExpensesStructureData = async () => {
         credentials: "include",
       },
     );
+
+    if (response.status === 403) {
+      return { status: 403 };
+    }
+
     const result = await response.json();
-    return result.success ? result.data : [];
+    if (!result.success) {
+      throw new Error(result.message || "Ошибка загрузки группировки расходов");
+    }
+    return result.data;
   } catch (error) {
     console.error("Ошибка при вызове getExpensesStructureData:", error);
-    return [];
+    throw error;
   }
-}; //группировка трат
+};
 
 export const getDebtClient = async () => {
   try {
@@ -121,11 +158,19 @@ export const getDebtClient = async () => {
         credentials: "include",
       },
     );
+
+    if (response.status === 403) {
+      return { status: 403 };
+    }
+
     const result = await response.json();
-    return result.success ? result.data : [];
+    if (!result.success) {
+      throw new Error(result.message || "Ошибка загрузки должников");
+    }
+    return result.data;
   } catch (error) {
-    console.error("Ошибка при вызове getExpensesStructureData:", error);
-    return [];
+    console.error("Ошибка при вызове getDebtClient:", error);
+    throw error;
   }
 };
 
@@ -136,9 +181,13 @@ export const fetchFinanceSummary = async () => {
       credentials: "include",
     });
 
+    if (response.status === 403) {
+      return { success: false, status: 403 };
+    }
+
     const result = await response.json();
 
-    if (!response.ok || !result.success) {
+    if (!result.success) {
       throw new Error(result.message || "something went wrong");
     }
 
@@ -151,26 +200,30 @@ export const fetchFinanceSummary = async () => {
     };
   } catch (error) {
     console.error("API Error in getAllState:", error);
-    return { success: false };
+    return { success: false, error };
   }
 };
 
-export const getFinanceChartData = async (): Promise<FinancialTimelineData[]> => {
+export const getFinanceChartData = async (): Promise<any> => {
   try {
     const response = await fetch(`http://localhost:3000/get-chart-state`, {
       method: "GET",
       credentials: "include",
     });
 
+    if (response.status === 403) {
+      return { status: 403 };
+    }
+
     const result = await response.json();
 
-    if (!response.ok || !result.success) {
+    if (!result.success) {
       throw new Error(result.message || "Failed to fetch chart data");
     }
 
     return result.data;
   } catch (error) {
     console.error("API Error in getFinanceChartData:", error);
-    return [];
+    throw error;
   }
 };
