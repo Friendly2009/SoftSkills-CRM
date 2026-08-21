@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `clients` (
     `name` VARCHAR(255) NOT NULL,
     `avatar` TEXT NULL,
     `balance` DECIMAL(10, 2) NOT NULL,
-    `skills` INT NOT NULL,
+    `skills` INT,
     `status` TINYINT,
     `contact` VARCHAR(45) NOT NULL,
     `company_id` INT NOT NULL,

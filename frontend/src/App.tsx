@@ -4,7 +4,7 @@ import { Dashboard } from './components/Dashboard';
 import { LoginForm } from './components/Aauthorization';
 import { RegisterForm } from './components/Registration';
 import { ProfilePage } from './components/Profile';
-import { ClientProfile } from './components/DashboardsComponents/ClientsComponents/ClientProfile';
+import { ClientProfile } from './components/DashboardsComponents/СlientsComponents/ClientProfile';
 
 function App() {
   return (

@@ -46,13 +46,13 @@ export const UpdateClientForm: React.FC<UpdateClientFormProps> = ({
                                 />
                             </div>
 
-                            <div className={style['form-group']}>
+                            {/*<div className={style['form-group']}>
                                 <label>Скилы</label>
                                 <input
                                     type="number" name="skills" className={style['form-input']}
                                     value={resetFormData.skills} onChange={handleResetInputChange}
                                 />
-                            </div>
+                            </div>*/}
 
                             <div className={`${style['form-group']} ${style['full-width']}`}>
                                 <label>Контакт</label>

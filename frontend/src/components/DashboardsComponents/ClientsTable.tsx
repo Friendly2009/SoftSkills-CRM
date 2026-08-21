@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
-import { MoreAction } from '@/components/DashboardsComponents/clientsComponents/MoreActions.tsx';
+import { MoreAction } from '@/components/DashboardsComponents/СlientsComponents/MoreActions.tsx';
 import { deleteClient, getClient, addClient, updateClient } from '../../logic/ClientRequests.ts';
 import { ClientTemplate, MoreActionProps } from "@/interfaces/ClientsInterfaces.ts";
-import { TopUp } from "@/components/DashboardsComponents/clientsComponents/topUp.tsx";
-import { UpdateClientForm } from '@/components/DashboardsComponents/clientsComponents/updateClientForm.tsx';
+import { TopUp } from "@/components/DashboardsComponents/СlientsComponents/TopUp.tsx";
+import { UpdateClientForm } from '@/components/DashboardsComponents/СlientsComponents/UpdateClientForm.tsx';
 
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
@@ -238,13 +238,13 @@ export const ClientTable: React.FC = () => {
                                     <input name="balance" type="number" className={style['form-input']} value={formData.balance} onChange={handleInputChange}></input>
                                 </div>
 
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Скилы</label>
                                     <input
                                         type="number" name="skills" className={style['form-input']}
                                         value={formData.skills} onChange={handleInputChange}
                                     />
-                                </div>
+                                </div>*/}
 
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Контакт</label>
@@ -350,7 +350,7 @@ export const ClientTable: React.FC = () => {
                             <th>Клиент</th>
                             <th>Группа</th>
                             <th>Баланс</th>
-                            <th>Доп. счет</th>
+                            {/*<th>Доп. счет</th>*/}
                             <th>Контакт</th>
                             {/*<th>Статус</th>*/}
                             <th>Следующее посещение</th>
@@ -386,9 +386,9 @@ export const ClientTable: React.FC = () => {
                                         {formatBalance(client.balance)}
                                     </span>
                                 </td>
-                                <td>
+                                {/*<td>
                                     <span className={style['skills-count']}>{client.skills}</span>
-                                </td>
+                                </td>*/}
                                 <td>
                                     <span className={style['contact-text']}>{client.contact}</span>
                                 </td>
