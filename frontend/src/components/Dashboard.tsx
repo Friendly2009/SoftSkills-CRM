@@ -17,7 +17,7 @@ export const Dashboard: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string>('analytics');
-
+  const [isActiveMenu, setIsActiveMenu] = useState(true);
   const GetGlobalInfo = async () => {
     try {
       const response = await fetch("http://localhost:3000/getglobalinfo", {
@@ -35,7 +35,9 @@ export const Dashboard: React.FC = () => {
       console.error(ex);
     }
   };
-
+  const handleBurgerClick = () => {
+    setIsActiveMenu(p => !p);
+  }
   useEffect(() => {
     GetGlobalInfo();
   }, []);
@@ -43,7 +45,7 @@ export const Dashboard: React.FC = () => {
     <>
       <header className={style['alfa-header']}>
         <div className={style['header-left']}>
-          <button className={style['burger-menu']} id="burger-button">
+          <button className={style['burger-menu']} id="burger-button" onClick={handleBurgerClick}>
             <span></span>
             <span></span>
             <span></span>
@@ -129,7 +131,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </header>
       <main className={style['alfa-container']}>
-        <aside className={style.sidebar} id="burger-menu">
+        {isActiveMenu && (<aside className={style.sidebar}>
           <nav className={style['sidebar-nav']}>
             <div
               className={`${style['nav-item']} ${activeMenu === 'analytics' ? style['nav-item-active'] : ''}`}
@@ -182,7 +184,7 @@ export const Dashboard: React.FC = () => {
             </div>
           </nav>
         </aside>
-
+        )}
         <section className={style['main-content']}>
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
