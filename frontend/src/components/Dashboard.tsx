@@ -119,7 +119,6 @@ export const Dashboard: React.FC = () => {
                 <hr className={style.hr} />
                 <ul className={style['dropdown-links']}>
                   <li><a href="/profile">Мой профиль</a></li>
-                  <li><a href="/settings">Настройки</a></li>
                   <li><a href="/logout" className={style['logout-link']}>Выйти</a></li>
                 </ul>
               </div>

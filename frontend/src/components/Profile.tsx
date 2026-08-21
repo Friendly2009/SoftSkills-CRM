@@ -215,13 +215,6 @@ export const ProfilePage: React.FC = () => {
           >
             {isUpdateMode ? 'Отмена' : 'Редактировать'}
           </button>
-
-          <button
-            className={`${styles.btn} ${styles.btnSecondary}`}
-            onClick={() => console.log('Настройки')}
-          >
-            Настройки
-          </button>
         </section>
 
         {!isUpdateMode && (
