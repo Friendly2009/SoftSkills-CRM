@@ -5,28 +5,26 @@ export const getSchedule = async (req: Request, res: Response) => {
   try {
     const company_id = req.session.company_id;
     if (!company_id || company_id === -1) {
-      return res.status(401).json({
-        success: false,
-        message: "user is unauthorized",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "user is unauthorized" });
     }
 
     const { startDate, endDate } = req.query;
-
     if (!startDate || !endDate) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing startDate or endDate parameters",
-      });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Missing startDate or endDate parameters",
+        });
     }
 
     const [templates] = await pool.query(
-      `SELECT s.*, g.id AS group_id 
-   FROM select_schedules_of_groups s
-   JOIN \`groups\` g ON s.group_name = g.name
-   WHERE s.company_id = ?`,
+      "SELECT * FROM select_schedules_of_groups WHERE company_id = ?",
       [company_id],
     );
+
     const [realLessons] = await pool.query(
       `SELECT l.id, l.lesson_date, l.start_time, l.end_time, l.status, l.group_id, g.name AS group_name
        FROM lessons l
@@ -38,17 +36,13 @@ export const getSchedule = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      data: {
-        templates,
-        realLessons,
-      },
+      data: { templates, realLessons },
     });
   } catch (error) {
     console.error("Error in getSchedule:", error);
-    return res.status(500).json({
-      success: false,
-      message: "something went wrong",
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "something went wrong" });
   }
 };
 

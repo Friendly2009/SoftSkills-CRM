@@ -53,7 +53,7 @@ export const ScheduleTable: React.FC = () => {
           const dateStr = formatToLocalDateStr(dayDate);
 
           uniqueTemplates.forEach((template: any) => {
-            const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase()];
+            const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase().trim()];
 
             if (targetDayIndex === currentDayIndex) {
               const realLesson = Array.isArray(realLessons) && realLessons.find((rl: any) => {
@@ -89,7 +89,10 @@ export const ScheduleTable: React.FC = () => {
             }
           });
         });
-
+        console.log("=== ДАННЫЕ С БЭКЕНДА ===");
+        console.log("Templates:", templates);
+        console.log("Real Lessons:", realLessons);
+        console.log("Week Days:", weekDays.map(d => d.toLocaleDateString('ru-RU')));
         setLessons(generatedLessonsList);
       }
     } catch (error) {
@@ -124,8 +127,8 @@ export const ScheduleTable: React.FC = () => {
     return { backgroundColor: '#f0f9ff', borderLeft: '4px solid #3b82f6', color: '#075985' };
   };
 
-  const timeSlots = Array.from({ length: 14 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
-
+  const timeSlots = Array.from({ length: 17 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
+  
   return (
     <div style={{ padding: '24px', fontFamily: 'system-ui, sans-serif', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
