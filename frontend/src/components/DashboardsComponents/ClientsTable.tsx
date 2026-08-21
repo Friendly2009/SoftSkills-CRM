@@ -254,7 +254,7 @@ export const ClientTable: React.FC = () => {
                                     />
                                 </div>
 
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Статус</label>
                                     <div className={style['radio-container']}>
                                         <label className={style['radio-label']}>
@@ -272,7 +272,7 @@ export const ClientTable: React.FC = () => {
                                             Неактивен
                                         </label>
                                     </div>
-                                </div>
+                                </div>*/}
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Группы (зажмите Ctrl/Cmd для выбора нескольких)</label>
                                     <div className={style['select-wrapper']}>
@@ -350,9 +350,9 @@ export const ClientTable: React.FC = () => {
                             <th>Клиент</th>
                             <th>Группа</th>
                             <th>Баланс</th>
-                            <th>Скилы</th>
+                            <th>Доп. счет</th>
                             <th>Контакт</th>
-                            <th>Статус</th>
+                            {/*<th>Статус</th>*/}
                             <th>Следующее посещение</th>
                             {!isReadOnly && <th className={style['actions-cell']}>Действия</th>}
                         </tr>
@@ -392,9 +392,9 @@ export const ClientTable: React.FC = () => {
                                 <td>
                                     <span className={style['contact-text']}>{client.contact}</span>
                                 </td>
-                                <td>
+                                {/*<td>
                                     {renderStatus(client.status)}
-                                </td>
+                                </td>*/}
                                 <td>
                                     {client.next_visit instanceof Date ? (
                                         <span className={style['visit-badge']}>
