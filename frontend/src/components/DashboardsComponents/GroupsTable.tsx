@@ -682,7 +682,8 @@ export const GroupTable: React.FC = () => {
                             <th>Ученики</th>
                             <th>Следующий урок</th>
                             <th>Статус</th>
-                            <th className={style['actions-cell']}>Действия</th>
+                            {//<th className={style['actions-cell']}>Действия</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -735,9 +736,9 @@ export const GroupTable: React.FC = () => {
                                         {getStatusLabel(group.status)}
                                     </span>
                                 </td>
-                                <td className={style['actions-cell']}>
+                                {/*<td className={style['actions-cell']}>
                                     <button className={style['btn-action']}>•••</button>
-                                </td>
+                                </td>*/}
                             </tr>
                         ))}
                     </tbody>
