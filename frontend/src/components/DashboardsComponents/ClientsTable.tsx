@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
-import { MoreAction } from './ClientsComponents/MoreActions.tsx';
+import { MoreAction } from '@/components/DashboardsComponents/clientsComponents/MoreActions.tsx';
 import { deleteClient, getClient, addClient, updateClient } from '../../logic/ClientRequests.ts';
 import { ClientTemplate, MoreActionProps } from "@/interfaces/ClientsInterfaces.ts";
-import { TopUp } from "./ClientsComponents/topUp.tsx";
-import { UpdateClientForm } from '@/components/DashboardsComponents/ClientsComponents/updateClientForm.tsx';
+import { TopUp } from "@/components/DashboardsComponents/clientsComponents/topUp.tsx";
+import { UpdateClientForm } from '@/components/DashboardsComponents/clientsComponents/updateClientForm.tsx';
 
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
@@ -15,7 +15,9 @@ export const ClientTable: React.FC = () => {
     const [allGroups, setAllGroups] = useState<{ id: number; name: string }[]>([]);
     const [isMoreAction, setMoreAction] = useState(false);
     const [topUpClient, setTopUpClient] = useState<ClientTemplate | null>(null);
-
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
+    const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
     const [menu, setMenu] = useState<MoreActionProps>({
         isOpen: false,
         x: 0,
@@ -66,6 +68,7 @@ export const ClientTable: React.FC = () => {
     };
 
     const handleRowClick = async (client: ClientTemplate) => {
+        if (isReadOnly) return;
         if (isResetMode) {
             setResetFormData({
                 id: client.id,
@@ -91,6 +94,12 @@ export const ClientTable: React.FC = () => {
     const getCompanyGroups = async () => {
         try {
             const response = await fetch("http://localhost:3000/getgroups", { credentials: "include" });
+
+            if (response.status === 403) {
+                setIsReadOnly(true);
+                return;
+            }
+
             if (response.ok) {
                 const data = await response.json();
                 setAllGroups(data.data || []);
@@ -113,9 +122,25 @@ export const ClientTable: React.FC = () => {
     };
 
     useEffect(() => {
-        getClient().then((data) => {
-            if (data) setClient(data);
-        });
+        setIsLoading(true);
+
+        getClient()
+            .then((data: any) => {
+                if (data?.status === 403) {
+                    setIsForbidden(true);
+                } else if (data) {
+                    setClient(data);
+                }
+            })
+            .catch((err: any) => {
+                if (err?.status === 403 || err?.message?.includes('403')) {
+                    setIsForbidden(true);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+
         getCompanyGroups();
     }, []);
 
@@ -170,6 +195,24 @@ export const ClientTable: React.FC = () => {
         setIsResetModalWinOpen(false);
         setIsResetMode(false);
     };
+    if (isLoading) {
+        return (
+            <div style={{ padding: '32px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                Загрузка списка клиентов...
+            </div>
+        );
+    }
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли недостаточно прав для просмотра базы клиентов.
+                </p>
+            </div>
+        );
+    }
     return (
         <>
             {isModalOpen && (<div>
@@ -284,20 +327,22 @@ export const ClientTable: React.FC = () => {
                     allGroups={allGroups}
                 />
             )}
-            <div className={style['content-header']}>
-                <div className={style['action-bar']}>
-                    <div className={style['btn-group']}>
-                        <button className={`${style.btn} ${style['btn-blue']}`} onClick={handleAddClient}>+ Добавить</button>
-                        <button className={`${style.btn} ${isResetMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClient}>{isResetMode ? 'Отменить' : 'Править'}</button>
-                        <button
-                            className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
-                            onClick={handleDelClient}
-                        >
-                            {isDeleteMode ? 'Отменить' : 'Удалить'}
-                        </button>
+            {!isReadOnly && (
+                <div className={style['content-header']}>
+                    <div className={style['action-bar']}>
+                        <div className={style['btn-group']}>
+                            <button className={`${style.btn} ${style['btn-blue']}`} onClick={handleAddClient}>+ Добавить</button>
+                            <button className={`${style.btn} ${isResetMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClient}>{isResetMode ? 'Отменить' : 'Править'}</button>
+                            <button
+                                className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
+                                onClick={handleDelClient}
+                            >
+                                {isDeleteMode ? 'Отменить' : 'Удалить'}
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
                     <thead>
@@ -309,7 +354,7 @@ export const ClientTable: React.FC = () => {
                             <th>Контакт</th>
                             <th>Статус</th>
                             <th>Следующее посещение</th>
-                            <th className={style['actions-cell']}>Действия</th>
+                            {!isReadOnly && <th className={style['actions-cell']}>Действия</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -450,7 +495,6 @@ export const ClientTable: React.FC = () => {
                     </>
                 )}
             </div>
-
         </>
     );
 };

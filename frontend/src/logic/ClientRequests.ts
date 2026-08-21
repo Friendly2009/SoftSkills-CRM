@@ -24,9 +24,14 @@ export const getClient = async () => {
       credentials: "include",
     });
 
+    if (response.status === 403) {
+      return { status: 403 };
+    }
+
     if (!response.ok) {
       throw new Error("oooops, something went wrong");
     }
+    
     const data = await response.json();
     const rawClients = data.data || [];
 
@@ -35,10 +40,11 @@ export const getClient = async () => {
       next_visit: client.next_visit ? new Date(client.next_visit) : null
     }));
   } catch (ex) {
-    console.error(ex);
-    return [];
+    console.error("Ошибка в getClient:", ex);
+    throw ex;
   }
 };
+
 
 export const addClient = async (formData: ClientTemplate) => {
   try {
