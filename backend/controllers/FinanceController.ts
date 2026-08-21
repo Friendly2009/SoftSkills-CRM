@@ -59,6 +59,9 @@ export const getExpenses = async (req: Request, res: Response) => {
         .status(401)
         .json({ success: false, message: "user is not authorized" });
     }
+    if (req.session.rank! < 500) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [rows] = await pool.query(
       `SELECT 
     id AS transaction_id,
