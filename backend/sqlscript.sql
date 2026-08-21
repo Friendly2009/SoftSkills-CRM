@@ -183,12 +183,10 @@ SELECT
     `gs`.`end_time` AS `end_time`,
     `g`.`name` AS `group_name`,
     `u`.`full_name` AS `user_name`,
-    `u`.`company_id` AS `company_id`,
-    `l`.`id` AS `lesson_id`
+    `u`.`company_id` AS `company_id`
 FROM `cheapcrm`.`group_schedules` `gs`
 JOIN `cheapcrm`.`groups` `g` ON `gs`.`group_id` = `g`.`id`
-JOIN `cheapcrm`.`users` `u` ON `g`.`users_id` = `u`.`id`
-LEFT JOIN `cheapcrm`.`lessons` `l` ON `l`.`group_id` = `g`.`id`;
+JOIN `cheapcrm`.`users` `u` ON `g`.`users_id` = `u`.`id`;
 
 CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`state_clients_balance` AS
 SELECT  

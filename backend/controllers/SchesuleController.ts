@@ -21,10 +21,12 @@ export const getSchedule = async (req: Request, res: Response) => {
     }
 
     const [templates] = await pool.query(
-      "SELECT * FROM select_schedules_of_groups WHERE company_id = ?",
+      `SELECT s.*, g.id AS group_id 
+   FROM select_schedules_of_groups s
+   JOIN \`groups\` g ON s.group_name = g.name
+   WHERE s.company_id = ?`,
       [company_id],
     );
-
     const [realLessons] = await pool.query(
       `SELECT l.id, l.lesson_date, l.start_time, l.end_time, l.status, l.group_id, g.name AS group_name
        FROM lessons l
@@ -95,7 +97,7 @@ export const getLessonDetails = async (req: Request, res: Response) => {
         status: 1,
         group_id: s.group_id,
         user_id: s.teacher_id,
-        teacher_pay: 1500.00,
+        teacher_pay: 1500.0,
       };
       const [groupStudents]: any = await pool.query(
         "SELECT client_id FROM group_members WHERE group_id = ?",
@@ -180,7 +182,10 @@ export const getLessonDetails = async (req: Request, res: Response) => {
   }
 };
 
-export const closeLesson = async (req: Request, res: Response): Promise<void> => {
+export const closeLesson = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   const {
     lessonId,
     groupId,
@@ -201,7 +206,9 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
     !teacherId ||
     !students
   ) {
-    res.status(400).json({ error: "Переданы некорректные или неполные данные формы" });
+    res
+      .status(400)
+      .json({ error: "Переданы некорректные или неполные данные формы" });
     return;
   }
 
@@ -229,7 +236,14 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       const [insertLessonResult] = await connection.query<ResultSetHeader>(
         `INSERT INTO lessons (lesson_date, start_time, end_time, status, group_id, user_id, teacher_pay) 
          VALUES (?, ?, ?, 1, ?, ?, ?)`,
-        [strLessonDate, strStartTime, strEndTime, groupId, teacherId, teacherPay],
+        [
+          strLessonDate,
+          strStartTime,
+          strEndTime,
+          groupId,
+          teacherId,
+          teacherPay,
+        ],
       );
       realLessonId = insertLessonResult.insertId;
     } else {
@@ -245,26 +259,42 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
 
         const [oldTransactions]: any = await connection.query(
           "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ?",
-          [realLessonId]
+          [realLessonId],
         );
 
         for (const tx of oldTransactions) {
-          if (tx.type === 'revenue' && tx.client_id) {
-            await connection.query("UPDATE clients SET balance = balance + ? WHERE id = ?", [tx.amount, tx.client_id]);
+          if (tx.type === "revenue" && tx.client_id) {
+            await connection.query(
+              "UPDATE clients SET balance = balance + ? WHERE id = ?",
+              [tx.amount, tx.client_id],
+            );
           }
-          if (tx.type === 'expense' && tx.user_id) {
-            await connection.query("UPDATE users SET balance = balance - ? WHERE id = ?", [tx.amount, tx.user_id]);
+          if (tx.type === "expense" && tx.user_id) {
+            await connection.query(
+              "UPDATE users SET balance = balance - ? WHERE id = ?",
+              [tx.amount, tx.user_id],
+            );
           }
         }
 
-        await connection.query("DELETE FROM financial_transactions WHERE lesson_id = ?", [realLessonId]);
+        await connection.query(
+          "DELETE FROM financial_transactions WHERE lesson_id = ?",
+          [realLessonId],
+        );
       }
 
       await connection.query(
         `UPDATE lessons 
          SET lesson_date = ?, start_time = ?, end_time = ?, user_id = ?, teacher_pay = ?
          WHERE id = ?`,
-        [strLessonDate, strStartTime, strEndTime, teacherId, teacherPay, realLessonId],
+        [
+          strLessonDate,
+          strStartTime,
+          strEndTime,
+          teacherId,
+          teacherPay,
+          realLessonId,
+        ],
       );
     }
 
@@ -284,10 +314,12 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       );
     }
 
-    const strTodayDate = now.toLocaleDateString('en-CA'); 
+    const strTodayDate = now.toLocaleDateString("en-CA");
 
     if (strLessonDate > strTodayDate) {
-      await connection.query("UPDATE lessons SET status = 1 WHERE id = ?", [realLessonId]);
+      await connection.query("UPDATE lessons SET status = 1 WHERE id = ?", [
+        realLessonId,
+      ]);
       await connection.commit();
       res.status(200).json({
         success: true,
@@ -297,7 +329,9 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    await connection.query("UPDATE lessons SET status = 2 WHERE id = ?", [realLessonId]);
+    await connection.query("UPDATE lessons SET status = 2 WHERE id = ?", [
+      realLessonId,
+    ]);
 
     for (const student of students) {
       if (Number(student.attendanceStatus) === 1 && student.amountCharged > 0) {
@@ -309,8 +343,8 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
             realLessonId,
             student.clientId,
             student.amountCharged,
-            `Автоматическое списание за проведенный урок №${realLessonId}`
-          ]
+            `Автоматическое списание за проведенный урок №${realLessonId}`,
+          ],
         );
 
         await connection.query(
@@ -329,8 +363,8 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
           realLessonId,
           teacherId,
           teacherPay,
-          `Начисление вознаграждения за проведение урока №${realLessonId}`
-        ]
+          `Начисление вознаграждения за проведение урока №${realLessonId}`,
+        ],
       );
 
       await connection.query(

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { PhantomLesson } from '@/interfaces/ScheduleInterfaces';
+import { PhantomLesson } from '@/interfaces/scheduleInterfaces';
 import { getSchedule } from '../../logic/SchedulesRequest';
 import { LessonModalWindow } from '@/components/DashboardsComponents/SchesuleComponents/LessonModalWindow.tsx';
 
@@ -44,11 +44,15 @@ export const ScheduleTable: React.FC = () => {
         const { templates, realLessons } = result.data;
         const generatedLessonsList: PhantomLesson[] = [];
 
+        const uniqueTemplates = Array.isArray(templates)
+          ? templates.filter((v, i, a) => a.findIndex(t => t.schedule_id === v.schedule_id) === i)
+          : [];
+
         weekDays.forEach((dayDate) => {
           const currentDayIndex = dayDate.getDay();
           const dateStr = formatToLocalDateStr(dayDate);
 
-          templates.forEach((template: any) => {
+          uniqueTemplates.forEach((template: any) => {
             const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase()];
 
             if (targetDayIndex === currentDayIndex) {
@@ -134,7 +138,6 @@ export const ScheduleTable: React.FC = () => {
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* Кнопка Назад */}
             <button
               onClick={() => changeWeek(-1)}
               style={{
