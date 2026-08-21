@@ -8,7 +8,9 @@ export const getgroups = async (req: Request, res: Response) => {
     if (!company_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
+    if (req.session?.rank! < 500) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [groups] = await pool.query<RowDataPacket[]>(
       `SELECT 
         g.id,
@@ -72,9 +74,9 @@ export const getgroups = async (req: Request, res: Response) => {
         ...group,
         schedules: parsedSchedules,
         studentsCount: Number(group.studentsCount || 0),
-        start_date: startDateObj,       
-        end_date: endDateObj,        
-        nextMeeting: nextMeetingObj,   
+        start_date: startDateObj,
+        end_date: endDateObj,
+        nextMeeting: nextMeetingObj,
       };
     });
 
@@ -97,7 +99,9 @@ export const creategroup = async (req: Request, res: Response) => {
   if (!company_id) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
-
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   let connect;
 
   try {
@@ -130,7 +134,7 @@ export const creategroup = async (req: Request, res: Response) => {
         users_id,
         status,
         startDateObj,
-        endDateObj,  
+        endDateObj,
         max_students || null,
       ],
     );
@@ -173,7 +177,7 @@ export const creategroup = async (req: Request, res: Response) => {
 export const deleteGroup = async (
   req: Request,
   res: Response,
-): Promise<void> => {
+) => {
   const groupId = parseInt(req.params.id as string, 10);
   const companyId = req.session.company_id;
 
@@ -183,7 +187,9 @@ export const deleteGroup = async (
       .json({ error: "Некорректный ID группы или вы не авторизованы" });
     return;
   }
-
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   const connection = await pool.getConnection();
 
   try {
@@ -242,7 +248,9 @@ export const updategroup = async (req: Request, res: Response) => {
   if (!company_id) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
-
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   const {
     name,
     users_id,
@@ -294,7 +302,7 @@ export const updategroup = async (req: Request, res: Response) => {
         users_id,
         status,
         formattedStartDate,
-        formattedEndDate,  
+        formattedEndDate,
         max_students,
         group_id,
       ],
