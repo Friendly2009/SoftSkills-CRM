@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `groups` (
     `users_id` INT NOT NULL,
     `name` VARCHAR(45) NOT NULL,
     `status` TINYINT NOT NULL COMMENT '1 = активен, 2 = набор, 3 = архив',
-    `start_date` DATE NOT NULL DEFAULT (CURRENT_DATE()),
+    `start_date` DATE DEFAULT NULL,
     `end_date` DATE DEFAULT NULL,
     `max_students` INT NOT NULL,
     PRIMARY KEY (`id`),
