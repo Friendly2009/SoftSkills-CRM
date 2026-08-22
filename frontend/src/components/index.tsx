@@ -10,7 +10,7 @@ const Index = () => {
         <div className={style['container']}>
           <div className={style['header-inner']}>
             <a href="/" className={style['header-logo']}>
-              <img src="/img/index/brand-logo-2024.webp" alt="alfacrm" />
+              <img src="/img/user/dashboard/logo.png" alt="softskillscrm" className={style['footer-logo-img']} style={{width:40, height:40}}/>
             </a>
             <nav className={style['header-nav']}>
               <a href="#" className={style['header-nav-link']}>Новости</a>
@@ -86,7 +86,7 @@ const Index = () => {
         <div className={style['container']}>
           <div className={style['footer-top']}>
             <div className={style['footer-brand']}>
-              <img src="/img/index/alfacrm-bw-2024.svg" alt="AlfaCRM" className={style['footer-logo-img']} />
+              <img src="/img/user/dashboard/logo.png" alt="softskillscrm" className={style['footer-logo-img']} style={{width:40, height:40}}/>
               <p className={style['footer-desc']}>SoftSkills CRM — CRM система для учебного центра.</p>
             </div>
             <div className={style['footer-links-group']}>
