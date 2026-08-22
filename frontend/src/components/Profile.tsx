@@ -287,7 +287,7 @@ export const ProfilePage: React.FC = () => {
               />
             </div>
 
-            <div className={styles.infoRow}>
+            {/*<div className={styles.infoRow}>
               <label className={styles.infoLabel}>Очки (Pts)</label>
               <input
                 type='number'
@@ -296,7 +296,7 @@ export const ProfilePage: React.FC = () => {
                 value={formData.rank}
                 onChange={handleOnChange}
               />
-            </div>
+            </div>*/}
 
             <div className={styles.infoRow}>
               <label className={styles.infoLabel}>Дата рождения</label>
