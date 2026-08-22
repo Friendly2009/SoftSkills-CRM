@@ -50,9 +50,9 @@ export const Dashboard: React.FC = () => {
             <span></span>
             <span></span>
           </button>
-          <div className={style.logo}>
-            <img src="/img/index/brand-logo-2024.webp" alt="SoftSkills CRM" />
-          </div>
+          {/*<div className={style.logo}>
+            <img src="/img/user/dashboard/logo.png" alt="SoftSkills CRM" style={{width: 40, height: 100}}/>
+          </div>*/}
         </div>
         <div className={style['header-center']}>
           {/* ... 
@@ -68,7 +68,7 @@ export const Dashboard: React.FC = () => {
               Лид
             </div>
             <div className={style['menu-item']}>
-              <img src="/img/user/dashboard/user-solid.png" alt="" className={style['nav-icon']} />
+              <img src="" alt="" className={style['nav-icon']} />
               Клиент
             </div>
             <div className={style['menu-item']}>
