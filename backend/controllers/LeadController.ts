@@ -13,7 +13,12 @@ export const createLead = async (
         .status(401)
         .json({ success: false, message: "Сессия не найдена или истекла" });
     }
-
+    if (req.session.rank! < 500) {
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
+    }
     const { user_id, name, contact, source, description } = req.body;
 
     if (!name || !contact) {
@@ -68,7 +73,12 @@ export const getLeads = async (
         .status(401)
         .json({ success: false, message: "Сессия не найдена или истекла" });
     }
-
+    if (req.session.rank! < 500) {
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
+    }
     const query = `SELECT * FROM leads WHERE company_id = ? ORDER BY created_at DESC`;
     const [rows] = await pool.query<RowDataPacket[]>(query, [company_id]);
 
@@ -100,7 +110,12 @@ export const getLeadById = async (
         .status(401)
         .json({ success: false, message: "Сессия не найдена или истекла" });
     }
-
+    if (req.session.rank! < 500) {
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
+    }
     const { id } = req.params;
     const query = `SELECT * FROM leads WHERE id = ? AND company_id = ?`;
     const [rows] = await pool.query<RowDataPacket[]>(query, [id, company_id]);
@@ -130,7 +145,14 @@ export const deleteLead = async (
         .status(401)
         .json({ success: false, message: "Сессия не найдена или истекла" });
     }
-
+    if (req.session.rank! < 1000) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "not enough rights to perform the action",
+        });
+    }
     const { id } = req.params;
     const query = `DELETE FROM leads WHERE id = ? AND company_id = ?`;
     const [result] = await pool.query<ResultSetHeader>(query, [id, company_id]);
@@ -167,7 +189,14 @@ export const updateLead = async (
         .status(401)
         .json({ success: false, message: "Сессия не найдена" });
     }
-
+    if (req.session.rank! < 500) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "not enough rights to perform the action",
+        });
+    }
     const { id } = req.params;
     const {
       status,
@@ -194,16 +223,14 @@ export const updateLead = async (
 
     if (currentLeadRows.length === 0) {
       connection.release();
-      return res
-        .status(404)
-        .json({ success: false, message: "Лид не найден" });
+      return res.status(404).json({ success: false, message: "Лид не найден" });
     }
 
     const currentStatus = currentLeadRows[0].status;
 
     if (
-      (currentStatus === "won" || currentStatus === "lost") && 
-      status !== undefined && 
+      (currentStatus === "won" || currentStatus === "lost") &&
+      status !== undefined &&
       status !== currentStatus
     ) {
       connection.release();
@@ -254,7 +281,7 @@ export const updateLead = async (
     if (fields.length > 0) {
       const updateLeadQuery = `UPDATE leads SET ${fields.join(", ")} WHERE id = ? AND company_id = ?`;
       values.push(id, company_id);
-      
+
       const [updateResult] = await connection.query<ResultSetHeader>(
         updateLeadQuery,
         values,
@@ -262,9 +289,10 @@ export const updateLead = async (
 
       if (updateResult.affectedRows === 0) {
         await connection.rollback();
-        return res
-          .status(404)
-          .json({ success: false, message: "Лид не найден или не принадлежит вашей компании" });
+        return res.status(404).json({
+          success: false,
+          message: "Лид не найден или не принадлежит вашей компании",
+        });
       }
     }
 
@@ -320,4 +348,3 @@ export const updateLead = async (
     connection.release();
   }
 };
-

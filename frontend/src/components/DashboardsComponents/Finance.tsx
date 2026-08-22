@@ -25,7 +25,6 @@ export const Expenses: React.FC = () => {
     const loadExpensesData = () => {
         getExpensesData()
             .then((res: any) => {
-                // ПРАВИЛЬНЫЙ ПЕРЕХВАТ: Если функция API вернула маркер 403 ошибки
                 if (res?.status === 403) {
                     setIsForbidden(true);
                 } else if (Array.isArray(res)) {

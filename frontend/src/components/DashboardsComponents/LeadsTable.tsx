@@ -5,7 +5,7 @@ const styles = {
     segmentedContainer: {
         display: 'inline-flex',
         alignItems: 'center',
-        backgroundColor: '#f1f5f9', 
+        backgroundColor: '#f1f5f9',
         padding: '4px',
         borderRadius: '8px',
         gap: '4px',
@@ -239,7 +239,7 @@ export const LeadsTable: React.FC = () => {
     const [isReSetModalWinOpen, setIsReSetModalWinOpen] = useState(false);
 
     const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
-
+    const [isForbiden, setIsForbiden] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         contact: '',
@@ -263,6 +263,12 @@ export const LeadsTable: React.FC = () => {
             const response = await fetch("http://localhost:3000/get-lead", {
                 credentials: "include"
             });
+
+            if (response.status === 403) {
+                setIsForbiden(true);
+                throw new Error('Access forbidden');
+            }
+
             if (!response.ok) throw new Error('Something went wrong');
 
             const data = await response.json();
@@ -352,7 +358,10 @@ export const LeadsTable: React.FC = () => {
                     credentials: "include"
                 });
                 const result = await response.json();
-
+                if (response.status === 403) {
+                    alert('У вас недостаточно прав для выполнения этого действия');
+                    throw new Error('Access forbidden'); 
+                }
                 if (response.ok && result.success) {
                     setLeads(prev => prev.filter(l => l.id !== lead.id));
                 } else {
@@ -402,6 +411,17 @@ export const LeadsTable: React.FC = () => {
             default: return status;
         }
     };
+    if (isForbiden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли нет доступа к просмотру финансовых расходов компании.
+                </p>
+            </div>
+        );
+    }
     return (
         <div>
             <div style={{ display: 'flex', marginBottom: '16px', alignItems: 'center' }}>
