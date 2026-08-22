@@ -407,7 +407,7 @@ export const UsersTable: React.FC = () => {
                             <th>Телефон</th>
                             <th>Др</th>
                             <th>Пол</th>
-                            <th className={style['actions-cell']}>Действия</th>
+                            {/*<th className={style['actions-cell']}>Действия</th>*/}
                         </tr>
                     </thead>
                     <tbody>
@@ -440,9 +440,9 @@ export const UsersTable: React.FC = () => {
                                 <td>
                                     {user.gender ? user.gender : <span className={style['text-muted']}>—</span>}
                                 </td>
-                                <td className={style['actions-cell']}>
+                                {/*<td className={style['actions-cell']}>
                                     <button className={style['btn-action']} title="Действия">•••</button>
-                                </td>
+                                </td>*/}
                             </tr>
                         ))}
                     </tbody>

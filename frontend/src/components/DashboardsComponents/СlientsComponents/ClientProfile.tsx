@@ -86,12 +86,12 @@ export const ClientProfile: React.FC = () => {
                     <h3 style={styles.cardTitle}>Обучение и группы</h3>
                     <div style={styles.infoGroup}>
                         <div>
-                            <span style={{ ...styles.infoLabel, display: 'block', marginBottom: '8px', fontSize: '14px' }}>
+                            {/*<span style={{ ...styles.infoLabel, display: 'block', marginBottom: '8px', fontSize: '14px' }}>
                                 Накопленные скилы (очки)
                             </span>
                             <div style={styles.skillsCount}>
                                 {client.skills || 0} <span style={{ fontSize: '16px', color: '#666666' }}>pts</span>
-                            </div>
+                            </div>*/}
                         </div>
 
                         <div style={{ marginTop: '8px' }}>

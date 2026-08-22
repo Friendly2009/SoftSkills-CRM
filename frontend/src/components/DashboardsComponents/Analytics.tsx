@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import styles from '../cssmoduls/DashboardComponentsCssModuls/analytic.module.css';
+import styles from '../cssmoduls/DashboardComponentsCssModuls/Analytic.module.css';
 import { getAccupancyGroups, getBarColor } from '@/logic/analytic/Accupancy_groups';
 import { AnalyticsTable, AnalyticsChart, CustomTooltip } from '../DashboardsComponents/AnalyticModuls/AccupancyGroup';
 import { FinancialAnalyticsDashboard } from '@/components/DashboardsComponents/AnalyticModuls/FinancialAnalyticsDashboard';

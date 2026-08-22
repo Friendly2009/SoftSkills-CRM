@@ -399,7 +399,7 @@ export const GroupTable: React.FC = () => {
                                         </label>
                                     </div>
                                 </div>
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Дата начала работы группы</label>
                                     <input
                                         type="date" name="start_date" required className={style['form-input']}
@@ -431,8 +431,8 @@ export const GroupTable: React.FC = () => {
                                         value={typeof updateFormData.end_date === 'string' ? updateFormData.end_date : (updateFormData.end_date as any).toISOString().split('T')[0]}
                                         onChange={handleUpdateInputChange}
                                     />
-
                                 </div>
+                                */}
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Максимальное количество учеников</label>
                                     <input
@@ -552,7 +552,7 @@ export const GroupTable: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Дата начала работы группы</label>
                                     <input
                                         type="date" name="start_date" required className={style['form-input']}
@@ -584,7 +584,7 @@ export const GroupTable: React.FC = () => {
                                         value={typeof formData.end_date === 'string' ? formData.end_date : ''}
                                         onChange={handleInputChange}
                                     />
-                                </div>
+                                </div>*/}
 
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Максимальное количество учеников</label>
@@ -682,7 +682,8 @@ export const GroupTable: React.FC = () => {
                             <th>Ученики</th>
                             <th>Следующий урок</th>
                             <th>Статус</th>
-                            <th className={style['actions-cell']}>Действия</th>
+                            {//<th className={style['actions-cell']}>Действия</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -735,9 +736,9 @@ export const GroupTable: React.FC = () => {
                                         {getStatusLabel(group.status)}
                                     </span>
                                 </td>
-                                <td className={style['actions-cell']}>
+                                {/*<td className={style['actions-cell']}>
                                     <button className={style['btn-action']}>•••</button>
-                                </td>
+                                </td>*/}
                             </tr>
                         ))}
                     </tbody>

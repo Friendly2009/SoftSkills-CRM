@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS `clients` (
     `name` VARCHAR(255) NOT NULL,
     `avatar` TEXT NULL,
     `balance` DECIMAL(10, 2) NOT NULL,
-    `skills` INT NOT NULL,
-    `status` TINYINT NOT NULL,
+    `skills` INT,
+    `status` TINYINT,
     `contact` VARCHAR(45) NOT NULL,
     `company_id` INT NOT NULL,
     PRIMARY KEY (`id`),
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `groups` (
     `users_id` INT NOT NULL,
     `name` VARCHAR(45) NOT NULL,
     `status` TINYINT NOT NULL COMMENT '1 = активен, 2 = набор, 3 = архив',
-    `start_date` DATE NOT NULL DEFAULT (CURRENT_DATE()),
+    `start_date` DATE DEFAULT NULL,
     `end_date` DATE DEFAULT NULL,
     `max_students` INT NOT NULL,
     PRIMARY KEY (`id`),
@@ -183,12 +183,10 @@ SELECT
     `gs`.`end_time` AS `end_time`,
     `g`.`name` AS `group_name`,
     `u`.`full_name` AS `user_name`,
-    `u`.`company_id` AS `company_id`,
-    `l`.`id` AS `lesson_id`
+    `u`.`company_id` AS `company_id`
 FROM `cheapcrm`.`group_schedules` `gs`
 JOIN `cheapcrm`.`groups` `g` ON `gs`.`group_id` = `g`.`id`
-JOIN `cheapcrm`.`users` `u` ON `g`.`users_id` = `u`.`id`
-LEFT JOIN `cheapcrm`.`lessons` `l` ON `l`.`group_id` = `g`.`id`;
+JOIN `cheapcrm`.`users` `u` ON `g`.`users_id` = `u`.`id`;
 
 CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`state_clients_balance` AS
 SELECT  

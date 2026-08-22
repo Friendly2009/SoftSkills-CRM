@@ -446,7 +446,7 @@ export const LeadsTable: React.FC = () => {
                                     <th style={styles.th}>Контакты</th>
                                     <th style={styles.th}>Заметки менеджера</th>
                                     <th style={styles.th}>Статус воронки</th>
-                                    <th style={{ ...styles.th, textAlign: 'right' }}>Действия</th>
+                                    {/*<th style={{ ...styles.th, textAlign: 'right' }}>Действия</th>*/}
                                 </tr>
                             </thead>
                             <tbody>
@@ -494,9 +494,9 @@ export const LeadsTable: React.FC = () => {
                                                 {translateStatus(lead.status)}
                                             </span>
                                         </td>
-                                        <td style={{ ...styles.td(isDeleteMode, isReSetMode), ...styles.actionsCell }}>
+                                        {/*<td style={{ ...styles.td(isDeleteMode, isReSetMode), ...styles.actionsCell }}>
                                             <button style={styles.btnAction}>•••</button>
-                                        </td>
+                                        </td>*/}
                                     </tr>
                                 ))}
                             </tbody>
