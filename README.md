@@ -2,7 +2,7 @@
 ## About this project
 A commercial crm system for educational institutions offering extracurricular supplementary activities. 
 This project addresses issues regarding the tracking of profit allocation across roles within the class attendance hierarchy, as well as other financial matters concerning the educational institution.
-
+Distributing the code online is discouraged.
 ##  Getting Started
 
 ### 1. Prerequisites
@@ -366,3 +366,17 @@ npm install @hello-pangea/dnd clsx lucide-react react react-dom react-router-dom
 npm install --save-dev @tailwindcss/vite @testing-library/jest-dom @testing-library/react @testing-library/user-event @types/node @types/react @types/react-dom @vitejs/plugin-react @vitest/ui jsdom msw tailwindcss typescript vite vite-plugin-singlefile vitest
 npm run dev
 ```
+## Screenshots
+| | Screenshots | |
+| :---: | :---: | :---: |
+| ![alt text](frontend/screenshots/image-1.png) | ![alt text](frontend/screenshots/image-2.png) | ![alt text](frontend/screenshots/image-3.png) |
+| ![alt text](frontend/screenshots/image-4.png) | ![alt text](frontend/screenshots/image-5.png) | ![alt text](frontend/screenshots/image-6.png) |
+| ![alt text](frontend/screenshots/image-7.png) | ![alt text](frontend/screenshots/image-8.png) | ![alt text](frontend/screenshots/image-9.png) |
+| ![alt text](frontend/screenshots/image-10.png) | ![alt text](frontend/screenshots/image-11.png) | ![alt text](frontend/screenshots/image-12.png) |
+| ![alt text](frontend/screenshots/image-13.png) | ![alt text](frontend/screenshots/image-14.png) | ![alt text](frontend/screenshots/image-15.png) |
+| ![alt text](frontend/screenshots/image-16.png) | ![alt text](frontend/screenshots/image-17.png) | ![alt text](frontend/screenshots/image-18.png) |
+| ![alt text](frontend/screenshots/image-19.png) | ![alt text](frontend/screenshots/image-20.png) | ![alt text](frontend/screenshots/image-21.png) |
+| ![alt text](frontend/screenshots/image-22.png) | ![alt text](frontend/screenshots/image-23.png) | ![alt text](frontend/screenshots/image-24.png) |
+| ![alt text](frontend/screenshots/image-25.png) | ![alt text](frontend/screenshots/image-26.png) | ![alt text](frontend/screenshots/image-27.png) |
+| ![alt text](frontend/screenshots/image-28.png) | ![alt text](frontend/screenshots/image-29.png) | ![alt text](frontend/screenshots/image-30.png) |
+ | | |
