@@ -50,6 +50,9 @@ export const getLessonDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
     const company_id = req.session.company_id;
+    const user_rank = Number(req.session.rank || 0); 
+    const current_user_id = req.session.user_id;    
+
     if (!company_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
@@ -57,14 +60,14 @@ export const getLessonDetails = async (req: Request, res: Response) => {
     let lessonData: any = null;
     let groupId: number = 0;
     let attendanceData: any[] = [];
+    let isReadOnly = false; 
 
     if (id.startsWith("temp-")) {
       const [, scheduleId, year, month, day] = id.split("-");
       const dateStr = `${year}-${month}-${day}`;
 
-      const [scheduleRows]: any = await pool.query<RowDataPacket[]>(
-        `SELECT gs.start_time, gs.end_time, gs.group_id, g.name AS group_name, g.users_id AS teacher_id,
-                u.balance AS default_pay
+      const [scheduleRows]: any = await pool.query(
+        `SELECT gs.start_time, gs.end_time, gs.group_id, g.name AS group_name, g.users_id AS teacher_id
          FROM group_schedules gs
          JOIN \`groups\` g ON gs.group_id = g.id
          JOIN users u ON g.users_id = u.id
@@ -73,26 +76,27 @@ export const getLessonDetails = async (req: Request, res: Response) => {
       );
 
       if (!scheduleRows.length) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Schedule template not found" });
+        return res.status(404).json({ success: false, message: "Schedule template not found" });
       }
 
       const s = scheduleRows[0];
       groupId = s.group_id;
 
-      const lessonDateObj = new Date(dateStr);
+      if (user_rank < 500 && Number(s.teacher_id) !== Number(current_user_id)) {
+        isReadOnly = true; 
+      }
 
       lessonData = {
         id: id,
-        lesson_date: lessonDateObj,
+        lesson_date: new Date(dateStr),
         start_time: s.start_time,
         end_time: s.end_time,
         status: 1,
         group_id: s.group_id,
-        user_id: s.teacher_id,
-        teacher_pay: 1500.0,
+        teacher_id: s.teacher_id, 
+        teacher_pay: 1500.00,
       };
+
       const [groupStudents]: any = await pool.query(
         "SELECT client_id FROM group_members WHERE group_id = ?",
         [groupId],
@@ -103,13 +107,14 @@ export const getLessonDetails = async (req: Request, res: Response) => {
         attendance_status: 1,
         amount_charged: 800.0,
       }));
+
     } else {
       const lessonId = parseInt(id, 10);
       if (isNaN(lessonId)) {
         return res.status(400).json({ error: "Invalid ID format" });
       }
 
-      const [lessonRows]: any = await pool.query<RowDataPacket[]>(
+      const [lessonRows]: any = await pool.query(
         `SELECT l.id, l.lesson_date, l.start_time, l.end_time, l.status, l.group_id, l.user_id, l.teacher_pay 
          FROM lessons l 
          JOIN \`groups\` g ON l.group_id = g.id
@@ -119,13 +124,15 @@ export const getLessonDetails = async (req: Request, res: Response) => {
       );
 
       if (!lessonRows.length) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Lesson not found" });
+        return res.status(404).json({ success: false, message: "Lesson not found" });
       }
 
       const l = lessonRows[0];
       groupId = l.group_id;
+
+      if (Number(l.status) === 2 || (user_rank < 500 && Number(l.user_id) !== Number(current_user_id))) {
+        isReadOnly = true;
+      }
 
       lessonData = {
         id: l.id,
@@ -134,7 +141,7 @@ export const getLessonDetails = async (req: Request, res: Response) => {
         end_time: l.end_time,
         status: l.status,
         group_id: l.group_id,
-        user_id: l.user_id,
+        teacher_id: l.user_id, 
         teacher_pay: l.teacher_pay,
       };
 
@@ -145,14 +152,16 @@ export const getLessonDetails = async (req: Request, res: Response) => {
       attendanceData = attRows;
     }
 
-    const [groupRows]: any = await pool.query(
-      "SELECT id, name FROM `groups` WHERE id = ?",
-      [groupId],
-    );
+    const [groupRows]: any = await pool.query("SELECT id, name FROM `groups` WHERE id = ?", [groupId]);
+    
+    const isForeignLessonForTeacher = user_rank < 500 && Number(lessonData.teacher_id) !== Number(current_user_id);
+    const studentFields = isForeignLessonForTeacher ? "c.id, c.name, 0 AS balance" : "c.id, c.name, c.balance";
+    
     const [studentsData]: any = await pool.query(
-      "SELECT c.id, c.name, c.balance FROM clients c JOIN group_members gm ON c.id = gm.client_id WHERE gm.group_id = ?",
+      `SELECT ${studentFields} FROM clients c JOIN group_members gm ON c.id = gm.client_id WHERE gm.group_id = ?`,
       [groupId],
     );
+
     const [allTeachers]: any = await pool.query(
       "SELECT id, full_name, role FROM users WHERE company_id = ?",
       [company_id],
@@ -166,20 +175,16 @@ export const getLessonDetails = async (req: Request, res: Response) => {
         students: studentsData,
         allTeachers,
         attendance: attendanceData,
+        isReadOnly
       },
     });
   } catch (error) {
     console.error("Ошибка в getLessonDetails:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
-export const closeLesson = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const closeLesson = async (req: Request, res: Response): Promise<void> => {
   const {
     lessonId,
     groupId,
@@ -191,6 +196,8 @@ export const closeLesson = async (
   } = req.body;
 
   const company_id = req.session.company_id;
+  const user_rank = Number(req.session.rank || 0); 
+  const current_user_id = req.session.user_id;    
 
   if (
     !lessonId ||
@@ -200,9 +207,12 @@ export const closeLesson = async (
     !teacherId ||
     !students
   ) {
-    res
-      .status(400)
-      .json({ error: "Переданы некорректные или неполные данные формы" });
+    res.status(400).json({ error: "Переданы некорректные или неполные данные формы" });
+    return;
+  }
+
+  if (user_rank < 500 && Number(teacherId) !== Number(current_user_id)) {
+    res.status(403).json({ error: "У вас нет прав на сохранение или закрытие чужого урока!" });
     return;
   }
 
@@ -223,6 +233,24 @@ export const closeLesson = async (
 
   try {
     await connection.beginTransaction();
+
+    // === ФИНАНСОВАЯ МОДЕРАЦИЯ ДЛЯ УЧИТЕЛЯ ===
+    let finalTeacherPay = Number(teacherPay);
+    let validatedStudents = students;
+
+    if (user_rank < 500) {
+      const [teacherRow]: any = await connection.query(
+        "SELECT balance FROM users WHERE id = ?",
+        [current_user_id]
+      );
+      finalTeacherPay = teacherRow.length > 0 ? Number(teacherRow[0].balance) : 1500.00;
+
+      validatedStudents = students.map((s: any) => ({
+        ...s,
+        amountCharged: 800.00 
+      }));
+    }
+
     let realLessonId: number;
     let isAlreadyClosed = false;
 
@@ -230,69 +258,52 @@ export const closeLesson = async (
       const [insertLessonResult] = await connection.query<ResultSetHeader>(
         `INSERT INTO lessons (lesson_date, start_time, end_time, status, group_id, user_id, teacher_pay) 
          VALUES (?, ?, ?, 1, ?, ?, ?)`,
-        [
-          strLessonDate,
-          strStartTime,
-          strEndTime,
-          groupId,
-          teacherId,
-          teacherPay,
-        ],
+        [strLessonDate, strStartTime, strEndTime, groupId, teacherId, finalTeacherPay],
       );
       realLessonId = insertLessonResult.insertId;
     } else {
       realLessonId = Number(lessonId);
 
       const [rows]: any = await connection.query<RowDataPacket[]>(
-        "SELECT status FROM lessons WHERE id = ?",
+        "SELECT status, user_id FROM lessons WHERE id = ?",
         [realLessonId],
       );
 
-      if (rows.length > 0 && Number(rows[0].status) === 2) {
-        isAlreadyClosed = true;
-
-        const [oldTransactions]: any = await connection.query(
-          "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ?",
-          [realLessonId],
-        );
-
-        for (const tx of oldTransactions) {
-          if (tx.type === "revenue" && tx.client_id) {
-            await connection.query(
-              "UPDATE clients SET balance = balance + ? WHERE id = ?",
-              [tx.amount, tx.client_id],
-            );
-          }
-          if (tx.type === "expense" && tx.user_id) {
-            await connection.query(
-              "UPDATE users SET balance = balance - ? WHERE id = ?",
-              [tx.amount, tx.user_id],
-            );
-          }
+      if (rows.length > 0) {
+        if (user_rank < 500 && Number(rows[0].user_id) !== Number(current_user_id)) {
+          throw new Error("403: Попытка изменения чужого урока");
         }
 
-        await connection.query(
-          "DELETE FROM financial_transactions WHERE lesson_id = ?",
-          [realLessonId],
-        );
+        if (Number(rows[0].status) === 2) {
+          isAlreadyClosed = true;
+
+          const [oldTransactions]: any = await connection.query(
+            "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ?",
+            [realLessonId]
+          );
+
+          for (const tx of oldTransactions) {
+            if (tx.type === 'revenue' && tx.client_id) {
+              await connection.query("UPDATE clients SET balance = balance + ? WHERE id = ?", [tx.amount, tx.client_id]);
+            }
+            if (tx.type === 'expense' && tx.user_id) {
+              await connection.query("UPDATE users SET balance = balance - ? WHERE id = ?", [tx.amount, tx.user_id]);
+            }
+          }
+
+          await connection.query("DELETE FROM financial_transactions WHERE lesson_id = ?", [realLessonId]);
+        }
       }
 
       await connection.query(
         `UPDATE lessons 
          SET lesson_date = ?, start_time = ?, end_time = ?, user_id = ?, teacher_pay = ?
          WHERE id = ?`,
-        [
-          strLessonDate,
-          strStartTime,
-          strEndTime,
-          teacherId,
-          teacherPay,
-          realLessonId,
-        ],
+        [strLessonDate, strStartTime, strEndTime, teacherId, finalTeacherPay, realLessonId],
       );
     }
 
-    for (const student of students) {
+    for (const student of validatedStudents) {
       await connection.query(
         `INSERT INTO lesson_attendance (lesson_id, client_id, attendance_status, amount_charged)
          VALUES (?, ?, ?, ?)
@@ -308,12 +319,10 @@ export const closeLesson = async (
       );
     }
 
-    const strTodayDate = now.toLocaleDateString("en-CA");
+    const strTodayDate = now.toLocaleDateString('en-CA'); 
 
     if (strLessonDate > strTodayDate) {
-      await connection.query("UPDATE lessons SET status = 1 WHERE id = ?", [
-        realLessonId,
-      ]);
+      await connection.query("UPDATE lessons SET status = 1 WHERE id = ?", [realLessonId]);
       await connection.commit();
       res.status(200).json({
         success: true,
@@ -323,11 +332,9 @@ export const closeLesson = async (
       return;
     }
 
-    await connection.query("UPDATE lessons SET status = 2 WHERE id = ?", [
-      realLessonId,
-    ]);
+    await connection.query("UPDATE lessons SET status = 2 WHERE id = ?", [realLessonId]);
 
-    for (const student of students) {
+    for (const student of validatedStudents) {
       if (Number(student.attendanceStatus) === 1 && student.amountCharged > 0) {
         await connection.query(
           `INSERT INTO financial_transactions (company_id, lesson_id, client_id, user_id, amount, type, description) 
@@ -337,8 +344,8 @@ export const closeLesson = async (
             realLessonId,
             student.clientId,
             student.amountCharged,
-            `Автоматическое списание за проведенный урок №${realLessonId}`,
-          ],
+            `Автоматическое списание за проведенный урок №${realLessonId}`
+          ]
         );
 
         await connection.query(
@@ -348,7 +355,7 @@ export const closeLesson = async (
       }
     }
 
-    if (teacherPay > 0) {
+    if (finalTeacherPay > 0) {
       await connection.query(
         `INSERT INTO financial_transactions (company_id, lesson_id, client_id, user_id, amount, type, description) 
          VALUES (?, ?, NULL, ?, ?, 'expense', ?)`,
@@ -356,14 +363,14 @@ export const closeLesson = async (
           company_id,
           realLessonId,
           teacherId,
-          teacherPay,
-          `Начисление вознаграждения за проведение урока №${realLessonId}`,
-        ],
+          finalTeacherPay,
+          `Начисление вознаграждения за проведение урока №${realLessonId}`
+        ]
       );
 
       await connection.query(
         "UPDATE users SET balance = balance + ? WHERE id = ?",
-        [teacherPay, teacherId],
+        [finalTeacherPay, teacherId],
       );
     }
 
@@ -373,14 +380,19 @@ export const closeLesson = async (
       success: true,
       realLessonId: realLessonId,
       message: isAlreadyClosed
-        ? `Урок №${realLessonId} успешно пересчитан в единой кассе.`
+        ? `Урок №${realLessonId} успешно пересчитан в единой кассу.`
         : `Урок №${realLessonId} проведен. Новые финансовые проводки добавлены в кассу.`,
     });
   } catch (error: any) {
     await connection.rollback();
     console.error("Ошибка в closeLesson:", error);
-    res.status(500).json({ error: error.message || "Ошибка сервера" });
+    if (error.message.includes("403")) {
+      res.status(403).json({ error: "Доступ ограничен" });
+    } else {
+      res.status(500).json({ error: error.message || "Ошибка сервера" });
+    }
   } finally {
     connection.release();
   }
 };
+
