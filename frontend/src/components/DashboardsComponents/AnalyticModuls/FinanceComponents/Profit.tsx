@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { getFinancialTimelineData } from '@/logic/analytic/Finance';
 import {
     LineChart,
     Line,
@@ -11,36 +10,59 @@ import {
     ResponsiveContainer
 } from 'recharts';
 import { FinancialTimelineData } from '@/interfaces/AnalyticsInterfaces';
+import { getFinancialTimelineData } from '@/logic/analytic/Finance';
 
 export const Profit: React.FC = () => {
     const [chartData, setChartData] = useState<FinancialTimelineData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
     useEffect(() => {
-        let isMounted = true; // Защита от утечки памяти при переключении табов
+        let isMounted = true;
         setLoading(true);
 
-        getFinancialTimelineData().then(res => {
-            if (isMounted) {
-                if (Array.isArray(res)) {
-                    setChartData(res);
+        getFinancialTimelineData()
+            .then(res => {
+                if (isMounted) {
+                    if (res?.status === 403) {
+                        setIsForbidden(true);
+                    } else if (Array.isArray(res)) {
+                        setChartData(res);
+                    }
+                    setLoading(false);
                 }
-                setLoading(false);
-            }
-        }).catch(err => {
-            console.error("Ошибка загрузки графика прибыли:", err);
-            if (isMounted) setLoading(false);
-        });
+            })
+            .catch(err => {
+                console.error("Ошибка загрузки графика прибыли:", err);
+                if (isMounted) {
+                    if (err?.status === 403 || err?.message?.includes('403')) {
+                        setIsForbidden(true);
+                    }
+                    setLoading(false);
+                }
+            });
 
         return () => {
-            isMounted = false; // Срабатывает при размонтировании вкладки
+            isMounted = false;
         };
-    }, []); // ⬅️ ИСПРАВЛЕНО: Добавлен пустой массив зависимостей!
+    }, []);
 
     if (loading) {
         return (
             <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', color: '#64748b' }}>
-                <p style={{ fontSize: '14px', margin: 0 }}>Загрузка финансового графика...</p>
+                <p style={{ fontSize: '14px', margin: 0 }}>Загрузка financial графика...</p>
+            </div>
+        );
+    }
+
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли недостаточно прав для просмотра графиков прибыли.
+                </p>
             </div>
         );
     }

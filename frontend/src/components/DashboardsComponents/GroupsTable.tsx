@@ -51,6 +51,9 @@ export const GroupTable: React.FC = () => {
     const [isUpdateMode, setIsUpdateMode] = useState(false);
     const [hasEndDate, setHasEndDate] = useState(false);
     const [isOpenModalWindow, setIsOpenModalWindow] = useState(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
+    const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
 
     const [formData, setFormData] = useState<FormState>({
         id: 0,
@@ -196,9 +199,13 @@ export const GroupTable: React.FC = () => {
             const response = await fetch('http://localhost:3000/getgroups', {
                 credentials: "include"
             });
-            if (!response.ok) {
-                throw new Error('oooops, something went wrong');
+
+            if (response.status === 403) {
+                setIsForbidden(true);
+                return;
             }
+
+            if (!response.ok) throw new Error('oooops, something went wrong');
             const rows = await response.json();
             const rawGroups = rows.data || [];
 
@@ -210,10 +217,9 @@ export const GroupTable: React.FC = () => {
             }));
 
             setGroups(formattedGroups);
-            console.log(rows);
         } catch (ex) {
-            console.log(ex);
-            alert('something went wrong...');
+            console.error(ex);
+            alert('Не удалось загрузить группы');
         }
     };
     const getUsers = async () => {
@@ -221,9 +227,13 @@ export const GroupTable: React.FC = () => {
             const response = await fetch('http://localhost:3000/getusers', {
                 credentials: "include"
             });
-            if (!response.ok) {
-                throw new Error('Ошибка при загрузке сотрудников');
+
+            if (response.status === 403) {
+                setIsReadOnly(true);
+                return;
             }
+
+            if (!response.ok) throw new Error('Ошибка при загрузке сотрудников');
             const rows = await response.json();
             setUsers(rows.data || []);
         } catch (ex) {
@@ -271,6 +281,7 @@ export const GroupTable: React.FC = () => {
         }
     };
     const handleRowClick = async (group: GroupTemplate) => {
+        if (isReadOnly) return;
         if (isDeleteMode) {
             if (!window.confirm(`Вы действительно хотите удалить группу ${group.name}?`)) {
                 return;
@@ -317,9 +328,29 @@ export const GroupTable: React.FC = () => {
         }
     };
     useEffect(() => {
-        getGroup();
-        getUsers();
+        setIsLoading(true);
+        Promise.all([getGroup(), getUsers()]).finally(() => {
+            setIsLoading(false);
+        });
     }, []);
+    if (isLoading) {
+        return (
+            <div style={{ padding: '32px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                Загрузка списка групп...
+            </div>
+        );
+    }
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли нет доступа к просмотру групп.
+                </p>
+            </div>
+        );
+    }
     return (
         <>
             {isOpenModalWindow && (
@@ -351,7 +382,7 @@ export const GroupTable: React.FC = () => {
                                         ))}
                                     </select>
                                 </div>
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Статус</label>
                                     <div className={style['radio-container']}>
                                         <label className={style['radio-label']}>
@@ -400,8 +431,8 @@ export const GroupTable: React.FC = () => {
                                         value={typeof updateFormData.end_date === 'string' ? updateFormData.end_date : (updateFormData.end_date as any).toISOString().split('T')[0]}
                                         onChange={handleUpdateInputChange}
                                     />
-
                                 </div>
+                                */}
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Максимальное количество учеников</label>
                                     <input
@@ -503,7 +534,7 @@ export const GroupTable: React.FC = () => {
                                     </select>
                                 </div>
 
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Статус</label>
                                     <div className={style['radio-container']}>
                                         <label className={style['radio-label']}>
@@ -553,7 +584,7 @@ export const GroupTable: React.FC = () => {
                                         value={typeof formData.end_date === 'string' ? formData.end_date : ''}
                                         onChange={handleInputChange}
                                     />
-                                </div>
+                                </div>*/}
 
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Максимальное количество учеников</label>
@@ -629,20 +660,19 @@ export const GroupTable: React.FC = () => {
                     </div>
                 </div>
             )}
-            <div className={style['content-header']}>
-                <div className={style['action-bar']}>
-                    <div className={style['btn-group']}>
-                        <button className={`${style.btn} ${style['btn-blue']}`} onClick={handleAddGroup}>+ Добавить</button>
-                        <button className={`${style.btn} ${isUpdateMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleUpdateGroup}>{isUpdateMode ? 'Отменить' : 'Править'}</button>
-                        <button
-                            className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
-                            onClick={handleDelGroup}
-                        >
-                            {isDeleteMode ? 'Отменить' : 'Удалить'}
-                        </button>
+            {!isReadOnly && (
+                <div className={style['content-header']}>
+                    <div className={style['action-bar']}>
+                        <div className={style['btn-group']}>
+                            <button className={`${style.btn} ${style['btn-blue']}`} onClick={handleAddGroup}>+ Добавить</button>
+                            <button className={`${style.btn} ${isUpdateMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleUpdateGroup}>{isUpdateMode ? 'Отменить' : 'Править'}</button>
+                            <button className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`} onClick={handleDelGroup}>
+                                {isDeleteMode ? 'Отменить' : 'Удалить'}
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
                     <thead>
@@ -651,8 +681,8 @@ export const GroupTable: React.FC = () => {
                             <th>Расписание</th>
                             <th>Ученики</th>
                             <th>Следующий урок</th>
-                            <th>Статус</th>
-                            <th className={style['actions-cell']}>Действия</th>
+                            {/*<th>Статус</th>
+                            <th className={style['actions-cell']}>Действия</th>*/}
                         </tr>
                     </thead>
                     <tbody>
@@ -697,7 +727,7 @@ export const GroupTable: React.FC = () => {
                                         {group.nextMeeting ? group.nextMeeting.toLocaleDateString('ru-RU') : '—'}
                                     </span>
                                 </td>
-                                <td>
+                                {/*<td>
                                     <span className={`
                                         ${style['badge']} 
                                         ${group.status === 2 ? style['is_active'] : style['is_not_active']}
@@ -707,7 +737,7 @@ export const GroupTable: React.FC = () => {
                                 </td>
                                 <td className={style['actions-cell']}>
                                     <button className={style['btn-action']}>•••</button>
-                                </td>
+                                </td>*/}
                             </tr>
                         ))}
                     </tbody>

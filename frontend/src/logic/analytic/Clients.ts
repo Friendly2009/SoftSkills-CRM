@@ -1,10 +1,15 @@
 import { AttendanceTrendData } from "@/interfaces/AnalyticsInterfaces";
-export const fetchAttendanceTrends = async (range: string): Promise<AttendanceTrendData[]> => {
+
+export const fetchAttendanceTrends = async (range: string): Promise<AttendanceTrendData[] | { status: 403 }> => {
   try {
     const response = await fetch(`http://localhost:3000/hr/get-attendance-trends?range=${range}`, {
       method: "GET",
       credentials: "include",
     });
+
+    if (response.status === 403) {
+      return { status: 403 };
+    }
 
     const result = await response.json();
 
@@ -15,6 +20,6 @@ export const fetchAttendanceTrends = async (range: string): Promise<AttendanceTr
     return result.data;
   } catch (error) {
     console.error("API Error in fetchAttendanceTrends:", error);
-    return [];
+    throw error;
   }
 };

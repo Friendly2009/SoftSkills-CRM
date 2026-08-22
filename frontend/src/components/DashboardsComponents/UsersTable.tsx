@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/user.module.css';
+import { error } from "console";
 
 interface UserTemplate {
     id: number;
@@ -18,7 +19,7 @@ export const UsersTable: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isReSetModalWinOpen, setIsReSetModalWinOpen] = useState(false);
     const [isReSetMode, setIsReSetMode] = useState(false);
-
+    const [isForbiden, setIsForbiden] = useState(false);
     const [formData, setFormData] = useState({
         full_name: '',
         role: '',
@@ -48,9 +49,15 @@ export const UsersTable: React.FC = () => {
                 credentials: "include"
             });
 
+            if (response.status === 403) {
+                setIsForbiden(true);
+                return; 
+            }
+
             if (!response.ok) {
                 throw new Error('oooops, something went wrong');
             }
+
             const data = await response.json();
             const rawUsers = data.data || [];
 
@@ -64,6 +71,7 @@ export const UsersTable: React.FC = () => {
             console.error(ex);
         }
     };
+
 
     useEffect(() => {
         getUsers();
@@ -111,7 +119,10 @@ export const UsersTable: React.FC = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
-
+            if (response.status === 403) {
+                alert('Ваших прав недостаточно для совершения этого действия');
+                throw new Error('forbiden doing');
+            }
             if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
             setIsModalOpen(false);
             getUsers();
@@ -135,7 +146,10 @@ export const UsersTable: React.FC = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
-
+            if (response.status === 403) {
+                alert('Ваших прав недостаточно для совершения этого действия');
+                throw new Error('forbiden doing');
+            }
             if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
             setIsReSetModalWinOpen(false);
             setIsReSetMode(false);
@@ -207,6 +221,17 @@ export const UsersTable: React.FC = () => {
     const handleDelClick = () => {
         setIsDeleteMode(prev => !prev);
     };
+    if (isForbiden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли нет доступа к просмотру сотрудников компании.
+                </p>
+            </div>
+        );
+    }
     return (
         <>
             {isReSetModalWinOpen && (
@@ -407,7 +432,7 @@ export const UsersTable: React.FC = () => {
                             <th>Телефон</th>
                             <th>Др</th>
                             <th>Пол</th>
-                            <th className={style['actions-cell']}>Действия</th>
+                            {/*<th className={style['actions-cell']}>Действия</th>*/}
                         </tr>
                     </thead>
                     <tbody>
@@ -440,9 +465,9 @@ export const UsersTable: React.FC = () => {
                                 <td>
                                     {user.gender ? user.gender : <span className={style['text-muted']}>—</span>}
                                 </td>
-                                <td className={style['actions-cell']}>
+                                {/*<td className={style['actions-cell']}>
                                     <button className={style['btn-action']} title="Действия">•••</button>
-                                </td>
+                                </td>*/}
                             </tr>
                         ))}
                     </tbody>

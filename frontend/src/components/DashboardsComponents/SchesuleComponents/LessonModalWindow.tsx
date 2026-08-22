@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from "@/components/cssmoduls/DashboardComponentsCssModuls/lessonModal.module.css";
-import { LessonModalData } from "@/interfaces/ScheduleInterfaces";
+import { LessonModalData } from "@/interfaces/scheduleInterfaces";
 import { getLessonModal, formatDateToString } from "@/logic/SchedulesRequest.ts";
 
 interface LessonModalWindowProps {
@@ -16,17 +16,21 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
     const [teacherPay, setTeacherPay] = useState<number>(0);
     const [attendance, setAttendance] = useState<Record<number, 'present' | 'absent' | 'excused'>>({});
     const [studentsPrice, setStudentsPrice] = useState<number>(800);
+    const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
 
     useEffect(() => {
         getLessonModal(lessonId)
             .then((result) => {
                 if (result && result.success && result.data) {
-                    setLesson(result.data);
-                    setTeacherId(result.data.lesson.teacher_id?.toString() || '1');
-                    setTeacherPay(result.data.lesson.teacher_pay || 0);
+                    const modalData = result.data;
+                    setLesson(modalData);
+
+                    setTeacherId(modalData.lesson.teacher_id?.toString() || '1');
+                    setTeacherPay(Number(modalData.lesson.teacher_pay) || 0);
+                    setIsReadOnly(!!modalData.isReadOnly);
 
                     const initialAttendance: Record<number, 'present' | 'absent' | 'excused'> = {};
-                    const backendAttendance = result.data.attendance || [];
+                    const backendAttendance = modalData.attendance || [];
 
                     const reverseStatusMapping: Record<number, 'present' | 'absent' | 'excused'> = {
                         1: 'present',
@@ -34,7 +38,13 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                         3: 'excused'
                     };
 
-                    result.data.students.forEach((student: { id: number;[key: string]: any }) => {
+                    if (backendAttendance.length > 0 && backendAttendance[0].amount_charged) {
+                        setStudentsPrice(Number(backendAttendance[0].amount_charged));
+                    } else {
+                        setStudentsPrice(800); 
+                    }
+
+                    modalData.students.forEach((student: { id: number;[key: string]: any }) => {
                         const savedRecord = backendAttendance.find((a: any) => Number(a.client_id) === Number(student.id));
 
                         if (savedRecord) {
@@ -50,12 +60,16 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
             .catch((error) => console.error("Ошибка загрузки модалки:", error));
     }, [lessonId]);
 
+
     const handleStatusChange = (studentId: number, status: 'present' | 'absent' | 'excused') => {
+        if (isReadOnly) return;
         setAttendance(prev => ({ ...prev, [studentId]: status }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isReadOnly) return;
 
         const convertToISO = (dateVal?: string | Date | null, timeStr?: string) => {
             if (!dateVal) return "";
@@ -76,7 +90,6 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
             return `${pureDate}T${cleanTime}:00.000Z`;
         };
 
-
         const statusMapping: Record<'present' | 'absent' | 'excused', number> = {
             present: 1,
             absent: 2,
@@ -96,10 +109,6 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                 amountCharged: Number(studentsPrice)
             })) || []
         };
-
-        console.log("=== ОБНОВЛЕННЫЙ PAYLOAD ===");
-        console.log(JSON.stringify(payload, null, 2));
-        console.log("============================");
 
         try {
             const response = await fetch('http://localhost:3000/lessons/close', {
@@ -154,13 +163,14 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                     <div className={styles['scroll-content']}>
                         <div>
                             <h4 className={styles['section-title']}>Ответственный преподаватель</h4>
-                            <div className={styles['teacher-card']}>
+                            <div className={styles['teacher-card']} style={isReadOnly ? { opacity: 0.7, backgroundColor: '#f8fafc' } : {}}>
                                 <div className={styles['teacher-select-wrapper']}>
                                     <select
                                         value={teacherId}
                                         onChange={(e) => setTeacherId(e.target.value)}
                                         className={styles['teacher-select']}
                                         name='teacherId'
+                                        disabled={isReadOnly} 
                                     >
                                         {lesson?.allTeachers.map((teach) => (
                                             <option key={teach.id} value={teach.id}>{teach.full_name}</option>
@@ -175,6 +185,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                             onChange={(e) => setTeacherPay(Number(e.target.value))}
                                             className={styles['teacher-pay-input']}
                                             name='teacherPay'
+                                            disabled={isReadOnly}
                                         />
                                         <span className={styles['price-symbol']}>₽</span>
                                     </div>
@@ -204,6 +215,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                                 type="button"
                                                 className={`${styles['enum-btn']} ${attendance[student.id] === 'present' ? styles['enum-btn-present'] : ''}`}
                                                 onClick={() => handleStatusChange(student.id, 'present')}
+                                                style={isReadOnly ? { cursor: 'not-allowed', opacity: 0.6 } : {}}
                                             >
                                                 Был
                                             </button>
@@ -211,6 +223,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                                 type="button"
                                                 className={`${styles['enum-btn']} ${attendance[student.id] === 'absent' ? styles['enum-btn-absent'] : ''}`}
                                                 onClick={() => handleStatusChange(student.id, 'absent')}
+                                                style={isReadOnly ? { cursor: 'not-allowed', opacity: 0.6 } : {}}
                                             >
                                                 Прогул
                                             </button>
@@ -218,6 +231,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                                 type="button"
                                                 className={`${styles['enum-btn']} ${attendance[student.id] === 'excused' ? styles['enum-btn-excused'] : ''}`}
                                                 onClick={() => handleStatusChange(student.id, 'excused')}
+                                                style={isReadOnly ? { cursor: 'not-allowed', opacity: 0.6 } : {}}
                                             >
                                                 Уважительная
                                             </button>
@@ -225,6 +239,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                     </div>
                                 ))}
                             </div>
+
                             <div style={{ marginTop: 24 }}>
                                 <h4 className={styles['section-title']}>Финансовый расчет занятия</h4>
                                 <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
@@ -237,12 +252,13 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                             position: 'relative',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            backgroundColor: '#ffffff',
+                                            backgroundColor: isReadOnly ? '#f8fafc' : '#ffffff',
                                             border: '1px solid #dcdfe6',
                                             borderRadius: '12px',
                                             padding: '0 16px',
                                             height: '52px',
                                             transition: 'border-color 0.2s',
+                                            opacity: isReadOnly ? 0.7 : 1
                                         }}>
                                             <input
                                                 type="number"
@@ -250,6 +266,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                                 onChange={(e) => setStudentsPrice(Number(e.target.value))}
                                                 placeholder="0"
                                                 min="0"
+                                                disabled={isReadOnly}
                                                 style={{
                                                     border: 'none',
                                                     outline: 'none',
@@ -259,7 +276,8 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                                                     color: '#303133',
                                                     fontWeight: '500',
                                                     backgroundColor: 'transparent',
-                                                    paddingRight: '60px'
+                                                    paddingRight: '60px',
+                                                    cursor: isReadOnly ? 'not-allowed' : 'text'
                                                 }}
                                             />
                                             <div style={{
@@ -311,8 +329,13 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
                         <button type="button" onClick={onClose} className={styles['btn-cancel']}>
                             Отмена
                         </button>
-                        <button type="submit" className={styles['btn-submit']}>
-                            Провести урок и зафиксировать данные
+                        <button
+                            type="submit"
+                            className={styles['btn-submit']}
+                            disabled={isReadOnly}
+                            style={isReadOnly ? { backgroundColor: '#cbd5e1', color: '#94a3b8', cursor: 'not-allowed', boxShadow: 'none' } : {}}
+                        >
+                            {isReadOnly ? 'Просмотр ограничен' : 'Провести урок и зафиксировать данные'}
                         </button>
                     </div>
                 </form>

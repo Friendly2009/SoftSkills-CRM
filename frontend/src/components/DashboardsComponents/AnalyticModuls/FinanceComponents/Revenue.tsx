@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getRevenueSources } from '@/logic/analytic/Finance';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
+import { getRevenueSources } from '@/logic/analytic/Finance';
 interface RevenueSourceItem {
     name: string;
     value: number;
@@ -10,20 +9,45 @@ interface RevenueSourceItem {
 export const Revenue: React.FC = () => {
     const [analyticsData, setAnalyticsData] = useState<RevenueSourceItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
     useEffect(() => {
-        getRevenueSources().then(res => {
-            if (Array.isArray(res)) {
-                setAnalyticsData(res);
-            }
-            setLoading(false);
-        });
+        getRevenueSources()
+            .then(res => {
+                if (res?.status === 403) {
+                    setIsForbidden(true);
+                } else if (Array.isArray(res)) {
+                    setAnalyticsData(res);
+                }
+            })
+            .catch((err) => {
+                if (err?.status === 403 || err?.message?.includes('403')) {
+                    setIsForbidden(true);
+                } else {
+                    console.error(err);
+                }
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
     if (loading) {
         return (
             <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center', color: '#64748b' }}>
                 <p style={{ fontSize: '13px', margin: 0 }}>Загрузка источников доходов...</p>
+            </div>
+        );
+    }
+
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли недостаточно прав для просмотра источников выручки.
+                </p>
             </div>
         );
     }
@@ -69,14 +93,3 @@ export const Revenue: React.FC = () => {
         </div>
     );
 };
-
-
-
-
-
-
-
-
-
-
-

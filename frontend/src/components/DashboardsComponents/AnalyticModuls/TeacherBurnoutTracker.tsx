@@ -12,24 +12,54 @@ import {
 } from 'recharts';
 import { TeacherWorkloadData } from '@/interfaces/AnalyticsInterfaces';
 import { fetchTeachersWorkload } from '@/logic/analytic/Teachers';
+
 export const TeacherBurnoutTracker: React.FC = () => {
     const [data, setData] = useState<TeacherWorkloadData[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
     const BURNOUT_THRESHOLD = 24;
 
     useEffect(() => {
         let isMounted = true;
-        fetchTeachersWorkload().then(res => {
-            if (isMounted) {
-                setData(res);
-                setIsLoading(false);
-            }
-        });
+        
+        fetchTeachersWorkload()
+            .then((res: any) => {
+                if (isMounted) {
+                    if (res?.status === 403) {
+                        setIsForbidden(true);
+                    } else if (Array.isArray(res)) {
+                        setData(res);
+                    }
+                    setIsLoading(false);
+                }
+            })
+            .catch(err => {
+                console.error("Ошибка загрузки трекера нагрузки:", err);
+                if (isMounted) {
+                    if (err?.status === 403 || err?.message?.includes('403')) {
+                        setIsForbidden(true);
+                    }
+                    setIsLoading(false);
+                }
+            });
+
         return () => { isMounted = false; };
     }, []);
 
     if (isLoading) {
         return <div style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>Загрузка трекера нагрузки...</div>;
+    }
+
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли недостаточно прав для просмотра нагрузки преподавателей.
+                </p>
+            </div>
+        );
     }
 
     return (
@@ -79,7 +109,6 @@ export const TeacherBurnoutTracker: React.FC = () => {
                             formatter={(value: any) => [`${value} ч / неделю`]}
                             contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                         />
-
 
                         <ReferenceLine
                             x={BURNOUT_THRESHOLD}

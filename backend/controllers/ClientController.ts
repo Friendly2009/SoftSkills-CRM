@@ -12,7 +12,9 @@ export const APIGetClients = async (
     if (!company_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
+    if (req.session?.rank! < 500) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [clients] = await pool.query<RowDataPacket[]>(
       `SELECT 
         c.id,
@@ -97,6 +99,9 @@ export const addclient = async (
   if (!company_id) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
 
   const connection = await pool.getConnection();
 
@@ -148,7 +153,9 @@ export const delclient = async (
     res.status(400).json({ error: "Некорректный ID клиента" });
     return;
   }
-
+  if (req.session?.rank! < 1000) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   const connection = await pool.getConnection();
 
   try {
@@ -181,7 +188,7 @@ export const delclient = async (
   }
 };
 
-export async function updateClient(req: Request, res: Response): Promise<void> {
+export async function updateClient(req: Request, res: Response) {
   const clientId = parseInt(req.params.id as string, 10);
 
   if (isNaN(clientId)) {
@@ -192,8 +199,7 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
   const { name, balance, skills, status, contact, company_id, group_ids } =
     req.body;
 
-  const targetBalance =
-    balance !== undefined ? parseInt(String(balance), 10) : undefined;
+  const targetBalance = balance !== undefined ? parseInt(String(balance), 10) : undefined;
 
   const clientFields: Record<string, any> = {};
   if (name !== undefined) clientFields.name = name;
@@ -207,7 +213,9 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
     res.status(400).json({ error: "Нет данных для обновления" });
     return;
   }
-
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   const connection = await pool.getConnection();
 
   try {
@@ -258,7 +266,7 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
             [
               clientCompanyId,
               clientId,
-              Math.abs(diffAmount), 
+              Math.abs(diffAmount),
               txType,
               txDescription,
             ],

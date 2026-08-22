@@ -4,12 +4,49 @@ import { get_transactions_list } from '@/logic/analytic/Finance';
 
 export const Transactions: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionsFrontend[]>([]);
+  const [isForbidden, setIsForbidden] = useState<boolean>(false); 
+  const [isLoading, setIsLoading] = useState<boolean>(true);     
 
   useEffect(() => {
-    get_transactions_list().then((res: any) => {
-      setTransactions(res || []);
-    });
+    get_transactions_list()
+      .then((res: any) => {
+        if (res?.status === 403) {
+          setIsForbidden(true);
+        } else {
+          setTransactions(res || []);
+        }
+      })
+      .catch((err: any) => {
+        if (err?.status === 403 || err?.message?.includes('403')) {
+          setIsForbidden(true);
+        } else {
+          console.error('Ошибка загрузки транзакций:', err);
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
+
+  if (isForbidden) {
+    return (
+      <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+        <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+        <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+          У вашей роли недостаточно прав для просмотра финансовых транзакций.
+        </p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #e2e8f0', color: '#64748b', fontSize: '14px' }}>
+        Загрузка транзакций...
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #e2e8f0', overflowX: 'auto' }}>
@@ -39,11 +76,11 @@ export const Transactions: React.FC = () => {
               <td style={{ padding: '12px 8px', color: '#64748b' }}>
                 {item.type === 'wallet_topup' ? 'Пополнение' : item.type === 'expense' ? 'Расход' : item.type}
               </td>
-              <td style={{ 
-                padding: '12px 8px', 
-                textAlign: 'right', 
-                fontWeight: 600, 
-                color: item.type === 'wallet_topup' ? '#10b981' : '#f43f5e' 
+              <td style={{
+                padding: '12px 8px',
+                textAlign: 'right',
+                fontWeight: 600,
+                color: item.type === 'wallet_topup' ? '#10b981' : '#f43f5e'
               }}>
                 {item.type === 'wallet_topup' ? '+' : '-'}
                 {Number(item.amount).toLocaleString('ru-RU')} ₽

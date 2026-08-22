@@ -9,17 +9,30 @@ interface DebtorItem {
     contact: string;
     group_names: string;
 }
+
 export const Debts: React.FC = () => {
     const [debtors, setDebtors] = useState<DebtorItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
     useEffect(() => {
-        getDebtClient().then(res => {
-            if (Array.isArray(res)) {
-                setDebtors(res);
-            }
-            setLoading(false);
-        });
+        getDebtClient()
+            .then(res => {
+                if (res?.status === 403) {
+                    setIsForbidden(true);
+                } else if (Array.isArray(res)) {
+                    setDebtors(res);
+                }
+            })
+            .catch(err => {
+                console.error("Ошибка загрузки списка должников:", err);
+                if (err?.status === 403 || err?.message?.includes('403')) {
+                    setIsForbidden(true);
+                }
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
     if (loading) {
@@ -28,7 +41,21 @@ export const Debts: React.FC = () => {
                 <p style={{ fontSize: '13px', margin: 0 }}>Загрузка списка должников...</p>
             </div>
         );
-    } return (
+    }
+
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли недостаточно прав для просмотра списка должников.
+                </p>
+            </div>
+        );
+    }
+
+    return (
         <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                 <ShieldAlert size={18} color="#ef4444" />
@@ -83,4 +110,3 @@ export const Debts: React.FC = () => {
         </div>
     );
 };
-

@@ -1,5 +1,5 @@
 import React from "react";
-import { MoreActionProps } from "@/interfaces/ClientsInterfaces";
+import { MoreActionProps } from "@/interfaces/clientsInterfaces";
 import { useNavigate } from "react-router-dom";
 
 const menuStyles = {
@@ -73,9 +73,9 @@ export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, on
                     }
                     onClose();
                 }}
-                style={{ ...menuStyles.btn, ...menuStyles.btnSuccess }}
+                style={{ ...menuStyles.btn, ...menuStyles.btnSecondary }}
             >
-                Пополнить
+                Пополнить счет
             </button>
             <button
                 onClick={(e) => {

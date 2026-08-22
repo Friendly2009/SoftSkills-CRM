@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
-import { MoreAction } from './ClientsComponents/MoreActions.tsx';
+import { MoreAction } from '@/components/DashboardsComponents/СlientsComponents/MoreActions.tsx';
 import { deleteClient, getClient, addClient, updateClient } from '../../logic/ClientRequests.ts';
 import { ClientTemplate, MoreActionProps } from "@/interfaces/ClientsInterfaces.ts";
-import { TopUp } from "./ClientsComponents/topUp.tsx";
-import { UpdateClientForm } from '@/components/DashboardsComponents/ClientsComponents/updateClientForm.tsx';
+import { TopUp } from "@/components/DashboardsComponents/СlientsComponents/TopUp.tsx";
+import { UpdateClientForm } from '@/components/DashboardsComponents/СlientsComponents/UpdateClientForm.tsx';
 
 export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
@@ -15,7 +15,9 @@ export const ClientTable: React.FC = () => {
     const [allGroups, setAllGroups] = useState<{ id: number; name: string }[]>([]);
     const [isMoreAction, setMoreAction] = useState(false);
     const [topUpClient, setTopUpClient] = useState<ClientTemplate | null>(null);
-
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
+    const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
     const [menu, setMenu] = useState<MoreActionProps>({
         isOpen: false,
         x: 0,
@@ -66,6 +68,7 @@ export const ClientTable: React.FC = () => {
     };
 
     const handleRowClick = async (client: ClientTemplate) => {
+        if (isReadOnly) return;
         if (isResetMode) {
             setResetFormData({
                 id: client.id,
@@ -91,6 +94,12 @@ export const ClientTable: React.FC = () => {
     const getCompanyGroups = async () => {
         try {
             const response = await fetch("http://localhost:3000/getgroups", { credentials: "include" });
+
+            if (response.status === 403) {
+                setIsReadOnly(true);
+                return;
+            }
+
             if (response.ok) {
                 const data = await response.json();
                 setAllGroups(data.data || []);
@@ -113,9 +122,25 @@ export const ClientTable: React.FC = () => {
     };
 
     useEffect(() => {
-        getClient().then((data) => {
-            if (data) setClient(data);
-        });
+        setIsLoading(true);
+
+        getClient()
+            .then((data: any) => {
+                if (data?.status === 403) {
+                    setIsForbidden(true);
+                } else if (data) {
+                    setClient(data);
+                }
+            })
+            .catch((err: any) => {
+                if (err?.status === 403 || err?.message?.includes('403')) {
+                    setIsForbidden(true);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+
         getCompanyGroups();
     }, []);
 
@@ -170,6 +195,24 @@ export const ClientTable: React.FC = () => {
         setIsResetModalWinOpen(false);
         setIsResetMode(false);
     };
+    if (isLoading) {
+        return (
+            <div style={{ padding: '32px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                Загрузка списка клиентов...
+            </div>
+        );
+    }
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли недостаточно прав для просмотра базы клиентов.
+                </p>
+            </div>
+        );
+    }
     return (
         <>
             {isModalOpen && (<div>
@@ -195,7 +238,7 @@ export const ClientTable: React.FC = () => {
                                     <input name="balance" type="number" className={style['form-input']} value={formData.balance} onChange={handleInputChange}></input>
                                 </div>
 
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Скилы</label>
                                     <input
                                         type="number" name="skills" className={style['form-input']}
@@ -211,7 +254,7 @@ export const ClientTable: React.FC = () => {
                                     />
                                 </div>
 
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Статус</label>
                                     <div className={style['radio-container']}>
                                         <label className={style['radio-label']}>
@@ -229,7 +272,7 @@ export const ClientTable: React.FC = () => {
                                             Неактивен
                                         </label>
                                     </div>
-                                </div>
+                                </div>*/}
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Группы (зажмите Ctrl/Cmd для выбора нескольких)</label>
                                     <div className={style['select-wrapper']}>
@@ -284,20 +327,22 @@ export const ClientTable: React.FC = () => {
                     allGroups={allGroups}
                 />
             )}
-            <div className={style['content-header']}>
-                <div className={style['action-bar']}>
-                    <div className={style['btn-group']}>
-                        <button className={`${style.btn} ${style['btn-blue']}`} onClick={handleAddClient}>+ Добавить</button>
-                        <button className={`${style.btn} ${isResetMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClient}>{isResetMode ? 'Отменить' : 'Править'}</button>
-                        <button
-                            className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
-                            onClick={handleDelClient}
-                        >
-                            {isDeleteMode ? 'Отменить' : 'Удалить'}
-                        </button>
+            {!isReadOnly && (
+                <div className={style['content-header']}>
+                    <div className={style['action-bar']}>
+                        <div className={style['btn-group']}>
+                            <button className={`${style.btn} ${style['btn-blue']}`} onClick={handleAddClient}>+ Добавить</button>
+                            <button className={`${style.btn} ${isResetMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClient}>{isResetMode ? 'Отменить' : 'Править'}</button>
+                            <button
+                                className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
+                                onClick={handleDelClient}
+                            >
+                                {isDeleteMode ? 'Отменить' : 'Удалить'}
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
                     <thead>
@@ -305,11 +350,11 @@ export const ClientTable: React.FC = () => {
                             <th>Клиент</th>
                             <th>Группа</th>
                             <th>Баланс</th>
-                            <th>Скилы</th>
+                            {/*<th>Доп. счет</th>*/}
                             <th>Контакт</th>
-                            <th>Статус</th>
+                            {/*<th>Статус</th>*/}
                             <th>Следующее посещение</th>
-                            <th className={style['actions-cell']}>Действия</th>
+                            {!isReadOnly && <th className={style['actions-cell']}>Действия</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -341,19 +386,18 @@ export const ClientTable: React.FC = () => {
                                         {formatBalance(client.balance)}
                                     </span>
                                 </td>
-                                <td>
+                                {/*<td>
                                     <span className={style['skills-count']}>{client.skills}</span>
-                                </td>
+                                </td>*/}
                                 <td>
                                     <span className={style['contact-text']}>{client.contact}</span>
                                 </td>
-                                <td>
+                                {/*<td>
                                     {renderStatus(client.status)}
-                                </td>
+                                </td>*/}
                                 <td>
                                     {client.next_visit instanceof Date ? (
                                         <span className={style['visit-badge']}>
-                                            <span className={style['visit-icon']}>📅</span>
                                             {client.next_visit.toLocaleDateString('ru-RU')}
                                         </span>
                                     ) : (
@@ -450,7 +494,6 @@ export const ClientTable: React.FC = () => {
                     </>
                 )}
             </div>
-
         </>
     );
 };

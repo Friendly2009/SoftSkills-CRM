@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { getExpensesData, addManualExpenseRequest } from '@/logic/analytic/Finance';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { PlusCircle, Wallet, FileText, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface ExpenseTransactionItem {
@@ -21,15 +20,25 @@ export const Expenses: React.FC = () => {
     const [comment, setComment] = useState<string>('');
     const [formLoading, setFormLoading] = useState<boolean>(false);
     const [successStatus, setSuccessStatus] = useState<boolean>(false);
-
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
 
     const loadExpensesData = () => {
-        getExpensesData().then(res => {
-            if (Array.isArray(res)) {
-                setTransactions(res);
-            }
-            setLoading(false);
-        });
+        getExpensesData()
+            .then((res: any) => {
+                if (res?.status === 403) {
+                    setIsForbidden(true);
+                } else if (Array.isArray(res)) {
+                    setTransactions(res);
+                }
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                if (err?.status === 403 || err?.message?.includes('403')) {
+                    setIsForbidden(true);
+                }
+                setLoading(false);
+            });
     };
 
     useEffect(() => {
@@ -60,6 +69,18 @@ export const Expenses: React.FC = () => {
         return (
             <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '16px', border: '1px solid #e2e8f0', textAlign: 'center', color: '#64748b' }}>
                 <p style={{ fontSize: '14px', margin: 0, fontWeight: 500 }}>Загрузка ленты расходов...</p>
+            </div>
+        );
+    }
+
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли нет доступа к просмотру финансовых расходов компании.
+                </p>
             </div>
         );
     }

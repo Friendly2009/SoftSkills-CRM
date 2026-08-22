@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Index from './components/index';
+import Index from './components/Index';
 import { Dashboard } from './components/Dashboard';
 import { LoginForm } from './components/Aauthorization';
-import { RegisterForm } from './components/registration';
+import { RegisterForm } from './components/Registration';
 import { ProfilePage } from './components/Profile';
-import { ClientProfile } from './components/DashboardsComponents/ClientsComponents/ClientProfile';
+import { ClientProfile } from './components/DashboardsComponents/СlientsComponents/ClientProfile';
 
 function App() {
   return (
