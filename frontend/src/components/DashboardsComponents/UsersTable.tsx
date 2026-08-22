@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/user.module.css';
-
-interface UsersTableProps {
-    setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
-    setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-    setReSetAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-}
+import { error } from "console";
 
 interface UserTemplate {
     id: number;
@@ -13,27 +8,29 @@ interface UserTemplate {
     role: string;
     rank: number;
     email: string;
-    birthday: string | null;
+    birthday: Date | null;
     contact: string;
     gender: string | null;
 }
 
-export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAction, setReSetAction }) => {
+export const UsersTable: React.FC = () => {
     const [users, setUsers] = useState<UserTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isReSetModalWinOpen, setIsReSetModalWinOpen] = useState(false);
     const [isReSetMode, setIsReSetMode] = useState(false);
+    const [isForbiden, setIsForbiden] = useState(false);
     const [formData, setFormData] = useState({
         full_name: '',
         role: '',
         rank: 100,
         email: '',
         contact: '',
-        birthday: '',
+        birthday: null as Date | null,
         gender: 'Муж',
         password: ''
     });
+
     const [resetFormData, SetResetFormData] = useState({
         id: 0,
         full_name: '',
@@ -41,96 +38,91 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
         rank: 100,
         email: '',
         contact: '',
-        birthday: '',
+        birthday: null as Date | null,
         gender: 'Муж',
         password: ''
     });
+
     const getUsers = async () => {
         try {
             const response = await fetch("http://localhost:3000/getusers", {
                 credentials: "include"
             });
 
+            if (response.status === 403) {
+                setIsForbiden(true);
+                return; 
+            }
+
             if (!response.ok) {
                 throw new Error('oooops, something went wrong');
             }
+
             const data = await response.json();
-            setUsers(data.data || []);
+            const rawUsers = data.data || [];
+
+            const formattedUsers = rawUsers.map((user: any) => ({
+                ...user,
+                birthday: user.birthday ? new Date(user.birthday) : null
+            }));
+
+            setUsers(formattedUsers);
         } catch (ex) {
             console.error(ex);
         }
-    }
-    const handleAddUser = () => {
-        setIsModalOpen(true);
     };
-    const handleDelUser = () => {
-        setIsDeleteMode(prev => !prev);
-    };
-    const handleResetUser = () => {
-        setIsReSetMode(prev => !prev);
-    }
-    useEffect(() => {
-        setReSetAction({
-            isActive: isReSetMode,
-            handler: handleResetUser
-        });
 
-        return () => {
-            setReSetAction(null);
-        };
-    }, [isReSetMode]);
-    useEffect(() => {
-        setPlusAction(() => handleAddUser);
 
-        return () => {
-            setPlusAction(null);
-        };
-    }, []);
-    useEffect(() => {
-        setDelAction({
-            isActive: isDeleteMode,
-            handler: handleDelUser
-        });
-
-        return () => {
-            setDelAction(null);
-        };
-    }, [isDeleteMode]);
     useEffect(() => {
         getUsers();
     }, []);
+
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'birthday'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
     };
+
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         SetResetFormData(prev => ({
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'birthday'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
-    }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const payload = {
+                ...formData,
+                birthday: formData.birthday ? formData.birthday.toISOString().split('T')[0] : null
+            };
+
             const response = await fetch("http://localhost:3000/adduser", {
                 credentials: "include",
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(payload),
             });
-
+            if (response.status === 403) {
+                alert('Ваших прав недостаточно для совершения этого действия');
+                throw new Error('forbiden doing');
+            }
             if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
             setIsModalOpen(false);
             getUsers();
@@ -139,16 +131,25 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
             alert("Произошла ошибка при сохранении сотрудника.");
         }
     };
+
     const handleResetFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const payload = {
+                ...resetFormData,
+                birthday: resetFormData.birthday ? resetFormData.birthday.toISOString().split('T')[0] : null
+            };
+
             const response = await fetch("http://localhost:3000/resetuser", {
                 credentials: "include",
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(resetFormData),
+                body: JSON.stringify(payload),
             });
-
+            if (response.status === 403) {
+                alert('Ваших прав недостаточно для совершения этого действия');
+                throw new Error('forbiden doing');
+            }
             if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
             setIsReSetModalWinOpen(false);
             setIsReSetMode(false);
@@ -158,9 +159,9 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
             alert("Произошла ошибка при сохранении сотрудника.");
         }
     };
+
     const handleRowClick = async (user: UserTemplate) => {
         if (isDeleteMode) {
-
             if (user.rank === 1000) {
                 alert("Нельзя удалить сотрудника с рангом 1000 (Директор)!");
                 return;
@@ -200,7 +201,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
                 rank: user.rank,
                 email: user.email,
                 contact: user.contact,
-                birthday: user.birthday || '',
+                birthday: user.birthday ? new Date(user.birthday) : null,
                 gender: user.gender || 'Муж',
                 password: ''
             });
@@ -209,6 +210,28 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
         }
     };
 
+    const handlePlusClick = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleResetClick = () => {
+        setIsReSetMode(prev => !prev);
+    };
+
+    const handleDelClick = () => {
+        setIsDeleteMode(prev => !prev);
+    };
+    if (isForbiden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли нет доступа к просмотру сотрудников компании.
+                </p>
+            </div>
+        );
+    }
     return (
         <>
             {isReSetModalWinOpen && (
@@ -271,7 +294,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
                                     <label>ДР</label>
                                     <input
                                         type="date" name="birthday" className={style['form-input']}
-                                        value={resetFormData.birthday} onChange={handleResetInputChange}
+                                        value={resetFormData.birthday ? resetFormData.birthday.toISOString().split('T')[0] : ""} onChange={handleResetInputChange}
                                     />
                                 </div>
 
@@ -357,7 +380,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
                                     <label>ДР</label>
                                     <input
                                         type="date" name="birthday" className={style['form-input']}
-                                        value={formData.birthday} onChange={handleInputChange}
+                                        value={formData.birthday ? formData.birthday.toISOString().split('T')[0] : ""} onChange={handleInputChange}
                                     />
                                 </div>
 
@@ -383,6 +406,20 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
                     </div>
                 </div>
             )}
+            <div className={style['content-header']}>
+                <div className={style['action-bar']}>
+                    <div className={style['btn-group']}>
+                        <button className={`${style.btn} ${style['btn-blue']}`} onClick={handlePlusClick}>+ Добавить</button>
+                        <button className={`${style.btn} ${isReSetMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClick}>{isReSetMode ? 'Отменить' : 'Править'}</button>
+                        <button
+                            className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
+                            onClick={handleDelClick}
+                        >
+                            {isDeleteMode ? 'Отменить' : 'Удалить'}
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
@@ -395,7 +432,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
                             <th>Телефон</th>
                             <th>Др</th>
                             <th>Пол</th>
-                            <th className={style['actions-cell']}>Действия</th>
+                            {/*<th className={style['actions-cell']}>Действия</th>*/}
                         </tr>
                     </thead>
                     <tbody>
@@ -422,14 +459,15 @@ export const UsersTable: React.FC<UsersTableProps> = ({ setPlusAction, setDelAct
                                 <td>{user.email}</td>
                                 <td>{user.contact}</td>
                                 <td>
-                                    {user.birthday ? user.birthday : <span className={style['text-muted']}>—</span>}
+                                    {user.birthday ? user.birthday.toLocaleDateString('ru-RU') : <span className={style['text-muted']}>—</span>}
                                 </td>
+
                                 <td>
                                     {user.gender ? user.gender : <span className={style['text-muted']}>—</span>}
                                 </td>
-                                <td className={style['actions-cell']}>
+                                {/*<td className={style['actions-cell']}>
                                     <button className={style['btn-action']} title="Действия">•••</button>
-                                </td>
+                                </td>*/}
                             </tr>
                         ))}
                     </tbody>

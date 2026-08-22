@@ -3,6 +3,7 @@ import styles from './cssmoduls/profile.module.css';
 
 export const ProfilePage: React.FC = () => {
   const [isUpdateMode, setIsUpdateMode] = useState(false);
+
   const [user, setUser] = useState({
     fullname: "",
     email: "",
@@ -10,12 +11,12 @@ export const ProfilePage: React.FC = () => {
     rank: 0,
     contact: "",
     gender: "Муж",
-    birthday: "",
+    birthday: null as Date | null,
     password: '',
     avatar: '',
     company_name: ''
   });
-  
+
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
@@ -23,7 +24,7 @@ export const ProfilePage: React.FC = () => {
     rank: 0,
     contact: "",
     gender: "Муж",
-    birthday: "",
+    birthday: null as Date | null,
     password: ''
   });
 
@@ -61,7 +62,11 @@ export const ProfilePage: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'rank' ? Number(value) : value
+      [name]: name === 'rank'
+        ? Number(value)
+        : name === 'birthday'
+          ? (value ? new Date(value) : null)
+          : value
     }));
   };
 
@@ -73,7 +78,7 @@ export const ProfilePage: React.FC = () => {
       email: formData.email,
       contact: formData.contact,
       rank: formData.rank,
-      birthday: formData.birthday,
+      birthday: formData.birthday ? formData.birthday.toISOString().split('T')[0] : null,
       gender: formData.gender,
       password: formData.password,
       role: formData.user_role
@@ -85,7 +90,7 @@ export const ProfilePage: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", 
+        credentials: "include",
         body: JSON.stringify(updateData),
       });
 
@@ -133,6 +138,7 @@ export const ProfilePage: React.FC = () => {
 
         if (data.success && data.user) {
           const fetchedUser = data.user;
+          const birthdayDate = fetchedUser.birthday ? new Date(fetchedUser.birthday) : null;
 
           setUser({
             fullname: fetchedUser.fullname || "",
@@ -141,7 +147,7 @@ export const ProfilePage: React.FC = () => {
             rank: fetchedUser.rank || 0,
             contact: fetchedUser.contact || "",
             gender: fetchedUser.gender || "Муж",
-            birthday: fetchedUser.birthday || "",
+            birthday: birthdayDate,
             password: "",
             avatar: fetchedUser.avatar || "",
             company_name: fetchedUser.company_name || ""
@@ -154,7 +160,7 @@ export const ProfilePage: React.FC = () => {
             rank: fetchedUser.rank || 0,
             contact: fetchedUser.contact || "",
             gender: fetchedUser.gender || "Муж",
-            birthday: fetchedUser.birthday || "",
+            birthday: birthdayDate,
             password: ""
           });
         }
@@ -208,13 +214,6 @@ export const ProfilePage: React.FC = () => {
             onClick={() => setIsUpdateMode(!isUpdateMode)}
           >
             {isUpdateMode ? 'Отмена' : 'Редактировать'}
-          </button>
-
-          <button
-            className={`${styles.btn} ${styles.btnSecondary}`}
-            onClick={() => console.log('Настройки')}
-          >
-            Настройки
           </button>
         </section>
 
@@ -288,7 +287,7 @@ export const ProfilePage: React.FC = () => {
               />
             </div>
 
-            <div className={styles.infoRow}>
+            {/*<div className={styles.infoRow}>
               <label className={styles.infoLabel}>Очки (Pts)</label>
               <input
                 type='number'
@@ -297,7 +296,7 @@ export const ProfilePage: React.FC = () => {
                 value={formData.rank}
                 onChange={handleOnChange}
               />
-            </div>
+            </div>*/}
 
             <div className={styles.infoRow}>
               <label className={styles.infoLabel}>Дата рождения</label>
@@ -305,10 +304,11 @@ export const ProfilePage: React.FC = () => {
                 type='date'
                 name='birthday'
                 className={styles.formInput}
-                value={formData.birthday}
+                value={formData.birthday ? formData.birthday.toISOString().split('T')[0] : ""}
                 onChange={handleOnChange}
               />
             </div>
+
 
             <div className={styles.infoRow}>
               <label className={styles.infoLabel}>Пол</label>

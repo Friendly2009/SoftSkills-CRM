@@ -12,7 +12,9 @@ export const APIGetClients = async (
     if (!company_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
+    if (req.session?.rank! < 500) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [clients] = await pool.query<RowDataPacket[]>(
       `SELECT 
         c.id,
@@ -23,7 +25,26 @@ export const APIGetClients = async (
         c.contact,
         c.company_id,
         GROUP_CONCAT(DISTINCT g.id) AS group_ids_str,
-        GROUP_CONCAT(DISTINCT g.name SEPARATOR '|||') AS group_names_str
+        GROUP_CONCAT(DISTINCT g.name SEPARATOR '|||') AS group_names_str,
+        
+        -- Убрали DATE_FORMAT, чтобы MIN() возвращал чистый тип DATE бд
+        (
+          SELECT MIN(
+            CASE gs.day_of_week
+              WHEN 'Понедельник' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (8 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Вторник'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (9 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Среда'       THEN DATE_ADD(CURRENT_DATE(), INTERVAL (10 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Четверг'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (11 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Пятница'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (12 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Суббота'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (13 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Воскресенье' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (14 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+            END
+          )
+          FROM group_members gm_sub
+          JOIN group_schedules gs ON gm_sub.group_id = gs.group_id
+          WHERE gm_sub.client_id = c.id
+        ) AS next_visit
+
       FROM clients c
       LEFT JOIN group_members gm ON c.id = gm.client_id
       LEFT JOIN \`groups\` g ON gm.group_id = g.id
@@ -34,19 +55,24 @@ export const APIGetClients = async (
 
     const formattedClients = clients.map((client) => {
       const group_ids = client.group_ids_str
-        ? client.group_ids_str.split(',').map(Number)
+        ? client.group_ids_str.split(",").map(Number)
         : [];
 
       const group_names = client.group_names_str
-        ? client.group_names_str.split('|||')
+        ? client.group_names_str.split("|||")
         : [];
 
       const { group_ids_str, group_names_str, ...cleanClient } = client;
 
+      const nextVisitDate = client.next_visit
+        ? new Date(client.next_visit)
+        : null;
+
       return {
         ...cleanClient,
         group_ids,
-        group_names
+        group_names,
+        next_visit: nextVisitDate,
       };
     });
 
@@ -63,7 +89,6 @@ export const APIGetClients = async (
   }
 };
 
-
 export const addclient = async (
   req: Request,
   res: Response,
@@ -73,6 +98,9 @@ export const addclient = async (
   const company_id = req.session.company_id;
   if (!company_id) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
   }
 
   const connection = await pool.getConnection();
@@ -115,7 +143,6 @@ export const addclient = async (
   }
 };
 
-
 export const delclient = async (
   req: Request,
   res: Response,
@@ -126,7 +153,9 @@ export const delclient = async (
     res.status(400).json({ error: "Некорректный ID клиента" });
     return;
   }
-
+  if (req.session?.rank! < 1000) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   const connection = await pool.getConnection();
 
   try {
@@ -159,7 +188,7 @@ export const delclient = async (
   }
 };
 
-export async function updateClient(req: Request, res: Response): Promise<void> {
+export async function updateClient(req: Request, res: Response) {
   const clientId = parseInt(req.params.id as string, 10);
 
   if (isNaN(clientId)) {
@@ -167,11 +196,14 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const { name, balance, skills, status, contact, company_id, group_ids } = req.body;
+  const { name, balance, skills, status, contact, company_id, group_ids } =
+    req.body;
+
+  const targetBalance = balance !== undefined ? parseInt(String(balance), 10) : undefined;
 
   const clientFields: Record<string, any> = {};
   if (name !== undefined) clientFields.name = name;
-  if (balance !== undefined) clientFields.balance = balance;
+  if (targetBalance !== undefined) clientFields.balance = targetBalance;
   if (skills !== undefined) clientFields.skills = skills;
   if (status !== undefined) clientFields.status = status;
   if (contact !== undefined) clientFields.contact = contact;
@@ -181,22 +213,29 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
     res.status(400).json({ error: "Нет данных для обновления" });
     return;
   }
-
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   const connection = await pool.getConnection();
 
   try {
     await connection.beginTransaction();
 
-    const [rows] = await connection.execute<any[]>(
-      `SELECT id FROM clients WHERE id = ?`,
-      [clientId]
+    const [clientRows]: any = await connection.execute(
+      `SELECT name, balance, company_id FROM clients WHERE id = ?`,
+      [clientId],
     );
 
-    if (rows.length === 0) {
+    if (!clientRows || clientRows.length === 0) {
       await connection.rollback();
       res.status(404).json({ error: "Клиент не найден" });
       return;
     }
+
+    const oldAmountNum = Number(clientRows[0].balance);
+    const clientName = clientRows[0].name;
+    const clientCompanyId =
+      company_id !== undefined ? company_id : clientRows[0].company_id;
 
     if (Object.keys(clientFields).length > 0) {
       const keys = Object.keys(clientFields);
@@ -207,14 +246,39 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
 
       await connection.execute(
         `UPDATE clients SET ${setClause} WHERE id = ?`,
-        values
+        values,
       );
+
+      if (targetBalance !== undefined) {
+        const diffAmount = targetBalance - oldAmountNum;
+
+        if (diffAmount !== 0) {
+          const txType = diffAmount > 0 ? "wallet_topup" : "correction";
+          const txDescription =
+            diffAmount > 0
+              ? `Пополнение счета через личный кабинет (Клиент: ${clientName}, ID: ${clientId})`
+              : `Ручная корректировка/списание баланса (Клиент: ${clientName}, ID: ${clientId})`;
+
+          await connection.execute(
+            `INSERT INTO financial_transactions 
+                (company_id, lesson_id, client_id, user_id, amount, type, description) 
+             VALUES (?, NULL, ?, NULL, ?, ?, ?)`,
+            [
+              clientCompanyId,
+              clientId,
+              Math.abs(diffAmount),
+              txType,
+              txDescription,
+            ],
+          );
+        }
+      }
     }
 
     if (group_ids !== undefined) {
       await connection.execute(
         `DELETE FROM group_members WHERE client_id = ?`,
-        [clientId]
+        [clientId],
       );
 
       if (Array.isArray(group_ids) && group_ids.length > 0) {
@@ -222,7 +286,7 @@ export async function updateClient(req: Request, res: Response): Promise<void> {
 
         await connection.query(
           `INSERT INTO group_members (group_id, client_id) VALUES ?`,
-          [values]
+          [values],
         );
       }
     }

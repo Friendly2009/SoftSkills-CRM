@@ -8,7 +8,9 @@ export const getgroups = async (req: Request, res: Response) => {
     if (!company_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
+    if (req.session?.rank! < 500) {
+      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+    }
     const [groups] = await pool.query<RowDataPacket[]>(
       `SELECT 
         g.id,
@@ -19,6 +21,23 @@ export const getgroups = async (req: Request, res: Response) => {
         g.end_date,
         g.max_students,
         (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id) AS studentsCount,
+        
+        (
+          SELECT MIN(
+            CASE gs_sub.day_of_week
+              WHEN 'Понедельник' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (8 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Вторник'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (9 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Среда'       THEN DATE_ADD(CURRENT_DATE(), INTERVAL (10 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Четверг'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (11 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Пятница'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (12 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Суббота'     THEN DATE_ADD(CURRENT_DATE(), INTERVAL (13 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+              WHEN 'Воскресенье' THEN DATE_ADD(CURRENT_DATE(), INTERVAL (14 - DAYOFWEEK(CURRENT_DATE())) % 7 DAY)
+            END
+          )
+          FROM group_schedules gs_sub
+          WHERE gs_sub.group_id = g.id
+        ) AS nextMeeting,
+
         IF(COUNT(gs.id) = 0, JSON_ARRAY(), 
           JSON_ARRAYAGG(
             JSON_OBJECT(
@@ -32,13 +51,13 @@ export const getgroups = async (req: Request, res: Response) => {
       INNER JOIN users u ON g.users_id = u.id 
       LEFT JOIN group_schedules gs ON g.id = gs.group_id 
       WHERE u.company_id = ? 
-      GROUP BY g.id`, 
-      [company_id]
+      GROUP BY g.id`,
+      [company_id],
     );
 
     const formattedGroups = (groups as any[]).map((group) => {
       let parsedSchedules = group.schedules;
-      
+
       if (typeof group.schedules === "string") {
         try {
           parsedSchedules = JSON.parse(group.schedules);
@@ -47,10 +66,17 @@ export const getgroups = async (req: Request, res: Response) => {
         }
       }
 
+      const startDateObj = group.start_date ? new Date(group.start_date) : null;
+      const endDateObj = group.end_date ? new Date(group.end_date) : null;
+      const nextMeetingObj = group.nextMeeting ? new Date(group.nextMeeting) : null;
+
       return {
         ...group,
         schedules: parsedSchedules,
         studentsCount: Number(group.studentsCount || 0),
+        start_date: startDateObj,
+        end_date: endDateObj,
+        nextMeeting: nextMeetingObj,
       };
     });
 
@@ -67,12 +93,15 @@ export const getgroups = async (req: Request, res: Response) => {
   }
 };
 
+
 export const creategroup = async (req: Request, res: Response) => {
   const company_id = req.session.company_id;
   if (!company_id) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
-
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   let connect;
 
   try {
@@ -92,6 +121,9 @@ export const creategroup = async (req: Request, res: Response) => {
         .json({ message: "Не все обязательные поля заполнены" });
     }
 
+    const startDateObj = new Date(start_date);
+    const endDateObj = end_date ? new Date(end_date) : null;
+
     connect = await pool.getConnection();
     await connect.beginTransaction();
 
@@ -101,8 +133,8 @@ export const creategroup = async (req: Request, res: Response) => {
         name,
         users_id,
         status,
-        start_date,
-        end_date || null,
+        startDateObj,
+        endDateObj,
         max_students || null,
       ],
     );
@@ -145,7 +177,7 @@ export const creategroup = async (req: Request, res: Response) => {
 export const deleteGroup = async (
   req: Request,
   res: Response,
-): Promise<void> => {
+) => {
   const groupId = parseInt(req.params.id as string, 10);
   const companyId = req.session.company_id;
 
@@ -155,7 +187,9 @@ export const deleteGroup = async (
       .json({ error: "Некорректный ID группы или вы не авторизованы" });
     return;
   }
-
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   const connection = await pool.getConnection();
 
   try {
@@ -206,17 +240,20 @@ export const deleteGroup = async (
     connection.release();
   }
 };
+
 export const updategroup = async (req: Request, res: Response) => {
-  const group_id = req.params.id; 
+  const group_id = req.params.id;
   const company_id = req.session.company_id;
 
   if (!company_id) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
-
+  if (req.session?.rank! < 500) {
+    return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+  }
   const {
     name,
-    users_id, 
+    users_id,
     status,
     schedules,
     start_date,
@@ -225,6 +262,9 @@ export const updategroup = async (req: Request, res: Response) => {
   } = req.body;
 
   const connection = await pool.getConnection();
+
+  const formattedStartDate = (start_date === "" || !start_date) ? null : new Date(start_date);
+  const formattedEndDate = (end_date === "" || !end_date) ? null : new Date(end_date);
 
   try {
     await connection.beginTransaction();
@@ -257,7 +297,15 @@ export const updategroup = async (req: Request, res: Response) => {
 
     await connection.query(
       `UPDATE \`groups\` SET name = ?, users_id = ?, status = ?, start_date = ?, end_date = ?, max_students = ? WHERE id = ?`,
-      [name, users_id, status, start_date, end_date, max_students, group_id],
+      [
+        name,
+        users_id,
+        status,
+        formattedStartDate,
+        formattedEndDate,
+        max_students,
+        group_id,
+      ],
     );
 
     if (schedules && Array.isArray(schedules)) {
@@ -287,9 +335,7 @@ export const updategroup = async (req: Request, res: Response) => {
   } catch (er) {
     await connection.rollback();
     console.error(er);
-    return res
-      .status(500)
-      .json({ success: false, message: "something went wrong" });
+    return res.status(500).json({ success: false, message: er });
   } finally {
     connection.release();
   }

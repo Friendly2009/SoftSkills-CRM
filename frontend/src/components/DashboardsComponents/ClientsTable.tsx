@@ -1,30 +1,32 @@
 import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
+import { MoreAction } from '@/components/DashboardsComponents/СlientsComponents/MoreActions.tsx';
+import { deleteClient, getClient, addClient, updateClient } from '../../logic/ClientRequests.ts';
+import { ClientTemplate, MoreActionProps } from "@/interfaces/ClientsInterfaces.ts";
+import { TopUp } from "@/components/DashboardsComponents/СlientsComponents/TopUp.tsx";
+import { UpdateClientForm } from '@/components/DashboardsComponents/СlientsComponents/UpdateClientForm.tsx';
 
-interface ClientTableProps {
-    setPlusAction: React.Dispatch<React.SetStateAction<(() => void) | null>>;
-    setDelAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-    setReSetAction: React.Dispatch<React.SetStateAction<{ isActive: boolean; handler: () => void } | null>>;
-}
-
-interface ClientTemplate {
-    id: number;
-    name: string;
-    balance: number;
-    skills: number;
-    status: number;
-    contact: string;
-    group_ids: number[];
-    group_names: string[];
-}
-
-export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelAction, setReSetAction }) => {
+export const ClientTable: React.FC = () => {
     const [clients, setClient] = useState<ClientTemplate[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isResetMode, setIsResetMode] = useState(false);
     const [isResetModalWinOpen, setIsResetModalWinOpen] = useState(false);
     const [allGroups, setAllGroups] = useState<{ id: number; name: string }[]>([]);
+    const [isMoreAction, setMoreAction] = useState(false);
+    const [topUpClient, setTopUpClient] = useState<ClientTemplate | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isForbidden, setIsForbidden] = useState<boolean>(false);
+    const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
+    const [menu, setMenu] = useState<MoreActionProps>({
+        isOpen: false,
+        x: 0,
+        y: 0,
+        client: null,
+        onClose: () => { },
+        onDelete: () => { }
+    });
+
     const [resetFormData, setResetFormData] = useState<ClientTemplate>({
         id: 0,
         name: '',
@@ -33,8 +35,10 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
         status: 0,
         contact: "",
         group_ids: [],
-        group_names: []
+        group_names: [],
+        next_visit: null
     });
+
     const [formData, setFormData] = useState<ClientTemplate>({
         id: 0,
         name: '',
@@ -43,21 +47,28 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
         status: 0,
         contact: "",
         group_ids: [],
-        group_names: []
-    })
+        group_names: [],
+        next_visit: null
+    });
+
     const handleResetInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setResetFormData(prev => ({
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'next_visit'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
-    }
+    };
+
     const getInitials = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     };
+
     const handleRowClick = async (client: ClientTemplate) => {
+        if (isReadOnly) return;
         if (isResetMode) {
             setResetFormData({
                 id: client.id,
@@ -67,92 +78,82 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                 status: client.status,
                 contact: client.contact,
                 group_ids: client.group_ids,
-                group_names: client.group_names
+                group_names: client.group_names,
+                next_visit: client.next_visit
             });
             setIsResetModalWinOpen(true);
         }
         if (isDeleteMode) {
-            try {
-                const response = await fetch(`http://localhost:3000/delclients/${client.id}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Ошибка сервера: ${response.status}`);
-                }
-
-                alert("User was deleted");
-                console.log("User was deleted");
-
-                setIsDeleteMode(false);
-                getClient();
-                getCompanyGroups();
-            } catch (ex) {
-                console.error(ex);
-            }
+            await deleteClient(client);
+            setIsDeleteMode(false);
+            setClient(await getClient());
+            getCompanyGroups();
         }
     };
-    const getClient = async () => {
+
+    const getCompanyGroups = async () => {
         try {
-            const response = await fetch("http://localhost:3000/getclient", {
-                credentials: "include"
-            });
+            const response = await fetch("http://localhost:3000/getgroups", { credentials: "include" });
 
-            if (!response.ok) {
-                throw new Error('oooops, something went wrong');
+            if (response.status === 403) {
+                setIsReadOnly(true);
+                return;
             }
-            const data = await response.json();
-            setClient(data.data || []);
+
+            if (response.ok) {
+                const data = await response.json();
+                setAllGroups(data.data || []);
+            }
         } catch (ex) {
-            console.error(ex);
+            console.error("Ошибка загрузки групп:", ex);
         }
     };
+
     const handleAddClient = () => {
         setIsModalOpen(true);
     };
+
     const handleDelClient = () => {
         setIsDeleteMode(prev => !prev);
     };
+
     const handleResetClient = () => {
         setIsResetMode(prev => !prev);
-    }
-    useEffect(() => {
-        getClient();
-        setPlusAction(() => handleAddClient);
+    };
 
-        return () => {
-            setPlusAction(null);
-        };
-    }, []);
     useEffect(() => {
-        getClient();
-        setReSetAction({
-            isActive: isResetMode,
-            handler: handleResetClient
-        });
+        setIsLoading(true);
 
-        return () => {
-            setReSetAction(null);
-        };
-    }, [isResetMode]);
-    useEffect(() => {
-        getClient();
-        setDelAction({
-            isActive: isDeleteMode,
-            handler: handleDelClient
-        });
+        getClient()
+            .then((data: any) => {
+                if (data?.status === 403) {
+                    setIsForbidden(true);
+                } else if (data) {
+                    setClient(data);
+                }
+            })
+            .catch((err: any) => {
+                if (err?.status === 403 || err?.message?.includes('403')) {
+                    setIsForbidden(true);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
 
-        return () => {
-            setDelAction(null);
-        };
-    }, [isDeleteMode]);
-    useEffect(() => {
-        getClient();
         getCompanyGroups();
     }, []);
+
+    useEffect(() => {
+        const closeMenu = () => setMenu(prev => ({ ...prev, isOpen: false }));
+        window.addEventListener("click", closeMenu);
+        return () => window.removeEventListener("click", closeMenu);
+    }, []);
+
     const formatBalance = (amount: number) => {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
     };
+
     const renderStatus = (status: number) => {
         switch (status) {
             case 1:
@@ -163,6 +164,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                 return <span className={style['text-muted']}>—</span>;
         }
     };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
@@ -170,72 +172,46 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
             ...prev,
             [name]: name === 'status'
                 ? (value === 'true' ? 1 : 0)
-                : value
+                : name === 'next_visit'
+                    ? (value ? new Date(value) : null)
+                    : value
         }));
     };
-    const getCompanyGroups = async () => {
-        try {
-            const response = await fetch("http://localhost:3000/getgroups", { credentials: "include" });
-            if (response.ok) {
-                const data = await response.json();
-                setAllGroups(data.data || []);
-            }
-        } catch (ex) {
-            console.error("Ошибка загрузки групп:", ex);
-        }
-    };
+
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log(JSON.stringify(formData));
-        try {
-            const response = await fetch('http://localhost:3000/addclients', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: "include",
-                body: JSON.stringify(formData)
-            });
+        await addClient(formData);
+        getCompanyGroups();
+        setClient(await getClient());
+        setIsModalOpen(false);
+    };
 
-            if (!response.ok) {
-                throw new Error("something went wrong");
-            }
-
-            const data = await response.json();
-            console.log(data);
-            getCompanyGroups();
-            getClient();
-            setIsModalOpen(false);
-        } catch (ex) {
-            alert("Произошла ошибка при отправке данных");
-            console.error(ex);
-        }
-    }
     const handleResetFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const response = await fetch(`http://localhost:3000/updateclient/${resetFormData.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify(resetFormData)
-            });
-
-            if (!response) {
-                throw new Error("something went wrong");
-            }
-            const data = await response.json();
-            console.log(data);
-            getCompanyGroups();
-            getClient();
-            setIsResetModalWinOpen(false);
-            setIsResetMode(false);
-        } catch (ex) {
-            console.log(ex);
-            alert('something went wrong');
-        }
+        await updateClient(resetFormData);
+        getCompanyGroups();
+        setClient(await getClient());
+        setIsResetModalWinOpen(false);
+        setIsResetMode(false);
+    };
+    if (isLoading) {
+        return (
+            <div style={{ padding: '32px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
+                Загрузка списка клиентов...
+            </div>
+        );
+    }
+    if (isForbidden) {
+        return (
+            <div style={{ backgroundColor: '#ffffff', padding: '40px 24px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+                    У вашей роли недостаточно прав для просмотра базы клиентов.
+                </p>
+            </div>
+        );
     }
     return (
         <>
@@ -262,7 +238,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                     <input name="balance" type="number" className={style['form-input']} value={formData.balance} onChange={handleInputChange}></input>
                                 </div>
 
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Скилы</label>
                                     <input
                                         type="number" name="skills" className={style['form-input']}
@@ -278,7 +254,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                     />
                                 </div>
 
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Статус</label>
                                     <div className={style['radio-container']}>
                                         <label className={style['radio-label']}>
@@ -296,7 +272,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                             Неактивен
                                         </label>
                                     </div>
-                                </div>
+                                </div>*/}
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Группы (зажмите Ctrl/Cmd для выбора нескольких)</label>
                                     <div className={style['select-wrapper']}>
@@ -310,7 +286,7 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                                 const selectedIds = selectedOptions
                                                     .map(option => parseInt(option.value, 10))
                                                     .filter(id => !isNaN(id));
-                                                                                                         
+
                                                 setFormData(prev => ({
                                                     ...prev,
                                                     group_ids: selectedIds
@@ -341,110 +317,32 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                     </div>
                 </div>
             </div>)}
-            {isResetModalWinOpen && (<div>
-                <div className={style['modal-overlay']} onClick={() => setIsResetModalWinOpen(false)}>
-                    <div className={style['modal-content']} onClick={(e) => e.stopPropagation()}>
-                        <div className={style['modal-header']}>
-                            <h3>Добавить Клиента</h3>
-                            <button className={style['btn-close']} onClick={() => setIsResetModalWinOpen(false)}>×</button>
+            {isResetModalWinOpen && (
+                <UpdateClientForm
+                    setIsResetModalWinOpen={setIsResetModalWinOpen}
+                    handleResetFormSubmit={handleResetFormSubmit}
+                    resetFormData={resetFormData}
+                    handleResetInputChange={handleResetInputChange}
+                    setResetFormData={setResetFormData}
+                    allGroups={allGroups}
+                />
+            )}
+            {!isReadOnly && (
+                <div className={style['content-header']}>
+                    <div className={style['action-bar']}>
+                        <div className={style['btn-group']}>
+                            <button className={`${style.btn} ${style['btn-blue']}`} onClick={handleAddClient}>+ Добавить</button>
+                            <button className={`${style.btn} ${isResetMode ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClient}>{isResetMode ? 'Отменить' : 'Править'}</button>
+                            <button
+                                className={`${style.btn} ${isDeleteMode ? style['btn-gray'] : style['btn-red']}`}
+                                onClick={handleDelClient}
+                            >
+                                {isDeleteMode ? 'Отменить' : 'Удалить'}
+                            </button>
                         </div>
-
-                        <form onSubmit={handleResetFormSubmit}>
-                            <div className={style['form-grid']}>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Имя</label>
-                                    <input
-                                        type="text" name="name" required className={style['form-input']}
-                                        value={resetFormData.name} onChange={handleResetInputChange} placeholder="Иван Иванов Иванович"
-                                    />
-                                </div>
-                                <div className={style['form-group']}>
-                                    <label>Баланс</label>
-                                    <input name="balance" type="number" className={style['form-input']} value={resetFormData.balance} onChange={handleResetInputChange}></input>
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Скилы</label>
-                                    <input
-                                        type="number" name="skills" className={style['form-input']}
-                                        value={resetFormData.skills} onChange={handleResetInputChange}
-                                    />
-                                </div>
-
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Контакт</label>
-                                    <input
-                                        type="text" name="contact" required className={style['form-input']}
-                                        value={resetFormData.contact} onChange={handleResetInputChange} placeholder="+7 000 000 00 00"
-                                    />
-                                </div>
-
-                                <div className={style['form-group']}>
-                                    <label>Статус</label>
-                                    <div className={style['radio-container']}>
-                                        <label className={style['radio-label']}>
-                                            <input
-                                                name="status" type="radio" value="true"
-                                                checked={resetFormData.status === 1} onChange={handleResetInputChange}
-                                            />
-                                            Активен
-                                        </label>
-                                        <label className={style['radio-label']}>
-                                            <input
-                                                name="status" type="radio" value="false"
-                                                checked={resetFormData.status === 0} onChange={handleResetInputChange}
-                                            />
-                                            Неактивен
-                                        </label>
-                                    </div>
-                                </div>
-                                <div className={`${style['form-group']} ${style['full-width']}`}>
-                                    <label>Группы (зажмите Ctrl/Cmd для выбора нескольких)</label>
-                                    <div className={style['select-wrapper']}>
-                                        <select
-                                            multiple
-                                            name="group_ids"
-                                            className={style['form-select']}
-                                            value={resetFormData.group_ids.map(String)}
-                                            onChange={(e) => {
-                                                const selectedOptions = Array.from(e.target.selectedOptions);
-                                                const selectedIds = selectedOptions
-                                                    .map(option => parseInt(option.value, 10))
-                                                    .filter(id => !isNaN(id));
-
-                                                setResetFormData(prev => ({
-                                                    ...prev,
-                                                    group_ids: selectedIds
-                                                }));
-                                            }}
-
-
-                                            style={{ height: 'auto', minHeight: '100px' }}
-                                        >
-                                            <option value="">-- Без группы --</option>
-                                            {allGroups.map(group => (
-                                                <option key={group.id} value={group.id}>
-                                                    {group.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div className={style['form-actions']}>
-                                <button type="button" className={style['btn-secondary']} onClick={() => setIsResetModalWinOpen(false)}>
-                                    Отмена
-                                </button>
-                                <button type="submit" className={style['btn-primary']}>
-                                    Сохранить
-                                </button>
-                            </div>
-                        </form>
                     </div>
                 </div>
-            </div>)}
+            )}
             <div className={style['table-container']}>
                 <table className={style['crm-table']}>
                     <thead>
@@ -452,11 +350,11 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                             <th>Клиент</th>
                             <th>Группа</th>
                             <th>Баланс</th>
-                            <th>Скилы</th>
+                            {/*<th>Доп. счет</th>*/}
                             <th>Контакт</th>
-                            <th>Статус</th>
+                            {/*<th>Статус</th>*/}
                             <th>Следующее посещение</th>
-                            <th className={style['actions-cell']}>Действия</th>
+                            {!isReadOnly && <th className={style['actions-cell']}>Действия</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -488,33 +386,113 @@ export const ClientTable: React.FC<ClientTableProps> = ({ setPlusAction, setDelA
                                         {formatBalance(client.balance)}
                                     </span>
                                 </td>
-                                <td>
+                                {/*<td>
                                     <span className={style['skills-count']}>{client.skills}</span>
-                                </td>
+                                </td>*/}
                                 <td>
                                     <span className={style['contact-text']}>{client.contact}</span>
                                 </td>
-                                <td>
+                                {/*<td>
                                     {renderStatus(client.status)}
-                                </td>
+                                </td>*/}
                                 <td>
-                                    coming soon...
+                                    {client.next_visit instanceof Date ? (
+                                        <span className={style['visit-badge']}>
+                                            {client.next_visit.toLocaleDateString('ru-RU')}
+                                        </span>
+                                    ) : (
+                                        <span className={`${style['visit-badge']} ${style['visit-empty']}`}>
+                                            Нет занятий
+                                        </span>
+                                    )}
                                 </td>
+
                                 <td className={style['actions-cell']}>
                                     <button
                                         className={style['btn-action']}
                                         title="Действия"
                                         onClick={(e) => {
                                             e.stopPropagation();
+
+                                            setMenu({
+                                                isOpen: true,
+                                                x: e.clientX,
+                                                y: e.clientY,
+                                                client: client,
+
+                                                onClose: () => {
+                                                    setMoreAction(false);
+                                                    setMenu(prev => ({ ...prev, isOpen: false }));
+                                                },
+
+                                                onDelete: async (clientToDelete) => {
+                                                    await deleteClient(clientToDelete);
+
+                                                    setMoreAction(false);
+                                                    setMenu(prev => ({ ...prev, isOpen: false }));
+
+                                                    const updatedData = await getClient();
+                                                    if (updatedData) setClient(updatedData);
+                                                    getCompanyGroups();
+                                                }
+                                            });
+
+                                            setMoreAction(true);
                                         }}
                                     >
                                         •••
                                     </button>
                                 </td>
+
                             </tr>
                         ))}
                     </tbody>
                 </table>
+                {isMoreAction && (
+                    <>
+                        <MoreAction
+                            x={menu.x}
+                            y={menu.y}
+                            isOpen={menu.isOpen}
+                            client={menu.client}
+                            onClose={() => setMenu(prev => ({ ...prev, isOpen: false }))}
+                            onDelete={async (targetClient) => {
+                                await deleteClient(targetClient);
+                                setClient(await getClient());
+                            }}
+                            onTopUp={(targetClient) => {
+                                setTopUpClient(targetClient);
+                            }}
+                            onEdit={(targetClient) => {
+                                setResetFormData({
+                                    id: targetClient.id,
+                                    name: targetClient.name,
+                                    balance: targetClient.balance,
+                                    skills: targetClient.skills,
+                                    status: targetClient.status,
+                                    contact: targetClient.contact,
+                                    group_ids: targetClient.group_ids || [],
+                                    group_names: targetClient.group_names || [],
+                                    next_visit: targetClient.next_visit || null
+                                });
+                                setIsResetModalWinOpen(true);
+                            }}
+                        />
+
+                        {topUpClient && (
+                            <TopUp
+                                client={topUpClient}
+                                onClose={() => setTopUpClient(null)}
+                                onSuccess={async () => {
+                                    const updatedData = await getClient();
+                                    if (updatedData) setClient(updatedData);
+                                    getCompanyGroups();
+                                }}
+                            />
+                        )}
+
+                    </>
+                )}
             </div>
         </>
     );

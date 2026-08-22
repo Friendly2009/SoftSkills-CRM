@@ -1,15 +1,21 @@
+.page-wrapper {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1e293b;
+  background-color: #f8fafc;
+}
+
 .container {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 24px;
   box-sizing: border-box;
 }
 
 /* Шапка (Header) */
 .main-header {
   background-color: #ffffff;
-  border-bottom: 1px solid #eef2f6;
+  border-bottom: 1px solid #f1f5f9;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -19,26 +25,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 80px;
+  height: 72px;
 }
 
 .header-logo img {
-  height: 36px;
+  height: 32px;
   display: block;
 }
 
 .header-nav {
   display: flex;
-  gap: 32px;
+  gap: 28px;
 }
 
 .header-nav-link {
-  color: #2e2e2e;
+  color: #64748b;
   text-decoration: none;
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 500;
   transition: color 0.2s ease;
-  font-family: "JetBrainsFont", monospace;
 }
 
 .header-nav-link:hover {
@@ -47,20 +52,20 @@
 
 .header-actions {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
 }
 
 .header-main-btn {
   background-color: #1a73e8;
   color: #ffffff;
   border: none;
-  padding: 10px 20px;
+  padding: 10px 18px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-family: "JetBrainsFont", monospace;
+  transition: background-color 0.15s ease;
 }
 
 .header-main-btn:hover {
@@ -68,26 +73,23 @@
 }
 
 .header-sec-btn {
-  background-color: #ffffff;
+  background: transparent;
   color: #1a73e8;
-  border: 1.5px solid #1a73e8;
-  padding: 9px 19px;
-  border-radius: 8px;
+  border: none;
+  padding: 10px 12px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: "JetBrainsFont", monospace;
+  transition: color 0.15s ease;
 }
 
 .header-sec-btn:hover {
-  background-color: #f4f8ff;
+  color: #1557b0;
 }
 
 /* Главный блок (Hero) */
 .main {
-  background-color: #f8fafc;
-  padding: 80px 0;
+  padding: 80px 0 100px 0;
 }
 
 .hero-content {
@@ -95,82 +97,94 @@
 }
 
 .hero-title {
-  font-size: 44px;
-  color: #1e293b;
+  font-size: 48px;
+  color: #0f172a;
   font-weight: 800;
-  line-height: 1.25;
-  margin-bottom: 56px;
-  letter-spacing: -1px;
-  font-family: "JetBrainsFont", monospace;
+  line-height: 1.2;
+  margin-bottom: 48px;
+  letter-spacing: -0.02em;
 }
 
 .hero-title span {
   color: #1a73e8;
 }
 
-/* Сетка преимуществ (Grid-cards) */
+/* Сетка преимуществ */
 .hero-features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
   margin-bottom: 56px;
+}
+
+@media (max-width: 968px) {
+  .hero-features { grid-template-columns: repeat(2, 1fr); }
+  .header-nav { display: none; }
+}
+@media (max-width: 640px) {
+  .hero-features { grid-template-columns: 1fr; }
 }
 
 .feature-item {
   background: #ffffff;
   padding: 24px;
   border-radius: 16px;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.02),
-    0 2px 4px -1px rgba(0, 0, 0, 0.01);
-  border: 1px solid #eef2f6;
+  border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   gap: 16px;
   text-align: left;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .feature-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.04);
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.05);
+}
+
+.icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background-color: #f0f7ff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .feature-item img {
-  width: 48px;
-  height: 48px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
-  flex-shrink: 0;
 }
 
 .feature-item p {
   margin: 0;
   font-size: 15px;
-  color: #000000;
+  color: #334155;
   font-weight: 500;
   line-height: 1.4;
-  font-family: "JetBrainsFont", monospace;
 }
 
 .hero-cta-btn {
   background-color: #1a73e8;
   color: #ffffff;
   border: none;
-  padding: 16px 36px;
+  padding: 16px 40px;
   border-radius: 12px;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(26, 115, 232, 0.3);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+  transition: all 0.15s ease;
 }
 
 .hero-cta-btn:hover {
   background-color: #1557b0;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+  box-shadow: 0 6px 20px rgba(26, 115, 232, 0.3);
 }
 
 /* Подвал (Footer) */
@@ -178,31 +192,35 @@
   background-color: #0f172a;
   color: #94a3b8;
   padding: 64px 0 32px 0;
-  font-size: 14px;
 }
 
 .footer-top {
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 40px;
-  border-bottom: 1px solid #334155;
-  padding-bottom: 40px;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 48px;
 }
 
 .footer-brand {
-  max-width: 280px;
+  max-width: 320px;
 }
 
 .footer-logo-img {
-  height: 32px;
+  height: 28px;
   margin-bottom: 16px;
-  filter: brightness(0) invert(1); /* сделает логотип белым, если он темный */
+  filter: brightness(0) invert(1); /* Делает логотип белым, если он был темным */
 }
 
 .footer-desc {
-  margin: 0;
+  font-size: 14px;
   line-height: 1.5;
+  margin: 0;
+}
+
+.footer-links-group {
+  display: flex;
+  gap: 64px;
 }
 
 .footer-nav {
@@ -211,23 +229,34 @@
   gap: 12px;
 }
 
+.footer-nav h4 {
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
 .footer-nav a {
   color: #94a3b8;
   text-decoration: none;
-  transition: color 0.2s ease;
+  font-size: 14px;
+  transition: color 0.15s ease;
 }
 
 .footer-nav a:hover {
-  color: #ffffff;
+  color: #f8fafc;
 }
 
 .footer-bottom {
-  margin-top: 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
+  padding-top: 32px;
+  font-size: 13px;
+}
+
+.footer-copy {
+  margin: 0;
 }
 
 .footer-socials {
@@ -236,23 +265,12 @@
 }
 
 .footer-socials img {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   opacity: 0.6;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
 .footer-socials img:hover {
   opacity: 1;
-}
-
-.footer-copy,
-.footer-author {
-  margin: 0;
-}
-
-.footer-author {
-  font-size: 12px;
-  font-style: italic;
-  color: #64748b;
 }

@@ -3,7 +3,10 @@ import style from './cssmoduls/dashboard.module.css';
 import { UsersTable } from './DashboardsComponents/UsersTable.tsx';
 import { ClientTable } from './DashboardsComponents/ClientsTable.tsx';
 import { GroupTable } from './DashboardsComponents/GroupsTable.tsx'
-
+import { Analytic } from './DashboardsComponents/Analytics.tsx'
+import { ScheduleTable } from './DashboardsComponents/SheduleTable.tsx';
+import { Expenses } from './DashboardsComponents/Finance.tsx';
+import { LeadsTable } from './DashboardsComponents/LeadsTable.tsx';
 interface UserProfile {
   fullname: string;
   email: string;
@@ -12,41 +15,9 @@ interface UserProfile {
 export const Dashboard: React.FC = () => {
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-
-  const [isPlusOpen, setIsPlusOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
-
-  const [activeTab, setActiveTab] = useState<'desktop' | 'reports'>('desktop');
-  const [activeMenu, setActiveMenu] = useState<string>('groups');
-
-  const [plusAction, setPlusAction] = useState<(() => void) | null>(null);
-  const [delAction, setDelAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
-  const [ReSetAction, setReSetAction] = useState<{ isActive: boolean; handler: () => void } | null>(null);
-
-
-  const handlePlusClick = () => {
-    if (plusAction) {
-      plusAction();
-    } else {
-      console.log("Для этого экрана кнопка '+' не настроена");
-    }
-  };
-
-  const handleDelClick = () => {
-    if (delAction) {
-      delAction.handler();
-    } else {
-      console.log("Для этого экрана кнопка 'Удалить' не настроена");
-    }
-  };
-
-  const handleResetClick = () => {
-    if (ReSetAction) {
-      ReSetAction.handler();
-    } else {
-      console.log("Для этого экрана кнопка 'Править' не настроена");
-    }
-  }
+  const [activeMenu, setActiveMenu] = useState<string>('analytics');
+  const [isActiveMenu, setIsActiveMenu] = useState(true);
   const GetGlobalInfo = async () => {
     try {
       const response = await fetch("http://localhost:3000/getglobalinfo", {
@@ -64,7 +35,9 @@ export const Dashboard: React.FC = () => {
       console.error(ex);
     }
   };
-
+  const handleBurgerClick = () => {
+    setIsActiveMenu(p => !p);
+  }
   useEffect(() => {
     GetGlobalInfo();
   }, []);
@@ -72,17 +45,18 @@ export const Dashboard: React.FC = () => {
     <>
       <header className={style['alfa-header']}>
         <div className={style['header-left']}>
-          <button className={style['burger-menu']} id="burger-button">
+          <button className={style['burger-menu']} id="burger-button" onClick={handleBurgerClick}>
             <span></span>
             <span></span>
             <span></span>
           </button>
-          <div className={style.logo}>
-            <img src="/img/index/brand-logo-2024.webp" alt="SoftSkills CRM" />
-          </div>
+          {/*<div className={style.logo}>
+            <img src="/img/user/dashboard/logo.png" alt="SoftSkills CRM" style={{width: 40, height: 100}}/>
+          </div>*/}
         </div>
-
         <div className={style['header-center']}>
+          {/* ... 
+        
           <div className={`${style['dropdown-menu']} ${isPlusOpen ? style.active : ''}`}>
             COMING SOON
             <div className={style['menu-item']}>
@@ -94,7 +68,7 @@ export const Dashboard: React.FC = () => {
               Лид
             </div>
             <div className={style['menu-item']}>
-              <img src="/img/user/dashboard/user-solid.png" alt="" className={style['nav-icon']} />
+              <img src="" alt="" className={style['nav-icon']} />
               Клиент
             </div>
             <div className={style['menu-item']}>
@@ -107,7 +81,6 @@ export const Dashboard: React.FC = () => {
               Доход
             </div>
           </div>
-
           <div
             className={style['icon-box']}
             id="plusBtn"
@@ -126,6 +99,7 @@ export const Dashboard: React.FC = () => {
           <div className={style['search-container']}>
             <input type="text" placeholder="Поиск клиента" />
           </div>
+          */}
         </div>
 
         <div
@@ -147,7 +121,6 @@ export const Dashboard: React.FC = () => {
                 <hr className={style.hr} />
                 <ul className={style['dropdown-links']}>
                   <li><a href="/profile">Мой профиль</a></li>
-                  <li><a href="/settings">Настройки</a></li>
                   <li><a href="/logout" className={style['logout-link']}>Выйти</a></li>
                 </ul>
               </div>
@@ -158,8 +131,15 @@ export const Dashboard: React.FC = () => {
         </div>
       </header>
       <main className={style['alfa-container']}>
-        <aside className={style.sidebar} id="burger-menu">
+        {isActiveMenu && (<aside className={style.sidebar}>
           <nav className={style['sidebar-nav']}>
+            <div
+              className={`${style['nav-item']} ${activeMenu === 'analytics' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('analytics')}
+            >
+              <img src="/img/user/dashboard/chart-line-solid.png" alt="" className={style['nav-icon']} />
+              <span>Аналитика</span>
+            </div>
             <div
               className={`${style['nav-item']} ${activeMenu === 'groups' ? style['nav-item-active'] : ''}`}
               onClick={() => setActiveMenu('groups')}
@@ -181,47 +161,40 @@ export const Dashboard: React.FC = () => {
               <img src="/img/user/dashboard/chalkboard-user-solid.png" alt="" className={style['nav-icon']} />
               <span>Сотрудники</span>
             </div>
+            <div
+              className={`${style['nav-item']} ${activeMenu === 'shedule' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('shedule')}
+            >
+              <img src="/img/user/dashboard/calendar-regular.png" alt="" className={style['nav-icon']} />
+              <span>Расписание</span>
+            </div>
+            <div
+              className={`${style['nav-item']} ${activeMenu === 'finance' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('finance')}
+            >
+              <img src="/img/user/dashboard/coins-solid.png" alt="" className={style['nav-icon']} />
+              <span>Финансы</span>
+            </div>
+            <div
+              className={`${style['nav-item']} ${activeMenu === 'leads' ? style['nav-item-active'] : ''}`}
+              onClick={() => setActiveMenu('leads')}
+            >
+              <img src="/img/user/dashboard/user-plus-solid.png" alt="" className={style['nav-icon']} />
+              <span>Лиды</span>
+            </div>
           </nav>
         </aside>
-
+        )}
         <section className={style['main-content']}>
-          <div className={style['content-header']}>
-            <div className={style.tabs}>
-              <button
-                className={`${style.tab} ${activeTab === 'desktop' ? style.active : ''}`}
-                onClick={() => setActiveTab('desktop')}
-              >
-                Рабочий стол
-              </button>
-              <button
-                className={`${style.tab} ${activeTab === 'reports' ? style.active : ''}`}
-                onClick={() => setActiveTab('reports')}
-              >
-                Отчеты
-              </button>
-            </div>
-
-            <div className={style['action-bar']}>
-              <div className={style['btn-group']}>
-                <button className={`${style.btn} ${style['btn-blue']}`} onClick={handlePlusClick}>+ Добавить</button>
-                <button className={`${style.btn} ${ReSetAction?.isActive ? style['btn-gray'] : style['btn-light-blue']}`} onClick={handleResetClick}>{ReSetAction?.isActive ? 'Отменить' : 'Править'}</button>
-                <button
-                  className={`${style.btn} ${delAction?.isActive ? style['btn-gray'] : style['btn-red']}`}
-                  onClick={handleDelClick}
-                >
-                  {delAction?.isActive ? 'Отменить' : 'Удалить'}
-                </button>
-                <button className={`${style.btn} ${style['btn-gray']}`}>Другое</button>
-              </div>
-              <button className={`${style.btn} ${style['btn-green']}`}>Личный рабочий стол</button>
-            </div>
-          </div>
-
           <div className={style['dashboard-placeholder']}>
             <div className={style['placeholder-content']} id="placeholder-content">
-              {activeMenu === 'users' && <UsersTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></UsersTable>}
-              {activeMenu === 'clients' && <ClientTable setPlusAction={setPlusAction} setDelAction={setDelAction} setReSetAction={setReSetAction}></ClientTable>}
-              {activeMenu === 'groups' && <GroupTable setPlusAction={setPlusAction} setDelAction={setDelAction} setUpdateAction={setReSetAction}></GroupTable>}
+              {activeMenu === 'analytics' && <Analytic></Analytic>}
+              {activeMenu === 'users' && <UsersTable></UsersTable>}
+              {activeMenu === 'clients' && <ClientTable></ClientTable>}
+              {activeMenu === 'groups' && <GroupTable></GroupTable>}
+              {activeMenu === 'shedule' && <ScheduleTable></ScheduleTable>}
+              {activeMenu === 'finance' && <Expenses></Expenses>}
+              {activeMenu === 'leads' && <LeadsTable></LeadsTable>}
             </div>
           </div>
         </section>
