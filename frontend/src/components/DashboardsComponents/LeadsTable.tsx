@@ -417,7 +417,7 @@ export const LeadsTable: React.FC = () => {
                 <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔒</div>
                 <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>Доступ ограничен</h3>
                 <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
-                    У вашей роли нет доступа к просмотру финансовых расходов компании.
+                    У вашей роли нет доступа к просмотру лидов компании.
                 </p>
             </div>
         );
