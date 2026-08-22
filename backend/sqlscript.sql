@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `groups` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `users_id` INT NOT NULL,
     `name` VARCHAR(45) NOT NULL,
-    `status` TINYINT NOT NULL COMMENT '1 = активен, 2 = набор, 3 = архив',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1 = активен, 2 = набор, 3 = архив',
     `start_date` DATE DEFAULT NULL,
     `end_date` DATE DEFAULT NULL,
     `max_students` INT NOT NULL,

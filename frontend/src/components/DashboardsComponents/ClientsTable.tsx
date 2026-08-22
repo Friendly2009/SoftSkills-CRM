@@ -244,7 +244,7 @@ export const ClientTable: React.FC = () => {
                                         type="number" name="skills" className={style['form-input']}
                                         value={formData.skills} onChange={handleInputChange}
                                     />
-                                </div>*/}
+                                </div>
 
                                 <div className={`${style['form-group']} ${style['full-width']}`}>
                                     <label>Контакт</label>
@@ -398,7 +398,6 @@ export const ClientTable: React.FC = () => {
                                 <td>
                                     {client.next_visit instanceof Date ? (
                                         <span className={style['visit-badge']}>
-                                            <span className={style['visit-icon']}>📅</span>
                                             {client.next_visit.toLocaleDateString('ru-RU')}
                                         </span>
                                     ) : (

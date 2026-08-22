@@ -382,7 +382,7 @@ export const GroupTable: React.FC = () => {
                                         ))}
                                     </select>
                                 </div>
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Статус</label>
                                     <div className={style['radio-container']}>
                                         <label className={style['radio-label']}>
@@ -399,7 +399,7 @@ export const GroupTable: React.FC = () => {
                                         </label>
                                     </div>
                                 </div>
-                                {/*<div className={style['form-group']}>
+                                <div className={style['form-group']}>
                                     <label>Дата начала работы группы</label>
                                     <input
                                         type="date" name="start_date" required className={style['form-input']}
@@ -534,7 +534,7 @@ export const GroupTable: React.FC = () => {
                                     </select>
                                 </div>
 
-                                <div className={style['form-group']}>
+                                {/*<div className={style['form-group']}>
                                     <label>Статус</label>
                                     <div className={style['radio-container']}>
                                         <label className={style['radio-label']}>
@@ -552,7 +552,7 @@ export const GroupTable: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/*<div className={style['form-group']}>
+                                <div className={style['form-group']}>
                                     <label>Дата начала работы группы</label>
                                     <input
                                         type="date" name="start_date" required className={style['form-input']}
@@ -681,9 +681,8 @@ export const GroupTable: React.FC = () => {
                             <th>Расписание</th>
                             <th>Ученики</th>
                             <th>Следующий урок</th>
-                            <th>Статус</th>
-                            {//<th className={style['actions-cell']}>Действия</th>
-                            }
+                            {/*<th>Статус</th>
+                            <th className={style['actions-cell']}>Действия</th>*/}
                         </tr>
                     </thead>
                     <tbody>
@@ -728,7 +727,7 @@ export const GroupTable: React.FC = () => {
                                         {group.nextMeeting ? group.nextMeeting.toLocaleDateString('ru-RU') : '—'}
                                     </span>
                                 </td>
-                                <td>
+                                {/*<td>
                                     <span className={`
                                         ${style['badge']} 
                                         ${group.status === 2 ? style['is_active'] : style['is_not_active']}
@@ -736,7 +735,7 @@ export const GroupTable: React.FC = () => {
                                         {getStatusLabel(group.status)}
                                     </span>
                                 </td>
-                                {/*<td className={style['actions-cell']}>
+                                <td className={style['actions-cell']}>
                                     <button className={style['btn-action']}>•••</button>
                                 </td>*/}
                             </tr>
