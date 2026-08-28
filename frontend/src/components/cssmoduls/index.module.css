@@ -274,3 +274,196 @@
 .footer-socials img:hover {
   opacity: 1;
 }
+
+/* ИСПРАВЛЕНИЕ ДЛЯ ФУТЕРА */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Растягивает контейнер на всю высоту экрана */
+}
+
+.main {
+  flex: 1; /* Заставляет основной блок занимать всё свободное место, прижимая футер вниз */
+  padding: 80px 0 100px 0;
+}
+
+/* ОБЩИЕ СТИЛИ ДЛЯ НОВЫХ СЕКЦИЙ */
+.section-title {
+  font-size: 32px;
+  color: #0f172a;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 48px;
+}
+
+/* СТИЛИ БЛОКА ВОЗМОЖНОСТЕЙ */
+.features-details {
+  padding: 80px 0;
+  background-color: #ffffff;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.detail-card {
+  padding: 32px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.detail-card h3 {
+  font-size: 20px;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+}
+
+.detail-card p {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* СТИЛИ БЛОКА ТАРИФОВ */
+.pricing-section {
+  padding: 80px 0;
+  background-color: #f8fafc;
+}
+
+.pricing-grid {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.price-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 360px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.price-card-popular {
+  border-color: #1a73e8;
+  box-shadow: 0 20px 25px -5px rgba(26, 115, 232, 0.1);
+}
+
+.badge-popular {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #e0e7ff;
+  color: #1a73e8;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.price-level {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.price-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.price-value span {
+  font-size: 16px;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.price-card p {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 32px 0;
+  flex: 1;
+}
+
+.price-btn, .price-btn-primary {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.price-btn {
+  background: transparent;
+  color: #1a73e8;
+  border: 1px solid #1a73e8;
+}
+
+.price-btn:hover {
+  background: #f0f7ff;
+}
+
+.price-btn-primary {
+  background: #1a73e8;
+  color: #ffffff;
+  border: none;
+}
+
+.price-btn-primary:hover {
+  background: #1557b0;
+}
+
+/* СТИЛИ БЛОКА FAQ */
+.faq-section {
+  padding: 80px 0;
+  background: #ffffff;
+}
+
+.faq-list {
+  max-width: 768px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.faq-item {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 24px;
+}
+
+.faq-item h4 {
+  font-size: 18px;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+}
+
+.faq-item p {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* АДАПТИВНОСТЬ ДЛЯ НОВЫХ БЛОКОВ */
+@media (max-width: 968px) {
+  .details-grid { grid-template-columns: 1fr; gap: 20px; }
+  .pricing-grid { flex-direction: column; align-items: center; }
+  .price-card { max-width: 100%; }
+}
