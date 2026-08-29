@@ -6,6 +6,7 @@ import { RegisterForm } from './components/Registration';
 import { ProfilePage } from './components/Profile';
 import { ClientProfile } from './components/DashboardsComponents/СlientsComponents/ClientProfile';
 import { PricingSection } from './components/Price';
+import { PricePage } from './components/Prices/PricePage';
 
 function App() {
   return (
@@ -14,15 +15,16 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/authorization" element={<LoginForm />} />
         <Route path="/registration" element={<RegisterForm />} />
-        <Route path="/profile" element={<ProfilePage/>}/>
-        <Route 
-          path="/dashboard" 
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/dashboard"
           element={
             <Dashboard />
-          } 
+          }
         />
         <Route path="/dashboard/client/:id" element={<ClientProfile />} />
-        <Route path="/price" element={<PricingSection/>}/>
+        <Route path="/price" element={<PricingSection />} />
+        <Route path="/tarid-details/:tariffId" element={<PricePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

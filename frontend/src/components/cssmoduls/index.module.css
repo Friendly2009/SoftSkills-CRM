@@ -3,7 +3,9 @@
   color: #1e293b;
   background-color: #f8fafc;
 }
-
+.page-font {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
 .container {
   width: 100%;
   max-width: 1200px;
@@ -458,15 +460,13 @@
   .price-card { max-width: 100%; }
 }
 
-/* Контейнер-обертка для всего блока тарифов */
 .pricing-wrapper {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
-  font-family: sans-serif; /* замените на ваш шрифт проекта */
+  font-family: sans-serif; 
 }
 
-/* Верхняя часть: Лабел и Заголовок */
 .pricing-header {
   text-align: center;
   margin-bottom: 40px;
@@ -477,7 +477,7 @@
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: #007bff; /* Акцентный цвет, можно поменять на ваш */
+  color: #007bff; 
   background-color: rgba(0, 123, 255, 0.1);
   padding: 4px 12px;
   border-radius: 20px;
@@ -487,11 +487,10 @@
 
 .pricing-header h2 {
   font-size: 28px;
-  color: #ffffff; /* Белый цвет текста для темной темы */
+  color: #ffffff;
   margin: 0;
 }
 
-/* Нижняя часть: Кнопка-ссылка */
 .pricing-footer {
   display: flex;
   justify-content: center;
@@ -501,19 +500,19 @@
 .price-more-btn {
   background: none;
   border: none;
-  color: #007bff; /* Акцентный цвет ссылки */
+  color: #007bff;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   padding: 10px 20px;
   transition: all 0.2s ease-in-out;
-  border-bottom: 1px dashed #007bff; /* Аккуратное подчеркивание черточками */
+  border-bottom: 1px dashed #007bff;
 }
 
 .price-more-btn:hover {
-  color: #0056b3; /* Цвет при наведении */
+  color: #0056b3; 
   border-bottom-color: #0056b3;
-  transform: translateY(-1px); /* Легкий эффект приподнимания */
+  transform: translateY(-1px);
 }
 
 .price-more-btn:active {
