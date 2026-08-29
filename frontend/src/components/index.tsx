@@ -6,7 +6,6 @@ const Index = () => {
 
   return (
     <div className={style['page-wrapper']}>
-      {/* Шапка */}
       <header className={style['main-header']}>
         <div className={style['container']}>
           <div className={style['header-inner']}>
@@ -14,9 +13,10 @@ const Index = () => {
               <img src="/img/user/dashboard/logo.png" alt="softskillscrm" style={{ width: 40, height: 40 }} />
             </a>
             <nav className={style['header-nav']}>
-              <a href="#features" className={style['header-nav-link']}>Возможности</a>
-              <a href="#pricing" className={style['header-nav-link']}>Тарифы</a>
-              <a href="#faq" className={style['header-nav-link']}>Вопросы</a>
+              <a href="#features" className={style['header-nav-link']} onClick={() => navigate('/')}>Главная</a>
+              <a href="#pricing" className={style['header-nav-link']} onClick={() => navigate('/price')}>Тарифы</a>
+              <a href="#faq" className={style['header-nav-link']} onClick={() => navigate('/support')}>Поддержка</a>
+              <a href="#faq" className={style['header-nav-link']} onClick={() => navigate('/contact')}>Контакты</a>
             </nav>
             <div className={style['header-actions']}>
               <button className={style['header-sec-btn']} type="button" onClick={() => navigate('/authorization')}>Войти</button>
@@ -26,9 +26,7 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Главный контент */}
       <main className={style['main']}>
-        {/* Hero Секция */}
         <section className={style['hero']}>
           <div className={style['container']}>
             <div className={style['hero-content']}>
@@ -88,25 +86,60 @@ const Index = () => {
         <section id="pricing" className={style['pricing-section']}>
           <div className={style['container']}>
             <h2 className={style['section-title']}>Гибкие тарифы под ваш масштаб</h2>
-            <div className={style['pricing-grid']}>
-              <div className={style['price-card']}>
-                <div className={style['price-level']}>Старт</div>
-                <div className={style['price-value']}> 0₽</div>
-                <p>Пробный период - 14 дней</p>
-                <button className={style['price-btn']} onClick={() => navigate('/registration')}>Выбрать Старт</button>
+            <div className={style['pricing-wrapper']}>
+              <div className={style['pricing-header']}>
+                <span className={style['pricing-label']}>Тарифы</span>
               </div>
-              <div className={style['price-card']}>
-                <div className={style['price-level']}>Старт</div>
-                <div className={style['price-value']}> 1 999₽<span>/ мес</span></div>
-                <p>Помесячный тариф</p>
-                <button className={style['price-btn']} onClick={() => navigate('/registration')}>Выбрать Старт</button>
+
+              <div className={style['pricing-grid']}>
+                <div className={style['price-card']}>
+                  <div className={style['price-level']}>Пробный период</div>
+                  <div className={style['price-value']}>0 ₽</div>
+                  <p className={style['price-period']}>Доступ на 14 дней</p>
+                  <ul className={style['price-features']}>
+                    <li>Весь функционал</li>
+                    <li>До 300 активных учеников</li>
+                    <li>Помощь с переносом базы</li>
+                  </ul>
+                  <button className={style['price-btn']} onClick={() => navigate('/registration')}>
+                    Попробовать бесплатно
+                  </button>
+                </div>
+
+                <div className={style['price-card']}>
+                  <div className={style['price-level']}>Базовый месяц</div>
+                  <div className={style['price-value']}>1 999 ₽<span> / мес</span></div>
+                  <p className={style['price-period']}>Гибкая оплата без обязательств</p>
+                  <ul className={style['price-features']}>
+                    <li>Весь функционал</li>
+                    <li>До 300 active учеников</li>
+                    <li>Техподдержка в чате</li>
+                  </ul>
+                  <button className={style['price-btn']} onClick={() => navigate('/price-base-month')}>
+                    Выбрать Базовый
+                  </button>
+                </div>
+
+                <div className={`${style['price-card']} ${style['price-card-popular']}`}>
+                  <div className={style['badge-popular']}>Выгода ~60%</div>
+                  <div className={style['price-level']}>Годовой безлимит</div>
+                  <div className={style['price-value']}>9 999 ₽<span> / год</span></div>
+                  <p className={style['price-period']}>Всего 833 ₽ в месяц</p>
+                  <ul className={style['price-features']}>
+                    <li>Весь функционал</li>
+                    <li><strong>Безлимит</strong> по ученикам</li>
+                    <li>Приоритетная поддержка</li>
+                  </ul>
+                  <button className={style['price-btn-primary']} onClick={() => navigate('/price-year-prime')}>
+                    Купить на год
+                  </button>
+                </div>
               </div>
-              <div className={`${style['price-card']} ${style['price-card-popular']}`}>
-                <div className={style['badge-popular']}>Популярный</div>
-                <div className={style['price-level']}>Профессиональный</div>
-                <div className={style['price-value']}>9 999 ₽<span>/ 12 мес</span></div>
-                <p>Погодовой тариф</p>
-                <button className={style['price-btn-primary']} onClick={() => navigate('/registration')}>Выбрать Старт</button>
+
+              <div className={style['pricing-footer']}>
+                <button className={style['price-more-btn']} onClick={() => navigate('/pricing-details')}>
+                  Подробнее о тарифах здесь
+                </button>
               </div>
             </div>
           </div>
@@ -139,10 +172,10 @@ const Index = () => {
             <div className={style['footer-links-group']}>
               <nav className={style['footer-nav']}>
                 <h4>Навигация</h4>
-                <a href="#">Главная</a>
-                <a href="#pricing">Тарифы</a>
-                <a href="#">Поддержка</a>
-                <a href="#">Контакты</a>
+                <a href="#" onClick={() => navigate('/')}>Главная</a>
+                <a href="#" onClick={() => navigate('/price')}>Тарифы</a>
+                <a href="#" onClick={() => navigate('/support')}>Поддержка</a>
+                <a href="#" onClick={() => navigate('/contact')}>Контакты</a>
               </nav>
               <nav className={style['footer-nav']}>
                 <h4>Документы</h4>

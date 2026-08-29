@@ -12,7 +12,6 @@
   box-sizing: border-box;
 }
 
-/* Шапка (Header) */
 .main-header {
   background-color: #ffffff;
   border-bottom: 1px solid #f1f5f9;
@@ -87,7 +86,6 @@
   color: #1557b0;
 }
 
-/* Главный блок (Hero) */
 .main {
   padding: 80px 0 100px 0;
 }
@@ -109,7 +107,6 @@
   color: #1a73e8;
 }
 
-/* Сетка преимуществ */
 .hero-features {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -187,7 +184,6 @@
   box-shadow: 0 6px 20px rgba(26, 115, 232, 0.3);
 }
 
-/* Подвал (Footer) */
 .footer {
   background-color: #0f172a;
   color: #94a3b8;
@@ -209,7 +205,7 @@
 .footer-logo-img {
   height: 28px;
   margin-bottom: 16px;
-  filter: brightness(0) invert(1); /* Делает логотип белым, если он был темным */
+  filter: brightness(0) invert(1);
 }
 
 .footer-desc {
@@ -275,19 +271,17 @@
   opacity: 1;
 }
 
-/* ИСПРАВЛЕНИЕ ДЛЯ ФУТЕРА */
 .page-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Растягивает контейнер на всю высоту экрана */
+  min-height: 100vh;
 }
 
 .main {
-  flex: 1; /* Заставляет основной блок занимать всё свободное место, прижимая футер вниз */
+  flex: 1;
   padding: 80px 0 100px 0;
 }
 
-/* ОБЩИЕ СТИЛИ ДЛЯ НОВЫХ СЕКЦИЙ */
 .section-title {
   font-size: 32px;
   color: #0f172a;
@@ -296,7 +290,6 @@
   margin-bottom: 48px;
 }
 
-/* СТИЛИ БЛОКА ВОЗМОЖНОСТЕЙ */
 .features-details {
   padding: 80px 0;
   background-color: #ffffff;
@@ -328,7 +321,6 @@
   margin: 0;
 }
 
-/* СТИЛИ БЛОКА ТАРИФОВ */
 .pricing-section {
   padding: 80px 0;
   background-color: #f8fafc;
@@ -429,7 +421,6 @@
   background: #1557b0;
 }
 
-/* СТИЛИ БЛОКА FAQ */
 .faq-section {
   padding: 80px 0;
   background: #ffffff;
@@ -461,9 +452,70 @@
   margin: 0;
 }
 
-/* АДАПТИВНОСТЬ ДЛЯ НОВЫХ БЛОКОВ */
 @media (max-width: 968px) {
   .details-grid { grid-template-columns: 1fr; gap: 20px; }
   .pricing-grid { flex-direction: column; align-items: center; }
   .price-card { max-width: 100%; }
+}
+
+/* Контейнер-обертка для всего блока тарифов */
+.pricing-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: sans-serif; /* замените на ваш шрифт проекта */
+}
+
+/* Верхняя часть: Лабел и Заголовок */
+.pricing-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.pricing-label {
+  display: inline-block;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #007bff; /* Акцентный цвет, можно поменять на ваш */
+  background-color: rgba(0, 123, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.pricing-header h2 {
+  font-size: 28px;
+  color: #ffffff; /* Белый цвет текста для темной темы */
+  margin: 0;
+}
+
+/* Нижняя часть: Кнопка-ссылка */
+.pricing-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.price-more-btn {
+  background: none;
+  border: none;
+  color: #007bff; /* Акцентный цвет ссылки */
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px 20px;
+  transition: all 0.2s ease-in-out;
+  border-bottom: 1px dashed #007bff; /* Аккуратное подчеркивание черточками */
+}
+
+.price-more-btn:hover {
+  color: #0056b3; /* Цвет при наведении */
+  border-bottom-color: #0056b3;
+  transform: translateY(-1px); /* Легкий эффект приподнимания */
+}
+
+.price-more-btn:active {
+  transform: translateY(0);
 }
