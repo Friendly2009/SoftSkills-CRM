@@ -49,23 +49,42 @@ const TARIFFS_DATABASE: Record<string, TariffDetails> = {
 export const PricePage = () => {
     const { tariffId } = useParams<{ tariffId: string }>();
     const navigate = useNavigate();
-
+    const [paymentMethod, setPaymentMethod] = useState<'card' | 'invoice'>('card');
+    const [inn, setInn] = useState('');
     const currentTariff = TARIFFS_DATABASE[tariffId!];
 
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [schoolName, setSchoolName] = useState('');
+    const [formData, setFormData] = useState({
+        company: '',
+        fullname: '',
+        email: '',
+        contact: '',
+        password: ''
+    });
     const [agreeTerms, setAgreeTerms] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!agreeTerms) {
-            alert('Пожалуйста, примите условия оферты');
+            alert('Требуется соглашение с политикой конфиленциальности и публичной оферты');
             return;
         }
-        console.log('Отправка на оплату:', { email, phone, schoolName, tariff: currentTariff.name });
-        alert(`Перенаправление на шлюз оплаты для тарифа "${currentTariff.name}"`);
-    };
+        try {
+            const response = await fetch('http://localhost:3000/signup', {
+                credentials: "include",
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+                navigate('/dashboard');
+            }
+        } catch (ex) {
+            console.log(ex);
+        }
+    }
 
     return (
         <>
@@ -81,45 +100,112 @@ export const PricePage = () => {
                 <div className={styles['checkout-layout']}>
                     <main className={styles['checkout-main']}>
                         <section className={styles['card-section']}>
-                            <h2 className={styles['section-title']}>1. Данные вашей организации</h2>
                             <form onSubmit={handleSubmit} className={styles['checkout-form']}>
+
                                 <div className={styles['form-group']}>
-                                    <label htmlFor="schoolName">Название учебного центра *</label>
+                                    <label htmlFor="centerName">Имя центра</label>
                                     <input
                                         type="text"
-                                        id="schoolName"
-                                        placeholder="Например: Языковая школа 'Слово'"
-                                        value={schoolName}
-                                        onChange={(e) => setSchoolName(e.target.value)}
+                                        id="centerName"
+                                        placeholder="AnyCompany"
+                                        value={formData.company}
+                                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                                         required
                                     />
                                 </div>
 
-                                <div className={styles['form-row']}>
-                                    <div className={styles['form-group']}>
-                                        <label htmlFor="email">Email для закрывающих документов *</label>
-                                        <input
-                                            type="email"
-                                            id="email"
-                                            placeholder="director@school.ru"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <div className={styles['form-group']}>
-                                        <label htmlFor="phone">Контактный телефон *</label>
-                                        <input
-                                            type="tel"
-                                            id="phone"
-                                            placeholder="+7 (999) 999-99-99"
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            required
-                                        />
-                                    </div>
+                                <div className={styles['form-group']}>
+                                    <label htmlFor="fullName">ФИО</label>
+                                    <input
+                                        type="text"
+                                        id="fullName"
+                                        placeholder="Иван Иванов Иванович"
+                                        value={formData.fullname}
+                                        onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+                                        required
+                                    />
                                 </div>
 
+                                <div className={styles['form-group']}>
+                                    <label htmlFor="email">Эл. почта</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        placeholder="mail@example.com"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <div className={styles['form-group']}>
+                                    <label htmlFor="phone">Номер телефона</label>
+                                    <input
+                                        type="tel"
+                                        id="phone"
+                                        placeholder="+71234567890"
+                                        value={formData.contact}
+                                        onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <div className={styles['form-group']}>
+                                    <label htmlFor="password">Пароль</label>
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        placeholder="••••••••"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                {currentTariff.price !== '0 ₽' && (
+                                    <div className={styles['payment-method-section']}>
+                                        <label className={styles['method-label']}>Способ оплаты</label>
+                                        <div className={styles['method-selector']}>
+                                            <label className={`${styles['method-option']} ${paymentMethod === 'card' ? styles['active-method'] : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="paymentMethod"
+                                                    checked={paymentMethod === 'card'}
+                                                    onChange={() => setPaymentMethod('card')}
+                                                />
+                                                <span>Онлайн-оплата (Карта, СБП)</span>
+                                            </label>
+
+                                            <label className={`${styles['method-option']} ${paymentMethod === 'invoice' ? styles['active-method'] : ''}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="paymentMethod"
+                                                    checked={paymentMethod === 'invoice'}
+                                                    onChange={() => setPaymentMethod('invoice')}
+                                                />
+                                                <span>Счет для юрлиц (ИП / ООО)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+                                {currentTariff.price !== '0 ₽' && paymentMethod === 'invoice' && (
+                                    <div className={styles['form-group']}>
+                                        <label htmlFor="inn">ИНН организации *</label>
+                                        <input
+                                            type="text"
+                                            id="inn"
+                                            placeholder="10-значный ИНН для ИП или 12-значный для ООО"
+                                            value={inn}
+                                            onChange={(e) => setInn(e.target.value)}
+                                            required={paymentMethod === 'invoice'}
+                                        />
+                                    </div>
+                                )}
+                                <p className={styles['tariff-notice-text']}>
+                                    Вы выбрали {currentTariff.name}, для смены тарифа перейдите в {' '}
+                                    <span className={styles['link-span']} onClick={() => navigate('/pricing')}>
+                                        тарифы
+                                    </span>
+                                </p>
                                 <div className={styles['checkbox-group']}>
                                     <input
                                         type="checkbox"
@@ -128,12 +214,16 @@ export const PricePage = () => {
                                         onChange={(e) => setAgreeTerms(e.target.checked)}
                                     />
                                     <label htmlFor="terms">
-                                        Я согласен с условиями <a href="/terms" target="_blank" rel="noreferrer">Публичной оферты</a> и <a href="/privacy" target="_blank" rel="noreferrer">Политикой конфиденциальности</a>.
+                                        Я согласен с условиями <a href="/terms" target="_blank">Публичной оферты</a>
                                     </label>
                                 </div>
-
                                 <button type="submit" className={styles['submit-pay-btn']}>
-                                    Оплатить {currentTariff.price}
+                                    {currentTariff.price === '0 ₽'
+                                        ? 'Создать центр бесплатно'
+                                        : paymentMethod === 'card'
+                                            ? `Перейти к оплате ${currentTariff.price}`
+                                            : 'Сгенерировать счет и создать центр'
+                                    }
                                 </button>
                             </form>
                         </section>
@@ -141,24 +231,8 @@ export const PricePage = () => {
                         <section className={styles['security-banner']}>
                             <div className={styles['security-icon']}>🛡️</div>
                             <div>
-                                <h3>Безопасность платежей гарантирована</h3>
-                                <p>Все транзакции шифруются по протоколу SSL. Мы не сохраняем данные ваших банковских карт. Оплата проходит через сертифицированный платежный шлюз.</p>
-                            </div>
-                        </section>
-
-                        <section className={styles['faq-section']}>
-                            <h2 className={styles['section-title']}>Частые вопросы по подписке</h2>
-                            <div className={styles['faq-item']}>
-                                <h4>Можно ли изменить тариф в процессе использования?</h4>
-                                <p>Да, вы можете перейти на тариф выше или ниже в любой момент в личном кабинете. Остаток средств автоматически пересчитается.</p>
-                            </div>
-                            <div className={styles['faq-item']}>
-                                <h4>Предоставляете ли вы закрывающие документы?</h4>
-                                <p>Конечно. Мы работаем официально. После оплаты на ваш Email придет чек, а в ЛК будут доступны акты для бухгалтерии (для Юр. лиц).</p>
-                            </div>
-                            <div className={styles['faq-item']}>
-                                <h4>Что произойдет, если лимит учеников будет превышен?</h4>
-                                <p>Система не заблокируется внезапно. Мы отправим вам уведомление и предложим плавно перейти на расширенный пакет («Прайм»).</p>
+                                <h3>Ваши данные под защитой</h3>
+                                <p>Мы используем современные протоколы шифрования. Ваши персональные данные и учебные базы защищены в соответствии с ФЗ-152.</p>
                             </div>
                         </section>
                     </main>

@@ -3,7 +3,7 @@ import register from './CssModuls/signup.module.css'
 import { useNavigate } from 'react-router-dom';
 
 export const RegisterForm = () => {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     company: '',
@@ -12,8 +12,14 @@ const navigate = useNavigate();
     contact: '',
     password: ''
   });
+  const [agreeTerms, setAgreeTerms] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreeTerms) {
+      alert('Требуется соглашение с политикой конфиленциальности и публичной оферты');
+      return;
+    }
     try {
       const response = await fetch('http://localhost:3000/signup', {
         credentials: "include",
@@ -43,7 +49,7 @@ const navigate = useNavigate();
         </button>
 
         <div className={register['register-header']}>
-          <h2 className={register.title}>Создать аккаунт</h2>
+          <h2 className={register.title}>Создать центр</h2>
           <p className={register.subtitle}>Присоединяйтесь к нашей CRM системе</p>
         </div>
 
@@ -51,7 +57,7 @@ const navigate = useNavigate();
           <div className={register['inputs-container']}>
 
             <div className={register['input-group']}>
-              <label className={register.label}>Имя компани</label>
+              <label className={register.label}>Имя центра</label>
               <input
                 name="company"
                 type="text"
@@ -85,7 +91,7 @@ const navigate = useNavigate();
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
                 className={register.input}
-                placeholder="mail@example.com" 
+                placeholder="mail@example.com"
               />
             </div>
 
@@ -98,7 +104,7 @@ const navigate = useNavigate();
                 onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
                 required
                 className={register.input}
-                placeholder="+71234567890" 
+                placeholder="+71234567890"
               />
             </div>
 
@@ -116,7 +122,18 @@ const navigate = useNavigate();
             </div>
 
           </div>
-
+          <p>Вы выбрали пробный период (0₽ / 14 дней), для смены тарифа перейдите в <a className={register['price-more-btn']} onClick={() => { navigate('/price') }}>тарифы</a></p>
+          <div className={register['checkbox-group']}>
+            <input
+              type="checkbox"
+              id="terms"
+              checked={agreeTerms}
+              onChange={(e) => setAgreeTerms(e.target.checked)}
+            />
+            <label htmlFor="terms">
+              Я согласен с условиями <a href="/terms" target="_blank" rel="noreferrer">Публичной оферты</a> и <a href="/privacy" target="_blank" rel="noreferrer">Политикой конфиденциальности</a>.
+            </label>
+          </div>
           <button type="submit" className={register['submit-btn']}>
             Создать центр
           </button>
