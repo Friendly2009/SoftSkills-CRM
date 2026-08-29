@@ -13,10 +13,10 @@ const Index = () => {
               <img src="/img/user/dashboard/logo.png" alt="softskillscrm" style={{ width: 40, height: 40 }} />
             </a>
             <nav className={style['header-nav']}>
-              <a href="#features" className={style['header-nav-link']} onClick={() => navigate('/')}>Главная</a>
-              <a href="#pricing" className={style['header-nav-link']} onClick={() => navigate('/price')}>Тарифы</a>
-              <a href="#faq" className={style['header-nav-link']} onClick={() => navigate('/support')}>Поддержка</a>
-              <a href="#faq" className={style['header-nav-link']} onClick={() => navigate('/contact')}>Контакты</a>
+              <a className={style['header-nav-link']} onClick={() => navigate('/')}>Главная</a>
+              <a className={style['header-nav-link']} onClick={() => navigate('/price')}>Тарифы</a>
+              <a className={style['header-nav-link']} onClick={() => navigate('/support')}>Поддержка</a>
+              <a className={style['header-nav-link']} onClick={() => navigate('/contact')}>Контакты</a>
             </nav>
             <div className={style['header-actions']}>
               <button className={style['header-sec-btn']} type="button" onClick={() => navigate('/authorization')}>Войти</button>
@@ -137,7 +137,7 @@ const Index = () => {
               </div>
 
               <div className={style['pricing-footer']}>
-                <button className={style['price-more-btn']} onClick={() => navigate('/pricing-details')}>
+                <button className={style['price-more-btn']} onClick={() => navigate('/price')}>
                   Подробнее о тарифах здесь
                 </button>
               </div>
@@ -172,25 +172,25 @@ const Index = () => {
             <div className={style['footer-links-group']}>
               <nav className={style['footer-nav']}>
                 <h4>Навигация</h4>
-                <a href="#" onClick={() => navigate('/')}>Главная</a>
-                <a href="#" onClick={() => navigate('/price')}>Тарифы</a>
-                <a href="#" onClick={() => navigate('/support')}>Поддержка</a>
-                <a href="#" onClick={() => navigate('/contact')}>Контакты</a>
+                <a onClick={() => navigate('/')}>Главная</a>
+                <a onClick={() => navigate('/price')}>Тарифы</a>
+                <a onClick={() => navigate('/support')}>Поддержка</a>
+                <a onClick={() => navigate('/contact')}>Контакты</a>
               </nav>
               <nav className={style['footer-nav']}>
                 <h4>Документы</h4>
-                <a href="#">Договор-оферта</a>
-                <a href="#">Политика cookie</a>
-                <a href="#">Конфиденциальность</a>
-                <a href="#">Юридическая информация</a>
+                <a>Договор-оферта</a>
+                <a>Политика cookie</a>
+                <a>Конфиденциальность</a>
+                <a>Юридическая информация</a>
               </nav>
             </div>
           </div>
           <div className={style['footer-bottom']}>
             <p className={style['footer-copy']}>© 2026, ООО «Soft Skills»</p>
             <div className={style['footer-socials']}>
-              <a href="#"><img src="/img/index/vk.svg" alt="VK" /></a>
-              <a href="#"><img src="/img/index/tg.svg" alt="TG" /></a>
+              <a><img src="/img/index/vk.svg" alt="VK" /></a>
+              <a><img src="/img/index/tg.svg" alt="TG" /></a>
             </div>
           </div>
         </div>

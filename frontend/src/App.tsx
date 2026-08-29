@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Index from './components/Index';
+import Index from './components/index';
 import { Dashboard } from './components/Dashboard';
 import { LoginForm } from './components/Aauthorization';
 import { RegisterForm } from './components/Registration';
 import { ProfilePage } from './components/Profile';
 import { ClientProfile } from './components/DashboardsComponents/СlientsComponents/ClientProfile';
+import { PricingSection } from './components/Price';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           } 
         />
         <Route path="/dashboard/client/:id" element={<ClientProfile />} />
+        <Route path="/price" element={<PricingSection/>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
