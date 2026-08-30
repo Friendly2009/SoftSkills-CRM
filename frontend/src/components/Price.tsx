@@ -118,7 +118,7 @@ export const PricingSection = () => {
                                 <h4>Документы</h4>
                                 <a>Договор-оферта</a>
                                 <a>Политика cookie</a>
-                                <a>Конфиденциальность</a>
+                                <a onClick={() => navigate('/privacy')}>Конфиденциальность</a>
                                 <a>Юридическая информация</a>
                             </nav>
                         </div>

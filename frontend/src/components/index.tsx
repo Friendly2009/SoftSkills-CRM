@@ -181,7 +181,7 @@ const Index = () => {
                 <h4>Документы</h4>
                 <a>Договор-оферта</a>
                 <a>Политика cookie</a>
-                <a>Конфиденциальность</a>
+                <a onClick={() => navigate('/privacy')}>Конфиденциальность</a>
                 <a>Юридическая информация</a>
               </nav>
             </div>
@@ -189,7 +189,6 @@ const Index = () => {
           <div className={style['footer-bottom']}>
             <p className={style['footer-copy']}>© 2026, ООО «Soft Skills»</p>
             <div className={style['footer-socials']}>
-              <a><img src="/img/index/vk.svg" alt="VK" /></a>
               <a><img src="/img/index/tg.svg" alt="TG" /></a>
             </div>
           </div>
