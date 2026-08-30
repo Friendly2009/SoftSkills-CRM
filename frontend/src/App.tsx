@@ -10,6 +10,7 @@ import { PricePage } from './components/Prices/PricePage';
 import { PrivacyPolicy } from './components/Privacy';
 import { TermsOfService } from './components/Terms';
 import { SupportPage } from './components/Support';
+import { ContactsPage } from './components/Contact';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path='/privacy' element={<PrivacyPolicy/>}/>
         <Route path='/terms' element={<TermsOfService/>}/>
         <Route path='/support' element={<SupportPage/>}/>
+        <Route path='/Contact' element={<ContactsPage/>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
