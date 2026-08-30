@@ -179,10 +179,9 @@ const Index = () => {
               </nav>
               <nav className={style['footer-nav']}>
                 <h4>Документы</h4>
-                <a>Договор-оферта</a>
-                <a>Политика cookie</a>
+                <a onClick={() => navigate('/terms')}>Договор-оферта</a>
+                <a onClick={() => navigate('/privacy#cookie')}>Политика cookie</a>
                 <a onClick={() => navigate('/privacy')}>Конфиденциальность</a>
-                <a>Юридическая информация</a>
               </nav>
             </div>
           </div>

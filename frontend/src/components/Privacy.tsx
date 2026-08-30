@@ -1,10 +1,25 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import register from '@/components/cssmoduls/Signup.module.css'
+import { useEffect } from "react";
 export const PrivacyPolicy: React.FC = () => {
     const navigate = useNavigate();
+    const { hash } = useLocation();
+
+    useEffect(() => {
+        if (hash) {
+            setTimeout(() => {
+                const element = document.getElementById(hash.replace('#', ''));
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.classList.add('bg-indigo-50', 'transition-colors', 'duration-500');
+                    setTimeout(() => element.classList.remove('bg-indigo-50'), 2000);
+                }
+            }, 100);
+        }
+    }, [hash]);
     return (
         <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-800 antialiased">
-            <button className={register['back-btn']} onClick={() => navigate('/')}><img src="/img/user/dashboard/angle-left-solid.png" className={register['back-icon']} alt="exit" /></button>
+            <button className={register['back-btn']} onClick={() => navigate('/')} style={{position: "fixed"}}><img src="/img/user/dashboard/angle-left-solid.png" className={register['back-icon']} alt="exit" /></button>
             <div className="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-6 sm:p-10 border border-slate-200">
 
                 <header className="border-b border-slate-200 pb-6 mb-8">
@@ -91,7 +106,7 @@ export const PrivacyPolicy: React.FC = () => {
                                 <span className="font-semibold text-slate-950 mr-2 min-w-[28px]">2.4.</span>
                                 <span><strong className="text-slate-900">Внутренние системные и аналитические данные:</strong> Сведения о посещаемости занятий, расписании, статусах лидов, а также о виртуальном балансе и внутренних учетных операциях. Сервис не собирает данные банковских карт и не осуществляет обработку реальных платежей.</span>
                             </li>
-                            <li className="flex items-start">
+                            <li className="flex items-start" id="cookie">
                                 <span className="font-semibold text-slate-950 mr-2 min-w-[28px]">2.5.</span>
                                 <span><strong className="text-slate-900">Обезличенные технические данные:</strong> Сервис может автоматически собирать стандартные технические данные (файлы cookie, IP-адреса, тип браузера, операционная система) для обеспечения корректной пользовательской сессии и защиты бета-версии Сервиса от сетевых атак.</span>
                             </li>

@@ -8,6 +8,7 @@ import { ClientProfile } from './components/DashboardsComponents/СlientsCompone
 import { PricingSection } from './components/Price';
 import { PricePage } from './components/Prices/PricePage';
 import { PrivacyPolicy } from './components/Privacy';
+import { TermsOfService } from './components/Terms';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/price" element={<PricingSection />} />
         <Route path="/tarid-details/:tariffId" element={<PricePage />} />
         <Route path='/privacy' element={<PrivacyPolicy/>}/>
+        <Route path='/terms' element={<TermsOfService/>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
