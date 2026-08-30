@@ -1,6 +1,10 @@
+import { useNavigate } from "react-router-dom";
+import register from '@/components/cssmoduls/Signup.module.css'
 export const PrivacyPolicy: React.FC = () => {
+    const navigate = useNavigate();
     return (
         <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-800 antialiased">
+            <button className={register['back-btn']} onClick={() => navigate('/')}><img src="/img/user/dashboard/angle-left-solid.png" className={register['back-icon']} alt="exit" /></button>
             <div className="max-w-3xl mx-auto bg-white shadow-md rounded-xl p-6 sm:p-10 border border-slate-200">
 
                 <header className="border-b border-slate-200 pb-6 mb-8">
@@ -16,7 +20,6 @@ export const PrivacyPolicy: React.FC = () => {
                 </header>
 
                 <div className="space-y-8 text-base leading-relaxed">
-
                     <section>
                         <h2 className="text-lg font-bold text-slate-900 mb-3 uppercase tracking-wide border-l-4 border-indigo-500 pl-3">
                             1. Общие положения
