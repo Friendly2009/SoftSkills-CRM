@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import register from './CssModuls/signup.module.css'
 import { useNavigate } from 'react-router-dom';
-import style from '@/components/cssmoduls/index.module.css'
 import { Footer } from "./Footer";
+
 export const RegisterForm = () => {
   const navigate = useNavigate();
 
@@ -22,7 +22,7 @@ export const RegisterForm = () => {
       return;
     }
     try {
-      const response = await fetch('http://localhost:3000/signup', {
+      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signup`, {
         credentials: "include",
         method: 'POST',
         headers: {

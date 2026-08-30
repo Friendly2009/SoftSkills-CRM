@@ -3,13 +3,15 @@ import { fileURLToPath } from "url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from 'vitest/config';
+import envCompatible from 'vite-plugin-env-compatible';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [
     react(), 
-    tailwindcss()
+    tailwindcss(),
+    envCompatible()
   ],
   resolve: {
     alias: {
@@ -19,7 +21,7 @@ export default defineConfig({
   
   server: {
     proxy: {
-      '/api': 'http://localhost:3000', 
+      '/api': `${process.env.HOST}:${process.env.PORT}`, 
     }
   },
 });

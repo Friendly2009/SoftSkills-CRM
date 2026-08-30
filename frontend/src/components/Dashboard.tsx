@@ -20,7 +20,7 @@ export const Dashboard: React.FC = () => {
   const [isActiveMenu, setIsActiveMenu] = useState(true);
   const GetGlobalInfo = async () => {
     try {
-      const response = await fetch("http://localhost:3000/getglobalinfo", {
+      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getglobalinfo`, {
         credentials: "include"
       });
 

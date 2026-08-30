@@ -1,12 +1,10 @@
-import { FinancialTimelineData } from "@/interfaces/AnalyticsInterfaces";
-
 export const get_transactions_list = async () => {
   try {
     const response = await fetch(
-      "http://localhost:3000/get_transactions_list",
+      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get_transactions_list`,
       {
-        method: "GET",
-        credentials: "include",
+        method: `GET`,
+        credentials: `include`,
       },
     );
 
@@ -22,16 +20,16 @@ export const get_transactions_list = async () => {
 
     return result.data;
   } catch (error: any) {
-    console.error("Ошибка в get_transactions_list:", error);
+    console.error(`Ошибка в get_transactions_list:`, error);
     throw error;
   }
 };
 
 export const getRevenueSources = async () => {
   try {
-    const response = await fetch("http://localhost:3000/revenue-sources", {
-      method: "GET",
-      credentials: "include",
+    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/revenue-sources`, {
+      method: `GET`,
+      credentials: `include`,
     });
 
     if (response.status === 403) {
@@ -40,21 +38,21 @@ export const getRevenueSources = async () => {
 
     const result = await response.json();
     if (!result.success) {
-      throw new Error(result.message || "Не удалось загрузить данные дашборда");
+      throw new Error(result.message || `Не удалось загрузить данные дашборда`);
     }
 
     return result.data;
   } catch (error) {
-    console.error("Ошибка при вызове getFinancialDashboardData:", error);
+    console.error(`Ошибка при вызове getFinancialDashboardData:`, error);
     throw error;
   }
 };
 
 export const getFinancialTimelineData = async () => {
   try {
-    const response = await fetch("http://localhost:3000/getFinancialTimeline", {
-      method: "GET",
-      credentials: "include",
+    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getFinancialTimeline`, {
+      method: `GET`,
+      credentials: `include`,
     });
 
     if (response.status === 403) {
@@ -63,12 +61,12 @@ export const getFinancialTimelineData = async () => {
 
     const result = await response.json();
     if (!result.success) {
-      throw new Error(result.message || "Не удалось загрузить таймлайн");
+      throw new Error(result.message || `Не удалось загрузить таймлайн`);
     }
 
     return result.data;
   } catch (error) {
-    console.error("Ошибка при вызове getFinancialTimelineData:", error);
+    console.error(`Ошибка при вызове getFinancialTimelineData:`, error);
     throw error;
   }
 };
@@ -79,33 +77,33 @@ export const addManualExpenseRequest = async (expenseData: {
   comment: string;
 }) => {
   try {
-    const response = await fetch("http://localhost:3000/finance/add-expense", {
+    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/add-expense`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": `application/json`,
       },
-      credentials: "include",
+      credentials: `include`,
       body: JSON.stringify(expenseData),
     });
 
     if (response.status === 403) {
-      return { success: false, status: 403, message: "Доступ запрещен" };
+      return { success: false, status: 403, message: `Доступ запрещен` };
     }
 
     return await response.json();
   } catch (error) {
-    console.error("Ошибка при вызове addManualExpenseRequest:", error);
-    return { success: false, message: "Ошибка сети при отправке расхода" };
+    console.error(`Ошибка при вызове addManualExpenseRequest:`, error);
+    return { success: false, message: `Ошибка сети при отправке расхода` };
   }
 };
 
 export const getExpensesData = async () => {
   try {
     const response = await fetch(
-      "http://localhost:3000/finance/expenses-structure",
+      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/expenses-structure`,
       {
-        method: "GET",
-        credentials: "include",
+        method: `GET`,
+        credentials: `include`,
       },
     );
 
@@ -115,11 +113,11 @@ export const getExpensesData = async () => {
 
     const result = await response.json();
     if (!result.success) {
-      throw new Error(result.message || "Ошибка загрузки структуры расходов");
+      throw new Error(result.message || `Ошибка загрузки структуры расходов`);
     }
     return result.data;
   } catch (error) {
-    console.error("Ошибка при вызове getExpensesData:", error);
+    console.error(`Ошибка при вызове getExpensesData:`, error);
     throw error;
   }
 };
@@ -127,10 +125,10 @@ export const getExpensesData = async () => {
 export const getExpensesStructureData = async () => {
   try {
     const response = await fetch(
-      "http://localhost:3000/finance/expenses-structure-by-group",
+      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/expenses-structure-by-group`,
       {
-        method: "GET",
-        credentials: "include",
+        method: `GET`,
+        credentials: `include`,
       },
     );
 
@@ -140,11 +138,11 @@ export const getExpensesStructureData = async () => {
 
     const result = await response.json();
     if (!result.success) {
-      throw new Error(result.message || "Ошибка загрузки группировки расходов");
+      throw new Error(result.message || `Ошибка загрузки группировки расходов`);
     }
     return result.data;
   } catch (error) {
-    console.error("Ошибка при вызове getExpensesStructureData:", error);
+    console.error(`Ошибка при вызове getExpensesStructureData:`, error);
     throw error;
   }
 };
@@ -152,10 +150,10 @@ export const getExpensesStructureData = async () => {
 export const getDebtClient = async () => {
   try {
     const response = await fetch(
-      "http://localhost:3000/finance/client-debtors",
+      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/client-debtors`,
       {
-        method: "GET",
-        credentials: "include",
+        method: `GET`,
+        credentials: `include`,
       },
     );
 
@@ -165,20 +163,20 @@ export const getDebtClient = async () => {
 
     const result = await response.json();
     if (!result.success) {
-      throw new Error(result.message || "Ошибка загрузки должников");
+      throw new Error(result.message || `Ошибка загрузки должников`);
     }
     return result.data;
   } catch (error) {
-    console.error("Ошибка при вызове getDebtClient:", error);
+    console.error(`Ошибка при вызове getDebtClient:`, error);
     throw error;
   }
 };
 
 export const fetchFinanceSummary = async () => {
   try {
-    const response = await fetch("http://localhost:3000/finance/get-all-state", {
-      method: "GET",
-      credentials: "include",
+    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/get-all-state`, {
+      method: `GET`,
+      credentials: `include`,
     });
 
     if (response.status === 403) {
@@ -188,7 +186,7 @@ export const fetchFinanceSummary = async () => {
     const result = await response.json();
 
     if (!result.success) {
-      throw new Error(result.message || "something went wrong");
+      throw new Error(result.message || `something went wrong`);
     }
 
     return {
@@ -199,16 +197,16 @@ export const fetchFinanceSummary = async () => {
       profit: result.profit,
     };
   } catch (error) {
-    console.error("API Error in getAllState:", error);
+    console.error(`API Error in getAllState:`, error);
     return { success: false, error };
   }
 };
 
 export const getFinanceChartData = async (): Promise<any> => {
   try {
-    const response = await fetch(`http://localhost:3000/get-chart-state`, {
-      method: "GET",
-      credentials: "include",
+    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get-chart-state`, {
+      method: `GET`,
+      credentials: `include`,
     });
 
     if (response.status === 403) {
@@ -218,12 +216,12 @@ export const getFinanceChartData = async (): Promise<any> => {
     const result = await response.json();
 
     if (!result.success) {
-      throw new Error(result.message || "Failed to fetch chart data");
+      throw new Error(result.message || `Failed to fetch chart data`);
     }
 
     return result.data;
   } catch (error) {
-    console.error("API Error in getFinanceChartData:", error);
+    console.error(`API Error in getFinanceChartData:`, error);
     throw error;
   }
 };
