@@ -1,8 +1,8 @@
-import { AttendanceTrendData } from "@/interfaces/AnalyticsInterfaces";
+import { AttendanceTrendData } from "@/interfaces/analyticsInterfaces";
 
 export const fetchAttendanceTrends = async (range: string): Promise<AttendanceTrendData[] | { status: 403 }> => {
   try {
-    const response = await fetch(`http://localhost:3000/hr/get-attendance-trends?range=${range}`, {
+    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/hr/get-attendance-trends?range=${range}`, {
       method: "GET",
       credentials: "include",
     });

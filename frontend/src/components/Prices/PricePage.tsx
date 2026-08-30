@@ -69,7 +69,7 @@ export const PricePage = () => {
             return;
         }
         try {
-            const response = await fetch('http://localhost:3000/signup', {
+            const response = await fetch(`${process.env.HOST}:${process.env.PORT}/signup`, {
                 credentials: "include",
                 method: 'POST',
                 headers: {

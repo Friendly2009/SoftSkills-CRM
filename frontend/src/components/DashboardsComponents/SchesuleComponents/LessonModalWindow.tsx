@@ -111,7 +111,7 @@ export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, 
         };
 
         try {
-            const response = await fetch('http://localhost:3000/lessons/close', {
+            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/lessons/close`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

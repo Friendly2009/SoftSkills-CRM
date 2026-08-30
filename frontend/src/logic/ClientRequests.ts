@@ -1,9 +1,9 @@
-import { ClientTemplate } from "../interfaces/ClientsInterfaces.ts";
+import { ClientTemplate } from "../interfaces/clientsInterfaces.ts";
 
 export const deleteClient = async (client: ClientTemplate) => {
   try {
     const response = await fetch(
-      `http://localhost:3000/delclients/${client.id}`,
+      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/delclients/${client.id}`,
       {
         method: "DELETE",
       },
@@ -20,7 +20,7 @@ export const deleteClient = async (client: ClientTemplate) => {
 
 export const getClient = async () => {
   try {
-    const response = await fetch("http://localhost:3000/getclient", {
+    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getclient`, {
       credentials: "include",
     });
 
@@ -48,7 +48,7 @@ export const getClient = async () => {
 
 export const addClient = async (formData: ClientTemplate) => {
   try {
-    const response = await fetch("http://localhost:3000/addclients", {
+    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/addclients`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export const addClient = async (formData: ClientTemplate) => {
 export const updateClient = async (updateFormData: ClientTemplate) => {
   try {
     const response = await fetch(
-      `http://localhost:3000/updateclient/${updateFormData.id}`,
+      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/updateclient/${updateFormData.id}`,
       {
         method: "PATCH",
         headers: {

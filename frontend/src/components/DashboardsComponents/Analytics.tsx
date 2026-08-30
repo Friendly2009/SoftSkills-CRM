@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import styles from '../cssmoduls/DashboardComponentsCssModuls/Analytic.module.css';
-import { getAccupancyGroups, getBarColor } from '@/logic/analytic/Accupancy_groups';
+import { getAccupancyGroups, getBarColor } from '@/logic/analytic/accupancy_groups';
 import { AnalyticsTable, AnalyticsChart, CustomTooltip } from '../DashboardsComponents/AnalyticModuls/AccupancyGroup';
 import { FinancialAnalyticsDashboard } from '@/components/DashboardsComponents/AnalyticModuls/FinancialAnalyticsDashboard';
-import { GroupAnalytics } from '@/interfaces/AnalyticsInterfaces';
+import { GroupAnalytics } from '@/interfaces/analyticsInterfaces';
 import { TeacherBurnoutTracker } from '@/components/DashboardsComponents/AnalyticModuls/TeacherBurnoutTracker';
 import { AttendanceTrendTracker } from '@/components/DashboardsComponents/AnalyticModuls/AttendanceTrendTracker';
 export const Analytic: React.FC = () => {

@@ -260,7 +260,7 @@ export const LeadsTable: React.FC = () => {
     const getLeads = async () => {
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:3000/get-lead", {
+            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get-lead`, {
                 credentials: "include"
             });
 
@@ -297,7 +297,7 @@ export const LeadsTable: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://localhost:3000/create-lead", {
+            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/create-lead`, {
                 credentials: "include",
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -328,7 +328,7 @@ export const LeadsTable: React.FC = () => {
                 loss_reason_id: resetFormData.status === 'lost' ? Number(resetFormData.loss_reason_id) : null
             };
 
-            const response = await fetch(`http://localhost:3000/update-lead/${resetFormData.id}`, {
+            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/update-lead/${resetFormData.id}`, {
                 credentials: "include",
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
@@ -353,7 +353,7 @@ export const LeadsTable: React.FC = () => {
             }
 
             try {
-                const response = await fetch(`http://localhost:3000/delete-lead/${lead.id}`, {
+                const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/delete-lead/${lead.id}`, {
                     method: "DELETE",
                     credentials: "include"
                 });
