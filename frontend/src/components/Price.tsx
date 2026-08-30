@@ -2,7 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PriceCard } from '@/components/Prices/PriceCard';
 import styles from '@/components/cssmoduls/Pricing.module.css';
-import style from '@/components/cssmoduls/index.module.css'
+import style from '@/components/cssmoduls/index.module.css';
+import register from '@/components/cssmoduls/Signup.module.css'
+
 export const PricingSection = () => {
     const navigate = useNavigate();
     const tariffsData = [
@@ -62,6 +64,8 @@ export const PricingSection = () => {
     return (
         <div className={style['page-font']}>
             <header className={style['main-header']}>
+                <button className={register['back-btn']} onClick={() => navigate('/')} style={{ position: "fixed" }}><img src="/img/user/dashboard/angle-left-solid.png" className={register['back-icon']} alt="exit" /></button>
+
                 <div className={style['container']}>
                     <div className={style['header-inner']}>
                         <a href="/" className={style['header-logo']}>

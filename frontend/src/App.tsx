@@ -9,6 +9,7 @@ import { PricingSection } from './components/Price';
 import { PricePage } from './components/Prices/PricePage';
 import { PrivacyPolicy } from './components/Privacy';
 import { TermsOfService } from './components/Terms';
+import { SupportPage } from './components/Support';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/tarid-details/:tariffId" element={<PricePage />} />
         <Route path='/privacy' element={<PrivacyPolicy/>}/>
         <Route path='/terms' element={<TermsOfService/>}/>
+        <Route path='/support' element={<SupportPage/>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
