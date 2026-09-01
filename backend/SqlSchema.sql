@@ -191,6 +191,9 @@ CREATE TABLE `tg_messages` (
   KEY `fk_tg_user_message_idx` (`tg_user_id`),
   CONSTRAINT `fk_tg_user_message` FOREIGN KEY (`tg_user_id`) REFERENCES `tg_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+ALTER TABLE `tg_users` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `tg_messages` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 --<================================================>--
 --<======================VIEW======================>--
 --<================================================>--
