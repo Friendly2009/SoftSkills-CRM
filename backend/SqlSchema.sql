@@ -160,6 +160,43 @@ CREATE TABLE IF NOT EXISTS `leads` (
         REFERENCES `lead_loss_reasons` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
 
+CREATE TABLE `feedbacks` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `message` longtext NOT NULL,
+  `user_id` int NOT NULL,
+  `rate` tinyint NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_fedback_user_idx` (`user_id`),
+  CONSTRAINT `fk_fedback_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tg_users` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `username` varchar(45) NOT NULL,
+  `first_name` varchar(45) NOT NULL,
+  `role` enum('user','admin') NOT NULL DEFAULT 'user',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tg_messages` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `tg_user_id` bigint NOT NULL,
+  `message` longtext NOT NULL,
+  `direction` enum('inbound','outbound') NOT NULL,
+  `tg_message_id` bigint DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_tg_user_message_idx` (`tg_user_id`),
+  CONSTRAINT `fk_tg_user_message` FOREIGN KEY (`tg_user_id`) REFERENCES `tg_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+ALTER TABLE `tg_users` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `tg_messages` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+--<================================================>--
+--<======================VIEW======================>--
+--<================================================>--
 CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`accupancy_rate` AS
 SELECT  
     `u`.`company_id` AS `company_id`,
