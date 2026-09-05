@@ -16,6 +16,9 @@ export const RegisterForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    alert("Подайте заявку на бета тестирование, написав в поддержке https://t.me/SoftSkillsCrmSupportbot");
+    return;
+    //IN FEATURE
     if (!agreeTerms) {
       alert('Требуется соглашение с политикой конфиленциальности и публичной оферты');
       return;
@@ -53,8 +56,8 @@ export const RegisterForm = () => {
             <h2 className={register.title}>Создать центр</h2>
             <p className={register.subtitle}>Присоединяйтесь к нашей CRM системе</p>
           </div>
-
-          <form className={register.form} onSubmit={handleSubmit}>
+          <p>Подайте заявку на бета тестирование, написав в поддержку https://t.me/SoftSkillsCrmSupportbot</p>
+          {/*<form className={register.form} onSubmit={handleSubmit}>
             <div className={register['inputs-container']}>
 
               <div className={register['input-group']}>
@@ -138,7 +141,7 @@ export const RegisterForm = () => {
             <button type="submit" className={register['submit-btn']}>
               Создать центр
             </button>
-          </form>
+          </form>*/}
         </div>
       </div>
     </>
