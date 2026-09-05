@@ -354,7 +354,7 @@ export const ProfilePage: React.FC = () => {
         </a>
         <br/>
         <a
-        onClick={() => {navigate('/feedback')}}
+        onClick={() => {navigate('/Feedback')}}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-sm font-semibold text-sky-500 hover:text-sky-600 transition-colors group"

@@ -13,6 +13,13 @@ import { get_accupancy_groups, get_transactions_list,
 from './controllers/AnalyticController.js';
 import { addManualExpense, getExpenses } from './controllers/FinanceController.js';
 import { createLead, getLeads, getLeadById, updateLead, deleteLead } from './controllers/LeadController.js';
+import { 
+  create_feedback, 
+  get_all_feedbacks, 
+  get_my_feedbacks, 
+  update_feedback, 
+  delete_feedback 
+} from './controllers/FeedbackController.js';
 const router: Router = Router();
 
 router.get('/checkconnect', checkconnect);
@@ -61,4 +68,10 @@ router.get('/finance/get-all-state', getAllState);
 router.get('/get-chart-state', getChartState);
 router.get('/hr/get-teachers-workload', getTeachersWorkload);
 router.get('/hr/get-attendance-trends', getAttendanceTrends);
+
+router.post('/createfeedback', create_feedback);
+router.get('/getfeedbacks', get_all_feedbacks);
+router.get('/getmyfeedback', get_my_feedbacks);
+router.put('/updatefeedback:id', update_feedback);
+router.delete('deletefeedback/:id', delete_feedback);
 export default router;

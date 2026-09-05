@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Index from './components/index';
 import { Dashboard } from './components/Dashboard';
 import { LoginForm } from './components/Aauthorization';
-import { RegisterForm } from './components/Registration';
+import { RegisterForm } from './components/registration';
 import { ProfilePage } from './components/Profile';
 import { ClientProfile } from './components/DashboardsComponents/СlientsComponents/ClientProfile';
 import { PricingSection } from './components/Price';
@@ -11,6 +11,7 @@ import { PrivacyPolicy } from './components/Privacy';
 import { TermsOfService } from './components/Terms';
 import { SupportPage } from './components/Support';
 import { ContactsPage } from './components/Contact';
+import { ReviewsPage } from './components/Feedback';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path='/terms' element={<TermsOfService/>}/>
         <Route path='/support' element={<SupportPage/>}/>
         <Route path='/Contact' element={<ContactsPage/>}/>
+        <Route path='/Feedback' element={<ReviewsPage/>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
