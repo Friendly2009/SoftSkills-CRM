@@ -12,18 +12,18 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export const create_feedback = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const create_feedback = async (req: Request, res: Response): Promise<void> => {
   try {
     const { message, rate } = req.body;
-    const userId = req.user?.id; 
+    const userId = req.session.user_id; 
 
     if (!userId) {
-      res.status(401).json({ error: 'Пользователь не авторизован' });
+      res.status(401).json({ error: 'Пользователь не авторизован (сессия отсутствует)' });
       return;
     }
 
     if (!message || !rate || rate < 1 || rate > 5) {
-      res.status(400).json({ error: 'Неверные данные: сообщение или оценка от 1 до 5' });
+      res.status(400).json({ error: 'Неверные данные формы' });
       return;
     }
 
@@ -32,17 +32,14 @@ export const create_feedback = async (req: AuthenticatedRequest, res: Response):
       [message, userId, rate]
     );
 
-    res.status(211).json({ 
-      message: 'Отзыв успешно добавлен', 
-      feedbackId: result.insertId 
-    });
+    res.status(201).json({ message: 'Отзыв добавлен', feedbackId: result.insertId });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера при создании отзыва' });
+    res.status(500).json({ error: 'Ошибка сервера' });
   }
 };
 
-export const get_all_feedbacks = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const get_all_feedbacks = async (req: Request, res: Response): Promise<void> => {
   try {
     const [rows] = await pool.execute<RowDataPacket[]>(
       `SELECT f.id, f.message, f.rate, f.created_at, f.user_id,
@@ -52,20 +49,19 @@ export const get_all_feedbacks = async (req: AuthenticatedRequest, res: Response
        INNER JOIN company c ON u.company_id = c.id
        ORDER BY f.created_at DESC`
     );
-
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера при получении отзывов' });
+    res.status(500).json({ error: 'Ошибка сервера' });
   }
 };
 
-export const get_my_feedbacks = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const get_my_feedbacks = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.session.user_id;
 
     if (!userId) {
-      res.status(401).json({ error: 'Пользователь не авторизован' });
+      res.status(401).json({ error: 'Сессия не найдена' });
       return;
     }
 
@@ -73,22 +69,21 @@ export const get_my_feedbacks = async (req: AuthenticatedRequest, res: Response)
       'SELECT id, message, rate, created_at FROM feedbacks WHERE user_id = ? ORDER BY created_at DESC',
       [userId]
     );
-
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера при получении личных отзывов' });
+    res.status(500).json({ error: 'Ошибка сервера' });
   }
 };
 
-export const update_feedback = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const update_feedback = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { message, rate } = req.body;
-    const userId = req.user?.id;
+    const userId = req.session.user_id;
 
     if (!userId) {
-      res.status(401).json({ error: 'Пользователь не авторизован' });
+      res.status(401).json({ error: 'Сессия не найдена' });
       return;
     }
 
@@ -112,21 +107,19 @@ export const update_feedback = async (req: AuthenticatedRequest, res: Response):
       [message, rate, id]
     );
 
-    res.status(200).json({ message: 'Отзыв успешно обновлен' });
+    res.status(200).json({ message: 'Отзыв обновлен' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера при обновлении отзыва' });
+    res.status(500).json({ error: 'Ошибка сервера' });
   }
 };
 
-export const delete_feedback = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const delete_feedback = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id;
-    const userRole = req.user?.role;
-
+    const userId = req.session.user_id;
     if (!userId) {
-      res.status(401).json({ error: 'Пользователь не авторизован' });
+      res.status(401).json({ error: 'Сессия не найдена' });
       return;
     }
 
@@ -140,16 +133,15 @@ export const delete_feedback = async (req: AuthenticatedRequest, res: Response):
       return;
     }
 
-    if (existing[0].user_id !== userId && userRole !== 'admin') {
-      res.status(403).json({ error: 'Запрещено к удалению' });
+    if (existing[0].user_id !== userId) {
+      res.status(403).json({ error: 'Нет прав на удаление' });
       return;
     }
 
     await pool.execute('DELETE FROM feedbacks WHERE id = ?', [id]);
-
-    res.status(200).json({ message: 'Отзыв успешно удален' });
+    res.status(200).json({ message: 'Отзыв удален' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера при удалении отзыва' });
+    res.status(500).json({ error: 'Ошибка сервера' });
   }
 };

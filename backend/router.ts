@@ -69,9 +69,9 @@ router.get('/get-chart-state', getChartState);
 router.get('/hr/get-teachers-workload', getTeachersWorkload);
 router.get('/hr/get-attendance-trends', getAttendanceTrends);
 
-router.post('/', create_feedback);
-router.get('/', get_all_feedbacks);
-router.get('/my', get_my_feedbacks);
-router.put('/:id', update_feedback);
-router.delete('/:id', delete_feedback);
+router.post('/createfeedback', create_feedback);
+router.get('/getfeedbacks', get_all_feedbacks);
+router.get('/getmyfeedback', get_my_feedbacks);
+router.put('/updatefeedback:id', update_feedback);
+router.delete('deletefeedback/:id', delete_feedback);
 export default router;
