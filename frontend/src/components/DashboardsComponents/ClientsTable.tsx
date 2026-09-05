@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
 import { MoreAction } from '@/components/DashboardsComponents/СlientsComponents/MoreActions.tsx';
 import { deleteClient, getClient, addClient, updateClient } from '../../logic/ClientRequests.ts';
-import { ClientTemplate, MoreActionProps } from "@/interfaces/ClientsInterfaces.ts";
+import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";
 import { TopUp } from "@/components/DashboardsComponents/СlientsComponents/TopUp.tsx";
 import { UpdateClientForm } from '@/components/DashboardsComponents/СlientsComponents/UpdateClientForm.tsx';
 
@@ -93,7 +93,7 @@ export const ClientTable: React.FC = () => {
 
     const getCompanyGroups = async () => {
         try {
-            const response = await fetch("http://localhost:3000/getgroups", { credentials: "include" });
+            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getgroups`, { credentials: "include" });
 
             if (response.status === 403) {
                 setIsReadOnly(true);

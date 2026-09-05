@@ -1,0 +1,387 @@
+.checkout-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #2d3748;
+  background-color: #f7fafc;
+  min-height: 100vh;
+}
+
+/* Шапка страницы */
+.checkout-header {
+  margin-bottom: 32px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #4a5568;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+  transition: color 0.2s ease;
+}
+
+.back-btn:hover {
+  color: #0066ff;
+}
+
+.checkout-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1a202c;
+}
+
+.subtitle {
+  color: #718096;
+  margin: 0;
+  font-size: 15px;
+}
+
+/* Двухколоночный макет */
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+@media (max-width: 992px) {
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Карточки секций левой стороны */
+.card-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 24px;
+  color: #1a202c;
+}
+
+/* Элементы формы */
+.checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+@media (max-width: 576px) {
+  .form-row {
+    flex-direction: column;
+  }
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.form-group input {
+  padding: 12px 16px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.15);
+}
+
+/* Галочка согласия */
+.checkbox-group {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 13px;
+  color: #718096;
+  line-height: 1.5;
+}
+
+.checkbox-group input {
+  margin-top: 3px;
+  cursor: pointer;
+}
+
+.checkbox-group a {
+  color: #0066ff;
+  text-decoration: none;
+}
+
+.checkbox-group a:hover {
+  text-decoration: underline;
+}
+
+/* Главная кнопка оплаты */
+.submit-pay-btn {
+  background-color: #0066ff;
+  color: white;
+  border: none;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 10px;
+}
+
+.submit-pay-btn:hover {
+  background-color: #0052cc;
+}
+
+/* Баннер безопасности */
+.security-banner {
+  display: flex;
+  gap: 16px;
+  background-color: #edf2f7;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 32px;
+}
+
+.security-icon {
+  font-size: 24px;
+}
+
+.security-banner h3 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.security-banner p {
+  margin: 0;
+  font-size: 13px;
+  color: #718096;
+  line-height: 1.4;
+}
+
+/* FAQ секция */
+.faq-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.faq-item {
+  margin-bottom: 20px;
+}
+
+.faq-item h4 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.faq-item p {
+  margin: 0;
+  font-size: 14px;
+  color: #718096;
+  line-height: 1.5;
+}
+
+/* ПРАВАЯ ПАНЕЛЬ: Чек заказа */
+.order-summary-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  margin-bottom: 20px;
+}
+
+.summary-title {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tariff-badge-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tariff-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.tariff-price-tag {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0066ff;
+}
+
+.tariff-descr {
+  font-size: 14px;
+  color: #718096;
+  margin: 0 0 20px 0;
+  line-height: 1.4;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 20px 0;
+}
+
+.include-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.summary-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-features li {
+  font-size: 13px;
+  color: #4a5568;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.total-price {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1a202c;
+}
+
+.billing-period-text {
+  font-size: 12px;
+  color: #a0aec0;
+  margin: 0;
+}
+
+.support-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  font-size: 14px;
+}
+
+.support-card h4 {
+  margin: 0 0 10px 0;
+  color: #1a202c;
+}
+
+.support-card p {
+  color: #718096;
+  margin: 0 0 14px 0;
+  line-height: 1.4;
+}
+
+.support-link {
+  color: #0066ff;
+  text-decoration: none;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.support-phone {
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+}
+
+.payment-method-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.method-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.method-selector {
+  display: flex;
+  gap: 12px;
+}
+
+.method-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.method-option input {
+  margin: 0;
+}
+
+.method-option:hover {
+  border-color: #0066ff;
+  background-color: #f0f5ff;
+}
+
+.active-method {
+  border-color: #0066ff;
+  background-color: #e6f0ff;
+  font-weight: 500;
+}

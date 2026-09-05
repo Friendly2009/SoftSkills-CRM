@@ -1,6 +1,6 @@
 import React from "react";
 import style from '@/components/cssmoduls/DashboardComponentsCssModuls/client.module.css';
-import { ClientTemplate } from "@/interfaces/ClientsInterfaces";
+import { ClientTemplate } from "@/interfaces/clientsInterfaces";
 
 interface UpdateClientFormProps {
     setIsResetModalWinOpen: (isOpen: boolean) => void;

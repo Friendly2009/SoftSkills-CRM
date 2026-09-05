@@ -9,25 +9,31 @@ import {
     ResponsiveContainer
 } from 'recharts';
 import { fetchAttendanceTrends } from '@/logic/analytic/Clients';
-import { AttendanceTrendData } from '@/interfaces/AnalyticsInterfaces'
+import { AttendanceTrendData } from '@/interfaces/analyticsInterfaces'
 export const AttendanceTrendTracker: React.FC = () => {
     const [data, setData] = useState<AttendanceTrendData[]>([]);
     const [range, setRange] = useState<string>('month');
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    useEffect(() => {
+        useEffect(() => {
         let isMounted = true;
         setIsLoading(true);
 
         fetchAttendanceTrends(range).then(res => {
             if (isMounted) {
-                setData(res);
+                if (res && 'status' in res && res.status === 403) {
+                    console.error("Доступ запрещен (403)");
+                    setIsLoading(false);
+                    return; 
+                }
+                setData(res as AttendanceTrendData[]);
                 setIsLoading(false);
             }
         });
 
         return () => { isMounted = false; };
-    }, [range]); 
+    }, [range]);
+
 
     const filterButtons = [
         { key: 'week', label: 'Неделя' },

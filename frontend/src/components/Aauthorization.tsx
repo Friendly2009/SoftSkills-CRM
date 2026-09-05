@@ -6,18 +6,17 @@ export const LoginForm = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    company: 'AnyCompany',
-    login: 'mail@example.com',
-    password: '19614141_Kirill'
+    company: '',
+    login: '',
+    password: ''
   });
   const backbtnOnClick = () => {
     navigate("/index");
   }
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     try {
-      const response = await fetch('http://localhost:3000/signin', {
+      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signin`, {
         credentials: "include",
         method: 'POST',
         headers: {
@@ -40,35 +39,8 @@ export const LoginForm = () => {
       console.error(ex);
     }
   };
-  const SUPPORT_CREDENTIALS = {
-    company: "AnyCompany",
-    login: "mail@mail.com", 
-    password: "1111"
-  };
   const handleSupportClick = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/signin', {
-        credentials: "include",
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(SUPPORT_CREDENTIALS),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message);
-      }
-
-      console.log('Успешный вход:' + JSON.stringify(data));
-
-      navigate('/dashboard');
-    } catch (ex) {
-      alert(ex);
-      console.error(ex);
-    }
+    navigate('/support');
   };
   return (
     <div className={login['page-wrapper']}>

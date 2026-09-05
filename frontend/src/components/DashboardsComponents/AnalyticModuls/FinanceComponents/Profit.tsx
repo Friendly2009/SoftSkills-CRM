@@ -9,7 +9,7 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
-import { FinancialTimelineData } from '@/interfaces/AnalyticsInterfaces';
+import { FinancialTimelineData } from '@/interfaces/analyticsInterfaces';
 import { getFinancialTimelineData } from '@/logic/analytic/Finance';
 
 export const Profit: React.FC = () => {

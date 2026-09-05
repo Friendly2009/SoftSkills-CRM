@@ -1,10 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Index from './components/Index';
+import Index from './components/index';
 import { Dashboard } from './components/Dashboard';
 import { LoginForm } from './components/Aauthorization';
-import { RegisterForm } from './components/Registration';
+import { RegisterForm } from './components/registration';
 import { ProfilePage } from './components/Profile';
 import { ClientProfile } from './components/DashboardsComponents/СlientsComponents/ClientProfile';
+import { PricingSection } from './components/Price';
+import { PricePage } from './components/Prices/PricePage';
+import { PrivacyPolicy } from './components/Privacy';
+import { TermsOfService } from './components/Terms';
+import { SupportPage } from './components/Support';
+import { ContactsPage } from './components/Contact';
+import { ReviewsPage } from './components/Feedback';
 
 function App() {
   return (
@@ -13,14 +20,21 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/authorization" element={<LoginForm />} />
         <Route path="/registration" element={<RegisterForm />} />
-        <Route path="/profile" element={<ProfilePage/>}/>
-        <Route 
-          path="/dashboard" 
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/dashboard"
           element={
             <Dashboard />
-          } 
+          }
         />
         <Route path="/dashboard/client/:id" element={<ClientProfile />} />
+        <Route path="/price" element={<PricingSection />} />
+        <Route path="/tarid-details/:tariffId" element={<PricePage />} />
+        <Route path='/privacy' element={<PrivacyPolicy/>}/>
+        <Route path='/terms' element={<TermsOfService/>}/>
+        <Route path='/support' element={<SupportPage/>}/>
+        <Route path='/Contact' element={<ContactsPage/>}/>
+        <Route path='/Feedback' element={<ReviewsPage/>}/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

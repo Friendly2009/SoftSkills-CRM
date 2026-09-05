@@ -119,7 +119,7 @@ export const LeadKanban: React.FC = () => {
     const getLeads = async () => {
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:3000/get-lead", {
+            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get-lead`, {
                 credentials: "include"
             });
             if (!response.ok) throw new Error('Ошибка загрузки лидов для Канбана');
@@ -138,7 +138,7 @@ export const LeadKanban: React.FC = () => {
 
     const updateLeadStatusInDb = async (id: number, nextStatus: string, reasonId: number | null = null) => {
         try {
-            const response = await fetch(`http://localhost:3000/update-lead/${id}`, {
+            const response = await fetch(`${process.env.HOST}:${process.env.PORT}/update-lead/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',

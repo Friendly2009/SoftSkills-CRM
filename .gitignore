@@ -9,3 +9,4 @@ frontend/node_modules/.vite/deps/react_jsx-runtime.js
 frontend/node_modules/.vite/deps/react-dom_client.js
 frontend/node_modules/.vite/deps/react-dom.js
 frontend/node_modules/.vite/deps/react.js
+*.env

@@ -1,12 +1,12 @@
 import { Dispatch, SetStateAction } from 'react';
-import { GroupAnalytics } from '@/interfaces/AnalyticsInterfaces';
+import { GroupAnalytics } from '@/interfaces/analyticsInterfaces';
 
 export const getAccupancyGroups = async (
     setReportData: Dispatch<SetStateAction<GroupAnalytics[]>>,
     setLoading: Dispatch<SetStateAction<boolean>>
 ): Promise<void> => {
     try {
-        const response = await fetch('http://localhost:3000/getaccupancygroups', {
+        const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getaccupancygroups`, {
             method: 'GET',
             credentials: "include"
         });

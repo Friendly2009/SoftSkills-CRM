@@ -1,9 +1,15 @@
 .page-wrapper {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
   color: #1e293b;
   background-color: #f8fafc;
 }
-
+.page-font {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
 .container {
   width: 100%;
   max-width: 1200px;
@@ -12,7 +18,6 @@
   box-sizing: border-box;
 }
 
-/* Шапка (Header) */
 .main-header {
   background-color: #ffffff;
   border-bottom: 1px solid #f1f5f9;
@@ -87,7 +92,6 @@
   color: #1557b0;
 }
 
-/* Главный блок (Hero) */
 .main {
   padding: 80px 0 100px 0;
 }
@@ -109,7 +113,6 @@
   color: #1a73e8;
 }
 
-/* Сетка преимуществ */
 .hero-features {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -118,11 +121,17 @@
 }
 
 @media (max-width: 968px) {
-  .hero-features { grid-template-columns: repeat(2, 1fr); }
-  .header-nav { display: none; }
+  .hero-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .header-nav {
+    display: none;
+  }
 }
 @media (max-width: 640px) {
-  .hero-features { grid-template-columns: 1fr; }
+  .hero-features {
+    grid-template-columns: 1fr;
+  }
 }
 
 .feature-item {
@@ -187,8 +196,10 @@
   box-shadow: 0 6px 20px rgba(26, 115, 232, 0.3);
 }
 
-/* Подвал (Footer) */
 .footer {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
   background-color: #0f172a;
   color: #94a3b8;
   padding: 64px 0 32px 0;
@@ -209,7 +220,7 @@
 .footer-logo-img {
   height: 28px;
   margin-bottom: 16px;
-  filter: brightness(0) invert(1); /* Делает логотип белым, если он был темным */
+  filter: brightness(0) invert(1);
 }
 
 .footer-desc {
@@ -273,4 +284,259 @@
 
 .footer-socials img:hover {
   opacity: 1;
+}
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  padding: 80px 0 100px 0;
+}
+
+.section-title {
+  font-size: 32px;
+  color: #0f172a;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 48px;
+}
+
+.features-details {
+  padding: 80px 0;
+  background-color: #ffffff;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.detail-card {
+  padding: 32px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.detail-card h3 {
+  font-size: 20px;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+}
+
+.detail-card p {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.pricing-section {
+  padding: 80px 0;
+  background-color: #f8fafc;
+}
+
+.pricing-grid {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.price-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 360px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.price-card-popular {
+  border-color: #1a73e8;
+  box-shadow: 0 20px 25px -5px rgba(26, 115, 232, 0.1);
+}
+
+.badge-popular {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #e0e7ff;
+  color: #1a73e8;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.price-level {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.price-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.price-value span {
+  font-size: 16px;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.price-card p {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 32px 0;
+  flex: 1;
+}
+
+.price-btn,
+.price-btn-primary {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.price-btn {
+  background: transparent;
+  color: #1a73e8;
+  border: 1px solid #1a73e8;
+}
+
+.price-btn:hover {
+  background: #f0f7ff;
+}
+
+.price-btn-primary {
+  background: #1a73e8;
+  color: #ffffff;
+  border: none;
+}
+
+.price-btn-primary:hover {
+  background: #1557b0;
+}
+
+.faq-section {
+  padding: 80px 0;
+  background: #ffffff;
+}
+
+.faq-list {
+  max-width: 768px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.faq-item {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 24px;
+}
+
+.faq-item h4 {
+  font-size: 18px;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+}
+
+.faq-item p {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 968px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .pricing-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+  .price-card {
+    max-width: 100%;
+  }
+}
+
+.pricing-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: sans-serif;
+}
+
+.pricing-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.pricing-label {
+  display: inline-block;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #007bff;
+  background-color: rgba(0, 123, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.pricing-header h2 {
+  font-size: 28px;
+  color: #ffffff;
+  margin: 0;
+}
+
+.pricing-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.price-more-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px 20px;
+  transition: all 0.2s ease-in-out;
+  border-bottom: 1px dashed #007bff;
+}
+
+.price-more-btn:hover {
+  color: #0056b3;
+  border-bottom-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.price-more-btn:active {
+  transform: translateY(0);
 }

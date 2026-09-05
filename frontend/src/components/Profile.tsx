@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import styles from './cssmoduls/profile.module.css';
+import { useNavigate } from 'react-router-dom';
 
 export const ProfilePage: React.FC = () => {
   const [isUpdateMode, setIsUpdateMode] = useState(false);
-
+  const navigate = useNavigate();
   const [user, setUser] = useState({
     fullname: "",
     email: "",
@@ -40,14 +41,14 @@ export const ProfilePage: React.FC = () => {
 
   const handleLogoutClick = async () => {
     try {
-      const response = await fetch("http://localhost:3000/logout");
+      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/logout`);
       if (!response.ok) {
         throw new Error("something went wrong...");
       }
       const data = await response.json();
 
       if (data.success) {
-        window.location.href = "http://localhost:5173/";
+        navigate('/');
       }
     } catch (er) {
       alert("something went wrong and you was not logout...");
@@ -55,7 +56,7 @@ export const ProfilePage: React.FC = () => {
   };
 
   const handleDashboardClick = () => {
-    window.location.href = 'http://localhost:5173/dashboard';
+    navigate('/dashboard');
   };
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -85,7 +86,7 @@ export const ProfilePage: React.FC = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/resetuser", {
+      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/resetuser`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +127,7 @@ export const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await fetch("http://localhost:3000/getcurrentuser", {
+        const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getcurrentuser`, {
           credentials: "include"
         });
 
@@ -342,6 +343,25 @@ export const ProfilePage: React.FC = () => {
             </div>
           </form>
         )}
+        <a
+          href="https://t.me/SoftSkillsCrmSupportbot"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-sky-500 hover:text-sky-600 transition-colors group"
+        >
+          Поддержка
+          <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
+        </a>
+        <br/>
+        <a
+        onClick={() => {navigate('/Feedback')}}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-sky-500 hover:text-sky-600 transition-colors group"
+        >
+          Оставить отзыв
+          <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
+        </a>
       </main>
     </div>
   );
