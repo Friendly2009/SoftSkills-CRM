@@ -1,8 +1,8 @@
-import { Response } from 'express';
+import { Response } from "express";
 import pool from "../data_base_connect.js";
-import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { RowDataPacket, ResultSetHeader } from "mysql2";
 
-import { Request } from 'express';
+import { Request } from "express";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -12,34 +12,57 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export const create_feedback = async (req: Request, res: Response): Promise<void> => {
+export const create_feedback = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { message, rate } = req.body;
-    const userId = req.session.user_id; 
+    const userId = req.session.user_id;
 
     if (!userId) {
-      res.status(401).json({ error: 'Пользователь не авторизован (сессия отсутствует)' });
+      res
+        .status(401)
+        .json({ error: "Пользователь не авторизован (сессия отсутствует)" });
       return;
     }
 
     if (!message || !rate || rate < 1 || rate > 5) {
-      res.status(400).json({ error: 'Неверные данные формы' });
+      res.status(400).json({ error: "Неверные данные формы" });
       return;
     }
-
-    const [result] = await pool.execute<ResultSetHeader>(
-      'INSERT INTO feedbacks (message, user_id, rate) VALUES (?, ?, ?)',
-      [message, userId, rate]
+    const [existing] = await pool.execute<RowDataPacket[]>(
+      "SELECT id FROM feedbacks WHERE user_id = ?",
+      [userId],
     );
 
-    res.status(201).json({ message: 'Отзыв добавлен', feedbackId: result.insertId });
+    if (existing.length > 0) {
+      res
+        .status(400)
+        .json({
+          error:
+            "Вы уже оставили отзыв. Можно иметь только один отзыв в системе.",
+        });
+      return;
+    }
+    const [result] = await pool.execute<ResultSetHeader>(
+      "INSERT INTO feedbacks (message, user_id, rate) VALUES (?, ?, ?)",
+      [message, userId, rate],
+    );
+
+    res
+      .status(201)
+      .json({ message: "Отзыв добавлен", feedbackId: result.insertId });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.status(500).json({ error: "Ошибка сервера" });
   }
 };
 
-export const get_all_feedbacks = async (req: Request, res: Response): Promise<void> => {
+export const get_all_feedbacks = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const [rows] = await pool.execute<RowDataPacket[]>(
       `SELECT f.id, f.message, f.rate, f.created_at, f.user_id,
@@ -47,101 +70,112 @@ export const get_all_feedbacks = async (req: Request, res: Response): Promise<vo
        FROM feedbacks f
        INNER JOIN users u ON f.user_id = u.id
        INNER JOIN company c ON u.company_id = c.id
-       ORDER BY f.created_at DESC`
+       ORDER BY f.created_at DESC`,
     );
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.status(500).json({ error: "Ошибка сервера" });
   }
 };
 
-export const get_my_feedbacks = async (req: Request, res: Response): Promise<void> => {
+export const get_my_feedbacks = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const userId = req.session.user_id;
 
     if (!userId) {
-      res.status(401).json({ error: 'Сессия не найдена' });
+      res.status(401).json({ error: "Сессия не найдена" });
       return;
     }
 
     const [rows] = await pool.execute<RowDataPacket[]>(
-      'SELECT id, message, rate, created_at FROM feedbacks WHERE user_id = ? ORDER BY created_at DESC',
-      [userId]
+      "SELECT id, message, rate, created_at FROM feedbacks WHERE user_id = ? ORDER BY created_at DESC",
+      [userId],
     );
     res.status(200).json(rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.status(500).json({ error: "Ошибка сервера" });
   }
 };
 
-export const update_feedback = async (req: Request, res: Response): Promise<void> => {
+export const update_feedback = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { id } = req.params;
     const { message, rate } = req.body;
     const userId = req.session.user_id;
 
     if (!userId) {
-      res.status(401).json({ error: 'Сессия не найдена' });
+      res.status(401).json({ error: "Сессия не найдена" });
       return;
     }
 
     const [existing] = await pool.execute<RowDataPacket[]>(
-      'SELECT user_id FROM feedbacks WHERE id = ?',
-      [id]
+      "SELECT user_id FROM feedbacks WHERE id = ?",
+      [id],
     );
 
     if (existing.length === 0) {
-      res.status(404).json({ error: 'Отзыв не найден' });
+      res.status(404).json({ error: "Отзыв не найден" });
       return;
     }
 
     if (existing[0].user_id !== userId) {
-      res.status(403).json({ error: 'У вас нет прав на редактирование этого отзыва' });
+      res
+        .status(403)
+        .json({ error: "У вас нет прав на редактирование этого отзыва" });
       return;
     }
 
     await pool.execute(
-      'UPDATE feedbacks SET message = ?, rate = ? WHERE id = ?',
-      [message, rate, id]
+      "UPDATE feedbacks SET message = ?, rate = ? WHERE id = ?",
+      [message, rate, id],
     );
 
-    res.status(200).json({ message: 'Отзыв обновлен' });
+    res.status(200).json({ message: "Отзыв обновлен" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.status(500).json({ error: "Ошибка сервера" });
   }
 };
 
-export const delete_feedback = async (req: Request, res: Response): Promise<void> => {
+export const delete_feedback = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { id } = req.params;
     const userId = req.session.user_id;
     if (!userId) {
-      res.status(401).json({ error: 'Сессия не найдена' });
+      res.status(401).json({ error: "Сессия не найдена" });
       return;
     }
 
     const [existing] = await pool.execute<RowDataPacket[]>(
-      'SELECT user_id FROM feedbacks WHERE id = ?',
-      [id]
+      "SELECT user_id FROM feedbacks WHERE id = ?",
+      [id],
     );
 
     if (existing.length === 0) {
-      res.status(404).json({ error: 'Отзыв не найден' });
+      res.status(404).json({ error: "Отзыв не найден" });
       return;
     }
 
     if (existing[0].user_id !== userId) {
-      res.status(403).json({ error: 'Нет прав на удаление' });
+      res.status(403).json({ error: "Нет прав на удаление" });
       return;
     }
 
-    await pool.execute('DELETE FROM feedbacks WHERE id = ?', [id]);
-    res.status(200).json({ message: 'Отзыв удален' });
+    await pool.execute("DELETE FROM feedbacks WHERE id = ?", [id]);
+    res.status(200).json({ message: "Отзыв удален" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.status(500).json({ error: "Ошибка сервера" });
   }
 };
