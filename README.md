@@ -411,6 +411,120 @@ venv\Scripts\activate
 source venv/bin/activate
 pip install aiogram requests
 ```
+
+### 5. Deploy guide
+This project can be launched in a single command using Docker and Docker Compose. 
+### Prerequisites
+
+Ensure you have Docker and Docker Compose installed on your system before proceeding.
+
+### Deployment Steps
+
+1. Download the release archive and extract its contents into a dedicated directory.
+2. Verify that the `init.sql` file containing the database schema is present in the root directory alongside `docker-compose.yml`.
+3. Open a terminal in the root directory of the extracted project and execute the following command:
+   ```bash
+   docker-compose up -d --build
+   ```
+4. The database engine will spin up and automatically execute the `init.sql` script to construct the schema during the initial boot. The application containers will build and start sequentially once the database becomes available.
+
+frontend:
+```
+FROM node:20-alpine as build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx:stable-alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+backend:
+```docker
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "run", "start"]
+```
+
+support bot:
+```docker
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt* ./
+RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; else pip install --no-cache-dir aiogram requests python-dotenv aiomysql pymysql cryptography; fi
+COPY . .
+CMD ["python", "main.py"]
+```
+
+.yaml:
+```docker
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: crm_mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_here
+      MYSQL_DATABASE: softskills_crm
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  backend:
+    build: ./backend
+    container_name: crm_backend_api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root_password_here
+      - DB_NAME=softskills_crm
+      - VITE_PORT=3000
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: crm_frontend_ui
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - VITE_HOST=http://localhost
+      - VITE_PORT=3000
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+```
+
+### Application Access Endpoints
+
+* Frontend Interface: http://localhost (Port 80)
+* Backend API: http://localhost:3000
+
+### Stopping the Application
+
+To shut down the active application containers and preserve database volumes, run:
+```bash
+docker-compose down
+```
 ## Screenshots
 | | Screenshots | |
 | :---: | :---: | :---: |
