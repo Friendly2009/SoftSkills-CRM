@@ -41,8 +41,8 @@ SET @OLD_UNIQUE_CHECKS = @@UNIQUE_CHECKS, UNIQUE_CHECKS = 0;
 SET @OLD_FOREIGN_KEY_CHECKS = @@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS = 0;
 SET @OLD_SQL_MODE = @@SQL_MODE, SQL_MODE = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
-CREATE SCHEMA IF NOT EXISTS `CheapCRM` DEFAULT CHARACTER SET utf8mb3; 
-USE `CheapCRM`;
+CREATE SCHEMA IF NOT EXISTS `soft-skills crm` DEFAULT CHARACTER SET utf8mb3; 
+USE `soft-skills crm`;
 
 CREATE TABLE IF NOT EXISTS `company` (
     `id` INT NOT NULL AUTO_INCREMENT,
@@ -199,7 +199,44 @@ CREATE TABLE IF NOT EXISTS `leads` (
         REFERENCES `lead_loss_reasons` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
 
-CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`accupancy_rate` AS
+CREATE TABLE `feedbacks` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `message` longtext NOT NULL,
+  `user_id` int NOT NULL,
+  `rate` tinyint NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_fedback_user_idx` (`user_id`),
+  CONSTRAINT `fk_fedback_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tg_users` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `username` varchar(45) NOT NULL,
+  `first_name` varchar(45) NOT NULL,
+  `role` enum('user','admin') NOT NULL DEFAULT 'user',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+CREATE TABLE `tg_messages` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `tg_user_id` bigint NOT NULL,
+  `message` longtext NOT NULL,
+  `direction` enum('inbound','outbound') NOT NULL,
+  `tg_message_id` bigint DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_tg_user_message_idx` (`tg_user_id`),
+  CONSTRAINT `fk_tg_user_message` FOREIGN KEY (`tg_user_id`) REFERENCES `tg_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+ALTER TABLE `tg_users` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE `tg_messages` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+--<================================================>--
+--<======================VIEW======================>--
+--<================================================>--
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`accupancy_rate` AS
 SELECT  
     `u`.`company_id` AS `company_id`,
     `g`.`id` AS `group_id`,
@@ -209,12 +246,12 @@ SELECT
     `u`.`full_name` AS `teacher_name`,
     COUNT(`gm`.`client_id`) AS `current_students`,
     IF((`g`.`max_students` > 0), ROUND(((COUNT(`gm`.`client_id`) / `g`.`max_students`) * 100), 1), 0) AS `occupancy_rate`
-FROM `cheapcrm`.`groups` `g`
-LEFT JOIN `cheapcrm`.`users` `u` ON `g`.`users_id` = `u`.`id`
-LEFT JOIN `cheapcrm`.`group_members` `gm` ON `g`.`id` = `gm`.`group_id`
+FROM ` soft-skills crm`.`groups` `g`
+LEFT JOIN ` soft-skills crm`.`users` `u` ON `g`.`users_id` = `u`.`id`
+LEFT JOIN ` soft-skills crm`.`group_members` `gm` ON `g`.`id` = `gm`.`group_id`
 GROUP BY `g`.`id`, `u`.`id`, `u`.`company_id`;
 
-CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`select_schedules_of_groups` AS
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`select_schedules_of_groups` AS
 SELECT  
     `gs`.`id` AS `schedule_id`,
     `gs`.`day_of_week` AS `day_of_week`,
@@ -223,22 +260,22 @@ SELECT
     `g`.`name` AS `group_name`,
     `u`.`full_name` AS `user_name`,
     `u`.`company_id` AS `company_id`
-FROM `cheapcrm`.`group_schedules` `gs`
-JOIN `cheapcrm`.`groups` `g` ON `gs`.`group_id` = `g`.`id`
-JOIN `cheapcrm`.`users` `u` ON `g`.`users_id` = `u`.`id`;
+FROM ` soft-skills crm`.`group_schedules` `gs`
+JOIN ` soft-skills crm`.`groups` `g` ON `gs`.`group_id` = `g`.`id`
+JOIN ` soft-skills crm`.`users` `u` ON `g`.`users_id` = `u`.`id`;
 
-CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`state_clients_balance` AS
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`state_clients_balance` AS
 SELECT  
     `c`.`id` AS `company_id`,
     `c`.`name` AS `company_name`,
     SUM(CASE WHEN `cl`.`balance` > 0 THEN 1 ELSE 0 END) AS `client_with_positive_account`,
     SUM(CASE WHEN `cl`.`balance` <= 0 THEN 1 ELSE 0 END) AS `client_wth_negative_account`,
     COUNT(`cl`.`id`) AS `total_clients`
-FROM `cheapcrm`.`company` `c`
-LEFT JOIN `cheapcrm`.`clients` `cl` ON `c`.`id` = `cl`.`company_id`
+FROM ` soft-skills crm`.`company` `c`
+LEFT JOIN ` soft-skills crm`.`clients` `cl` ON `c`.`id` = `cl`.`company_id`
 GROUP BY `c`.`id`, `c`.`name`;
 
-CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`v_lesson_details` AS
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`v_lesson_details` AS
 SELECT  
     `l`.`id` AS `lesson_id`,
     `l`.`lesson_date` AS `lesson_date`,
@@ -256,27 +293,27 @@ SELECT
     `u`.`balance` AS `teacher_balance`,
     `c`.`id` AS `company_id`,
     `c`.`name` AS `company_name`,
-    (SELECT COUNT(0) FROM `cheapcrm`.`group_members` `gm` WHERE `gm`.`group_id` = `g`.`id`) AS `current_students_count`, 
+    (SELECT COUNT(0) FROM ` soft-skills crm`.`group_members` `gm` WHERE `gm`.`group_id` = `g`.`id`) AS `current_students_count`, 
     IFNULL(SUM(`la`.`amount_charged`), 0.00) AS `total_revenue_charged`
-FROM `cheapcrm`.`lessons` `l`
-JOIN `cheapcrm`.`groups` `g` ON `l`.`group_id` = `g`.`id`
-JOIN `cheapcrm`.`users` `u` ON `l`.`user_id` = `u`.`id`
-JOIN `cheapcrm`.`company` `c` ON `u`.`company_id` = `c`.`id`
-LEFT JOIN `cheapcrm`.`lesson_attendance` `la` ON `l`.`id` = `la`.`lesson_id`
+FROM ` soft-skills crm`.`lessons` `l`
+JOIN ` soft-skills crm`.`groups` `g` ON `l`.`group_id` = `g`.`id`
+JOIN ` soft-skills crm`.`users` `u` ON `l`.`user_id` = `u`.`id`
+JOIN ` soft-skills crm`.`company` `c` ON `u`.`company_id` = `c`.`id`
+LEFT JOIN ` soft-skills crm`.`lesson_attendance` `la` ON `l`.`id` = `la`.`lesson_id`
 GROUP BY `l`.`id`, `g`.`id`, `u`.`id`, `c`.`id`;
 
-CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`view_company_finance` AS
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`view_company_finance` AS
 SELECT  
     `c`.`id` AS `company_id`,
     `c`.`name` AS `company_name`,
     COUNT(`cl`.`id`) AS `total_clients`,
     SUM(`cl`.`balance`) AS `total_balance`,
     ROUND(AVG(`cl`.`balance`), 2) AS `average_client_balance`
-FROM `cheapcrm`.`company` `c`
-LEFT JOIN `cheapcrm`.`clients` `cl` ON `c`.`id` = `cl`.`company_id`
+FROM ` soft-skills crm`.`company` `c`
+LEFT JOIN ` soft-skills crm`.`clients` `cl` ON `c`.`id` = `cl`.`company_id`
 GROUP BY `c`.`id`, `c`.`name`;
 
-CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`view_groups_analytics` AS
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`view_groups_analytics` AS
 SELECT  
     `g`.`id` AS `group_id`,
     `g`.`name` AS `group_name`,
@@ -288,14 +325,14 @@ SELECT
     ROUND(((COUNT(DISTINCT `gm`.`client_id`) / `g`.`max_students`) * 100), 2) AS `occupancy_rate_percent`,
     COUNT(DISTINCT CASE WHEN `l`.`status` = 2 THEN `l`.`id` END) AS `conducted_lessons_count`,
     ROUND(((COUNT(CASE WHEN `la`.`attendance_status` = 1 AND `l`.`status` = 2 THEN 1 END) / NULLIF(COUNT(CASE WHEN `l`.`status` = 2 THEN `la`.`client_id` END), 0)) * 100), 2) AS `attendance_rate_percent`
-FROM `cheapcrm`.`groups` `g`
-JOIN `cheapcrm`.`users` `u` ON `g`.`users_id` = `u`.`id`
-LEFT JOIN `cheapcrm`.`group_members` `gm` ON `g`.`id` = `gm`.`group_id`
-LEFT JOIN `cheapcrm`.`lessons` `l` ON `g`.`id` = `l`.`group_id`
-LEFT JOIN `cheapcrm`.`lesson_attendance` `la` ON `l`.`id` = `la`.`lesson_id`
+FROM ` soft-skills crm`.`groups` `g`
+JOIN ` soft-skills crm`.`users` `u` ON `g`.`users_id` = `u`.`id`
+LEFT JOIN ` soft-skills crm`.`group_members` `gm` ON `g`.`id` = `gm`.`group_id`
+LEFT JOIN ` soft-skills crm`.`lessons` `l` ON `g`.`id` = `l`.`group_id`
+LEFT JOIN ` soft-skills crm`.`lesson_attendance` `la` ON `l`.`id` = `la`.`lesson_id`
 GROUP BY `g`.`id`, `g`.`name`, `g`.`status`, `u`.`company_id`, `u`.`full_name`, `g`.`max_students`;
 
-CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`view_leads_conversion` AS
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`view_leads_conversion` AS
 SELECT 
     `c`.`id` AS `company_id`,
     `c`.`name` AS `company_name`,
@@ -311,11 +348,11 @@ SELECT
         NULLIF(SUM(CASE WHEN `l`.`status` IN ('won', 'lost') THEN 1 ELSE 0 END), 0)) * 100, 
         2
     ) AS `conversion_rate_percent`
-FROM `cheapcrm`.`company` `c`
-LEFT JOIN `cheapcrm`.`leads` `l` ON `c`.`id` = `l`.`company_id`
+FROM ` soft-skills crm`.`company` `c`
+LEFT JOIN ` soft-skills crm`.`leads` `l` ON `c`.`id` = `l`.`company_id`
 GROUP BY `c`.`id`, `c`.`name`;
 
-CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW `cheapcrm`.`view_leads_loss_analytics` AS
+CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`view_leads_loss_analytics` AS
 SELECT 
     `l`.`company_id` AS `company_id`,
     `llr`.`id` AS `reason_id`,
@@ -323,11 +360,11 @@ SELECT
     COUNT(`l`.`id`) AS `total_dropped_leads`,
     ROUND(
         (COUNT(`l`.`id`) / 
-        NULLIF((SELECT COUNT(1) FROM `cheapcrm`.`leads` WHERE `status` = 'lost' AND `company_id` = `l`.`company_id`), 0)) * 100, 
+        NULLIF((SELECT COUNT(1) FROM ` soft-skills crm`.`leads` WHERE `status` = 'lost' AND `company_id` = `l`.`company_id`), 0)) * 100, 
         2
     ) AS `reason_share_percent`
-FROM `cheapcrm`.`lead_loss_reasons` `llr`
-JOIN `cheapcrm`.`leads` `l` ON `llr`.`id` = `l`.`loss_reason_id`
+FROM ` soft-skills crm`.`lead_loss_reasons` `llr`
+JOIN ` soft-skills crm`.`leads` `l` ON `llr`.`id` = `l`.`loss_reason_id`
 WHERE `l`.`status` = 'lost'
 GROUP BY `l`.`company_id`, `llr`.`id`, `llr`.`reason_text`
 ORDER BY `total_dropped_leads` DESC;
@@ -365,6 +402,14 @@ npm install
 npm install @hello-pangea/dnd clsx lucide-react react react-dom react-router-dom recharts tailwind-merge
 npm install --save-dev @tailwindcss/vite @testing-library/jest-dom @testing-library/react @testing-library/user-event @types/node @types/react @types/react-dom @vitejs/plugin-react @vitest/ui jsdom msw tailwindcss typescript vite vite-plugin-singlefile vitest
 npm run dev
+```
+
+#### Start Bot
+```bash
+cd backend/bot
+venv\Scripts\activate
+source venv/bin/activate
+pip install aiogram requests
 ```
 ## Screenshots
 | | Screenshots | |
