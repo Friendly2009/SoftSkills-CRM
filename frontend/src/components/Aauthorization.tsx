@@ -26,19 +26,29 @@ export const LoginForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Ошибка авторизации');
+        let serverErrorText = "";
+        try {
+          const errData = await response.json();
+          serverErrorText = JSON.stringify(errData);
+        } catch {
+          serverErrorText = await response.text();
+        }
+
+        console.error(`Сервер вернул статус: ${response.status} (${response.statusText})`);
+        console.error(`Сообщение от сервера: ${serverErrorText}`);
+
+        throw new Error(`Не авторизован. Статус: ${response.status}`);
       }
 
       const data = await response.json();
-
       console.log('Успешный вход:' + JSON.stringify(data));
-
       navigate('/dashboard');
-    } catch (ex) {
 
+    } catch (ex) {
       console.error(ex);
     }
   };
+
   const handleSupportClick = async () => {
     navigate('/support');
   };

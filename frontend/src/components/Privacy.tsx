@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import register from '@/components/cssmoduls/Signup.module.css'
+import register from '@/components/cssmoduls/signup.module.css'
 import { useEffect } from "react";
 import { Footer } from "./Footer";
 export const PrivacyPolicy: React.FC = () => {

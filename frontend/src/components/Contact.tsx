@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import register from '@/components/cssmoduls/Signup.module.css'
+import register from '@/components/cssmoduls/signup.module.css'
 import { Footer } from './Footer';
 
 export const ContactsPage: React.FC = () => {

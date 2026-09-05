@@ -1,12 +1,9 @@
 backend/.env
 backend/api.http
 backend/node_modules/
-frontend/node_modules/
 backend/.sql
-frontend/node_modules/.vite/deps/_metadata.json
-frontend/node_modules/.vite/deps/react_jsx-dev-runtime.js
-frontend/node_modules/.vite/deps/react_jsx-runtime.js
-frontend/node_modules/.vite/deps/react-dom_client.js
-frontend/node_modules/.vite/deps/react-dom.js
-frontend/node_modules/.vite/deps/react.js
+frontend/node_modules/
 *.env
+/backend/bot/venv/
+Dockerfile
+docker-compose.yml

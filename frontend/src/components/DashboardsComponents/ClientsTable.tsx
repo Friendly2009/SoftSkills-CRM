@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import style from '../cssmoduls/DashboardComponentsCssModuls/client.module.css';
+import style from '../cssmoduls/dashboardcomponentscssmoduls/client.module.css';
 import { MoreAction } from '@/components/DashboardsComponents/СlientsComponents/MoreActions.tsx';
 import { deleteClient, getClient, addClient, updateClient } from '../../logic/ClientRequests.ts';
 import { ClientTemplate, MoreActionProps } from "@/interfaces/clientsInterfaces.ts";

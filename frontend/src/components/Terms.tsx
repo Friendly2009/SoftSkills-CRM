@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import register from '@/components/cssmoduls/Signup.module.css'
+import register from '@/components/cssmoduls/signup.module.css'
 import { Footer } from "./Footer";
 export const TermsOfService: React.FC = () => {
     const navigate = useNavigate();

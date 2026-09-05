@@ -11,9 +11,11 @@ const app: Express = express();
 const FRONTEND_PORT = process.env.FRONTEND_PORT;
 const FRONTEND_HOST = process.env.FRONTEND_HOST;
 app.use(cors({
-  origin: `http://${FRONTEND_HOST}:${FRONTEND_PORT}`, 
+  origin: true,
   credentials: true,          
 }));
+
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

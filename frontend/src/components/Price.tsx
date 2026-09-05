@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PriceCard } from '@/components/Prices/PriceCard';
-import styles from '@/components/cssmoduls/Pricing.module.css';
+import styles from '@/components/cssmoduls/pricing.module.css';
 import style from '@/components/cssmoduls/index.module.css';
-import register from '@/components/cssmoduls/Signup.module.css'
+import register from '@/components/cssmoduls/signup.module.css'
 
 export const PricingSection = () => {
     const navigate = useNavigate();

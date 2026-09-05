@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import styles from '@/components/cssmoduls/PricingPage.module.css';
+import styles from '@/components/cssmoduls/pricingpage.module.css';
 import style from '@/components/cssmoduls/index.module.css'
 import { useState } from 'react';
 interface TariffDetails {

@@ -1,0 +1,6 @@
+node_modules
+backend/node_modules
+backend/bot/venv
+backend/bot/logs.txt
+dist
+*.env
