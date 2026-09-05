@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import register from './CssModuls/signup.module.css'
 import { useNavigate } from 'react-router-dom';
-import { Footer } from "./Footer";
 
 export const RegisterForm = () => {
   const navigate = useNavigate();
@@ -124,13 +123,13 @@ export const RegisterForm = () => {
               </div>
 
             </div>
-            <p>Вы выбрали пробный период (0₽ / 14 дней), для смены тарифа перейдите в <a className={register['price-more-btn']} onClick={() => { navigate('/price') }}>тарифы</a></p>
-            <div className={register['checkbox-group']}>
+            <div className={register.subtitle}>
               <input
                 type="checkbox"
                 id="terms"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
+                style={{margin: 10}}
               />
               <label htmlFor="terms">
                 Я согласен с условиями <a href="/terms" target="_blank" rel="noreferrer">Публичной оферты</a> и <a href="/privacy" target="_blank" rel="noreferrer">Политикой конфиденциальности</a>.
@@ -142,7 +141,6 @@ export const RegisterForm = () => {
           </form>
         </div>
       </div>
-      <Footer />
     </>
   );
 };

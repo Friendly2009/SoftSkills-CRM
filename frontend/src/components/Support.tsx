@@ -1,117 +1,65 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Footer } from './Footer';
 import { useNavigate } from 'react-router-dom';
-import register from '@/components/cssmoduls/Signup.module.css'
 
 export const SupportPage: React.FC = () => {
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const navigate = useNavigate();
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('loading');
-
-    const BOT_TOKEN = "ВАШ_ТОКЕН_БОТА";
-    const CHAT_ID = "ВАШ_CHAT_ID_ИЛИ_ГРУППЫ";
-
-    const text = `🚨 *Новое обращение в поддержку*\n\n` +
-      `📌 *Тема:* ${subject}\n` +
-      `💬 *Сообщение:* ${message}`;
-
-    try {
-      const response = await fetch(`https://telegram.org{BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: text,
-          parse_mode: 'Markdown',
-        }),
-      });
-
-      if (response.ok) {
-        setStatus('success');
-        setSubject('');
-        setMessage('');
-      } else {
-        setStatus('error');
-      }
-    } catch (error) {
-      console.error(error);
-      setStatus('error');
-    }
-  };
+  const BOT_LINK = "https://t.me/SoftSkillsCrmSupportbot"; 
 
   return (
     <>
-      <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-800 antialiased">
-        <div className="max-w-xl mx-auto bg-white shadow-md rounded-xl p-6 sm:p-10 border border-slate-200">
-          <button className={register['back-btn']} onClick={() => navigate('/')} style={{ position: "fixed" }}><img src="/img/user/dashboard/angle-left-solid.png" className={register['back-icon']} alt="exit" /></button>
-          <header className="border-b border-slate-200 pb-6 mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight uppercase">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/30 py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-800 antialiased flex flex-col justify-between">
+        <div className="max-w-xl mx-auto w-full bg-white shadow-xl shadow-indigo-100/40 rounded-2xl p-6 sm:p-10 border border-slate-100 relative mt-8">
+          
+          <header className="border-b border-slate-100 pb-6 mb-8">
+          <div className="flex items-center gap-4 mb-3">
+            <button 
+              className="p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200/60 hover:border-indigo-200 text-slate-600 hover:text-indigo-600 transition-all cursor-pointer shadow-sm hover:shadow-md flex items-center justify-center group"
+              onClick={() => navigate('/')}
+              title="Назад"
+            >
+              <svg 
+                xmlns="http://w3.org" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                strokeWidth="2.5" 
+                stroke="currentColor" 
+                className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight uppercase bg-gradient-to-r from-slate-900 to-indigo-950 bg-clip-text text-transparent">
               Служба поддержки
             </h1>
-            <p className="text-md font-medium text-indigo-600 mt-1">
-              Сервис «softskills crm» (Бета-версия)
-            </p>
-          </header>
+          </div>
 
-          {status === 'success' && (
-            <div className="mb-6 p-4 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 text-sm">
-              ✅ Обращение успешно отправлено! Мы уже получили его в Telegram и скоро свяжемся с вами.
-            </div>
-          )}
-          {status === 'error' && (
-            <div className="mb-6 p-4 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 text-sm">
-              ❌ Ошибка при отправке. Пожалуйста, попробуйте позже или напишите на почту admin@example.com
-            </div>
-          )}
+          <p className="text-sm font-semibold text-indigo-600 tracking-wider uppercase flex items-center gap-2">
+            Сервис «softskills crm» 
+            <span className="px-2 py-0.5 text-xs bg-indigo-50 text-indigo-700 rounded-full font-bold border border-indigo-100">
+              Бета
+            </span>
+          </p>
+        </header>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="subject" className="block text-sm font-semibold text-slate-900 mb-2">
-                Тема обращения / Где нашли баг?
-              </label>
-              <input
-                type="text"
-                id="subject"
-                required
-                disabled={status === 'loading'}
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Например: Не прожимается кнопка баланса"
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition-all disabled:opacity-50"
-              />
+          <div className="mb-8 p-4 bg-gradient-to-r from-sky-50 to-indigo-50/50 rounded-xl border border-sky-100 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">💬</span>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">Есть срочный вопрос?</h4>
+                <p className="text-xs text-slate-500">Напишите нашему боту напрямую для быстрого ответа</p>
+              </div>
             </div>
-
-            <div>
-              <label htmlFor="message" className="block text-sm font-semibold text-slate-900 mb-2">
-                Подробное описание проблемы
-              </label>
-              <textarea
-                id="message"
-                required
-                rows={5}
-                disabled={status === 'loading'}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Опишите ваши действия перед багом..."
-                className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition-all resize-none disabled:opacity-50"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={status === 'loading'}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-4 rounded-lg shadow-sm text-sm tracking-wide transition-colors cursor-pointer text-center disabled:opacity-50"
+            <a 
+              href={BOT_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white font-medium text-xs px-3.5 py-2 rounded-lg shadow-sm transition-all whitespace-nowrap hover:shadow"
             >
-              {status === 'loading' ? 'Отправка...' : 'Отправить в поддержку'}
-            </button>
-          </form>
-
+              Открыть TG
+            </a>
+          </div>
         </div>
       </div>
       <Footer />

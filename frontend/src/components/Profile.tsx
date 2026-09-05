@@ -343,6 +343,25 @@ export const ProfilePage: React.FC = () => {
             </div>
           </form>
         )}
+        <a
+          href="https://t.me/SoftSkillsCrmSupportbot"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-sky-500 hover:text-sky-600 transition-colors group"
+        >
+          Поддержка
+          <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
+        </a>
+        <br/>
+        <a
+        onClick={() => {navigate('/feedback')}}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-sky-500 hover:text-sky-600 transition-colors group"
+        >
+          Оставить отзыв
+          <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
+        </a>
       </main>
     </div>
   );
