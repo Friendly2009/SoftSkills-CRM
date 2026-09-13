@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import style from './cssmoduls/dashboard.module.css';
+import style from '@/components/css/dashboard.module.css';
 import { UsersTable } from './DashboardsComponents/UsersTable.tsx';
 import { ClientTable } from './DashboardsComponents/ClientsTable.tsx';
 import { GroupTable } from './DashboardsComponents/GroupsTable.tsx'

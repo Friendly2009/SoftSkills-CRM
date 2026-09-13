@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import styles from './cssmoduls/profile.module.css';
+import styles from '@/components/css/profile.module.css';
 import { useNavigate } from 'react-router-dom';
 
 export const ProfilePage: React.FC = () => {
