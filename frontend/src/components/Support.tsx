@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const SupportPage: React.FC = () => {
   const navigate = useNavigate();
-  const BOT_LINK = "https://t.me/SoftSkillsCrmSupportbot"; 
+  const BOT_LINK = "https://t.me/imchelovek09"; 
 
   return (
     <>

@@ -344,7 +344,7 @@ export const ProfilePage: React.FC = () => {
           </form>
         )}
         <a
-          href="https://t.me/SoftSkillsCrmSupportbot"
+          href="https://t.me/imchelovek09"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-sm font-semibold text-sky-500 hover:text-sky-600 transition-colors group"
