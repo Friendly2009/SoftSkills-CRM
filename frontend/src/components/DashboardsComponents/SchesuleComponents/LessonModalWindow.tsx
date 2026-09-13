@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import styles from "@/components/cssmoduls/dashboardcomponentscssmoduls/lessonModal.module.css";
+import styles from "@/components/css/dashboard/lessonModal.module.css";
 import { LessonModalData } from "@/interfaces/scheduleInterfaces";
 import { getLessonModal, formatDateToString } from "@/logic/SchedulesRequest.ts";
 

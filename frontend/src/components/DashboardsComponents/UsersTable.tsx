@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import style from '../cssmoduls/dashboardcomponentscssmoduls/user.module.css';
+import style from '@/components/css/dashboard/user.module.css';
 
 interface UserTemplate {
     id: number;

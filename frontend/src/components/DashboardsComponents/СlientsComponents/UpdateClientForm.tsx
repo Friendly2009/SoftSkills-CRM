@@ -1,5 +1,5 @@
 import React from "react";
-import style from '@/components/cssmoduls/dashboardcomponentscssmoduls/client.module.css';
+import style from '@/components/css/dashboard/client.module.css';
 import { ClientTemplate } from "@/interfaces/clientsInterfaces";
 
 interface UpdateClientFormProps {

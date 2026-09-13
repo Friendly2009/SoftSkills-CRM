@@ -1,4 +1,4 @@
-import style from './cssmoduls/index.module.css';
+import style from '@/components/css/index.module.css';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from './Footer';
 

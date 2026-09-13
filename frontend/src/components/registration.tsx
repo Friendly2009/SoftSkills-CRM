@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import register from './cssmoduls/signup.module.css'
+import register from '@/components/css/signup.module.css'
 import { useNavigate } from 'react-router-dom';
 
 export const RegisterForm = () => {

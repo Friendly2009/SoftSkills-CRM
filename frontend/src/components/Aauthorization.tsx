@@ -1,5 +1,5 @@
 import { useState } from "react";
-import login from './cssmoduls/login.module.css'
+import login from '@/components/css/login.module.css'
 import { useNavigate } from 'react-router-dom';
 
 export const LoginForm = () => {

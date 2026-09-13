@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/components/cssmoduls/pricing.module.css';
+import styles from '@/components/css/pricing.module.css';
 
 interface PriceCardProps {
   level: string;
