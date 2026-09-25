@@ -3,6 +3,7 @@ backend/api.http
 backend/node_modules/
 backend/.sql
 frontend/node_modules/
+frontend/dist/
 *.env
 /backend/bot/venv/
 Dockerfile
