@@ -88,18 +88,21 @@ export const Dashboard: React.FC = () => {
           >
             <img src="/img/user/dashboard/plus-solid.png" alt="" className={style['nav-icon']} />
           </div>
-
+            */}
+          {/*
           <div className={style['icon-box']}><img src="/img/user/dashboard/wrench-solid.png" alt="" className={style['nav-icon']} /></div>
           <div className={style['icon-box']}><img src="/img/user/dashboard/envelope-solid.png" alt="" className={style['nav-icon']} /></div>
           <div className={style['icon-box']}><img src="/img/user/dashboard/mobile-solid.png" alt="" className={style['nav-icon']} /></div>
+            */}
           <div className={style['icon-box']}><img src="/img/user/dashboard/telegram-brands-solid.png" alt="" className={style['nav-icon']} /></div>
+          <div className={style['icon-box']}><img src="/img/user/dashboard/file.png" alt="" className={style['nav-icon']} /></div>
+          {/*
           <div className={style['icon-box']}><img src="/img/user/dashboard/cart-shopping-solid.png" alt="" className={style['nav-icon']} /></div>
           <div className={style['icon-box']}><img src="/img/user/dashboard/bell-regular.png" alt="" className={style['nav-icon']} /></div>
-
           <div className={style['search-container']}>
             <input type="text" placeholder="Поиск клиента" />
-          </div>
-          */}
+          </div>*/}
+
         </div>
 
         <div
