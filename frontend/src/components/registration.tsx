@@ -16,7 +16,7 @@ export const RegisterForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Подайте заявку на бета тестирование, написав в поддержке https://t.me/SoftSkillsCrmSupportbot");
+    alert("Подайте заявку на бета тестирование, написав в поддержке https://t.me/imchelovek09");
     return;
     //IN FEATURE
     if (!agreeTerms) {
@@ -56,7 +56,7 @@ export const RegisterForm = () => {
             <h2 className={register.title}>Создать центр</h2>
             <p className={register.subtitle}>Присоединяйтесь к нашей CRM системе</p>
           </div>
-          <p>Подайте заявку на бета тестирование, написав в поддержку https://t.me/SoftSkillsCrmSupportbot</p>
+          <p>Подайте заявку на бета тестирование, написав в поддержку https://t.me/imchelovek09"</p>
           {/*<form className={register.form} onSubmit={handleSubmit}>
             <div className={register['inputs-container']}>
 
