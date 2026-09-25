@@ -1,7 +1,7 @@
 {
   "name": "soft-skills-crm-frontend",
   "private": true,
-  "version": "0.2.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "caniuse-lite": "^1.0.30001810",
     "clsx": "2.1.1",
     "lucide-react": "^1.31.0",
     "react": "19.2.3",

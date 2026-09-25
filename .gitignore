@@ -1,9 +1,15 @@
-backend/.env
-backend/api.http
-backend/node_modules/
-backend/.sql
-frontend/node_modules/
+node_modules/
+venv/
+.vite/
+
 *.env
-/backend/bot/venv/
-Dockerfile
-docker-compose.yml
+.env.*
+! .env.example
+
+backend/.sql
+backend/api.http
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
