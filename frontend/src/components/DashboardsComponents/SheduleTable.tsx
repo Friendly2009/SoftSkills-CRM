@@ -44,57 +44,65 @@ export const ScheduleTable: React.FC = () => {
         const { templates, realLessons } = result.data;
         const generatedLessonsList: PhantomLesson[] = [];
 
-        const uniqueTemplates = Array.isArray(templates)
-          ? templates.filter((v, i, a) => a.findIndex(t => t.schedule_id === v.schedule_id) === i)
-          : [];
+        const safeRealLessons = Array.isArray(realLessons) ? realLessons : [];
+        const safeTemplates = Array.isArray(templates) ? templates : [];
+
+        
+        const templatesByDay: Record<number, any> = {};
+        safeTemplates.forEach((template: any) => {
+          const dayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase().trim()];
+          if (dayIndex !== undefined && !templatesByDay[dayIndex]) {
+            templatesByDay[dayIndex] = template;
+          }
+        });
 
         weekDays.forEach((dayDate) => {
           const currentDayIndex = dayDate.getDay();
           const dateStr = formatToLocalDateStr(dayDate);
 
-          uniqueTemplates.forEach((template: any) => {
-            const targetDayIndex = dayOfWeekMapping[template.day_of_week.toLowerCase().trim()];
-
-            if (targetDayIndex === currentDayIndex) {
-              const realLesson = Array.isArray(realLessons) && realLessons.find((rl: any) => {
-                const rlDateStr = String(rl.lesson_date).split('T')[0];
-                return Number(rl.group_id) === Number(template.group_id) && rlDateStr === dateStr;
-              });
-
-              if (realLesson) {
-                generatedLessonsList.push({
-                  id: String(realLesson.id),
-                  schedule_id: template.schedule_id,
-                  lesson_date: new Date(dayDate),
-                  start_time: String(realLesson.start_time).substring(0, 5),
-                  end_time: String(realLesson.end_time).substring(0, 5),
-                  group_name: template.group_name,
-                  group_id: template.group_id,
-                  user_name: template.user_name,
-                  status: Number(realLesson.status)
-                });
-              } else {
-                generatedLessonsList.push({
-                  id: `temp-${template.schedule_id}-${dateStr}`,
-                  schedule_id: template.schedule_id,
-                  lesson_date: new Date(dayDate),
-                  start_time: String(template.start_time).substring(0, 5),
-                  end_time: String(template.end_time).substring(0, 5),
-                  group_name: template.group_name,
-                  group_id: template.group_id,
-                  user_name: template.user_name,
-                  status: 1
-                });
-              }
-            }
+          const realLessonsThisDay = safeRealLessons.filter((rl: any) => {
+            const rlDateStr = String(rl.lesson_date).split('T')[0];
+            return rlDateStr === dateStr;
           });
+
+          if (realLessonsThisDay.length > 0) {
+            realLessonsThisDay.forEach((realLesson: any) => {
+              const relatedTemplate = safeTemplates.find((t: any) => Number(t.lesson_id) === Number(realLesson.id));
+
+              generatedLessonsList.push({
+                id: String(realLesson.id),
+                schedule_id: relatedTemplate?.schedule_id || realLesson.id,
+                lesson_date: new Date(dayDate),
+                start_time: String(realLesson.start_time).substring(0, 5),
+                end_time: String(realLesson.end_time).substring(0, 5),
+                group_name: realLesson.group_name || relatedTemplate?.group_name || "Без названия",
+                group_id: realLesson.group_id || relatedTemplate?.group_id,
+                user_name: relatedTemplate?.user_name || "Не назначен",
+                status: Number(realLesson.status)
+              });
+            });
+          } else {
+            const dayTemplate = templatesByDay[currentDayIndex];
+            if (dayTemplate) {
+              generatedLessonsList.push({
+                id: `temp-${dayTemplate.schedule_id}-${dateStr}`,
+                schedule_id: dayTemplate.schedule_id,
+                lesson_date: new Date(dayDate),
+                start_time: String(dayTemplate.start_time).substring(0, 5),
+                end_time: String(dayTemplate.end_time).substring(0, 5),
+                group_name: dayTemplate.group_name,
+                group_id: dayTemplate.group_id || dayTemplate.lesson_id,
+                user_name: dayTemplate.user_name,
+                status: 1
+              });
+            }
+          }
         });
-        console.log("=== ДАННЫЕ С БЭКЕНДА ===");
-        console.log("Templates:", templates);
-        console.log("Real Lessons:", realLessons);
-        console.log("Week Days:", weekDays.map(d => d.toLocaleDateString('ru-RU')));
+
+        console.log("=== СФОРМИРОВАННЫЙ СПИСОК УРОКОВ ===", generatedLessonsList);
         setLessons(generatedLessonsList);
       }
+
     } catch (error) {
       console.error("Ошибка при генерации умной сетки расписания:", error);
     }
@@ -128,7 +136,7 @@ export const ScheduleTable: React.FC = () => {
   };
 
   const timeSlots = Array.from({ length: 17 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
-  
+
   return (
     <div style={{ padding: '24px', fontFamily: 'system-ui, sans-serif', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>

@@ -42,7 +42,7 @@ export const Analytic: React.FC = () => {
                     </select>
                 </div>
 
-                <div className={styles['analytics-view-toggle']}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-1 bg-[#e2e8f0] p-1 rounded-md w-full md:w-auto">
                     {activeReport === 'groups' && (
                         <>
                             <button onClick={() => setViewMode('table')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'table' ? styles['analytics-toggle-btn--active'] : ''}`}>Таблица</button>
@@ -52,15 +52,55 @@ export const Analytic: React.FC = () => {
 
                     {activeReport === 'main_finance' && (
                         <>
-                            <button onClick={() => setViewMode('revenue')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'revenue' ? styles['analytics-toggle-btn--active'] : ''}`}>Выручка</button>
-                            <button onClick={() => setViewMode('profit')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'profit' ? styles['analytics-toggle-btn--active'] : ''}`}>Чистая прибыль</button>
-                            <button onClick={() => setViewMode('expenses')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'expenses' ? styles['analytics-toggle-btn--active'] : ''}`}>Расходы</button>
-                            <button onClick={() => setViewMode('debts')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'debts' ? styles['analytics-toggle-btn--active'] : ''}`}>Долги клиентов</button>
-                            <button onClick={() => setViewMode('transactions')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'transactions' ? styles['analytics-toggle-btn--active'] : ''}`}>Лента транзакций</button>
-                            <button onClick={() => setViewMode('finance_chart')} className={`${styles['analytics-toggle-btn']} ${viewMode === 'finance_chart' ? styles['analytics-toggle-btn--active'] : ''}`}>Общий график</button>
+                            <button
+                                onClick={() => setViewMode('revenue')}
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-center
+                    ${viewMode === 'revenue' ? 'bg-white text-[#2563eb] shadow-sm' : 'text-[#475569] hover:text-[#0f172a]'}`}
+                            >
+                                Выручка
+                            </button>
+
+                            <button
+                                onClick={() => setViewMode('profit')}
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-center
+                    ${viewMode === 'profit' ? 'bg-white text-[#2563eb] shadow-sm' : 'text-[#475569] hover:text-[#0f172a]'}`}
+                            >
+                                Чистая прибыль
+                            </button>
+
+                            <button
+                                onClick={() => setViewMode('expenses')}
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-center
+                    ${viewMode === 'expenses' ? 'bg-white text-[#2563eb] shadow-sm' : 'text-[#475569] hover:text-[#0f172a]'}`}
+                            >
+                                Расходы
+                            </button>
+
+                            <button
+                                onClick={() => setViewMode('debts')}
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-center
+                    ${viewMode === 'debts' ? 'bg-white text-[#2563eb] shadow-sm' : 'text-[#475569] hover:text-[#0f172a]'}`}
+                            >
+                                Долги клиентов
+                            </button>
+
+                            <button
+                                onClick={() => setViewMode('transactions')}
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-center
+                    ${viewMode === 'transactions' ? 'bg-white text-[#2563eb] shadow-sm' : 'text-[#475569] hover:text-[#0f172a]'}`}
+                            >
+                                Лента транзакций
+                            </button>
+
+                            <button
+                                onClick={() => setViewMode('finance_chart')}
+                                className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-center
+                    ${viewMode === 'finance_chart' ? 'bg-white text-[#2563eb] shadow-sm' : 'text-[#475569] hover:text-[#0f172a]'}`}
+                            >
+                                Общий график
+                            </button>
                         </>
                     )}
-
                 </div>
             </div>
 

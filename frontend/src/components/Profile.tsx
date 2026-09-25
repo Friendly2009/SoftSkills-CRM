@@ -102,8 +102,6 @@ export const ProfilePage: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-        alert("Данные успешно сохранены!");
-
         setUser(prev => ({
           ...prev,
           fullname: formData.fullname,

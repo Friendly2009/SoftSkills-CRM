@@ -14,11 +14,12 @@ import { ContactsPage } from './components/Contact';
 import { ReviewsPage } from './components/Feedback';
 
 function App() {
+  const isDebug = false;
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/authorization" element={<LoginForm />} />
+        <Route path="/authorization" element={<LoginForm isDebug={isDebug}/>} />
         <Route path="/registration" element={<RegisterForm />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route

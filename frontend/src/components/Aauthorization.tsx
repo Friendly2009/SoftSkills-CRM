@@ -1,11 +1,17 @@
 import { useState } from "react";
 import login from './cssmoduls/login.module.css'
 import { useNavigate } from 'react-router-dom';
-
-export const LoginForm = () => {
+import React from "react";
+import { IdebugProps } from "@/interfaces/debugInterface";
+export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    company: '',
+    login: '',
+    password: ''
+  });
+  const [debugFormData, setDebugFormData] = useState({
     company: '',
     login: '',
     password: ''
@@ -15,15 +21,29 @@ export const LoginForm = () => {
   }
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    let response: Response;
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signin`, {
-        credentials: "include",
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      if (isdebug) {
+        const debugResponse = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signin`, {
+          credentials: "include",
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(debugFormData),
+        });
+        response = debugResponse;
+      } else {
+        const releaseResponse = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signin`, {
+          credentials: "include",
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        response = releaseResponse;
+      }
 
       if (!response.ok) {
         let serverErrorText = "";

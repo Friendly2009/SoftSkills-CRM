@@ -147,7 +147,6 @@ export const LeadKanban: React.FC = () => {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                alert(result.message);
                 await getLeads(); 
             } else {
                 alert(result.message || "Ошибка обновления");
