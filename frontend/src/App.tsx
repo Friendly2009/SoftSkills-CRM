@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Index from './components/index';
 import { Dashboard } from './components/Dashboard';
 import { LoginForm } from './components/Aauthorization';
-import { RegisterForm } from './components/registration';
+import { RegisterForm } from './components/Registration';
 import { ProfilePage } from './components/Profile';
 import { ClientProfile } from './components/DashboardsComponents/СlientsComponents/ClientProfile';
 import { PricingSection } from './components/Price';
