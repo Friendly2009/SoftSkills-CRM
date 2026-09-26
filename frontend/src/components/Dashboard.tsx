@@ -7,13 +7,15 @@ import { Analytic } from './DashboardsComponents/Analytics.tsx'
 import { ScheduleTable } from './DashboardsComponents/SheduleTable.tsx';
 import { Expenses } from './DashboardsComponents/Finance.tsx';
 import { LeadsTable } from './DashboardsComponents/LeadsTable.tsx';
+import { useNavigate } from 'react-router-dom';
+
 interface UserProfile {
   fullname: string;
   email: string;
 }
 
 export const Dashboard: React.FC = () => {
-
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string>('analytics');
@@ -88,18 +90,21 @@ export const Dashboard: React.FC = () => {
           >
             <img src="/img/user/dashboard/plus-solid.png" alt="" className={style['nav-icon']} />
           </div>
-
+            */}
+          {/*
           <div className={style['icon-box']}><img src="/img/user/dashboard/wrench-solid.png" alt="" className={style['nav-icon']} /></div>
           <div className={style['icon-box']}><img src="/img/user/dashboard/envelope-solid.png" alt="" className={style['nav-icon']} /></div>
           <div className={style['icon-box']}><img src="/img/user/dashboard/mobile-solid.png" alt="" className={style['nav-icon']} /></div>
-          <div className={style['icon-box']}><img src="/img/user/dashboard/telegram-brands-solid.png" alt="" className={style['nav-icon']} /></div>
+            */}
+          <div className={style['icon-box']} onClick={() => {window.location.href = 'https://t.me/imchelovek09';}}><img src="/img/user/dashboard/telegram-brands-solid.png" alt="" className={style['nav-icon']} /></div>
+          <div className={style['icon-box']} onClick={() => {navigate('/transfer_page')}}><img src="/img/user/dashboard/file.png" alt="" className={style['nav-icon']} /></div>
+          {/*
           <div className={style['icon-box']}><img src="/img/user/dashboard/cart-shopping-solid.png" alt="" className={style['nav-icon']} /></div>
           <div className={style['icon-box']}><img src="/img/user/dashboard/bell-regular.png" alt="" className={style['nav-icon']} /></div>
-
           <div className={style['search-container']}>
             <input type="text" placeholder="Поиск клиента" />
-          </div>
-          */}
+          </div>*/}
+
         </div>
 
         <div

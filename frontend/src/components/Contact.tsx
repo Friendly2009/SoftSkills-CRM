@@ -36,7 +36,7 @@ export const ContactsPage: React.FC = () => {
                                     </p>
                                 </div>
                                 <a
-                                    href="https://t.me"
+                                    href="https://t.me/imchelovek09"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="mt-4 inline-block w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-center py-2.5 px-4 rounded-lg text-sm transition-colors"
@@ -45,7 +45,6 @@ export const ContactsPage: React.FC = () => {
                                 </a>
                             </div>
 
-                            {/* Email */}
                             <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between">
                                 <div>
                                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
