@@ -13,6 +13,7 @@ import { SupportPage } from './components/Support';
 import { ContactsPage } from './components/Contact';
 import { ReviewsPage } from './components/Feedback';
 import { useState } from 'react';
+import { TransferFilesPage } from './components/TransferFilesPage';
 
 function App() {
   const [isDebug, setIsDebug] = useState(true);
@@ -23,6 +24,7 @@ function App() {
         <Route path="/authorization" element={<LoginForm isDebug={isDebug} />} />
         <Route path="/registration" element={<RegisterForm isDebug={isDebug} />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/transfer_page" element={<TransferFilesPage/>}/>
         <Route
           path="/dashboard"
           element={
