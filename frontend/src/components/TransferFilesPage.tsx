@@ -1,3 +1,5 @@
+import { useState, useRef } from "react";
+
 export const TransferFilesPage: React.FC = () => {
     type TransferType = 'employees' | 'clients' | 'leads' | '';
     const [targetType, setTargetType] = useState<TransferType>('');
@@ -6,14 +8,12 @@ export const TransferFilesPage: React.FC = () => {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Обработка выбора файлов через стандартный проводник
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setFile(e.target.files[0]);
         }
     };
 
-    // Логика Drag and Drop (перетаскивание файла мышкой)
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -160,12 +160,3 @@ export const TransferFilesPage: React.FC = () => {
         </div>
     );
 };
-
-function useState<T>(arg0: string): [any, any] {
-    throw new Error("Function not implemented.");
-}
-
-
-function useRef<T>(arg0: null) {
-    throw new Error("Function not implemented.");
-}
