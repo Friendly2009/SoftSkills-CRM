@@ -12,16 +12,17 @@ import { TermsOfService } from './components/Terms';
 import { SupportPage } from './components/Support';
 import { ContactsPage } from './components/Contact';
 import { ReviewsPage } from './components/Feedback';
+import { useState } from 'react';
 import { TransferFilesPage } from './components/TransferFilesPage';
 
 function App() {
-  const isDebug = false;
+  const [isDebug, setIsDebug] = useState(true);
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/authorization" element={<LoginForm isDebug={isDebug}/>} />
-        <Route path="/registration" element={<RegisterForm />} />
+        <Route path="/authorization" element={<LoginForm isDebug={isDebug} />} />
+        <Route path="/registration" element={<RegisterForm isDebug={isDebug} />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/transfer_page" element={<TransferFilesPage/>}/>
         <Route
@@ -33,11 +34,11 @@ function App() {
         <Route path="/dashboard/client/:id" element={<ClientProfile />} />
         <Route path="/price" element={<PricingSection />} />
         <Route path="/tarid-details/:tariffId" element={<PricePage />} />
-        <Route path='/privacy' element={<PrivacyPolicy/>}/>
-        <Route path='/terms' element={<TermsOfService/>}/>
-        <Route path='/support' element={<SupportPage/>}/>
-        <Route path='/Contact' element={<ContactsPage/>}/>
-        <Route path='/Feedback' element={<ReviewsPage/>}/>
+        <Route path='/privacy' element={<PrivacyPolicy />} />
+        <Route path='/terms' element={<TermsOfService />} />
+        <Route path='/support' element={<SupportPage />} />
+        <Route path='/Contact' element={<ContactsPage />} />
+        <Route path='/Feedback' element={<ReviewsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
