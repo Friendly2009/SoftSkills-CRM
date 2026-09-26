@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const TransferFilesPage: React.FC = () => {
     type TransferType = 'employees' | 'clients' | 'leads' | '';
@@ -7,7 +8,7 @@ export const TransferFilesPage: React.FC = () => {
     const [isDragActive, setIsDragActive] = useState<boolean>(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-
+    const navigate = useNavigate()
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setFile(e.target.files[0]);
@@ -64,7 +65,6 @@ export const TransferFilesPage: React.FC = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
 
-                    {/* Блок Селекта */}
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-[#475569]">
                             Категория импортируемых данных
@@ -146,7 +146,7 @@ export const TransferFilesPage: React.FC = () => {
                     <button
                         type="submit"
                         disabled={!targetType || !file}
-                        className={`w-full py-3 px-4 rounded-lg font-medium text-sm transition-all shadow-sm text-center
+                        className={`w-full py-3 px-4 rounded-lg font-medium text-sm transition-all shadow-sm text-center 
               ${(!targetType || !file)
                                 ? 'bg-[#e2e8f0] text-[#94a3b8] cursor-not-allowed'
                                 : 'bg-[#2563eb] hover:bg-[#1d4ed8] text-white active:scale-[0.99] cursor-pointer'
@@ -154,8 +154,18 @@ export const TransferFilesPage: React.FC = () => {
                     >
                         Принять и импортировать
                     </button>
-
                 </form>
+                <div className="flex-1 leading-normal">
+                    <span className={`text-sm font-medium text-[#475569]`}>Переносите данные из другой системы? Ознакомьтесь с нашей инструкцией по </span>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/faq')}
+                        className="font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-800 transition text-sm"
+                    >
+                        экспорту и импорту таблиц из Alpha CRM
+                    </button>
+                    <span>.</span>
+                </div>
             </div>
         </div>
     );
