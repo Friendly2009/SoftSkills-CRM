@@ -41,7 +41,7 @@ export const ProfilePage: React.FC = () => {
 
   const handleLogoutClick = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/logout`);
+      const response = await fetch(`${import.meta.env.VITE_HOST}/logout`);
       if (!response.ok) {
         throw new Error("something went wrong...");
       }
@@ -86,7 +86,7 @@ export const ProfilePage: React.FC = () => {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/resetuser`, {
+      const response = await fetch(`${import.meta.env.VITE_HOST}/resetuser`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +125,7 @@ export const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getcurrentuser`, {
+        const response = await fetch(`${import.meta.env.VITE_HOST}/getcurrentuser`, {
           credentials: "include"
         });
 

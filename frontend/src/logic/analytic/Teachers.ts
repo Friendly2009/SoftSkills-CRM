@@ -2,7 +2,7 @@ import { TeacherWorkloadData } from '@/interfaces/analyticsInterfaces';
 
 export const fetchTeachersWorkload = async (): Promise<TeacherWorkloadData[] | { status: 403 }> => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/hr/get-teachers-workload`, {
+    const response = await fetch(`${import.meta.env.VITE_HOST}/hr/get-teachers-workload`, {
       method: "GET",
       credentials: "include",
     });

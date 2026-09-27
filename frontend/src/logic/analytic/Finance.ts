@@ -1,7 +1,7 @@
 export const get_transactions_list = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get_transactions_list`,
+      `${import.meta.env.VITE_HOST}/get_transactions_list`,
       {
         method: `GET`,
         credentials: `include`,
@@ -27,7 +27,7 @@ export const get_transactions_list = async () => {
 
 export const getRevenueSources = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/revenue-sources`, {
+    const response = await fetch(`${import.meta.env.VITE_HOST}/revenue-sources`, {
       method: `GET`,
       credentials: `include`,
     });
@@ -50,7 +50,7 @@ export const getRevenueSources = async () => {
 
 export const getFinancialTimelineData = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getFinancialTimeline`, {
+    const response = await fetch(`${import.meta.env.VITE_HOST}/getFinancialTimeline`, {
       method: `GET`,
       credentials: `include`,
     });
@@ -77,7 +77,7 @@ export const addManualExpenseRequest = async (expenseData: {
   comment: string;
 }) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/add-expense`, {
+    const response = await fetch(`${import.meta.env.VITE_HOST}/finance/add-expense`, {
       method: "POST",
       headers: {
         "Content-Type": `application/json`,
@@ -100,7 +100,7 @@ export const addManualExpenseRequest = async (expenseData: {
 export const getExpensesData = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/expenses-structure`,
+      `${import.meta.env.VITE_HOST}/finance/expenses-structure`,
       {
         method: `GET`,
         credentials: `include`,
@@ -125,7 +125,7 @@ export const getExpensesData = async () => {
 export const getExpensesStructureData = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/expenses-structure-by-group`,
+      `${import.meta.env.VITE_HOST}/finance/expenses-structure-by-group`,
       {
         method: `GET`,
         credentials: `include`,
@@ -150,7 +150,7 @@ export const getExpensesStructureData = async () => {
 export const getDebtClient = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/client-debtors`,
+      `${import.meta.env.VITE_HOST}/finance/client-debtors`,
       {
         method: `GET`,
         credentials: `include`,
@@ -174,7 +174,7 @@ export const getDebtClient = async () => {
 
 export const fetchFinanceSummary = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/get-all-state`, {
+    const response = await fetch(`${import.meta.env.VITE_HOST}/finance/get-all-state`, {
       method: `GET`,
       credentials: `include`,
     });
@@ -204,7 +204,7 @@ export const fetchFinanceSummary = async () => {
 
 export const getFinanceChartData = async (): Promise<any> => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get-chart-state`, {
+    const response = await fetch(`${import.meta.env.VITE_HOST}/get-chart-state`, {
       method: `GET`,
       credentials: `include`,
     });

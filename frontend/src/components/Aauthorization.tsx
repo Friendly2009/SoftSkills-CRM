@@ -3,7 +3,8 @@ import login from './cssmoduls/login.module.css'
 import { useNavigate } from 'react-router-dom';
 import React from "react";
 import { IdebugProps } from "@/interfaces/debugInterface";
-export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
+
+export const LoginForm: React.FC<IdebugProps> = ({ isdebug }) => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -11,30 +12,27 @@ export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
     login: '',
     password: ''
   });
-  const [debugFormData, setDebugFormData] = useState({
-    company: '',
-    login: '',
-    password: ''
-  });
+
   const backbtnOnClick = () => {
     navigate("/index");
-  }
+  };
+
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     let response: Response;
     try {
       if (isdebug) {
-        const debugResponse = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signin`, {
+        const debugResponse = await fetch(`${import.meta.env.VITE_HOST}/signin`, {
           credentials: "include",
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(debugFormData),
+          body: JSON.stringify(formData), 
         });
         response = debugResponse;
       } else {
-        const releaseResponse = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signin`, {
+        const releaseResponse = await fetch(`${import.meta.env.VITE_HOST}/signin`, {
           credentials: "include",
           method: 'POST',
           headers: {
@@ -48,10 +46,16 @@ export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
       if (!response.ok) {
         let serverErrorText = "";
         try {
-          const errData = await response.json();
-          serverErrorText = JSON.stringify(errData);
-        } catch {
-          serverErrorText = await response.text();
+          const rawText = await response.text();
+
+          try {
+            const errData = JSON.parse(rawText);
+            serverErrorText = JSON.stringify(errData);
+          } catch {
+            serverErrorText = rawText;
+          }
+        } catch (readError) {
+          serverErrorText = "Не удалось прочитать текст ошибки с сервера";
         }
 
         console.error(`Сервер вернул статус: ${response.status} (${response.statusText})`);
@@ -72,6 +76,7 @@ export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
   const handleSupportClick = async () => {
     navigate('/support');
   };
+
   return (
     <div className={login['page-wrapper']}>
       <div className={login['login-card']}>
@@ -87,6 +92,7 @@ export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
               type="text"
               id="name"
               name="name"
+              value={formData.company}
               onChange={(e) => { setFormData({ ...formData, company: e.target.value }) }}
               placeholder="Введите название компании..."
               className={login.input}
@@ -95,11 +101,12 @@ export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
           </div>
 
           <div className={login['input-group']}>
-            <label htmlFor="email" className={login.label} ></label>
+            <label htmlFor="email" className={login.label}>Эл. почта</label>
             <input
               type="email"
               id="email"
               name="email"
+              value={formData.login}
               onChange={(e) => { setFormData({ ...formData, login: e.target.value }) }}
               placeholder="Введите Эл. почту"
               className={login.input}
@@ -113,6 +120,7 @@ export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
               type="password"
               id="key"
               name="key"
+              value={formData.password}
               onChange={(e) => { setFormData({ ...formData, password: e.target.value }) }}
               placeholder="••••••••"
               className={login.input}

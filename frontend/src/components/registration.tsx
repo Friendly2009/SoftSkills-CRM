@@ -22,7 +22,7 @@ export const RegisterForm: React.FC<IdebugProps> = ({ isDebug }) => {
         return;
       }
       try {
-        const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signup`, {
+        const response = await fetch(`${import.meta.env.VITE_HOST}/signup`, {
           credentials: "include",
           method: 'POST',
           headers: {
@@ -38,7 +38,7 @@ export const RegisterForm: React.FC<IdebugProps> = ({ isDebug }) => {
         console.log(ex);
       }
     } else {
-      alert("Подайте заявку на бета тестирование, написав в поддержке https://t.me/SoftSkillsCrmSupportbot");
+      alert("Подайте заявку на бета тестирование, написав в поддержке https://t.me/imchelovek09");
       return;
     }
   }

@@ -122,7 +122,7 @@ export const ReviewsPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [rate, setRate] = useState(5);
 
-  const API_BASE = `${import.meta.env.VITE_HOST || 'http://localhost'}:${import.meta.env.VITE_PORT || '3000'}`;
+  const API_BASE = `${import.meta.env.VITE_HOST}`;
   const fetchCurrentUser = async () => {
     try {
       const response = await fetch(`${API_BASE}/getsession`, {

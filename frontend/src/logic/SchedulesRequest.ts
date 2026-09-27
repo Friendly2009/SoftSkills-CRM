@@ -18,7 +18,7 @@ export const formatDateToString = (
 
 export const getSchedule = async (startDate: string, endDate: string) => {
   try {
-    const url = `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/schedule?startDate=${startDate}&endDate=${endDate}`;
+    const url = `${import.meta.env.VITE_HOST}/schedule?startDate=${startDate}&endDate=${endDate}`;
 
     const response = await fetch(url, {
       method: "GET",
@@ -38,7 +38,7 @@ export const getSchedule = async (startDate: string, endDate: string) => {
 };
 
 export const getLessonModal = async (id: string) => {
-  const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getlessons/${id}`, {
+  const response = await fetch(`${import.meta.env.VITE_HOST}/getlessons/${id}`, {
     method: "GET",
     credentials: "include",
   });

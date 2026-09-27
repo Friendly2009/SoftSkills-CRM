@@ -93,7 +93,7 @@ export const ClientTable: React.FC = () => {
 
     const getCompanyGroups = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getgroups`, { credentials: "include" });
+            const response = await fetch(`${import.meta.env.VITE_HOST}/getgroups`, { credentials: "include" });
 
             if (response.status === 403) {
                 setIsReadOnly(true);

@@ -119,7 +119,7 @@ export const LeadKanban: React.FC = () => {
     const getLeads = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get-lead`, {
+            const response = await fetch(`${import.meta.env.VITE_HOST}/get-lead`, {
                 credentials: "include"
             });
             if (!response.ok) throw new Error('Ошибка загрузки лидов для Канбана');

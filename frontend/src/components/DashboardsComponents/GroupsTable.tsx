@@ -153,7 +153,7 @@ export const GroupTable: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/creategroup`, {
+            const response = await fetch(`${import.meta.env.VITE_HOST}/creategroup`, {
                 method: 'POST',
                 credentials: "include",
                 headers: {
@@ -196,7 +196,7 @@ export const GroupTable: React.FC = () => {
     };
     const getGroup = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getgroups`, {
+            const response = await fetch(`${import.meta.env.VITE_HOST}/getgroups`, {
                 credentials: "include"
             });
 
@@ -224,7 +224,7 @@ export const GroupTable: React.FC = () => {
     };
     const getUsers = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getusers`, {
+            const response = await fetch(`${import.meta.env.VITE_HOST}/getusers`, {
                 credentials: "include"
             });
 
@@ -262,7 +262,7 @@ export const GroupTable: React.FC = () => {
                 end_date: (!hasEndDate || bodyData.end_date === "") ? null : bodyData.end_date
             };
 
-            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/updategroup/${id}`, {
+            const response = await fetch(`${import.meta.env.VITE_HOST}/updategroup/${id}`, {
                 method: 'PATCH',
                 credentials: "include",
                 headers: {
@@ -288,7 +288,7 @@ export const GroupTable: React.FC = () => {
             }
 
             try {
-                const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/deletegroup/${group.id}`, {
+                const response = await fetch(`${import.meta.env.VITE_HOST}/deletegroup/${group.id}`, {
                     method: "DELETE",
                     credentials: "include"
                 });
