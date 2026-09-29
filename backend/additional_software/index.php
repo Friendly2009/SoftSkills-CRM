@@ -8,6 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
+
 if (strpos($_SERVER['REQUEST_URI'], '/.well-known/acme-challenge/') !== false) {
     $acme_path = dirname(__FILE__) . $_SERVER['REQUEST_URI'];
     if (file_exists($acme_path)) {
@@ -28,6 +29,8 @@ if (!is_dir($tmp_dir)) {
 }
 
 $headers = getallheaders();
+
+$lower_headers = array_change_key_case($headers, CASE_LOWER);
 
 if (isset($_GET['check_bridge_id']) || isset($_POST['check_bridge_id'])) {
     $check_id = $_GET['check_bridge_id'] ?? $_POST['check_bridge_id'];
@@ -54,7 +57,6 @@ if (isset($_GET['check_bridge_id']) || isset($_POST['check_bridge_id'])) {
     exit;
 }
 
-// 2. АВТОРИЗАЦИЯ ЛОКАЛЬНОГО НОУТБУКА (BRIDGE CLIENT)
 $client_key = $_GET['bridge_key'] ?? $_POST['bridge_key'] ?? '';
 
 if ($client_key === 'my_super_secret_key_123') {
@@ -62,14 +64,12 @@ if ($client_key === 'my_super_secret_key_123') {
         
         $response_id = $_GET['response_id'] 
             ?? $_POST['response_id'] 
-            ?? $headers['X-Response-ID'] 
-            ?? $headers['x-response-id'] 
-            ?? $headers['X-Response-Id'] 
+            ?? $lower_headers['x-response-id'] 
             ?? $_SERVER['HTTP_X_RESPONSE_ID']
             ?? '';
 
         $response_id = preg_replace('/[^a-zA-Z0-9\._-]/', '', $response_id);
-        $response_code = $_GET['response_code'] ?? $headers['X-Response-Code'] ?? $headers['x-response-code'] ?? 200;
+        $response_code = $_GET['response_code'] ?? $lower_headers['x-response-code'] ?? 200;
 
         if (empty($response_id)) {
             file_put_contents($tmp_dir . "/debug_bridge.log", "Ошибка: ID пуст. Доступные заголовки: " . json_encode($headers) . " GET: " . json_encode($_GET) . "\n", FILE_APPEND);
@@ -105,7 +105,6 @@ if ($client_key === 'my_super_secret_key_123') {
     }
 }
 
-// 3. ОБРАБОТКА ОБЫЧНОГО ПОЛЬЗОВАТЕЛЬСКОГО ЗАПРОСА
 $id = 'r' . substr(md5(microtime(true) . mt_rand()), 0, 15); 
 
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -123,8 +122,16 @@ $request_data = [
 file_put_contents($tmp_dir . "/req_" . $id . ".json", json_encode($request_data), LOCK_EX);
 clearstatcache(true, $tmp_dir . "/req_" . $id . ".json");
 
-$is_json_request = (strpos($headers['Content-Type'] ?? '', 'application/json') !== false) || 
-                   (strpos($headers['Accept'] ?? '', 'application/json') !== false);
+// Надежное определение REST/API запросов от фронтенда
+$content_type = $lower_headers['content-type'] ?? '';
+$accept = $lower_headers['accept'] ?? '';
+$requested_with = $lower_headers['x-requested-with'] ?? '';
+
+$is_json_request = (strpos($content_type, 'application/json') !== false) || 
+                   (strpos($accept, 'application/json') !== false) ||
+                   ($requested_with === 'xmlhttprequest') ||
+                   ($_SERVER['REQUEST_METHOD'] !== 'GET') ||
+                   ($uri !== '/' && strpos($accept, 'text/html') === false);
 
 if ($is_json_request) {
     $target_file = $tmp_dir . "/res_" . $id . ".json";
@@ -145,7 +152,6 @@ if ($is_json_request) {
         usleep(200000); 
     }
     
-    // Если локальный комп не ответил за 15 секунд — отдаем тайм-аут
     http_response_code(504);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(["error" => "Gateway Timeout", "message" => "Локальный сервер не ответил вовремя"]);
