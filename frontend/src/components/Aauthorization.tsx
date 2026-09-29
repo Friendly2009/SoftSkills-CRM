@@ -28,7 +28,7 @@ export const LoginForm: React.FC<IdebugProps> = ({ isdebug }) => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formData), 
+          body: JSON.stringify(formData),
         });
         response = debugResponse;
       } else {
@@ -47,7 +47,6 @@ export const LoginForm: React.FC<IdebugProps> = ({ isdebug }) => {
         let serverErrorText = "";
         try {
           const rawText = await response.text();
-
           try {
             const errData = JSON.parse(rawText);
             serverErrorText = JSON.stringify(errData);
@@ -57,21 +56,26 @@ export const LoginForm: React.FC<IdebugProps> = ({ isdebug }) => {
         } catch (readError) {
           serverErrorText = "Не удалось прочитать текст ошибки с сервера";
         }
-
         console.error(`Сервер вернул статус: ${response.status} (${response.statusText})`);
         console.error(`Сообщение от сервера: ${serverErrorText}`);
-
         throw new Error(`Не авторизован. Статус: ${response.status}`);
       }
 
       const data = await response.json();
       console.log('Успешный вход:' + JSON.stringify(data));
+
+      // ИСПРАВЛЕНО: Если бэкенд прислал sessionId, бережно сохраняем его в память браузера
+      if (data.sessionId) {
+        localStorage.setItem('sessionId', data.sessionId);
+      }
+
       navigate('/dashboard');
 
     } catch (ex) {
       console.error(ex);
     }
   };
+
 
   const handleSupportClick = async () => {
     navigate('/support');

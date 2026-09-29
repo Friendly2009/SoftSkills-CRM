@@ -27,10 +27,13 @@ export const get_transactions_list = async () => {
 
 export const getRevenueSources = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}/revenue-sources`, {
-      method: `GET`,
-      credentials: `include`,
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_HOST}/revenue-sources`,
+      {
+        method: `GET`,
+        credentials: `include`,
+      },
+    );
 
     if (response.status === 403) {
       return { status: 403 };
@@ -50,10 +53,13 @@ export const getRevenueSources = async () => {
 
 export const getFinancialTimelineData = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}/getFinancialTimeline`, {
-      method: `GET`,
-      credentials: `include`,
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_HOST}/getFinancialTimeline`,
+      {
+        method: `GET`,
+        credentials: `include`,
+      },
+    );
 
     if (response.status === 403) {
       return { status: 403 };
@@ -77,14 +83,17 @@ export const addManualExpenseRequest = async (expenseData: {
   comment: string;
 }) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}/finance/add-expense`, {
-      method: "POST",
-      headers: {
-        "Content-Type": `application/json`,
+    const response = await fetch(
+      `${import.meta.env.VITE_HOST}/finance/add-expense`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": `application/json`,
+        },
+        credentials: `include`,
+        body: JSON.stringify(expenseData),
       },
-      credentials: `include`,
-      body: JSON.stringify(expenseData),
-    });
+    );
 
     if (response.status === 403) {
       return { success: false, status: 403, message: `Доступ запрещен` };
@@ -174,13 +183,28 @@ export const getDebtClient = async () => {
 
 export const fetchFinanceSummary = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}/finance/get-all-state`, {
-      method: `GET`,
-      credentials: `include`,
-    });
+    const sessionId = localStorage.getItem("sessionId");
 
-    if (response.status === 403) {
-      return { success: false, status: 403 };
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    if (sessionId) {
+      headers["X-Session-ID"] = sessionId;
+    }
+
+    const response = await fetch(
+      `${import.meta.env.VITE_HOST}/finance/get-all-state`,
+      {
+        method: `GET`,
+        headers: headers,
+        credentials: `include`,
+      },
+    );
+
+    if (response.status === 401 || response.status === 403) {
+      return { success: false, status: response.status };
     }
 
     const result = await response.json();
@@ -204,13 +228,28 @@ export const fetchFinanceSummary = async () => {
 
 export const getFinanceChartData = async (): Promise<any> => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}/get-chart-state`, {
-      method: `GET`,
-      credentials: `include`,
-    });
+    const sessionId = localStorage.getItem("sessionId");
 
-    if (response.status === 403) {
-      return { status: 403 };
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    if (sessionId) {
+      headers["X-Session-ID"] = sessionId;
+    }
+
+    const response = await fetch(
+      `${import.meta.env.VITE_HOST}/get-chart-state`,
+      {
+        method: `GET`,
+        headers: headers,
+        credentials: `include`,
+      },
+    );
+
+    if (response.status === 401 || response.status === 403) {
+      return { status: response.status };
     }
 
     const result = await response.json();

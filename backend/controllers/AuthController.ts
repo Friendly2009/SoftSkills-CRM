@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import "dotenv/config";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 import bcrypt from "bcrypt";
@@ -55,7 +55,7 @@ export const APIsignup = async (
 
     return res.status(200).json({
       success: true,
-      message: "company with director has been created"
+      message: "company with director has been created",
     });
   } catch (ex: any) {
     if (connection) {
@@ -124,9 +124,19 @@ export const APIsignin = async (
     req.session.email = user.email;
     req.session.rank = user.rank;
 
-    return res.status(200).json({
-      success: true,
-      message: "authorization was be completed",
+    req.session.save((err) => {
+      if (err) {
+        console.error("Ошибка чтения сессии:", err);
+        return res
+          .status(500)
+          .json({ success: false, error: "Session save error" });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "authorization was be completed",
+        sessionId: req.sessionID,
+      });
     });
   } catch (ex: any) {
     console.error("Ошибка при авторизации:", ex);
@@ -136,13 +146,16 @@ export const APIsignin = async (
     });
   }
 };
+
 export const logout = (req: Request, res: Response) => {
   req.session.destroy((err) => {
     if (err) {
-      console.error('Ошибка сессии:', err);
-      return res.status(500).json({ success: false, message: 'Ошибка сервера' });
+      console.error("Ошибка сессии:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Ошибка сервера" });
     }
-    res.clearCookie('connect.sid');
-    return res.status(200).json({ success: true, message: 'Вышли!' });
+    res.clearCookie("connect.sid");
+    return res.status(200).json({ success: true, message: "Вышли!" });
   });
 };

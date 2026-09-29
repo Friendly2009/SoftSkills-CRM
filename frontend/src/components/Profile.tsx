@@ -125,7 +125,20 @@ export const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
+        const sessionId = localStorage.getItem("sessionId");
+
+        const headers: Record<string, string> = {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        };
+
+        if (sessionId) {
+          headers["X-Session-ID"] = sessionId;
+        }
+
         const response = await fetch(`${import.meta.env.VITE_HOST}/getcurrentuser`, {
+          method: 'GET',
+          headers: headers,
           credentials: "include"
         });
 
@@ -350,9 +363,9 @@ export const ProfilePage: React.FC = () => {
           Поддержка
           <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
         </a>
-        <br/>
+        <br />
         <a
-        onClick={() => {navigate('/Feedback')}}
+          onClick={() => { navigate('/Feedback') }}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-sm font-semibold text-sky-500 hover:text-sky-600 transition-colors group"
