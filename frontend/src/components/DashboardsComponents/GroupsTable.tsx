@@ -153,7 +153,7 @@ export const GroupTable: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}/creategroup`, {
+            const response = await fetch(`https://api.soft-skills-crm.ru/creategroup`, {
                 method: 'POST',
                 credentials: "include",
                 headers: {
@@ -196,7 +196,7 @@ export const GroupTable: React.FC = () => {
     };
     const getGroup = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}/getgroups`, {
+            const response = await fetch(`https://api.soft-skills-crm.ru/getgroups`, {
                 credentials: "include"
             });
 
@@ -224,7 +224,7 @@ export const GroupTable: React.FC = () => {
     };
     const getUsers = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}/getusers`, {
+            const response = await fetch(`https://api.soft-skills-crm.ru/getusers`, {
                 credentials: "include"
             });
 
@@ -262,7 +262,7 @@ export const GroupTable: React.FC = () => {
                 end_date: (!hasEndDate || bodyData.end_date === "") ? null : bodyData.end_date
             };
 
-            const response = await fetch(`${import.meta.env.VITE_HOST}/updategroup/${id}`, {
+            const response = await fetch(`https://api.soft-skills-crm.ru/updategroup/${id}`, {
                 method: 'PATCH',
                 credentials: "include",
                 headers: {
@@ -288,7 +288,7 @@ export const GroupTable: React.FC = () => {
             }
 
             try {
-                const response = await fetch(`${import.meta.env.VITE_HOST}/deletegroup/${group.id}`, {
+                const response = await fetch(`https://api.soft-skills-crm.ru/deletegroup/${group.id}`, {
                     method: "DELETE",
                     credentials: "include"
                 });

@@ -122,7 +122,7 @@ export const ReviewsPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [rate, setRate] = useState(5);
 
-  const API_BASE = `${import.meta.env.VITE_HOST}`;
+  const API_BASE = `https://api.soft-skills-crm.ru`;
   const fetchCurrentUser = async () => {
     try {
       const sessionId = localStorage.getItem("sessionId");

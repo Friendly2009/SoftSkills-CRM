@@ -35,7 +35,7 @@ export const getSchedule = async (startDate: any, endDate: any) => {
       return { success: true, data: { templates: [], realLessons: [] } };
     }
 
-    const url = `${import.meta.env.VITE_HOST}/schedule?startDate=${sDate}&endDate=${eDate}`;
+    const url = `https://api.soft-skills-crm.ru/schedule?startDate=${sDate}&endDate=${eDate}`;
 
     const response = await fetch(url, {
       method: "GET",
@@ -56,7 +56,7 @@ export const getSchedule = async (startDate: any, endDate: any) => {
 
 export const getLessonModal = async (id: string) => {
   const response = await fetch(
-    `${import.meta.env.VITE_HOST}/getlessons/${id}`,
+    `https://api.soft-skills-crm.ru/getlessons/${id}`,
     {
       method: "GET",
       credentials: "include",

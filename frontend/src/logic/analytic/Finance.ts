@@ -1,7 +1,7 @@
 export const get_transactions_list = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}/get_transactions_list`,
+      `https://api.soft-skills-crm.ru/get_transactions_list`,
       {
         method: `GET`,
         credentials: `include`,
@@ -28,7 +28,7 @@ export const get_transactions_list = async () => {
 export const getRevenueSources = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}/revenue-sources`,
+      `https://api.soft-skills-crm.ru/revenue-sources`,
       {
         method: `GET`,
         credentials: `include`,
@@ -54,7 +54,7 @@ export const getRevenueSources = async () => {
 export const getFinancialTimelineData = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}/getFinancialTimeline`,
+      `https://api.soft-skills-crm.ru/getFinancialTimeline`,
       {
         method: `GET`,
         credentials: `include`,
@@ -84,7 +84,7 @@ export const addManualExpenseRequest = async (expenseData: {
 }) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}/finance/add-expense`,
+      `https://api.soft-skills-crm.ru/finance/add-expense`,
       {
         method: "POST",
         headers: {
@@ -109,7 +109,7 @@ export const addManualExpenseRequest = async (expenseData: {
 export const getExpensesData = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}/finance/expenses-structure`,
+      `https://api.soft-skills-crm.ru/finance/expenses-structure`,
       {
         method: `GET`,
         credentials: `include`,
@@ -134,7 +134,7 @@ export const getExpensesData = async () => {
 export const getExpensesStructureData = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}/finance/expenses-structure-by-group`,
+      `https://api.soft-skills-crm.ru/finance/expenses-structure-by-group`,
       {
         method: `GET`,
         credentials: `include`,
@@ -159,7 +159,7 @@ export const getExpensesStructureData = async () => {
 export const getDebtClient = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}/finance/client-debtors`,
+      `https://api.soft-skills-crm.ru/finance/client-debtors`,
       {
         method: `GET`,
         credentials: `include`,
@@ -195,7 +195,7 @@ export const fetchFinanceSummary = async () => {
     }
 
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}/finance/get-all-state`,
+      `https://api.soft-skills-crm.ru/finance/get-all-state`,
       {
         method: `GET`,
         headers: headers,
@@ -240,7 +240,7 @@ export const getFinanceChartData = async (): Promise<any> => {
     }
 
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}/get-chart-state`,
+      `https://api.soft-skills-crm.ru/get-chart-state`,
       {
         method: `GET`,
         headers: headers,

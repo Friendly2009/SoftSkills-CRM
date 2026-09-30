@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import React from "react";
 import { IdebugProps } from "@/interfaces/debugInterface";
 
-export const LoginForm: React.FC<IdebugProps> = ({ isdebug }) => {
+export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ export const LoginForm: React.FC<IdebugProps> = ({ isdebug }) => {
     let response: Response;
     try {
       if (isdebug) {
-        const debugResponse = await fetch(`${import.meta.env.VITE_HOST}/signin`, {
+        const debugResponse = await fetch(`https://api.soft-skills-crm.ru/signin`, {
           credentials: "include",
           method: 'POST',
           headers: {
@@ -32,7 +32,7 @@ export const LoginForm: React.FC<IdebugProps> = ({ isdebug }) => {
         });
         response = debugResponse;
       } else {
-        const releaseResponse = await fetch(`${import.meta.env.VITE_HOST}/signin`, {
+        const releaseResponse = await fetch(`https://api.soft-skills-crm.ru/signin`, {
           credentials: "include",
           method: 'POST',
           headers: {

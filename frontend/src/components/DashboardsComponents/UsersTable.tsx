@@ -44,7 +44,7 @@ export const UsersTable: React.FC = () => {
 
     const getUsers = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}/getusers`, {
+            const response = await fetch(`https://api.soft-skills-crm.ru/getusers`, {
                 credentials: "include"
             });
 
@@ -112,7 +112,7 @@ export const UsersTable: React.FC = () => {
                 birthday: formData.birthday ? formData.birthday.toISOString().split('T')[0] : null
             };
 
-            const response = await fetch(`${import.meta.env.VITE_HOST}/adduser`, {
+            const response = await fetch(`https://api.soft-skills-crm.ru/adduser`, {
                 credentials: "include",
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -139,7 +139,7 @@ export const UsersTable: React.FC = () => {
                 birthday: resetFormData.birthday ? resetFormData.birthday.toISOString().split('T')[0] : null
             };
 
-            const response = await fetch(`${import.meta.env.VITE_HOST}/resetuser`, {
+            const response = await fetch(`https://api.soft-skills-crm.ru/resetuser`, {
                 credentials: "include",
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -171,7 +171,7 @@ export const UsersTable: React.FC = () => {
             }
 
             try {
-                const response = await fetch(`${import.meta.env.VITE_HOST}/deluser/${user.id}`, {
+                const response = await fetch(`https://api.soft-skills-crm.ru/deluser/${user.id}`, {
                     method: "DELETE",
                     credentials: "include"
                 });

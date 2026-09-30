@@ -2,7 +2,7 @@ import { AttendanceTrendData } from "@/interfaces/analyticsInterfaces";
 
 export const fetchAttendanceTrends = async (range: string): Promise<AttendanceTrendData[] | { status: 403 }> => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}/hr/get-attendance-trends?range=${range}`, {
+    const response = await fetch(`https://api.soft-skills-crm.ru/hr/get-attendance-trends?range=${range}`, {
       method: "GET",
       credentials: "include",
     });

@@ -41,7 +41,7 @@ export const ProfilePage: React.FC = () => {
 
   const handleLogoutClick = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}/logout`);
+      const response = await fetch(`https://api.soft-skills-crm.ru/logout`);
       if (!response.ok) {
         throw new Error("something went wrong...");
       }
@@ -86,7 +86,7 @@ export const ProfilePage: React.FC = () => {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}/resetuser`, {
+      const response = await fetch(`https://api.soft-skills-crm.ru/resetuser`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +136,7 @@ export const ProfilePage: React.FC = () => {
           headers["X-Session-ID"] = sessionId;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_HOST}/getcurrentuser`, {
+        const response = await fetch(`https://api.soft-skills-crm.ru/getcurrentuser`, {
           method: 'GET',
           headers: headers,
           credentials: "include"

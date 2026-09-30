@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Origin: https://soft-skills-crm.ru");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Response-ID, X-Response-Code, x-response-id, x-response-code, X-Session-ID, x-session-id");
@@ -122,7 +122,6 @@ $request_data = [
 file_put_contents($tmp_dir . "/req_" . $id . ".json", json_encode($request_data), LOCK_EX);
 clearstatcache(true, $tmp_dir . "/req_" . $id . ".json");
 
-// Надежное определение REST/API запросов от фронтенда
 $content_type = $lower_headers['content-type'] ?? '';
 $accept = $lower_headers['accept'] ?? '';
 $requested_with = $lower_headers['x-requested-with'] ?? '';

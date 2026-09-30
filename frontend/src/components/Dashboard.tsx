@@ -22,7 +22,7 @@ export const Dashboard: React.FC = () => {
   const [isActiveMenu, setIsActiveMenu] = useState(true);
   const GetGlobalInfo = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}/getglobalinfo`, {
+      const response = await fetch(`https://api.soft-skills-crm.ru/getglobalinfo`, {
         credentials: "include"
       });
 

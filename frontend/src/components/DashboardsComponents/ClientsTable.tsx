@@ -93,7 +93,7 @@ export const ClientTable: React.FC = () => {
 
     const getCompanyGroups = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}/getgroups`, { credentials: "include" });
+            const response = await fetch(`https://api.soft-skills-crm.ru/getgroups`, { credentials: "include" });
 
             if (response.status === 403) {
                 setIsReadOnly(true);

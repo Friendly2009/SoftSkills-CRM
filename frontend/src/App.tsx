@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { TransferFilesPage } from './components/TransferFilesPage';
 import { FaqPage } from './components/FaqPage';
 function App() {
-  const [isDebug, setIsDebug] = useState(true);
+  const [isDebug, setIsDebug] = useState(false);
   return (
     <BrowserRouter>
       <Routes>

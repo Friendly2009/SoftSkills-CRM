@@ -22,7 +22,7 @@ export const RegisterForm: React.FC<IdebugProps> = ({ isDebug }) => {
         return;
       }
       try {
-        const response = await fetch(`${import.meta.env.VITE_HOST}/signup`, {
+        const response = await fetch(`https://api.soft-skills-crm.ru/signup`, {
           credentials: "include",
           method: 'POST',
           headers: {
