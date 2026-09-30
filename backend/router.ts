@@ -73,5 +73,5 @@ router.post('/createfeedback', create_feedback);
 router.get('/getfeedbacks', get_all_feedbacks);
 router.get('/getmyfeedback', get_my_feedbacks);
 router.put('/updatefeedback:id', update_feedback);
-router.delete('deletefeedback/:id', delete_feedback);
+router.delete('/deletefeedback/:id', delete_feedback);
 export default router;
