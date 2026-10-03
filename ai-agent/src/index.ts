@@ -1,45 +1,62 @@
 import "dotenv/config";
 import { GoogleGenAI } from "@google/genai";
+import { searchCode } from "./tools/searchCode.js";
 
 const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY!,
+  apiKey: process.env.GEMINI_API_KEY!,
 });
 
+const searchCodeTool = {
+  type: "function",
+  name: "searchCode",
+  description:
+    "Searches the CRM source code for a text, function name, class name, variable, route, SQL query, or other code-related term. Use this when you need to find where something is implemented in the CRM.",
+  parameters: {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description:
+          "Text or code symbol to search for in the CRM source code.",
+      },
+    },
+    required: ["query"],
+  },
+} as const;
+
 async function main() {
-    const maxAttempts = 5;
+  const prompt =
+    "Найди в CRM всё, что связано с созданием клиента. " +
+    "Используй searchCode, если тебе нужно найти соответствующий код.";
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-            console.log(`Попытка ${attempt}/${maxAttempts}...`);
+  const interaction = await ai.interactions.create({
+    model: "gemini-3.8-flash",
+    input: prompt,
+    tools: [searchCodeTool],
+  });
 
-            const response = await ai.models.generateContent({
-                model: "gemini-3.8-flash",
-                contents: "Привет! Проверь, что ты работаешь. Ответь коротко.",
-            });
+  console.log("\nОтвет/шаги Gemini:\n");
 
-            console.log("\nОтвет Gemini:");
-            console.log(response.text);
+  for (const step of interaction.steps) {
+    if (step.type === "function_call") {
+      console.log(`Gemini вызвал: ${step.name}`, step.arguments);
 
-            return;
-        } catch (error: any) {
-            const status = error?.status;
+      if (step.name === "searchCode") {
+        const result = await searchCode(String(step.arguments.query));
 
-            if (status !== 503 || attempt === maxAttempts) {
-                throw error;
-            }
-
-            const delay = 1000 * 2 ** (attempt - 1);
-
-            console.log(
-                `Gemini временно недоступен. Повтор через ${delay / 1000} сек...`
-            );
-
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
+        console.log("\n📂 Результат поиска:\n");
+        console.log(result.results);
+      }
     }
+
+    if (step.type === "model_output") {
+      console.log("\n🤖 Gemini:");
+      console.log(step.content);
+    }
+  }
 }
 
-main().catch(error => {
-    console.error("\nОшибка:");
-    console.error(error);
+main().catch((error) => {
+  console.error("\nОшибка:");
+  console.error(error);
 });
