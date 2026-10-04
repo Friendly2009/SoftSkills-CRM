@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { GoogleGenAI } from "@google/genai";
 import { searchCode } from "./tools/searchCode.js";
-
+import { readFile } from "./tools/readFile.js";
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
 });
@@ -23,29 +23,70 @@ const searchCodeTool = {
     required: ["query"],
   },
 } as const;
-
+const readFileTool = {
+  type: "function",
+  name: "readFile",
+  description:
+    "Reads a source file from the CRM. Use this after searchCode when you need to inspect the actual implementation.",
+  parameters: {
+    type: "object",
+    properties: {
+      filePath: {
+        type: "string",
+        description: "Path to the file relative to the CRM root.",
+      },
+      startLine: {
+        type: "number",
+        description:
+          "Optional first line to read. Defaults to the beginning of the file.",
+      },
+      endLine: {
+        type: "number",
+        description:
+          "Optional last line to read. Defaults to the end of the file.",
+      },
+    },
+    required: ["filePath"],
+  },
+} as const;
 async function main() {
   const prompt =
-    "Найди в CRM всё, что связано с созданием клиента. " +
-    "Используй searchCode, если тебе нужно найти соответствующий код.";
+    "Найди реализацию ClientController в CRM. " +
+    "Сначала используй searchCode, чтобы найти файл. " +
+    "После этого используй readFile, чтобы прочитать найденный файл. " +
+    "После чтения кратко объясни, что находится в этом файле.";
 
   const interaction = await ai.interactions.create({
     model: "gemini-3.8-flash",
     input: prompt,
-    tools: [searchCodeTool],
+    tools: [searchCodeTool, readFileTool],
   });
 
   console.log("\nОтвет/шаги Gemini:\n");
 
   for (const step of interaction.steps) {
     if (step.type === "function_call") {
-      console.log(`Gemini вызвал: ${step.name}`, step.arguments);
+      const functionName = step.name;
+      const args = step.arguments;
 
-      if (step.name === "searchCode") {
-        const result = await searchCode(String(step.arguments.query));
+      console.log(`🛠 Gemini вызвал: ${functionName}`, args);
+
+      if (functionName === "searchCode") {
+        const result = await searchCode(String(args.query));
 
         console.log("\n📂 Результат поиска:\n");
         console.log(result.results);
+      }
+
+      if (functionName === "readFile") {
+        const result = await readFile(
+          String(args.filePath),
+          args.startLine !== undefined ? Number(args.startLine) : undefined,
+          args.endLine !== undefined ? Number(args.endLine) : undefined,
+        );
+
+        console.log("\n📄 Результат чтения файла:\n");
+        console.log(result.content ?? result.error);
       }
     }
 
