@@ -1,20 +1,3 @@
-export const findReferencesTool = {
-  type: "function",
-  name: "findReferences",
-  description:
-    "Находит все упоминания и вызовы определенного символа (функции, класса, переменной) в кодовой базе проекта. Помогает оценить влияние изменений перед модификацией кода.",
-  parameters: {
-    type: "object",
-    properties: {
-      symbol: {
-        type: "string",
-        description: "Имя функции, интерфейса, переменной или класса для поиска (например, 'creategroup' или 'ClientProfile').",
-      },
-    },
-    required: ["symbol"],
-  },
-};
-
 export const searchCodeTool = {
   type: "function",
   name: "searchCode",
@@ -74,6 +57,23 @@ export const getStructure = {
     },
     required: ['filePath']
   }
+};
+
+export const findReferencesTool = {
+  type: "function",
+  name: "findReferences",
+  description:
+    "Находит все упоминания и вызовы определенного символа (функции, класса, переменной) в кодовой базе проекта. Помогает оценить влияние изменений перед модификацией кода.",
+  parameters: {
+    type: "object",
+    properties: {
+      symbol: {
+        type: "string",
+        description: "Имя функции, интерфейса, переменной или класса для поиска (например, 'creategroup' или 'ClientProfile').",
+      },
+    },
+    required: ["symbol"],
+  },
 };
 
 export const tools = [searchCodeTool,readFileTool,getStructure,findReferencesTool];
