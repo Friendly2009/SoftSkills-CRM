@@ -79,6 +79,11 @@ async function main() {
           result = await inspectGit(gitCommand);
         } else if (functionName === "queryDatabase") {
           result = await queryDatabase(String(args.sql));
+        } else if (functionName === "editFile") {
+          result = await editFile(
+            String(args.filePath),
+            String(args.newContent),
+          );
         } else {
           result = {
             error: `Инструмент ${functionName} не реализован на бэкенде агента.`,
@@ -124,5 +129,8 @@ function runTypeCheck(target: string): unknown {
   throw new Error("Function not implemented.");
 }
 function inspectGit(gitCommand: string): unknown {
+  throw new Error("Function not implemented.");
+}
+function editFile(arg0: string, arg1: string): unknown {
   throw new Error("Function not implemented.");
 }
