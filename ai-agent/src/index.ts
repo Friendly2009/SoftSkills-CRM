@@ -6,6 +6,7 @@ import { getProjectStructure } from "./tools/getStructure.js";
 import { toolsConfig } from "./callTools.js";
 import { findReferences } from "./tools/findReference.js";
 import { getFileInfo } from "./tools/getFileInfo.js";
+import { findApiEndpoint } from "./tools/findApiEndpoint.js";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -61,6 +62,8 @@ async function main() {
           result = await findReferences(String(args.symbol));
         } else if (functionName === "getFileInfo") {
           result = await getFileInfo(String(args.filePath));
+        } else if (functionName === "findApiEndpoint") {
+          result = await findApiEndpoint(String(args.routePath));
         } else {
           result = {
             error: `Инструмент ${functionName} не реализован на бэкенде агента.`,
