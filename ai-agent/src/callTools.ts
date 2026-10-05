@@ -89,4 +89,4 @@ const getFileInfoTool = {
 };
 
 
-export const toolsConfig = [searchCodeTool,readFileTool,getStructure,findReferencesTool, getFileInfoTool];
+export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool];
