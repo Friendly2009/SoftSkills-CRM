@@ -5,6 +5,7 @@ import { readFile } from "./tools/readFile.js";
 import { getProjectStructure } from "./tools/getStructure.js";
 import { toolsConfig } from "./callTools.js";
 import { findReferences } from "./tools/findReference.js";
+import { getFileInfo } from "./tools/getFileInfo.js";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -17,7 +18,7 @@ async function main() {
     "Найди где в контроллерах бэкенда импортируется база данных (pool), прочитай этот файл и объясни, откуда берутся настройки подключения.";
 
   console.log("🚀 Запуск Agent Tool Loop...");
-  
+
   let interaction = await ai.interactions.create({
     model: "gemini-3.8-flash",
     input: prompt,
@@ -25,13 +26,17 @@ async function main() {
   });
 
   while (true) {
-    const functionCalls = interaction.steps.filter((step) => step.type === "function_call");
+    const functionCalls = interaction.steps.filter(
+      (step) => step.type === "function_call",
+    );
 
     if (functionCalls.length === 0) {
       break;
     }
 
-    console.log(`\n🧠 Модель запросила вызов инструментов (${functionCalls.length}):`);
+    console.log(
+      `\n🧠 Модель запросила вызов инструментов (${functionCalls.length}):`,
+    );
     const functionResults: any[] = [];
 
     for (const call of functionCalls) {
@@ -54,8 +59,12 @@ async function main() {
           result = await getProjectStructure(String(args.filePath));
         } else if (functionName === "findReferences") {
           result = await findReferences(String(args.symbol));
+        } else if (functionName === "getFileInfo") {
+          result = await getFileInfo(String(args.filePath));
         } else {
-          result = { error: `Инструмент ${functionName} не реализован на бэкенде агента.` };
+          result = {
+            error: `Инструмент ${functionName} не реализован на бэкенде агента.`,
+          };
         }
       } catch (err: any) {
         result = { error: `Ошибка при выполнении инструмента: ${err.message}` };
@@ -72,7 +81,7 @@ async function main() {
     await sleep(1500);
 
     console.log("📥 Отправка результатов инструментов обратно в Gemini...");
-    
+
     interaction = await ai.interactions.create({
       model: "gemini-3.8-flash",
       input: functionResults,

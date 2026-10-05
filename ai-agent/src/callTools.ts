@@ -1,4 +1,4 @@
-export const searchCodeTool = {
+const searchCodeTool = {
   type: "function",
   name: "searchCode",
   description:
@@ -16,7 +16,7 @@ export const searchCodeTool = {
   },
 };
 
-export const readFileTool = {
+const readFileTool = {
   type: "function",
   name: "readFile",
   description:
@@ -43,7 +43,7 @@ export const readFileTool = {
   },
 };
 
-export const getStructure = {
+const getStructure = {
   type: 'function',
   name: 'getStructure', 
   description: 'Get the project structure and output a clear tree view.',
@@ -72,4 +72,21 @@ const findReferencesTool = {
   },
 };
 
-export const toolsConfig = [searchCodeTool,readFileTool,getStructure,findReferencesTool];
+const getFileInfoTool = {
+  type: "function",
+  name: "getFileInfo",
+  description: "Возвращает метаданные о файле в CRM (существование, размер, расширение, пути). Помогает агенту оценить файлы перед чтением.",
+  parameters: {
+    type: "object",
+    properties: {
+      filePath: {
+        type: "string",
+        description: "Путь к файлу относительно корня CRM (например, 'backend/package.json').",
+      },
+    },
+    required: ["filePath"],
+  },
+};
+
+
+export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool];
