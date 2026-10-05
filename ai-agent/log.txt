@@ -1,0 +1,1005 @@
+backend\controllers\GroupController.ts:1: import { Request, Response } from "express";
+backend\controllers\GroupController.ts:2: import pool from "../data_base_connect.js";
+backend\controllers\GroupController.ts:3: import { RowDataPacket, ResultSetHeader } from "mysql2";
+backend\controllers\LeadController.ts:1: import { Request, Response } from "express";
+backend\controllers\LeadController.ts:2: import pool from "../data_base_connect.js";
+backend\controllers\LeadController.ts:3: import { ResultSetHeader, RowDataPacket } from "mysql2";
+backend\controllers\SchesuleController.ts:1: import { Request, Response } from "express";
+backend\controllers\SchesuleController.ts:2: import pool from "../data_base_connect.js";
+backend\controllers\SchesuleController.ts:3: import { ResultSetHeader, RowDataPacket } from "mysql2";
+backend\controllers\UsersController.ts:1: import { Request, Response } from "express";
+backend\controllers\UsersController.ts:2: import pool from "../data_base_connect.js";
+backend\controllers\UsersController.ts:3: import bcrypt from "bcrypt";
+backend\data_base_connect.ts:1: import 'dotenv/config';
+backend\data_base_connect.ts:2: import mysql from "mysql2/promise";
+backend\package-lock.json:620: "node_modules/@humanwhocodes/module-importer": {
+backend\package-lock.json:622: "resolved": "https://registry.npmjs.org/@humanwhocodes/module-importer/-/module-importer-1.0.1.tgz",
+backend\package-lock.json:1332: "@humanwhocodes/module-importer": "^1.0.1",
+backend\router.ts:1: import { Router } from "express";
+backend\router.ts:2: import { getusers, adduser, deluser, resetuser } from "./controllers/UsersController.js";
+backend\router.ts:3: import { getglobalinfo, checkconnect, getallsession, getUserProfile} from "./controllers/BackController.js"
+backend\router.ts:4: import { APIsignup, APIsignin, logout } from './controllers/AuthController.js'
+backend\router.ts:5: import { APIGetClients, addclient, delclient, updateClient } from './controllers/ClientController.js'
+backend\router.ts:6: import { getgroups, creategroup, deleteGroup, updategroup } from './controllers/GroupController.js'
+backend\router.ts:7: import { getSchedule, getLessonDetails, closeLesson } from './controllers/SchesuleController.js';
+backend\router.ts:8: import { get_accupancy_groups, get_transactions_list,
+backend\router.ts:14: import { addManualExpense, getExpenses } from './controllers/FinanceController.js';
+backend\router.ts:15: import { createLead, getLeads, getLeadById, updateLead, deleteLead } from './controllers/LeadController.js';
+backend\router.ts:16: import {
+backend\server.ts:1: import 'dotenv/config';
+backend\server.ts:2: import express, { Express } from "express";
+backend\server.ts:3: import path from "path";
+backend\server.ts:4: import { fileURLToPath } from "url";
+backend\server.ts:5: import session from "express-session";
+backend\server.ts:6: import cors from "cors";
+backend\server.ts:7: import routes from "./router.js"
+backend\server.ts:37: const __filename = fileURLToPath(import.meta.url);
+backend\session.d.ts:1: import "express-session";
+frontend\.vite\deps\chunk-AYPAJTUR.js:383: "lazy: Expected the result of a dynamic import() call. Instead received: %s\n\nYour code should look like: \n  const MyComponent = lazy(() => import('./MyComponent'))\n\nDid you accidentally put curly braces around the import?",
+frontend\.vite\deps\chunk-AYPAJTUR.js:386: "lazy: Expected the result of a dynamic import() call. Instead received: %s\n\nYour code should look like: \n  const MyComponent = lazy(() => import('./MyComponent'))",
+frontend\.vite\deps\react-dom_client.js:1: import {
+frontend\.vite\deps\react-dom_client.js:441: 'ReactDOM.preinitModule(): Currently the only supported "as" type for this function is "script" but received "%s" instead. This warning was generated for `href` "%s". In the future other module types will be supported, aligning with the import-attributes proposal. Learn more here: (https://github.com/tc39/proposal-import-attributes)',
+frontend\.vite\deps\react-dom_client.js:3989: resolvedType += " You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.";
+frontend\.vite\deps\react-dom_client.js:7796: "contextType" in Component && null !== _instance && (void 0 === _instance || _instance.$$typeof !== REACT_CONTEXT_TYPE) && !didWarnAboutInvalidateContextType.has(Component) && (didWarnAboutInvalidateContextType.add(Component), lane = void 0 === _instance ? " However, it is set to undefined. This can be caused by a typo or by mixing up named and default imports. This can also happen due to a circular dependency, so try moving the createContext() call to a separate file." : "object" !== typeof _instance ? " However, it is set to a " + typeof _instance + "." : _instance.$$typeof === REACT_CONSUMER_TYPE ? " Did you accidentally pass the Context.Consumer instead?" : " However, it is set to an object with keys {" + Object.keys(_instance).join(", ") + "}.", console.error(
+frontend\.vite\deps\react-dom_client.js:16228: "function" === typeof instance.setProperty ? instance.setProperty("display", "none", "important") : instance.display = "none";
+frontend\.vite\deps\react.js:1: import {
+frontend\.vite\deps\react_jsx-dev-runtime.js:1: import {
+frontend\package-lock.json:201: "node_modules/@babel/helper-module-imports": {
+frontend\package-lock.json:203: "resolved": "https://registry.npmjs.org/@babel/helper-module-imports/-/helper-module-imports-7.29.7.tgz",
+frontend\package-lock.json:222: "@babel/helper-module-imports": "^7.29.7",
+frontend\src\App.tsx:1: import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+frontend\src\App.tsx:2: import Index from './components/index';
+frontend\src\App.tsx:3: import { Dashboard } from './components/Dashboard';
+frontend\src\App.tsx:4: import { LoginForm } from './components/Aauthorization';
+frontend\src\App.tsx:5: import { RegisterForm } from './components/registration';
+frontend\src\App.tsx:6: import { ProfilePage } from './components/Profile';
+frontend\src\App.tsx:7: import { ClientProfile } from './components/DashboardsComponents/СlientsComponents/ClientProfile';
+frontend\src\App.tsx:8: import { PricingSection } from './components/Price';
+frontend\src\App.tsx:9: import { PricePage } from './components/Prices/PricePage';
+frontend\src\App.tsx:10: import { PrivacyPolicy } from './components/Privacy';
+frontend\src\App.tsx:11: import { TermsOfService } from './components/Terms';
+frontend\src\App.tsx:12: import { SupportPage } from './components/Support';
+frontend\src\App.tsx:13: import { ContactsPage } from './components/Contact';
+frontend\src\App.tsx:14: import { ReviewsPage } from './components/Feedback';
+frontend\src\App.tsx:15: import { useState } from 'react';
+frontend\src\App.tsx:16: import { TransferFilesPage } from './components/TransferFilesPage';
+frontend\src\App.tsx:17: import { FaqPage } from './components/FaqPage';
+frontend\src\components\Aauthorization.tsx:1: import { useState } from "react";
+frontend\src\components\Aauthorization.tsx:2: import login from './cssmoduls/login.module.css'
+frontend\src\components\Aauthorization.tsx:3: import { useNavigate } from 'react-router-dom';
+frontend\src\components\Aauthorization.tsx:4: import React from "react";
+frontend\src\components\Aauthorization.tsx:5: import { IdebugProps } from "@/interfaces/debugInterface";
+frontend\src\components\Aauthorization.tsx:27: const debugResponse = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signin`, {
+frontend\src\components\Aauthorization.tsx:37: const releaseResponse = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signin`, {
+frontend\src\components\Contact.tsx:1: import React from 'react';
+frontend\src\components\Contact.tsx:2: import { Link, useNavigate } from 'react-router-dom';
+frontend\src\components\Contact.tsx:3: import register from '@/components/cssmoduls/signup.module.css'
+frontend\src\components\Contact.tsx:4: import { Footer } from './Footer';
+frontend\src\components\cssmoduls\DashboardComponentsCssModuls\lessonModal.module.css:257: background-color: #0f172a !important;
+frontend\src\components\cssmoduls\DashboardComponentsCssModuls\lessonModal.module.css:258: color: #ffffff !important;
+frontend\src\components\Dashboard.tsx:1: import React, { useEffect, useState } from 'react';
+frontend\tailwind.config.ts:1: import type { Config } from 'tailwindcss'
+
+🛠 Gemini вызвал: readFile { filePath: 'backend/package.json' }
+
+📄 Результат чтения файла:
+
+1: {
+2:   "name": "mini-crm",
+3:   "version": "1.0.0",
+4:   "description": "",
+5:   "main": "index.js",
+6:   "scripts": {
+7:     "test": "echo \"Error: no test specified\" && exit 1",
+8:     "dev": "tsx server.ts"
+9:   },
+10:   "keywords": [],
+11:   "author": "",
+12:   "license": "ISC",
+13:   "type": "module",
+14:   "dependencies": {
+15:     "bcrypt": "^6.0.0",
+16:     "body-parser": "^2.2.2",
+17:     "cors": "^2.8.6",
+18:     "dotenv": "^17.4.2",
+19:     "ejs": "^5.0.1",
+20:     "express": "^5.2.1",
+21:     "express-session": "^1.19.0",
+22:     "mysql2": "^3.20.0"
+23:   },
+24:   "devDependencies": {
+25:     "@types/bcrypt": "^6.0.0",
+26:     "@types/cors": "^2.8.19",
+27:     "@types/dotenv": "^6.1.1",
+28:     "@types/express": "^5.0.6",
+29:     "@types/express-session": "^1.19.0",
+30:     "@types/node": "^25.9.4",
+31:     "eslint": "^10.2.0",
+32:     "ts-node": "^10.9.2",
+33:     "tsx": "^4.22.3",
+34:     "typescript": "^6.0.3"
+35:   }
+36: }
+37: 
+
+🛠 Gemini вызвал: readFile { filePath: 'frontend/package.json' }
+
+📄 Результат чтения файла:
+
+1: {
+2:   "name": "soft-skills-crm-frontend",
+3:   "private": true,
+4:   "version": "1.0.0",
+5:   "type": "module",
+6:   "scripts": {
+7:     "dev": "vite",
+8:     "build": "vite build",
+9:     "preview": "vite preview"
+10:   },
+11:   "dependencies": {
+12:     "@hello-pangea/dnd": "^18.0.1",
+13:     "caniuse-lite": "^1.0.30001810",
+14:     "clsx": "2.1.1",
+15:     "lucide-react": "^1.31.0",
+16:     "react": "19.2.3",
+17:     "react-dom": "19.2.3",
+18:     "react-router-dom": "^7.18.0",
+19:     "recharts": "^3.10.1",
+20:     "tailwind-merge": "3.4.0"
+21:   },
+22:   "devDependencies": {
+23:     "@tailwindcss/vite": "4.1.17",
+24:     "@testing-library/jest-dom": "^6.9.1",
+25:     "@testing-library/react": "^16.3.2",
+26:     "@testing-library/user-event": "^14.6.1",
+27:     "@types/node": "^22.20.1",
+28:     "@types/react": "19.2.7",
+29:     "@types/react-dom": "19.2.3",
+30:     "@vitejs/plugin-react": "5.1.1",
+31:     "@vitest/ui": "^4.1.8",
+32:     "autoprefixer": "^10.5.4",
+33:     "jsdom": "^29.1.1",
+34:     "msw": "^2.14.6",
+35:     "postcss": "^8.5.26",
+36:     "tailwindcss": "^4.1.17",
+37:     "typescript": "5.9.3",
+38:     "vite": "7.3.2",
+39:     "vite-plugin-env-compatible": "^2.0.1",
+40:     "vite-plugin-singlefile": "2.3.0",
+41:     "vitest": "^4.1.10"
+42:   }
+43: }
+44: 
+
+🛠 Gemini вызвал: readFile { filePath: 'package.json' }
+
+📄 Результат чтения файла:
+
+ENOENT: no such file or directory, open 'D:\vscodeprojects\alpha_crm_open_source\package.json'
+
+🛠 Gemini вызвал: readFile { filePath: 'README.md' }
+
+📄 Результат чтения файла:
+
+1: # SoftSkills CRM
+2: ## About this project
+3: A commercial crm system for educational institutions offering extracurricular supplementary activities. 
+4: This project addresses issues regarding the tracking of profit allocation across roles within the class attendance hierarchy, as well as other financial matters concerning the educational institution.
+5: Distributing the code online is discouraged.
+6: ##  Getting Started
+7: 
+8: ### 1. Prerequisites
+9: 
+10: Make sure you have [Node.js](https://nodejs.org) and [MySQL Server](https://mysql.com) installed on your machine.
+11: 
+12: ### 2. Environment Setup
+13: 
+14: Create a `.env` file in the backend directory and configure the environment variables:
+15: 
+16: ```env
+17: FRONTEND_PORT=5173
+18: FRONTEND_HOST=localhost
+19: 
+20: SESSION_SECRET='your_session_secret_key'
+21: 
+22: BACKEND_PORT=3000
+23: BACKEND_HOST=localhost
+24: 
+25: DB_HOST=localhost
+26: DB_ROLE=your_username
+27: DB_PASSWORD=your_password
+28: DB_NAME='database'
+29: ```
+30: 
+31: _> **Note:** The above configuration is for local development environments only._
+32: 
+33: ### 3. Database Initialization
+34: 
+35: This project uses MySQL. You can initialize the database using MySQL Workbench or any other database client.
+36: 
+37: Execute the following script to create the database schema:
+38: 
+39: ```sql
+40: SET @OLD_UNIQUE_CHECKS = @@UNIQUE_CHECKS, UNIQUE_CHECKS = 0;
+41: SET @OLD_FOREIGN_KEY_CHECKS = @@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS = 0;
+42: SET @OLD_SQL_MODE = @@SQL_MODE, SQL_MODE = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+43: 
+44: CREATE SCHEMA IF NOT EXISTS `soft-skills crm` DEFAULT CHARACTER SET utf8mb3; 
+45: USE `soft-skills crm`;
+46: 
+47: CREATE TABLE IF NOT EXISTS `company` (
+48:     `id` INT NOT NULL AUTO_INCREMENT,
+49:     `name` VARCHAR(255) NOT NULL,
+50:     PRIMARY KEY (`id`)
+51: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+52: 
+53: CREATE TABLE IF NOT EXISTS `users` (
+54:     `id` INT NOT NULL AUTO_INCREMENT,
+55:     `company_id` INT NOT NULL,
+56:     `full_name` VARCHAR(255) NOT NULL,
+57:     `role` VARCHAR(255) NOT NULL,
+58:     `rank` INT NOT NULL,
+59:     `email` VARCHAR(255) NOT NULL,
+60:     `password_hash` VARCHAR(255) NOT NULL,
+61:     `birthday` DATE DEFAULT NULL,
+62:     `contact` VARCHAR(45) DEFAULT NULL,
+63:     `gender` VARCHAR(3) DEFAULT NULL,
+64:     `avatar` VARCHAR(255) DEFAULT NULL,
+65:     `balance` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+66:     PRIMARY KEY (`id`),
+67:     UNIQUE KEY `idx_user_company` (`id`, `company_id`),
+68:     KEY `fk_users_company_idx` (`company_id`),
+69:     CONSTRAINT `fk_users_company` FOREIGN KEY (`company_id`) 
+70:         REFERENCES `company` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+71: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+72: 
+73: CREATE TABLE IF NOT EXISTS `clients` (
+74:     `id` INT NOT NULL AUTO_INCREMENT,
+75:     `name` VARCHAR(255) NOT NULL,
+76:     `avatar` TEXT NULL,
+77:     `balance` DECIMAL(10, 2) NOT NULL,
+78:     `skills` INT,
+79:     `status` TINYINT,
+80:     `contact` VARCHAR(45) NOT NULL,
+81:     `company_id` INT NOT NULL,
+82:     PRIMARY KEY (`id`),
+83:     KEY `fk_clients_company_idx` (`company_id`),
+84:     CONSTRAINT `fk_clients_company` FOREIGN KEY (`company_id`) 
+85:         REFERENCES `company` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+86: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+87: 
+88: CREATE TABLE IF NOT EXISTS `groups` (
+89:     `id` INT NOT NULL AUTO_INCREMENT,
+90:     `users_id` INT NOT NULL,
+91:     `name` VARCHAR(45) NOT NULL,
+92:     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1 = активен, 2 = набор, 3 = архив',
+93:     `start_date` DATE DEFAULT NULL,
+94:     `end_date` DATE DEFAULT NULL,
+95:     `max_students` INT NOT NULL,
+96:     PRIMARY KEY (`id`),
+97:     KEY `fk_groups_users_idx` (`users_id`),
+98:     CONSTRAINT `fk_groups_users` FOREIGN KEY (`users_id`) 
+99:         REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+100: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+101: 
+102: CREATE TABLE IF NOT EXISTS `group_members` (
+103:     `group_id` INT NOT NULL,
+104:     `client_id` INT NOT NULL,
+105:     PRIMARY KEY (`group_id`, `client_id`),
+106:     KEY `fk_group_members_clients_idx` (`client_id`),
+107:     KEY `fk_group_members_groups_idx` (`group_id`),
+108:     CONSTRAINT `fk_group_members_clients` FOREIGN KEY (`client_id`) 
+109:         REFERENCES `clients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+110:     CONSTRAINT `fk_group_members_groups` FOREIGN KEY (`group_id`) 
+111:         REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+112: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+113: 
+114: CREATE TABLE IF NOT EXISTS `group_schedules` (
+115:     `id` INT NOT NULL AUTO_INCREMENT,
+116:     `day_of_week` VARCHAR(15) NOT NULL,
+117:     `start_time` TIME NOT NULL,
+118:     `end_time` TIME NOT NULL,
+119:     `group_id` INT NOT NULL,
+120:     PRIMARY KEY (`id`),
+121:     KEY `fk_group_schedules_groups_idx` (`group_id`),
+122:     CONSTRAINT `fk_group_schedules_groups` FOREIGN KEY (`group_id`) 
+123:         REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+124: ) ENGINE = InnoDB AUTO_INCREMENT = 5 DEFAULT CHARSET = utf8mb3;
+125: 
+126: CREATE TABLE IF NOT EXISTS `lessons` (
+127:     `id` INT NOT NULL AUTO_INCREMENT,
+128:     `group_id` INT NOT NULL,
+129:     `user_id` INT NOT NULL,
+130:     `lesson_date` DATE NOT NULL,
+131:     `start_time` TIME NOT NULL,
+132:     `end_time` TIME NOT NULL,
+133:     `status` TINYINT NOT NULL COMMENT '1 = запланирован, 2 = проведен',
+134:     `teacher_pay` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+135:     PRIMARY KEY (`id`),
+136:     KEY `fk_lessons_groups_idx` (`group_id`),
+137:     KEY `fk_lessons_users_idx` (`user_id`),
+138:     CONSTRAINT `fk_lessons_groups` FOREIGN KEY (`group_id`) 
+139:         REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+140:     CONSTRAINT `fk_lessons_users` FOREIGN KEY (`user_id`) 
+141:         REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+142: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+143: 
+144: CREATE TABLE IF NOT EXISTS `lesson_attendance` (
+145:     `lesson_id` INT NOT NULL,
+146:     `client_id` INT NOT NULL,
+147:     `attendance_status` TINYINT NOT NULL DEFAULT 1 COMMENT '1 = был, 2 = прогул, 3 = уважительная причина',
+148:     `amount_charged` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+149:     PRIMARY KEY (`lesson_id`, `client_id`),
+150:     KEY `fk_attendance_clients_idx` (`client_id`),
+151:     CONSTRAINT `fk_attendance_lessons` FOREIGN KEY (`lesson_id`) 
+152:         REFERENCES `lessons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+153:     CONSTRAINT `fk_attendance_clients` FOREIGN KEY (`client_id`) 
+154:         REFERENCES `clients` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+155: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+156: 
+157: CREATE TABLE IF NOT EXISTS `financial_transactions` (
+158:     `id` INT NOT NULL AUTO_INCREMENT,
+159:     `company_id` INT NOT NULL,
+160:     `lesson_id` INT DEFAULT NULL,
+161:     `client_id` INT DEFAULT NULL,
+162:     `user_id` INT DEFAULT NULL,
+163:     `amount` DECIMAL(10, 2) NOT NULL,
+164:     `type` ENUM('revenue', 'expense', 'wallet_topup', 'correction') NOT NULL,
+165:     `description` VARCHAR(255) DEFAULT NULL,
+166:     `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+167:     PRIMARY KEY (`id`),
+168:     KEY `idx_tx_company` (`company_id`),
+169:     KEY `idx_tx_lesson` (`lesson_id`),
+170:     KEY `idx_tx_client` (`client_id`),
+171:     KEY `idx_tx_user` (`user_id`),
+172:     KEY `idx_tx_type` (`type`),
+173:     CONSTRAINT `fk_tx_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+174:     CONSTRAINT `fk_tx_company` FOREIGN KEY (`company_id`) REFERENCES `company` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+175:     CONSTRAINT `fk_tx_lesson` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+176:     CONSTRAINT `fk_tx_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+177: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+178: 
+179: CREATE TABLE IF NOT EXISTS `lead_loss_reasons` (
+180:     `id` INT NOT NULL AUTO_INCREMENT,
+181:     `reason_text` VARCHAR(255) NOT NULL,
+182:     PRIMARY KEY (`id`)
+183: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+184: 
+185: CREATE TABLE IF NOT EXISTS `leads` (
+186:     `id` INT NOT NULL AUTO_INCREMENT,
+187:     `company_id` INT NOT NULL,
+188:     `user_id` INT DEFAULT NULL,
+189:     `loss_reason_id` INT DEFAULT NULL,
+190:     `name` VARCHAR(255) NOT NULL,
+191:     `contact` VARCHAR(45) NOT NULL,
+192:     `status` ENUM('new', 'in_progress', 'trial_scheduled', 'trial_attended', 'won', 'lost') NOT NULL DEFAULT 'new',
+193:     `source` VARCHAR(100) DEFAULT NULL,
+194:     `description` TEXT DEFAULT NULL,
+195:     `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+196:     `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+197:     PRIMARY KEY (`id`),
+198:     CONSTRAINT `fk_leads_loss_reason` FOREIGN KEY (`loss_reason_id`) 
+199:         REFERENCES `lead_loss_reasons` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+200: ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb3;
+201: 
+202: CREATE TABLE `feedbacks` (
+203:   `id` int NOT NULL AUTO_INCREMENT,
+204:   `message` longtext NOT NULL,
+205:   `user_id` int NOT NULL,
+206:   `rate` tinyint NOT NULL,
+207:   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+208:   PRIMARY KEY (`id`),
+209:   KEY `fk_fedback_user_idx` (`user_id`),
+210:   CONSTRAINT `fk_fedback_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+211: ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+212: 
+213: CREATE TABLE `tg_users` (
+214:   `id` bigint NOT NULL AUTO_INCREMENT,
+215:   `username` varchar(45) NOT NULL,
+216:   `first_name` varchar(45) NOT NULL,
+217:   `role` enum('user','admin') NOT NULL DEFAULT 'user',
+218:   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+219:   PRIMARY KEY (`id`)
+220: ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+221: 
+222: CREATE TABLE `tg_messages` (
+223:   `id` bigint NOT NULL AUTO_INCREMENT,
+224:   `tg_user_id` bigint NOT NULL,
+225:   `message` longtext NOT NULL,
+226:   `direction` enum('inbound','outbound') NOT NULL,
+227:   `tg_message_id` bigint DEFAULT NULL,
+228:   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+229:   PRIMARY KEY (`id`),
+230:   KEY `fk_tg_user_message_idx` (`tg_user_id`),
+231:   CONSTRAINT `fk_tg_user_message` FOREIGN KEY (`tg_user_id`) REFERENCES `tg_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+232: ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+233: ALTER TABLE `tg_users` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+234: ALTER TABLE `tg_messages` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+235: 
+236: --<================================================>--
+237: --<======================VIEW======================>--
+238: --<================================================>--
+239: CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`accupancy_rate` AS
+240: SELECT  
+241:     `u`.`company_id` AS `company_id`,
+242:     `g`.`id` AS `group_id`,
+243:     `g`.`name` AS `group_name`,
+244:     `g`.`status` AS `group_status`,
+245:     `g`.`max_students` AS `max_capacity`,
+246:     `u`.`full_name` AS `teacher_name`,
+247:     COUNT(`gm`.`client_id`) AS `current_students`,
+248:     IF((`g`.`max_students` > 0), ROUND(((COUNT(`gm`.`client_id`) / `g`.`max_students`) * 100), 1), 0) AS `occupancy_rate`
+249: FROM ` soft-skills crm`.`groups` `g`
+250: LEFT JOIN ` soft-skills crm`.`users` `u` ON `g`.`users_id` = `u`.`id`
+251: LEFT JOIN ` soft-skills crm`.`group_members` `gm` ON `g`.`id` = `gm`.`group_id`
+252: GROUP BY `g`.`id`, `u`.`id`, `u`.`company_id`;
+253: 
+254: CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`select_schedules_of_groups` AS
+255: SELECT  
+256:     `gs`.`id` AS `schedule_id`,
+257:     `gs`.`day_of_week` AS `day_of_week`,
+258:     `gs`.`start_time` AS `start_time`,
+259:     `gs`.`end_time` AS `end_time`,
+260:     `g`.`name` AS `group_name`,
+261:     `u`.`full_name` AS `user_name`,
+262:     `u`.`company_id` AS `company_id`
+263: FROM ` soft-skills crm`.`group_schedules` `gs`
+264: JOIN ` soft-skills crm`.`groups` `g` ON `gs`.`group_id` = `g`.`id`
+265: JOIN ` soft-skills crm`.`users` `u` ON `g`.`users_id` = `u`.`id`;
+266: 
+267: CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`state_clients_balance` AS
+268: SELECT  
+269:     `c`.`id` AS `company_id`,
+270:     `c`.`name` AS `company_name`,
+271:     SUM(CASE WHEN `cl`.`balance` > 0 THEN 1 ELSE 0 END) AS `client_with_positive_account`,
+272:     SUM(CASE WHEN `cl`.`balance` <= 0 THEN 1 ELSE 0 END) AS `client_wth_negative_account`,
+273:     COUNT(`cl`.`id`) AS `total_clients`
+274: FROM ` soft-skills crm`.`company` `c`
+275: LEFT JOIN ` soft-skills crm`.`clients` `cl` ON `c`.`id` = `cl`.`company_id`
+276: GROUP BY `c`.`id`, `c`.`name`;
+277: 
+278: CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`v_lesson_details` AS
+279: SELECT  
+280:     `l`.`id` AS `lesson_id`,
+281:     `l`.`lesson_date` AS `lesson_date`,
+282:     `l`.`start_time` AS `start_time`,
+283:     `l`.`end_time` AS `end_time`,
+284:     `l`.`status` AS `lesson_status`,
+285:     `l`.`teacher_pay` AS `teacher_pay`,
+286:     `g`.`id` AS `group_id`,
+287:     `g`.`name` AS `group_name`,
+288:     `g`.`status` AS `group_status`,
+289:     `g`.`max_students` AS `max_students`,
+290:     `u`.`id` AS `teacher_id`,
+291:     `u`.`full_name` AS `teacher_name`,
+292:     `u`.`email` AS `teacher_email`,
+293:     `u`.`balance` AS `teacher_balance`,
+294:     `c`.`id` AS `company_id`,
+295:     `c`.`name` AS `company_name`,
+296:     (SELECT COUNT(0) FROM ` soft-skills crm`.`group_members` `gm` WHERE `gm`.`group_id` = `g`.`id`) AS `current_students_count`, 
+297:     IFNULL(SUM(`la`.`amount_charged`), 0.00) AS `total_revenue_charged`
+298: FROM ` soft-skills crm`.`lessons` `l`
+299: JOIN ` soft-skills crm`.`groups` `g` ON `l`.`group_id` = `g`.`id`
+300: JOIN ` soft-skills crm`.`users` `u` ON `l`.`user_id` = `u`.`id`
+301: JOIN ` soft-skills crm`.`company` `c` ON `u`.`company_id` = `c`.`id`
+302: LEFT JOIN ` soft-skills crm`.`lesson_attendance` `la` ON `l`.`id` = `la`.`lesson_id`
+303: GROUP BY `l`.`id`, `g`.`id`, `u`.`id`, `c`.`id`;
+304: 
+305: CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`view_company_finance` AS
+306: SELECT  
+307:     `c`.`id` AS `company_id`,
+308:     `c`.`name` AS `company_name`,
+309:     COUNT(`cl`.`id`) AS `total_clients`,
+310:     SUM(`cl`.`balance`) AS `total_balance`,
+311:     ROUND(AVG(`cl`.`balance`), 2) AS `average_client_balance`
+312: FROM ` soft-skills crm`.`company` `c`
+313: LEFT JOIN ` soft-skills crm`.`clients` `cl` ON `c`.`id` = `cl`.`company_id`
+314: GROUP BY `c`.`id`, `c`.`name`;
+315: 
+316: CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`view_groups_analytics` AS
+317: SELECT  
+318:     `g`.`id` AS `group_id`,
+319:     `g`.`name` AS `group_name`,
+320:     `g`.`status` AS `group_status`,
+321:     `u`.`company_id` AS `company_id`,
+322:     `u`.`full_name` AS `teacher_name`,
+323:     `g`.`max_students` AS `max_students`,
+324:     COUNT(DISTINCT `gm`.`client_id`) AS `current_students_count`,
+325:     ROUND(((COUNT(DISTINCT `gm`.`client_id`) / `g`.`max_students`) * 100), 2) AS `occupancy_rate_percent`,
+326:     COUNT(DISTINCT CASE WHEN `l`.`status` = 2 THEN `l`.`id` END) AS `conducted_lessons_count`,
+327:     ROUND(((COUNT(CASE WHEN `la`.`attendance_status` = 1 AND `l`.`status` = 2 THEN 1 END) / NULLIF(COUNT(CASE WHEN `l`.`status` = 2 THEN `la`.`client_id` END), 0)) * 100), 2) AS `attendance_rate_percent`
+328: FROM ` soft-skills crm`.`groups` `g`
+329: JOIN ` soft-skills crm`.`users` `u` ON `g`.`users_id` = `u`.`id`
+330: LEFT JOIN ` soft-skills crm`.`group_members` `gm` ON `g`.`id` = `gm`.`group_id`
+331: LEFT JOIN ` soft-skills crm`.`lessons` `l` ON `g`.`id` = `l`.`group_id`
+332: LEFT JOIN ` soft-skills crm`.`lesson_attendance` `la` ON `l`.`id` = `la`.`lesson_id`
+333: GROUP BY `g`.`id`, `g`.`name`, `g`.`status`, `u`.`company_id`, `u`.`full_name`, `g`.`max_students`;
+334: 
+335: CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`view_leads_conversion` AS
+336: SELECT 
+337:     `c`.`id` AS `company_id`,
+338:     `c`.`name` AS `company_name`,
+339:     COUNT(`l`.`id`) AS `total_leads`,
+340:     SUM(CASE WHEN `l`.`status` = 'new' THEN 1 ELSE 0 END) AS `leads_new`,
+341:     SUM(CASE WHEN `l`.`status` = 'in_progress' THEN 1 ELSE 0 END) AS `leads_in_progress`,
+342:     SUM(CASE WHEN `l`.`status` = 'trial_scheduled' THEN 1 ELSE 0 END) AS `leads_trial_scheduled`,
+343:     SUM(CASE WHEN `l`.`status` = 'trial_attended' THEN 1 ELSE 0 END) AS `leads_trial_attended`,
+344:     SUM(CASE WHEN `l`.`status` = 'won' THEN 1 ELSE 0 END) AS `leads_won`,
+345:     SUM(CASE WHEN `l`.`status` = 'lost' THEN 1 ELSE 0 END) AS `leads_lost`,
+346:     ROUND(
+347:         (SUM(CASE WHEN `l`.`status` = 'won' THEN 1 ELSE 0 END) / 
+348:         NULLIF(SUM(CASE WHEN `l`.`status` IN ('won', 'lost') THEN 1 ELSE 0 END), 0)) * 100, 
+349:         2
+350:     ) AS `conversion_rate_percent`
+351: FROM ` soft-skills crm`.`company` `c`
+352: LEFT JOIN ` soft-skills crm`.`leads` `l` ON `c`.`id` = `l`.`company_id`
+353: GROUP BY `c`.`id`, `c`.`name`;
+354: 
+355: CREATE OR REPLACE ALGORITHM = UNDEFINED DEFINER = `root`@`localhost` SQL SECURITY DEFINER VIEW ` soft-skills crm`.`view_leads_loss_analytics` AS
+356: SELECT 
+357:     `l`.`company_id` AS `company_id`,
+358:     `llr`.`id` AS `reason_id`,
+359:     `llr`.`reason_text` AS `loss_reason`,
+360:     COUNT(`l`.`id`) AS `total_dropped_leads`,
+361:     ROUND(
+362:         (COUNT(`l`.`id`) / 
+363:         NULLIF((SELECT COUNT(1) FROM ` soft-skills crm`.`leads` WHERE `status` = 'lost' AND `company_id` = `l`.`company_id`), 0)) * 100, 
+364:         2
+365:     ) AS `reason_share_percent`
+366: FROM ` soft-skills crm`.`lead_loss_reasons` `llr`
+367: JOIN ` soft-skills crm`.`leads` `l` ON `llr`.`id` = `l`.`loss_reason_id`
+368: WHERE `l`.`status` = 'lost'
+369: GROUP BY `l`.`company_id`, `llr`.`id`, `llr`.`reason_text`
+370: ORDER BY `total_dropped_leads` DESC;
+371: 
+372: SET SQL_MODE = @OLD_SQL_MODE;
+373: SET FOREIGN_KEY_CHECKS = @OLD_FOREIGN_KEY_CHECKS;
+374: SET UNIQUE_CHECKS = @OLD_UNIQUE_CHECKS;
+375: ```
+376: _> This code already exist in:_
+377: ```
+378: /backend
+379:     /SqlSchema.sql <== look at this
+380: /frontend
+381: ```
+382: 
+383: ### 4. Running the Application
+384: 
+385: Before starting, navigate to the target directory using the `cd` command.
+386: 
+387: #### Start Backend
+388: 
+389: ```bash
+390: cd backend
+391: npm install
+392: npm install bcrypt body-parser cors dotenv ejs express express-session mysql2
+393: npm install --save-dev @types/bcrypt @types/cors @types/dotenv @types/express @types/express-session @types/node eslint ts-node tsx typescript
+394: npm run dev
+395: ```
+396: 
+397: #### Start Frontend
+398: 
+399: ```bash
+400: cd frontend
+401: npm install
+402: npm install @hello-pangea/dnd clsx lucide-react react react-dom react-router-dom recharts tailwind-merge
+403: npm install --save-dev @tailwindcss/vite @testing-library/jest-dom @testing-library/react @testing-library/user-event @types/node @types/react @types/react-dom @vitejs/plugin-react @vitest/ui jsdom msw tailwindcss typescript vite vite-plugin-singlefile vitest
+404: npm run dev
+405: ```
+406: 
+407: #### Start Bot
+408: ```bash
+409: cd backend/bot
+410: venv\Scripts\activate
+411: source venv/bin/activate
+412: pip install aiogram requests
+413: ```
+414: 
+415: ### 5. Deploy guide
+416: This project can be launched in a single command using Docker and Docker Compose. 
+417: ### Prerequisites
+418: 
+419: Ensure you have Docker and Docker Compose installed on your system before proceeding.
+420: 
+421: ### Deployment Steps
+422: 
+423: 1. Download the release archive and extract its contents into a dedicated directory.
+424: 2. Verify that the `init.sql` file containing the database schema is present in the root directory alongside `docker-compose.yml`.
+425: 3. Open a terminal in the root directory of the extracted project and execute the following command:
+426:    ```bash
+427:    docker-compose up -d --build
+428:    ```
+429: 4. The database engine will spin up and automatically execute the `init.sql` script to construct the schema during the initial boot. The application containers will build and start sequentially once the database becomes available.
+430: 
+431: frontend:
+432: ```
+433: FROM node:20-alpine as build
+434: WORKDIR /app
+435: COPY package*.json ./
+436: RUN npm install
+437: COPY . .
+438: RUN npm run build
+439: 
+440: FROM nginx:stable-alpine
+441: COPY --from=build /app/dist /usr/share/nginx/html
+442: EXPOSE 80
+443: CMD ["nginx", "-g", "daemon off;"]
+444: ```
+445: 
+446: backend:
+447: ```docker
+448: FROM node:20-alpine
+449: WORKDIR /app
+450: COPY package*.json ./
+451: RUN npm install
+452: COPY . .
+453: RUN npm run build
+454: EXPOSE 3000
+455: CMD ["npm", "run", "start"]
+456: ```
+457: 
+458: support bot:
+459: ```docker
+460: FROM python:3.11-slim
+461: WORKDIR /app
+462: COPY requirements.txt* ./
+463: RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; else pip install --no-cache-dir aiogram requests python-dotenv aiomysql pymysql cryptography; fi
+464: COPY . .
+465: CMD ["python", "main.py"]
+466: ```
+467: 
+468: .yaml:
+469: ```docker
+470: version: '3.8'
+471: 
+472: services:
+473:   db:
+474:     image: mysql:8.0
+475:     container_name: crm_mysql_db
+476:     restart: always
+477:     environment:
+478:       MYSQL_ROOT_PASSWORD: root_password_here
+479:       MYSQL_DATABASE: softskills_crm
+480:     ports:
+481:       - "3306:3306"
+482:     volumes:
+483:       - mysql_data:/var/lib/mysql
+484:       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+485: 
+486:   backend:
+487:     build: ./backend
+488:     container_name: crm_backend_api
+489:     restart: always
+490:     ports:
+491:       - "3000:3000"
+492:     environment:
+493:       - DB_HOST=db
+494:       - DB_USER=root
+495:       - DB_PASSWORD=root_password_here
+496:       - DB_NAME=softskills_crm
+497:       - VITE_PORT=3000
+498:     depends_on:
+499:       - db
+500: 
+501:   frontend:
+502:     build: ./frontend
+503:     container_name: crm_frontend_ui
+504:     restart: always
+505:     ports:
+506:       - "80:80"
+507:     environment:
+508:       - VITE_HOST=http://localhost
+509:       - VITE_PORT=3000
+510:     depends_on:
+511:       - backend
+512: 
+513: volumes:
+514:   mysql_data:
+515: ```
+516: 
+517: ### Application Access Endpoints
+518: 
+519: * Frontend Interface: http://localhost (Port 80)
+520: * Backend API: http://localhost:3000
+521: 
+522: ### Stopping the Application
+523: 
+524: To shut down the active application containers and preserve database volumes, run:
+525: ```bash
+526: docker-compose down
+527: ```
+528: ## Screenshots
+529: | | Screenshots | |
+530: | :---: | :---: | :---: |
+531: | ![alt text](frontend/screenshots/image-1.png) | ![alt text](frontend/screenshots/image-2.png) | ![alt text](frontend/screenshots/image-3.png) |
+532: | ![alt text](frontend/screenshots/image-4.png) | ![alt text](frontend/screenshots/image-5.png) | ![alt text](frontend/screenshots/image-6.png) |
+533: | ![alt text](frontend/screenshots/image-7.png) | ![alt text](frontend/screenshots/image-8.png) | ![alt text](frontend/screenshots/image-9.png) |
+534: | ![alt text](frontend/screenshots/image-10.png) | ![alt text](frontend/screenshots/image-11.png) | ![alt text](frontend/screenshots/image-12.png) |
+535: | ![alt text](frontend/screenshots/image-13.png) | ![alt text](frontend/screenshots/image-14.png) | ![alt text](frontend/screenshots/image-15.png) |
+536: | ![alt text](frontend/screenshots/image-16.png) | ![alt text](frontend/screenshots/image-17.png) | ![alt text](frontend/screenshots/image-18.png) |
+537: | ![alt text](frontend/screenshots/image-19.png) | ![alt text](frontend/screenshots/image-20.png) | ![alt text](frontend/screenshots/image-21.png) |
+538: | ![alt text](frontend/screenshots/image-22.png) | ![alt text](frontend/screenshots/image-23.png) | ![alt text](frontend/screenshots/image-24.png) |
+539: | ![alt text](frontend/screenshots/image-25.png) | ![alt text](frontend/screenshots/image-26.png) | ![alt text](frontend/screenshots/image-27.png) |
+540: | ![alt text](frontend/screenshots/image-28.png) | ![alt text](frontend/screenshots/image-29.png) | ![alt text](frontend/screenshots/image-30.png) |
+541:  | | |
+542: 
+
+🛠 Gemini вызвал: searchCode { query: 'backend\\' }
+
+🔎 Ищу в CRM: "backend\"
+📁 Корень CRM: D:\vscodeprojects\alpha_crm_open_source
+
+📂 Результат поиска:
+
+Ничего не найдено.
+
+🛠 Gemini вызвал: searchCode { query: 'export ' }
+
+🔎 Ищу в CRM: "export "
+📁 Корень CRM: D:\vscodeprojects\alpha_crm_open_source
+
+📂 Результат поиска:
+
+backend\controllers\AnalyticController.ts:6: export const get_accupancy_groups = async (
+backend\controllers\AnalyticController.ts:39: export const get_transactions_list = async (
+backend\controllers\AnalyticController.ts:90: export const getRevenueSources = async (req: Request, res: Response) => {
+backend\controllers\AnalyticController.ts:126: export const getFinancialTimeline = async (req: Request, res: Response) => {
+backend\controllers\AnalyticController.ts:182: export const getExpensesStructure = async (req: Request, res: Response) => {
+backend\controllers\AnalyticController.ts:219: export const getClientDebtors = async (req: Request, res: Response) => {
+backend\controllers\AnalyticController.ts:256: export const getAllState = async (req: Request, res: Response) => {
+backend\controllers\AnalyticController.ts:313: export const getChartState = async (req: Request, res: Response) => {
+backend\controllers\AnalyticController.ts:384: export const getTeachersWorkload = async (req: Request, res: Response) => {
+backend\controllers\AnalyticController.ts:427: export const getAttendanceTrends = async (req: Request, res: Response) => {
+backend\controllers\AuthController.ts:6: export const APIsignup = async (
+backend\controllers\AuthController.ts:79: export const APIsignin = async (
+backend\controllers\AuthController.ts:139: export const logout = (req: Request, res: Response) => {
+backend\controllers\BackController.ts:4: export const getglobalinfo = async (req: Request, res: Response) => {
+backend\controllers\BackController.ts:32: export const checkconnect = async (req: Request, res: Response) => {
+backend\controllers\BackController.ts:49: export const getallsession = async (req: Request, res: Response) => {
+backend\controllers\BackController.ts:72: export const getUserProfile = async (req: Request, res: Response) => {
+backend\controllers\ClientController.ts:5: export const APIGetClients = async (
+backend\controllers\ClientController.ts:92: export const addclient = async (
+backend\controllers\ClientController.ts:146: export const delclient = async (
+backend\controllers\ClientController.ts:191: export async function updateClient(req: Request, res: Response) {
+backend\controllers\FeedbackController.ts:7: export interface AuthenticatedRequest extends Request {
+backend\controllers\FeedbackController.ts:15: export const create_feedback = async (
+backend\controllers\FeedbackController.ts:62: export const get_all_feedbacks = async (
+backend\controllers\FeedbackController.ts:82: export const get_my_feedbacks = async (
+backend\controllers\FeedbackController.ts:105: export const update_feedback = async (
+backend\controllers\FeedbackController.ts:148: export const delete_feedback = async (
+backend\controllers\FinanceController.ts:5: export const addManualExpense = async (req: Request, res: Response) => {
+backend\controllers\FinanceController.ts:54: export const getExpenses = async (req: Request, res: Response) => {
+backend\controllers\GroupController.ts:5: export const getgroups = async (req: Request, res: Response) => {
+backend\controllers\GroupController.ts:97: export const creategroup = async (req: Request, res: Response) => {
+backend\controllers\GroupController.ts:177: export const deleteGroup = async (
+backend\controllers\GroupController.ts:244: export const updategroup = async (req: Request, res: Response) => {
+backend\controllers\LeadController.ts:5: export const createLead = async (
+backend\controllers\LeadController.ts:65: export const getLeads = async (
+backend\controllers\LeadController.ts:102: export const getLeadById = async (
+backend\controllers\LeadController.ts:137: export const deleteLead = async (
+backend\controllers\LeadController.ts:178: export const updateLead = async (
+backend\controllers\SchesuleController.ts:4: export const getSchedule = async (req: Request, res: Response) => {
+backend\controllers\SchesuleController.ts:49: export const getLessonDetails = async (req: Request, res: Response) => {
+backend\controllers\SchesuleController.ts:187: export const closeLesson = async (req: Request, res: Response): Promise<void> => {
+backend\controllers\UsersController.ts:5: export const getusers = async (
+backend\controllers\UsersController.ts:40: export const adduser = async (req: Request, res: Response) => {
+backend\controllers\UsersController.ts:102: export const deluser = async (req: Request, res: Response) => {
+backend\controllers\UsersController.ts:172: export const resetuser = async (req: Request, res: Response) => {
+backend\data_base_connect.ts:14: export default pool;
+backend\router.ts:77: export default router;
+frontend\.vite\deps\chunk-AYPAJTUR.js:989: export {
+frontend\.vite\deps\react-dom_client.js:3989: resolvedType += " You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.";
+frontend\.vite\deps\react-dom_client.js:3990: null === type ? pendingProps = "null" : isArrayImpl(type) ? pendingProps = "array" : void 0 !== type && type.$$typeof === REACT_ELEMENT_TYPE ? (pendingProps = "<" + (getComponentNameFromType(type.type) || "Unknown") + " />", resolvedType = " Did you accidentally export a JSX literal instead of a component?") : pendingProps = typeof type;
+frontend\.vite\deps\react-dom_client.js:20444: export default require_client();
+frontend\.vite\deps\react.js:4: export default require_react();
+frontend\.vite\deps\react_jsx-dev-runtime.js:262: export default require_jsx_dev_runtime();
+frontend\src\App.tsx:49: export default App;
+frontend\src\components\Aauthorization.tsx:6: export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
+frontend\src\components\Contact.tsx:6: export const ContactsPage: React.FC = () => {
+frontend\src\components\Dashboard.tsx:17: export const Dashboard: React.FC = () => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\AccupancyGroup.tsx:15: export const AnalyticsTable: React.FC<AnalyticsTableProps> = ({ data, getBarColor }) => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\AccupancyGroup.tsx:63: export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({ data, getBarColor, CustomTooltip }) => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\AccupancyGroup.tsx:92: export const CustomTooltip = ({ active, payload }: any) => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\AttendanceTrendTracker.tsx:13: export const AttendanceTrendTracker: React.FC = () => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\FinanceComponents\Debts.tsx:13: export const Debts: React.FC = () => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\FinanceComponents\Expenses.tsx:12: export const Expenses: React.FC = () => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\FinanceComponents\FinanceChart.tsx:15: export const FinanceChart: React.FC = () => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\FinanceComponents\Profit.tsx:15: export const Profit: React.FC = () => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\FinanceComponents\Revenue.tsx:9: export const Revenue: React.FC = () => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\FinanceComponents\Transactions.tsx:5: export const Transactions: React.FC = () => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\FinancialAnalyticsDashboard.tsx:30: export const FinancialAnalyticsDashboard: React.FC<FinancialAnalyticsDashboardProps> = ({ subView }) => {
+frontend\src\components\DashboardsComponents\AnalyticModuls\TeacherBurnoutTracker.tsx:16: export const TeacherBurnoutTracker: React.FC = () => {
+frontend\src\components\DashboardsComponents\Analytics.tsx:10: export const Analytic: React.FC = () => {
+frontend\src\components\DashboardsComponents\ClientsTable.tsx:9: export const ClientTable: React.FC = () => {
+frontend\src\components\DashboardsComponents\Finance.tsx:14: export const Expenses: React.FC = () => {
+frontend\src\components\DashboardsComponents\GroupsTable.tsx:46: export const GroupTable: React.FC = () => {
+frontend\src\components\DashboardsComponents\LeadComponents\Kanban.tsx:102: export const LeadKanban: React.FC = () => {
+frontend\src\components\DashboardsComponents\LeadsTable.tsx:231: export const LeadsTable: React.FC = () => {
+frontend\src\components\DashboardsComponents\SchesuleComponents\LessonModalWindow.tsx:13: export const LessonModalWindow: React.FC<LessonModalWindowProps> = ({ lessonId, onClose, onSuccess }) => {
+frontend\src\components\DashboardsComponents\SheduleTable.tsx:6: export const ScheduleTable: React.FC = () => {
+frontend\src\components\DashboardsComponents\UsersTable.tsx:15: export const UsersTable: React.FC = () => {
+frontend\src\components\DashboardsComponents\СlientsComponents\ClientProfile.tsx:6: export const ClientProfile: React.FC = () => {
+frontend\src\components\DashboardsComponents\СlientsComponents\MoreActions.tsx:41: export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose, onTopUp, onEdit, onOpenProfile }) => {
+frontend\src\components\DashboardsComponents\СlientsComponents\TopUp.tsx:10: export const TopUp: React.FC<TopUpProps> = ({ client, onClose, onSuccess }) => {
+frontend\src\components\DashboardsComponents\СlientsComponents\UpdateClientForm.tsx:14: export const UpdateClientForm: React.FC<UpdateClientFormProps> = ({
+frontend\src\components\FaqPage.tsx:4: export const FaqPage: React.FC = () => {
+frontend\src\components\Feedback.tsx:1: export interface Review {
+frontend\src\components\Feedback.tsx:16: export const ReviewCard: React.FC<{ review: Review }> = ({ review }) => {
+frontend\src\components\Feedback.tsx:68: export const ReviewStats: React.FC<StatsProps> = ({ reviews, activeFilter, onFilterChange }) => {
+frontend\src\components\Feedback.tsx:112: export const ReviewsPage: React.FC = () => {
+frontend\src\components\Footer.tsx:3: export const Footer = () => {
+frontend\src\components\index.tsx:172: export default Index;
+frontend\src\components\Price.tsx:8: export const PricingSection = () => {
+frontend\src\components\Prices\PriceCard.tsx:16: export const PriceCard: React.FC<PriceCardProps> = ({
+frontend\src\components\Prices\PricePage.tsx:49: export const PricePage = () => {
+frontend\src\components\Privacy.tsx:5: export const PrivacyPolicy: React.FC = () => {
+frontend\src\components\Profile.tsx:5: export const ProfilePage: React.FC = () => {
+frontend\src\components\registration.tsx:6: export const RegisterForm: React.FC<IdebugProps> = ({ isDebug }) => {
+frontend\src\components\Support.tsx:5: export const SupportPage: React.FC = () => {
+frontend\src\components\Terms.tsx:4: export const TermsOfService: React.FC = () => {
+frontend\src\components\TransferFilesPage.tsx:4: export const TransferFilesPage: React.FC = () => {
+frontend\src\global.d.ts:3: export default classes;
+frontend\src\global.d.ts:8: export default content;
+frontend\tailwind.config.ts:3: export default {
+
+Ошибка:
+RateLimitError: 429 Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 5h54m53s or upgrade your tier at https://ai.dev/rate-limit.
+    at APIError.generate (D:\vscodeprojects\alpha_crm_open_source\ai-agent\node_modules\@google\genai\src\gaos\lib\compat-errors.ts:113:14)
+    at wrapAPIError (D:\vscodeprojects\alpha_crm_open_source\ai-agent\node_modules\@google\genai\src\gaos\lib\compat-errors.ts:186:28)
+    at wrapSDKError (D:\vscodeprojects\alpha_crm_open_source\ai-agent\node_modules\@google\genai\src\gaos\lib\compat-errors.ts:174:12)
+    at unwrapWithSdkHttpResponse (D:\vscodeprojects\alpha_crm_open_source\ai-agent\node_modules\@google\genai\src\gaos\google-genai.ts:801:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async GeminiNextGenInteractions.create (D:\vscodeprojects\alpha_crm_open_source\ai-agent\node_modules\@google\genai\src\gaos\google-genai.ts:282:22)
+    at async main (D:\vscodeprojects\alpha_crm_open_source\ai-agent\src\index.ts:141:21) {
+  status: 429,
+  headers: Headers {
+    'retry-after': '21293',
+    vary: 'Origin, X-Origin, Referer',
+    'content-type': 'application/json; charset=UTF-8',
+    'content-encoding': 'gzip',
+    date: 'Mon, 05 Oct 2026 18:05:06 GMT',
+    server: 'scaffolding on HTTPServer2',
+    'x-xss-protection': '0',
+    'x-frame-options': 'SAMEORIGIN',
+    'x-content-type-options': 'nosniff',
+    'server-timing': 'gfet4t7; dur=139',
+    'alt-svc': 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000',
+    'transfer-encoding': 'chunked'
+  },
+  error: {
+    httpMeta: {
+      response: Response {
+        status: 429,
+        statusText: 'Too Many Requests',
+        headers: Headers {
+          'retry-after': '21293',
+          vary: 'Origin, X-Origin, Referer',
+          'content-type': 'application/json; charset=UTF-8',
+          'content-encoding': 'gzip',
+          date: 'Mon, 05 Oct 2026 18:05:06 GMT',
+          server: 'scaffolding on HTTPServer2',
+          'x-xss-protection': '0',
+          'x-frame-options': 'SAMEORIGIN',
+          'x-content-type-options': 'nosniff',
+          'server-timing': 'gfet4t7; dur=139',
+          'alt-svc': 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000',
+          'transfer-encoding': 'chunked'
+        },
+        body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+        bodyUsed: true,
+        ok: false,
+        redirected: false,
+        type: 'basic',
+        url: 'https://generativelanguage.googleapis.com/v1beta/interactions'
+      },
+      request: Request {
+        method: 'POST',
+        url: 'https://generativelanguage.googleapis.com/v1beta/interactions',
+        headers: Headers {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          cookie: '',
+          'user-agent': 'speakeasy-sdk/typescript 2.4.1-preview.4 internal v1beta @google/genai'
+        },
+        destination: '',
+        referrer: 'about:client',
+        referrerPolicy: '',
+        mode: 'cors',
+        credentials: 'same-origin',
+        cache: 'default',
+        redirect: 'follow',
+        integrity: '',
+        keepalive: false,
+        isReloadNavigation: false,
+        isHistoryNavigation: false,
+        signal: AbortSignal { aborted: false }
+      }
+    },
+    error: {
+      message: 'Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 5h54m53s or upgrade your tier at https://ai.dev/rate-limit.',
+      code: 'too_many_requests'
+    }
+  },
+  statusCode: 429,
+  body: '{"error":{"message":"Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 5h54m53s or upgrade your tier at https://ai.dev/rate-limit.","code":"too_many_requests"}}',
+  contentType: 'application/json; charset=UTF-8',
+  rawResponse: Response {
+    status: 429,
+    statusText: 'Too Many Requests',
+    headers: Headers {
+      'retry-after': '21293',
+      vary: 'Origin, X-Origin, Referer',
+      'content-type': 'application/json; charset=UTF-8',
+      'content-encoding': 'gzip',
+      date: 'Mon, 05 Oct 2026 18:05:06 GMT',
+      server: 'scaffolding on HTTPServer2',
+      'x-xss-protection': '0',
+      'x-frame-options': 'SAMEORIGIN',
+      'x-content-type-options': 'nosniff',
+      'server-timing': 'gfet4t7; dur=139',
+      'alt-svc': 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000',
+      'transfer-encoding': 'chunked'
+    },
+    body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+    bodyUsed: true,
+    ok: false,
+    redirected: false,
+    type: 'basic',
+    url: 'https://generativelanguage.googleapis.com/v1beta/interactions'
+  },
+  cause: CreateInteractionClientError: Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 5h54m53s or upgrade your tier at https://ai.dev/rate-limit.
+      at matchFunc (D:\vscodeprojects\alpha_crm_open_source\ai-agent\node_modules\@google\genai\src\gaos\lib\matchers.ts:337:11)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async $do$k (D:\vscodeprojects\alpha_crm_open_source\ai-agent\node_modules\@google\genai\src\gaos\funcs\interactions-create.ts:222:20)
+      at async unwrapWithSdkHttpResponse (D:\vscodeprojects\alpha_crm_open_source\ai-agent\node_modules\@google\genai\src\gaos\google-genai.ts:799:26)
+      at async GeminiNextGenInteractions.create (D:\vscodeprojects\alpha_crm_open_source\ai-agent\node_modules\@google\genai\src\gaos\google-genai.ts:282:22)
+      at async main (D:\vscodeprojects\alpha_crm_open_source\ai-agent\src\index.ts:141:21) {
+    statusCode: 429,
+    body: '{"error":{"message":"Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 5h54m53s or upgrade your tier at https://ai.dev/rate-limit.","code":"too_many_requests"}}',
+    headers: Headers {
+      'retry-after': '21293',
+      vary: 'Origin, X-Origin, Referer',
+      'content-type': 'application/json; charset=UTF-8',
+      'content-encoding': 'gzip',
+      date: 'Mon, 05 Oct 2026 18:05:06 GMT',
+      server: 'scaffolding on HTTPServer2',
+      'x-xss-protection': '0',
+      'x-frame-options': 'SAMEORIGIN',
+      'x-content-type-options': 'nosniff',
+      'server-timing': 'gfet4t7; dur=139',
+      'alt-svc': 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000',
+      'transfer-encoding': 'chunked'
+    },
+    contentType: 'application/json; charset=UTF-8',
+    rawResponse: Response {
+      status: 429,
+      statusText: 'Too Many Requests',
+      headers: Headers {
+        'retry-after': '21293',
+        vary: 'Origin, X-Origin, Referer',
+        'content-type': 'application/json; charset=UTF-8',
+        'content-encoding': 'gzip',
+        date: 'Mon, 05 Oct 2026 18:05:06 GMT',
+        server: 'scaffolding on HTTPServer2',
+        'x-xss-protection': '0',
+        'x-frame-options': 'SAMEORIGIN',
+        'x-content-type-options': 'nosniff',
+        'server-timing': 'gfet4t7; dur=139',
+        'alt-svc': 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000',
+        'transfer-encoding': 'chunked'
+      },
+      body: ReadableStream { locked: true, state: 'closed', supportsBYOB: true },
+      bodyUsed: true,
+      ok: false,
+      redirected: false,
+      type: 'basic',
+      url: 'https://generativelanguage.googleapis.com/v1beta/interactions'
+    },
+    'data$': { httpMeta: [Object], error: [Object] },
+    error: {
+      message: 'Rate limit exceeded for model gemini-3.8-flash (limit: 20 requests per day on Free Tier). Please retry in 5h54m53s or upgrade your tier at https://ai.dev/rate-limit.',
+      code: 'too_many_requests'
+    }
+  }
+}
+PS D:\vscodeprojects\alpha_crm_open_source\ai-agent> 
