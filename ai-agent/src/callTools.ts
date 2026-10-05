@@ -88,5 +88,21 @@ const getFileInfoTool = {
   },
 };
 
+const findApiEndpointTool = {
+  type: "function",
+  name: "findApiEndpoint",
+  description: "Трассирует API эндпоинт бэкенда. НаходитExpress-роут, связывает его с контроллером и конкретной функцией.",
+  parameters: {
+    type: "object",
+    properties: {
+      routePath: {
+        type: "string",
+        description: "Часть URL или эндпоинта для поиска (например, 'signin', 'creategroup' или '/clients').",
+      },
+    },
+    required: ["routePath"],
+  },
+};
 
-export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool];
+
+export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, findApiEndpointTool];
