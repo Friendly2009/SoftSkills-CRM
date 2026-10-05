@@ -139,4 +139,14 @@ const inspectGitTool = {
   },
 };
 
-export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, runTypeCheckTool, runTestsTool, inspectGitTool];
+const readDatabaseSchemaTool = {
+  type: "function",
+  name: "readDatabaseSchema",
+  description: "Возвращает структуру базы данных CRM (таблицы, колонки, типы данных, ключи и связи) в режиме только для чтения.",
+  parameters: {
+    type: "object",
+    properties: {},
+  },
+};
+
+export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, runTypeCheckTool, runTestsTool, inspectGitTool, readDatabaseSchemaTool];
