@@ -68,6 +68,14 @@ async function main() {
         } else if (functionName === "runTests") {
           const target = args.target === "frontend" ? "frontend" : "backend";
           result = await runTests(target);
+        } else if (functionName === "inspectGit") {
+          const gitCommand =
+            args.command === "diff"
+              ? "diff"
+              : args.command === "branch"
+                ? "branch"
+                : "status";
+          result = await inspectGit(gitCommand);
         } else {
           result = {
             error: `Инструмент ${functionName} не реализован на бэкенде агента.`,
@@ -112,3 +120,7 @@ main().catch((error) => {
 function runTypeCheck(target: string): unknown {
   throw new Error("Function not implemented.");
 }
+function inspectGit(gitCommand: string): unknown {
+  throw new Error("Function not implemented.");
+}
+

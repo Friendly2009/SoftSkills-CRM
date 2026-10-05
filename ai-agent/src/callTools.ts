@@ -122,4 +122,21 @@ const runTestsTool = {
   },
 };
 
-export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, runTypeCheckTool, runTestsTool];
+const inspectGitTool = {
+  type: "function",
+  name: "inspectGit",
+  description: "Позволяет агенту инспектировать текущее состояние Git-репозитория (статус, изменения, текущая ветка). Инструмент работает только в режиме чтения.",
+  parameters: {
+    type: "object",
+    properties: {
+      command: {
+        type: "string",
+        enum: ["status", "diff", "branch"],
+        description: "Комманда для выполнения: 'status' (измененные файлы), 'diff' (просмотр незакоммиченных изменений), 'branch' (информация о текущей ветке).",
+      },
+    },
+    required: ["command"],
+  },
+};
+
+export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, runTypeCheckTool, runTestsTool, inspectGitTool];
