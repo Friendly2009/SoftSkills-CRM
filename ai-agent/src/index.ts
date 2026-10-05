@@ -61,6 +61,9 @@ async function main() {
           result = await findReferences(String(args.symbol));
         } else if (functionName === "getFileInfo") {
           result = await getFileInfo(String(args.filePath));
+        } else if (functionName === "runTypeCheck") {
+          const target = args.target === "frontend" ? "frontend" : "backend";
+          result = await runTypeCheck(target);
         } else {
           result = {
             error: `Инструмент ${functionName} не реализован на бэкенде агента.`,
@@ -102,3 +105,7 @@ main().catch((error) => {
   console.error("\n💥 Критическая ошибка в Tool Loop:");
   console.error(error);
 });
+function runTypeCheck(target: string): unknown {
+  throw new Error("Function not implemented.");
+}
+
