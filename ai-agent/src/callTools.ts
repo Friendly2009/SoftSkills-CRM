@@ -44,29 +44,34 @@ const readFileTool = {
 };
 
 const getStructure = {
-  type: 'function',
-  name: 'getStructure', 
-  description: 'Get the project structure and output a clear tree view.',
+  type: "function",
+  name: "getStructure",
+  description: "Get the project structure and output a clear tree view.",
   parameters: {
-    type: 'object',
+    type: "object",
     properties: {
       filePath: {
-        type: 'string',
-        description: 'Path to the directory relative to the CRM root. Use empty string "" for root.'
-      }
+        type: "string",
+        description:
+          'Path to the directory relative to the CRM root. Use empty string "" for root.',
+      },
     },
-    required: ['filePath']
-  }
+    required: ["filePath"],
+  },
 };
 
 const findReferencesTool = {
   type: "function",
   name: "findReferences",
-  description: "Finds all references and calls of a specific symbol in the codebase.",
+  description:
+    "Finds all references and calls of a specific symbol in the codebase.",
   parameters: {
     type: "object",
     properties: {
-      symbol: { type: "string", description: "The name of the function, class or variable." }
+      symbol: {
+        type: "string",
+        description: "The name of the function, class or variable.",
+      },
     },
     required: ["symbol"],
   },
@@ -75,13 +80,15 @@ const findReferencesTool = {
 const getFileInfoTool = {
   type: "function",
   name: "getFileInfo",
-  description: "Возвращает метаданные о файле в CRM (существование, размер, расширение, пути). Помогает агенту оценить файлы перед чтением.",
+  description:
+    "Возвращает метаданные о файле в CRM (существование, размер, расширение, пути). Помогает агенту оценить файлы перед чтением.",
   parameters: {
     type: "object",
     properties: {
       filePath: {
         type: "string",
-        description: "Путь к файлу относительно корня CRM (например, 'backend/package.json').",
+        description:
+          "Путь к файлу относительно корня CRM (например, 'backend/package.json').",
       },
     },
     required: ["filePath"],
@@ -91,7 +98,8 @@ const getFileInfoTool = {
 const runTypeCheckTool = {
   type: "function",
   name: "runTypeCheck",
-  description: "Запускает статическую проверку типов TypeScript (tsc) для бэкенда или фронтенда и возвращает обнаруженные ошибки.",
+  description:
+    "Запускает статическую проверку типов TypeScript (tsc) для бэкенда или фронтенда и возвращает обнаруженные ошибки.",
   parameters: {
     type: "object",
     properties: {
@@ -108,7 +116,8 @@ const runTypeCheckTool = {
 const runTestsTool = {
   type: "function",
   name: "runTests",
-  description: "Запускает тестовый набор (test suite) для бэкенда или фронтенда и возвращает отчет о результатах и падениях. Имеет встроенную защиту по таймауту.",
+  description:
+    "Запускает тестовый набор (test suite) для бэкенда или фронтенда и возвращает отчет о результатах и падениях. Имеет встроенную защиту по таймауту.",
   parameters: {
     type: "object",
     properties: {
@@ -125,28 +134,48 @@ const runTestsTool = {
 const inspectGitTool = {
   type: "function",
   name: "inspectGit",
-  description: "Позволяет агенту инспектировать текущее состояние Git-репозитория (статус, изменения, текущая ветка). Инструмент работает только в режиме чтения.",
+  description:
+    "Позволяет агенту инспектировать текущее состояние Git-репозитория (статус, изменения, текущая ветка). Инструмент работает только в режиме чтения.",
   parameters: {
     type: "object",
     properties: {
       command: {
         type: "string",
         enum: ["status", "diff", "branch"],
-        description: "Комманда для выполнения: 'status' (измененные файлы), 'diff' (просмотр незакоммиченных изменений), 'branch' (информация о текущей ветке).",
+        description:
+          "Комманда для выполнения: 'status' (измененные файлы), 'diff' (просмотр незакоммиченных изменений), 'branch' (информация о текущей ветке).",
       },
     },
     required: ["command"],
   },
 };
 
-const readDatabaseSchemaTool = {
+const queryDatabaseTool = {
   type: "function",
-  name: "readDatabaseSchema",
-  description: "Возвращает структуру базы данных CRM (таблицы, колонки, типы данных, ключи и связи) в режиме только для чтения.",
+  name: "queryDatabase",
+  description:
+    "Выполняет безопасный SQL-запрос (только SELECT) к локальной базе данных для инспекции данных. Имеет жесткие лимиты на вывод и время выполнения.",
   parameters: {
     type: "object",
-    properties: {},
+    properties: {
+      sql: {
+        type: "string",
+        description:
+          "Валидный SQL-запрос, начинающийся строго с SELECT (например, 'SELECT id, email FROM users LIMIT 5').",
+      },
+    },
+    required: ["sql"],
   },
 };
 
-export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, runTypeCheckTool, runTestsTool, inspectGitTool, readDatabaseSchemaTool];
+export const toolsConfig = [
+  searchCodeTool,
+  readFileTool,
+  getStructure,
+  findReferencesTool,
+  getFileInfoTool,
+  runTypeCheckTool,
+  runTestsTool,
+  inspectGitTool,
+  queryDatabaseTool,
+];

@@ -7,7 +7,7 @@ import { toolsConfig } from "./callTools.js";
 import { findReferences } from "./tools/findReference.js";
 import { getFileInfo } from "./tools/getFileInfo.js";
 import { runTests } from "./tools/runTests.js";
-import { readDatabaseSchema } from "./tools/readDatabaseSchema.js";
+import { queryDatabase } from "./tools/queryDatabase.js";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -77,8 +77,8 @@ async function main() {
                 ? "branch"
                 : "status";
           result = await inspectGit(gitCommand);
-        } else if (functionName === "readDatabaseSchema") {
-          result = await readDatabaseSchema();
+        } else if (functionName === "queryDatabase") {
+          result = await queryDatabase(String(args.sql));
         } else {
           result = {
             error: `Инструмент ${functionName} не реализован на бэкенде агента.`,
