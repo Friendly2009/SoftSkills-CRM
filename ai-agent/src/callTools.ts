@@ -59,21 +59,17 @@ export const getStructure = {
   }
 };
 
-export const findReferencesTool = {
+const findReferencesTool = {
   type: "function",
   name: "findReferences",
-  description:
-    "Находит все упоминания и вызовы определенного символа (функции, класса, переменной) в кодовой базе проекта. Помогает оценить влияние изменений перед модификацией кода.",
+  description: "Finds all references and calls of a specific symbol in the codebase.",
   parameters: {
     type: "object",
     properties: {
-      symbol: {
-        type: "string",
-        description: "Имя функции, интерфейса, переменной или класса для поиска (например, 'creategroup' или 'ClientProfile').",
-      },
+      symbol: { type: "string", description: "The name of the function, class or variable." }
     },
     required: ["symbol"],
   },
 };
 
-export const tools = [searchCodeTool,readFileTool,getStructure,findReferencesTool];
+export const toolsConfig = [searchCodeTool,readFileTool,getStructure,findReferencesTool];
