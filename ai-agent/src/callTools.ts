@@ -105,4 +105,21 @@ const runTypeCheckTool = {
   },
 };
 
-export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, runTypeCheckTool];
+const runTestsTool = {
+  type: "function",
+  name: "runTests",
+  description: "Запускает тестовый набор (test suite) для бэкенда или фронтенда и возвращает отчет о результатах и падениях. Имеет встроенную защиту по таймауту.",
+  parameters: {
+    type: "object",
+    properties: {
+      target: {
+        type: "string",
+        enum: ["backend", "frontend"],
+        description: "Область запуска тестов: 'backend' или 'frontend'.",
+      },
+    },
+    required: ["target"],
+  },
+};
+
+export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, runTypeCheckTool, runTestsTool];
