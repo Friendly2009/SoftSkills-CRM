@@ -4,11 +4,11 @@ import { searchCode } from "./tools/searchCode.js";
 import { readFile } from "./tools/readFile.js";
 import { getProjectStructure } from "./tools/getStructure.js";
 import { searchCodeTool, readFileTool, getStructure } from "./callTools.js";
+import { findReferences } from "./tools/findReference.js";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
 });
-
 
 const toolsConfig = [searchCodeTool, readFileTool, getStructure];
 
@@ -16,7 +16,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function main() {
   const prompt =
-    "получи полное дерево проекта с помощью getStructure, выведи его структуру на экран и объясни основные особенности архитектуры";
+    "проверь рабобтоспособность всех инструментов к каким только у тебя есть доступ";
 
   let interaction = await ai.interactions.create({
     model: "gemini-3.8-flash",
@@ -45,8 +45,7 @@ async function main() {
         result = await searchCode(String(args.query));
         console.log("\n📂 Результат поиска:\n");
         console.log((result as any).results ?? (result as any).error);
-      }
-      else if (functionName === "readFile") {
+      } else if (functionName === "readFile") {
         result = await readFile(
           String(args.filePath),
           args.startLine !== undefined ? Number(args.startLine) : undefined,
@@ -54,20 +53,32 @@ async function main() {
         );
         console.log("\n📄 Результат чтения файла:\n");
         console.log((result as any).content ?? (result as any).error);
-      }
-      // ИСПРАВЛЕНО: имя условия строго соответствует объявленному name в getStructure
-      else if (functionName === "getStructure") {
+      } else if (functionName === "getStructure") {
         result = await getProjectStructure(String(args.filePath));
         console.log("\nРезультат анализа структуры:\n");
-        // ИСПРАВЛЕНО: функция getProjectStructure возвращает свойство data, а не content
-        console.log(JSON.stringify((result as any).data ?? (result as any).error, null, 2));
-      }
-      else {
+        console.log(
+          JSON.stringify(
+            (result as any).data ?? (result as any).error,
+            null,
+            2,
+          ),
+        );
+      } else if (functionName === "findReferences") {
+        result = await findReferences(String(args.symbol));
+        console.log("\n🔍 Результат поиска связей (findReferences):\n");
+        console.log(
+          JSON.stringify(
+            (result as any).results ?? (result as any).error,
+            null,
+            2,
+          ),
+        );
+      } else {
         console.log(`⚠️ Неизвестный инструмент: ${functionName}`);
         continue;
       }
 
-      await sleep(1000); 
+      await sleep(1000);
 
       interaction = await ai.interactions.create({
         model: "gemini-2.5-flash",
