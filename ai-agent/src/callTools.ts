@@ -88,5 +88,21 @@ const getFileInfoTool = {
   },
 };
 
+const runTypeCheckTool = {
+  type: "function",
+  name: "runTypeCheck",
+  description: "Запускает статическую проверку типов TypeScript (tsc) для бэкенда или фронтенда и возвращает обнаруженные ошибки.",
+  parameters: {
+    type: "object",
+    properties: {
+      target: {
+        type: "string",
+        enum: ["backend", "frontend"],
+        description: "Область проверки типов: 'backend' или 'frontend'.",
+      },
+    },
+    required: ["target"],
+  },
+};
 
-export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool];
+export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, runTypeCheckTool];
