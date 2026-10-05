@@ -171,13 +171,15 @@ const queryDatabaseTool = {
 const editFileTool = {
   type: "function",
   name: "editFile",
-  description: "Модифицирует существующий файл в CRM. Перед записью создает бэкап, показывает дифф изменений и запрашивает ручное подтверждение у разработчика.",
+  description:
+    "Модифицирует существующий файл в CRM. Перед записью создает бэкап, показывает дифф изменений и запрашивает ручное подтверждение у разработчика.",
   parameters: {
     type: "object",
     properties: {
       filePath: {
         type: "string",
-        description: "Путь к файлу относительно корня CRM (например, 'backend/router.ts').",
+        description:
+          "Путь к файлу относительно корня CRM (например, 'backend/router.ts').",
       },
       newContent: {
         type: "string",
@@ -185,6 +187,28 @@ const editFileTool = {
       },
     },
     required: ["filePath", "newContent"],
+  },
+};
+
+const createFileTool = {
+  type: "function",
+  name: "createFile",
+  description:
+    "Создает новый файл в проекте CRM с указанным содержимым. Предотвращает случайную перезапись и запрашивает ручное подтверждение у разработчика.",
+  parameters: {
+    type: "object",
+    properties: {
+      filePath: {
+        type: "string",
+        description:
+          "Путь к новому файлу относительно корня CRM (например, 'backend/controllers/NewController.ts').",
+      },
+      content: {
+        type: "string",
+        description: "Полное текстовое содержимое создаваемого файла.",
+      },
+    },
+    required: ["filePath", "content"],
   },
 };
 
@@ -198,5 +222,6 @@ export const toolsConfig = [
   runTestsTool,
   inspectGitTool,
   queryDatabaseTool,
-  editFileTool
+  editFileTool,
+  createFileTool,
 ];

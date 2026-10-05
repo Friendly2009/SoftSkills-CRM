@@ -8,6 +8,7 @@ import { findReferences } from "./tools/findReference.js";
 import { getFileInfo } from "./tools/getFileInfo.js";
 import { runTests } from "./tools/runTests.js";
 import { queryDatabase } from "./tools/queryDatabase.js";
+import { createFile } from "./tools/createFile.js";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -83,6 +84,11 @@ async function main() {
           result = await editFile(
             String(args.filePath),
             String(args.newContent),
+          );
+        } else if (functionName === "createFile") {
+          result = await createFile(
+            String(args.filePath),
+            String(args.content),
           );
         } else {
           result = {
