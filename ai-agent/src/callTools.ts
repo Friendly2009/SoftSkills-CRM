@@ -168,6 +168,26 @@ const queryDatabaseTool = {
   },
 };
 
+const editFileTool = {
+  type: "function",
+  name: "editFile",
+  description: "Модифицирует существующий файл в CRM. Перед записью создает бэкап, показывает дифф изменений и запрашивает ручное подтверждение у разработчика.",
+  parameters: {
+    type: "object",
+    properties: {
+      filePath: {
+        type: "string",
+        description: "Путь к файлу относительно корня CRM (например, 'backend/router.ts').",
+      },
+      newContent: {
+        type: "string",
+        description: "Полное новое содержимое файла, которое заменит старое.",
+      },
+    },
+    required: ["filePath", "newContent"],
+  },
+};
+
 export const toolsConfig = [
   searchCodeTool,
   readFileTool,
@@ -178,4 +198,5 @@ export const toolsConfig = [
   runTestsTool,
   inspectGitTool,
   queryDatabaseTool,
+  editFileTool
 ];
