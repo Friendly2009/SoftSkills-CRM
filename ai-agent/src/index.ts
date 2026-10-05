@@ -2,6 +2,7 @@ import "dotenv/config";
 import { GoogleGenAI } from "@google/genai";
 import { searchCode } from "./tools/searchCode.js";
 import { readFile } from "./tools/readFile.js";
+import { getProjectStructure } from "./tools/getStructure.js";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -17,7 +18,8 @@ const searchCodeTool = {
     properties: {
       query: {
         type: "string",
-        description: "Text or code symbol to search for in the CRM source code.",
+        description:
+          "Text or code symbol to search for in the CRM source code.",
       },
     },
     required: ["query"],
@@ -38,25 +40,42 @@ const readFileTool = {
       },
       startLine: {
         type: "number",
-        description: "Optional first line to read. Defaults to the beginning of the file.",
+        description:
+          "Optional first line to read. Defaults to the beginning of the file.",
       },
       endLine: {
         type: "number",
-        description: "Optional last line to read. Defaults to the end of the file.",
+        description:
+          "Optional last line to read. Defaults to the end of the file.",
       },
     },
     required: ["filePath"],
   },
 };
 
-const toolsConfig = [searchCodeTool, readFileTool];
+const getStructure = {
+  type: 'function',
+  name: 'getStructure', 
+  description: 'Get the project structure and output a clear tree view.',
+  parameters: {
+    type: 'object',
+    properties: {
+      filePath: {
+        type: 'string',
+        description: 'Path to the directory relative to the CRM root. Use empty string "" for root.'
+      }
+    },
+    required: ['filePath']
+  }
+};
+
+const toolsConfig = [searchCodeTool, readFileTool, getStructure];
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function main() {
   const prompt =
-    "Найди реализацию ClientController в CRM. " +
-    "Сначала используй searchCode, чтобы найти файл. " +
-    "После этого используй readFile, чтобы прочитать найденный файл. " +
-    "После чтения кратко объясни, что находится в этом файле.";
+    "получи полное дерево проекта с помощью getStructure, выведи его структуру на экран и объясни основные особенности архитектуры";
 
   let interaction = await ai.interactions.create({
     model: "gemini-3.8-flash",
@@ -75,53 +94,50 @@ async function main() {
       }
 
       hasFunctionCall = true;
-
       const functionName = step.name;
       const args = step.arguments as Record<string, any>;
 
-      console.log(`\n🛠 Gemini вызвал: ${functionName}`, args);
-
+      console.log(`\n🛠 Gemini вызвал инструмент: ${functionName}`, args);
       let result: unknown;
 
       if (functionName === "searchCode") {
         result = await searchCode(String(args.query));
-
         console.log("\n📂 Результат поиска:\n");
-        console.log(
-          (result as { results?: string }).results ??
-            (result as { error?: string }).error,
-        );
+        console.log((result as any).results ?? (result as any).error);
       }
-
-      if (functionName === "readFile") {
+      else if (functionName === "readFile") {
         result = await readFile(
           String(args.filePath),
           args.startLine !== undefined ? Number(args.startLine) : undefined,
           args.endLine !== undefined ? Number(args.endLine) : undefined,
         );
-
         console.log("\n📄 Результат чтения файла:\n");
-        console.log(
-          (result as { content?: string; error?: string }).content ??
-            (result as { content?: string; error?: string }).error,
-        );
+        console.log((result as any).content ?? (result as any).error);
       }
-
-      if (functionName !== "searchCode" && functionName !== "readFile") {
+      // ИСПРАВЛЕНО: имя условия строго соответствует объявленному name в getStructure
+      else if (functionName === "getStructure") {
+        result = await getProjectStructure(String(args.filePath));
+        console.log("\nРезультат анализа структуры:\n");
+        // ИСПРАВЛЕНО: функция getProjectStructure возвращает свойство data, а не content
+        console.log(JSON.stringify((result as any).data ?? (result as any).error, null, 2));
+      }
+      else {
         console.log(`⚠️ Неизвестный инструмент: ${functionName}`);
         continue;
       }
 
+      await sleep(1000); 
+
       interaction = await ai.interactions.create({
-        model: "gemini-3.8-flash",
+        model: "gemini-2.5-flash",
         input: [
           {
             type: "function_result",
             call_id: step.id,
             name: functionName,
-            result: result, 
+            result: result,
           },
-        ] as any, 
+        ] as any,
         previous_interaction_id: interaction.id,
         tools: toolsConfig as any,
       });
@@ -136,13 +152,12 @@ async function main() {
           console.log(step.content);
         }
       }
-
       break;
     }
   }
 }
 
 main().catch((error) => {
-  console.error("\nОшибка:");
+  console.error("\nКритическая ошибка выполнения:");
   console.error(error);
 });
