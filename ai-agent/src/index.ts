@@ -6,6 +6,7 @@ import { getProjectStructure } from "./tools/getStructure.js";
 import { toolsConfig } from "./callTools.js";
 import { findReferences } from "./tools/findReference.js";
 import { getFileInfo } from "./tools/getFileInfo.js";
+import { runTests } from "./tools/runTests.js";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -64,6 +65,9 @@ async function main() {
         } else if (functionName === "runTypeCheck") {
           const target = args.target === "frontend" ? "frontend" : "backend";
           result = await runTypeCheck(target);
+        } else if (functionName === "runTests") {
+          const target = args.target === "frontend" ? "frontend" : "backend";
+          result = await runTests(target);
         } else {
           result = {
             error: `Инструмент ${functionName} не реализован на бэкенде агента.`,
@@ -108,4 +112,3 @@ main().catch((error) => {
 function runTypeCheck(target: string): unknown {
   throw new Error("Function not implemented.");
 }
-
