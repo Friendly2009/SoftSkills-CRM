@@ -88,21 +88,21 @@ const getFileInfoTool = {
   },
 };
 
-const findApiEndpointTool = {
+const runTypeCheckTool = {
   type: "function",
-  name: "findApiEndpoint",
-  description: "Трассирует API эндпоинт бэкенда. НаходитExpress-роут, связывает его с контроллером и конкретной функцией.",
+  name: "runTypeCheck",
+  description: "Запускает статическую проверку типов TypeScript (tsc) для бэкенда или фронтенда и возвращает обнаруженные ошибки.",
   parameters: {
     type: "object",
     properties: {
-      routePath: {
+      target: {
         type: "string",
-        description: "Часть URL или эндпоинта для поиска (например, 'signin', 'creategroup' или '/clients').",
+        enum: ["backend", "frontend"],
+        description: "Область проверки типов: 'backend' или 'frontend'.",
       },
     },
-    required: ["routePath"],
+    required: ["target"],
   },
 };
 
-
-export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, findApiEndpointTool];
+export const toolsConfig = [searchCodeTool, readFileTool, getStructure, findReferencesTool, getFileInfoTool, runTypeCheckTool];
