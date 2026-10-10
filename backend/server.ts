@@ -12,12 +12,17 @@ process.on('unhandledRejection', (reason: any) => {
 });
 
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+
 import express, { Express } from "express";
-import path from "path";
-import { fileURLToPath } from "url";
 import session from "express-session";
 import cors from "cors";
-import routes from "./router.js"
+import routes from "./router.js";
 
 const app: Express = express();
 
@@ -34,41 +39,24 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "your_cookie_name",
+    secret: process.env.SESSION_SECRET || "21r4qwgrvfs24tqwgavdsewqt4cxasvdrwgq",
     resave: false,
     saveUninitialized: false,
     cookie: { 
-      secure: true, 
+      secure: false, 
       httpOnly: true, 
-      sameSite: "none" 
+      sameSite: "lax" 
     },
   }),
 );
 
-app.use((req, res, next) => {
-  const customSessionId = req.headers['x-session-id'] as string;
-  
-  if (customSessionId && req.sessionStore) {
-    req.sessionStore.get(customSessionId, (err, session) => {
-      if (session) {
-        req.session = Object.assign(req.session, session);
-      }
-      next();
-    });
-  } else {
-    next();
-  }
-});
-
 app.use("/", routes);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const buildPath = path.join(__dirname, "..", "frontend");
 app.use(express.static(buildPath));
 
 setInterval(() => {}, 24 * 60 * 60 * 1000);
 
-app.listen(BACKEND_PORT, () => {
+app.listen(BACKEND_PORT, BACKEND_HOST, () => {
   console.log(`Your server is running on http://${BACKEND_HOST}:${BACKEND_PORT}`);
 });
