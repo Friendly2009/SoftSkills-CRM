@@ -1,0 +1,1304 @@
+--- /dev/null
++++ b/SECURITY_FIXES.md
+@@ -0,0 +1,60 @@
++# v2.0.0 — access control fixes
++
++This delivery implements the first stage of CRM stabilization: authentication,
++permission checks and company isolation. It does not close the entire stabilization issue.
++
++## Changes
++
++- Shared middleware rejects missing/invalid sessions and refreshes user membership
++  and rank from MySQL on every protected request.
++- Protected controllers also fail closed when called directly.
++- Clients can only be updated/deleted within the authenticated company; company
++  reassignment is forbidden and group assignments are checked before mutation.
++- Group creation validates the teacher's company; updates validate the group's
++  existing ownership before reassignment.
++- Financial chart company selection cannot override the session's company.
++- Manual expenses require manager-level permissions, consistently with expense reads.
++- Removed the fake X-Session-ID calendar fallback.
++- Lesson mutations validate company ownership, teacher, schedule occurrence,
++  lesson/group consistency and student membership before touching attendance or money.
++- Teachers cannot bypass the read-only state of completed lessons.
++- Teacher lesson processing retains the planned payment rather than reading the
++  accumulated balance; temporary lessons retain the previous default of 1500.
++  Configurable payment rates remain a separate task.
++- Financial balance writes are company-scoped, including reversals.
++- Lead assignment validates employee ownership; early returns release the connection once.
++- Fixed the feedback update route and included credentials on client deletion.
++
++## Validation
++
++Run from the repository root after installing backend dependencies:
++
++```bash
++npm ci --prefix backend
++npm test --prefix backend
++npm run typecheck --prefix backend
++```
++
++30 regression tests passed, including real Express HTTP requests covering all
++protected routes without a session. Tests transpile the production TypeScript
++modules and replace MySQL with controlled fixtures. They do not contact a real database.
++
++The available archived dependencies do not contain dotenv. Type checking therefore
++reports unresolved dotenv imports. No other TypeScript errors were reported after
++these changes. A clean dependency install and integration checks against disposable
++MySQL are still required. A production frontend build has not been verified in this stage.
++
++Authentication now requires a genuine express-session cookie. A custom X-Session-ID
++header is not an authentication mechanism. Verify cookie forwarding if using the
++legacy PHP/Node bridge.
++
++## Remaining stabilization work
++
++- Atomic, precise top-ups and reliable frontend mutation error handling.
++- Financial idempotency/concurrency, configurable rates and auditable corrections.
++- Database/schema/view inconsistencies and historical debt calculations.
++- Linux frontend build, navigation and calendar/date correctness.
++- Production session persistence, cookie/CORS configuration and secret management.
++
++Database schema changes are not included in this delivery. No production database
++was modified. The customer's remote v2.0.0 branch has not been pushed or merged.
+--- a/backend/controllers/AnalyticController.ts
++++ b/backend/controllers/AnalyticController.ts
+@@ -1,3 +1,4 @@
++import { authorize } from "../middleware/auth.js";
+ import "dotenv/config";
+ import { Request, Response } from "express";
+ import pool from "../data_base_connect.js";
+@@ -7,6 +8,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session?.company_id;
+     if (!company_id) {
+@@ -40,6 +43,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 1000)) return;
++
+   try {
+     const company_id = req.session.company_id;
+     if (!company_id) {
+@@ -88,6 +93,8 @@
+ };
+ 
+ export const getRevenueSources = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 1000)) return;
++
+   try {
+     const company_id = req.session.company_id;
+     if (!company_id || company_id === -1) {
+@@ -127,6 +134,8 @@
+ };
+ 
+ export const getFinancialTimeline = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 1000)) return;
++
+   try {
+     const company_id = req.session.company_id;
+     if (!company_id || company_id === -1) {
+@@ -186,6 +195,8 @@
+ };
+ 
+ export const getExpensesStructure = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 1000)) return;
++
+   try {
+     const company_id = req.session.company_id;
+     if (!company_id || isNaN(company_id)) {
+@@ -226,6 +237,8 @@
+ };
+ 
+ export const getClientDebtors = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session.company_id;
+     if (!company_id || isNaN(company_id)) {
+@@ -266,6 +279,8 @@
+ };
+ 
+ export const getAllState = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session?.company_id;
+ 
+@@ -326,9 +341,13 @@
+ };
+ 
+ export const getChartState = async (req: Request, res: Response) => {
+-  try {
+-    const companyId =
+-      parseInt(req.query.companyId as string, 10) || req.session?.company_id;
++  if (!authorize(req, res, 500)) return;
++
++  try {
++    const companyId = req.session.company_id!;
++    if (req.query.companyId !== undefined && Number(req.query.companyId) !== companyId) {
++      return res.status(403).json({ success: false, message: "Company access denied" });
++    }
+ 
+     if (!companyId || isNaN(companyId)) {
+       return res
+@@ -401,6 +420,8 @@
+ };
+ 
+ export const getTeachersWorkload = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session?.company_id;
+     const parsedCompanyId = parseInt(String(company_id), 10);
+@@ -452,6 +473,8 @@
+ };
+ 
+ export const getAttendanceTrends = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session?.company_id;
+     const parsedCompanyId = parseInt(String(company_id), 10);
+--- a/backend/controllers/BackController.ts
++++ b/backend/controllers/BackController.ts
+@@ -1,7 +1,10 @@
++import { authorize } from "../middleware/auth.js";
+ import { Request, Response } from "express";
+ import pool from "../data_base_connect.js";
+ 
+ export const getglobalinfo = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 0)) return;
++
+   try {
+     const [rows] = await pool.query(
+       "SELECT name FROM company WHERE id = ?",
+@@ -47,6 +50,8 @@
+ };
+ 
+ export const getallsession = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 0)) return;
++
+   try {
+     return res.status(200).json({
+       success: true,
+@@ -70,6 +75,8 @@
+ };
+ 
+ export const getUserProfile = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 0)) return;
++
+   const userId = req.session.user_id;
+   const companyId = req.session.company_id;
+ 
+--- a/backend/controllers/ClientController.ts
++++ b/backend/controllers/ClientController.ts
+@@ -1,3 +1,5 @@
++import { ownedGroups, respondToAccessError } from "../security/ownership.js";
++import { authorize } from "../middleware/auth.js";
+ import { Request, Response } from "express";
+ import pool from "../data_base_connect.js";
+ import { ResultSetHeader, RowDataPacket } from "mysql2";
+@@ -6,6 +8,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session.company_id;
+ 
+@@ -42,12 +46,14 @@
+           )
+           FROM group_members gm_sub
+           JOIN group_schedules gs ON gm_sub.group_id = gs.group_id
++          JOIN \`groups\` vg ON vg.id = gs.group_id
++          JOIN users vu ON vu.id = vg.users_id AND vu.company_id = c.company_id
+           WHERE gm_sub.client_id = c.id
+         ) AS next_visit
+ 
+       FROM clients c
+       LEFT JOIN group_members gm ON c.id = gm.client_id
+-      LEFT JOIN \`groups\` g ON gm.group_id = g.id
++      LEFT JOIN \`groups\` g ON gm.group_id = g.id AND EXISTS (SELECT 1 FROM users gu WHERE gu.id = g.users_id AND gu.company_id = c.company_id)
+       WHERE c.company_id = ?
+       GROUP BY c.id`,
+       [company_id],
+@@ -93,6 +99,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 500)) return;
++
+   const { name, group_ids, balance, skills, status, contact } = req.body;
+ 
+   const company_id = req.session.company_id;
+@@ -107,6 +115,7 @@
+ 
+   try {
+     await connection.beginTransaction();
++    await ownedGroups(connection, group_ids, company_id);
+ 
+     const [clientResult] = await connection.query(
+       `INSERT INTO clients (name, balance, skills, status, contact, company_id) 
+@@ -133,6 +142,7 @@
+     });
+   } catch (ex) {
+     await connection.rollback();
++    if (respondToAccessError(ex, res)) return;
+     console.error("Ошибка при добавлении клиента:", ex);
+     return res.status(500).json({
+       success: false,
+@@ -147,9 +157,12 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
+-  const clientId = parseInt(req.params.id as string, 10);
+-
+-  if (isNaN(clientId)) {
++  if (!authorize(req, res, 1000)) return;
++
++  const company_id = req.session.company_id!;
++  const clientId = Number(req.params.id);
++
++  if (!Number.isSafeInteger(clientId) || clientId <= 0) {
+     res.status(400).json({ error: "Некорректный ID клиента" });
+     return;
+   }
+@@ -161,13 +174,9 @@
+   try {
+     await connection.beginTransaction();
+ 
+-    await connection.execute(`DELETE FROM group_members WHERE client_id = ?`, [
+-      clientId,
+-    ]);
+-
+     const [result] = await connection.execute<ResultSetHeader>(
+-      `DELETE FROM clients WHERE id = ?`,
+-      [clientId],
++      `DELETE FROM clients WHERE id = ? AND company_id = ?`,
++      [clientId, company_id],
+     );
+ 
+     if (result.affectedRows === 0) {
+@@ -189,14 +198,16 @@
+ };
+ 
+ export async function updateClient(req: Request, res: Response) {
+-  const clientId = parseInt(req.params.id as string, 10);
+-
+-  if (isNaN(clientId)) {
++  if (!authorize(req, res, 500)) return;
++  const company_id = req.session.company_id!;
++  const clientId = Number(req.params.id);
++
++  if (!Number.isSafeInteger(clientId) || clientId <= 0) {
+     res.status(400).json({ error: "Некорректный ID клиента" });
+     return;
+   }
+ 
+-  const { name, balance, skills, status, contact, company_id, group_ids } =
++  const { name, balance, skills, status, contact, group_ids } =
+     req.body;
+ 
+   const targetBalance = balance !== undefined ? parseInt(String(balance), 10) : undefined;
+@@ -207,7 +218,9 @@
+   if (skills !== undefined) clientFields.skills = skills;
+   if (status !== undefined) clientFields.status = status;
+   if (contact !== undefined) clientFields.contact = contact;
+-  if (company_id !== undefined) clientFields.company_id = company_id;
++  if (req.body.company_id !== undefined && Number(req.body.company_id) !== company_id) {
++    return res.status(403).json({ error: "Company reassignment is forbidden" });
++  }
+ 
+   if (Object.keys(clientFields).length === 0 && group_ids === undefined) {
+     res.status(400).json({ error: "Нет данных для обновления" });
+@@ -222,8 +235,8 @@
+     await connection.beginTransaction();
+ 
+     const [clientRows]: any = await connection.execute(
+-      `SELECT name, balance, company_id FROM clients WHERE id = ?`,
+-      [clientId],
++      `SELECT name, balance, company_id FROM clients WHERE id = ? AND company_id = ? FOR UPDATE`,
++      [clientId, company_id],
+     );
+ 
+     if (!clientRows || clientRows.length === 0) {
+@@ -232,20 +245,21 @@
+       return;
+     }
+ 
++    await ownedGroups(connection, group_ids, company_id);
++
+     const oldAmountNum = Number(clientRows[0].balance);
+     const clientName = clientRows[0].name;
+-    const clientCompanyId =
+-      company_id !== undefined ? company_id : clientRows[0].company_id;
++    const clientCompanyId = company_id;
+ 
+     if (Object.keys(clientFields).length > 0) {
+       const keys = Object.keys(clientFields);
+       const setClause = keys.map((key) => `${key} = ?`).join(", ");
+       const values = keys.map((key) => clientFields[key]);
+ 
+-      values.push(clientId);
++      values.push(clientId, company_id);
+ 
+       await connection.execute(
+-        `UPDATE clients SET ${setClause} WHERE id = ?`,
++        `UPDATE clients SET ${setClause} WHERE id = ? AND company_id = ?`,
+         values,
+       );
+ 
+@@ -295,6 +309,7 @@
+     res.status(200).json({ message: "Данные клиента успешно обновлены" });
+   } catch (error) {
+     await connection.rollback();
++    if (respondToAccessError(error, res)) return;
+     console.error("Ошибка при обновлении клиента:", error);
+     res.status(500).json({ error: "Внутренняя ошибка сервера" });
+   } finally {
+--- a/backend/controllers/FeedbackController.ts
++++ b/backend/controllers/FeedbackController.ts
+@@ -1,3 +1,4 @@
++import { authorize } from "../middleware/auth.js";
+ import { Response } from "express";
+ import pool from "../data_base_connect.js";
+ import { RowDataPacket, ResultSetHeader } from "mysql2";
+@@ -16,6 +17,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<void> => {
++  if (!authorize(req, res, 0)) return;
++
+   try {
+     const { message, rate } = req.body;
+     const userId = req.session.user_id;
+@@ -83,6 +86,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<void> => {
++  if (!authorize(req, res, 0)) return;
++
+   try {
+     const userId = req.session.user_id;
+ 
+@@ -106,6 +111,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<void> => {
++  if (!authorize(req, res, 0)) return;
++
+   try {
+     const { id } = req.params;
+     const { message, rate } = req.body;
+@@ -149,6 +156,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<void> => {
++  if (!authorize(req, res, 0)) return;
++
+   try {
+     const { id } = req.params;
+     const userId = req.session.user_id;
+--- a/backend/controllers/FinanceController.ts
++++ b/backend/controllers/FinanceController.ts
+@@ -1,8 +1,11 @@
++import { authorize } from "../middleware/auth.js";
+ import "dotenv/config";
+ import { Request, Response } from "express";
+ import pool from "../data_base_connect.js";
+ 
+ export const addManualExpense = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session.company_id;
+     if (!company_id || company_id === -1) {
+@@ -52,6 +55,8 @@
+ };
+ 
+ export const getExpenses = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session.company_id;
+     if (!company_id || isNaN(company_id)) {
+--- a/backend/controllers/GroupController.ts
++++ b/backend/controllers/GroupController.ts
+@@ -1,8 +1,12 @@
++import { ownedUser, respondToAccessError } from "../security/ownership.js";
++import { authorize } from "../middleware/auth.js";
+ import { Request, Response } from "express";
+ import pool from "../data_base_connect.js";
+ import { RowDataPacket, ResultSetHeader } from "mysql2";
+ 
+ export const getgroups = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session.company_id;
+     if (!company_id) {
+@@ -95,6 +99,8 @@
+ 
+ 
+ export const creategroup = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 500)) return;
++
+   const company_id = req.session.company_id;
+   if (!company_id) {
+     return res.status(401).json({ success: false, message: "Unauthorized" });
+@@ -126,6 +132,7 @@
+ 
+     connect = await pool.getConnection();
+     await connect.beginTransaction();
++    await ownedUser(connect, users_id, company_id);
+ 
+     const [groupResult] = await connect.query<ResultSetHeader>(
+       "INSERT INTO `groups` (name, users_id, status, start_date, end_date, max_students) VALUES (?, ?, ?, ?, ?, ?)",
+@@ -165,6 +172,7 @@
+     if (connect) {
+       await connect.rollback();
+     }
++    if (respondToAccessError(error, res)) return;
+     console.error("Ошибка при создании группы:", error);
+     return res.status(500).json({ message: "Внутренняя ошибка сервера" });
+   } finally {
+@@ -178,6 +186,8 @@
+   req: Request,
+   res: Response,
+ ) => {
++  if (!authorize(req, res, 500)) return;
++
+   const groupId = parseInt(req.params.id as string, 10);
+   const companyId = req.session.company_id;
+ 
+@@ -242,6 +252,8 @@
+ };
+ 
+ export const updategroup = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 500)) return;
++
+   const group_id = req.params.id;
+   const company_id = req.session.company_id;
+ 
+@@ -270,8 +282,8 @@
+     await connection.beginTransaction();
+ 
+     const [groupCheck] = await connection.query<RowDataPacket[]>(
+-      "SELECT id FROM `groups` WHERE id = ?",
+-      [group_id],
++      "SELECT g.id FROM `groups` g JOIN users u ON u.id = g.users_id WHERE g.id = ? AND u.company_id = ?",
++      [group_id, company_id],
+     );
+ 
+     if (groupCheck.length === 0) {
+@@ -334,6 +346,7 @@
+       .json({ success: true, message: "Группа успешно обновлена" });
+   } catch (er) {
+     await connection.rollback();
++    if (respondToAccessError(er, res)) return;
+     console.error(er);
+     return res.status(500).json({ success: false, message: er });
+   } finally {
+--- a/backend/controllers/LeadController.ts
++++ b/backend/controllers/LeadController.ts
+@@ -1,3 +1,5 @@
++import { ownedUser, respondToAccessError } from "../security/ownership.js";
++import { authorize } from "../middleware/auth.js";
+ import { Request, Response } from "express";
+ import pool from "../data_base_connect.js";
+ import { ResultSetHeader, RowDataPacket } from "mysql2";
+@@ -6,6 +8,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session?.company_id;
+     if (!company_id) {
+@@ -27,6 +31,8 @@
+         message: "Поля 'name' и 'contact' обязательны для заполнения",
+       });
+     }
++
++    if (user_id !== undefined && user_id !== null) await ownedUser(pool, user_id, company_id);
+ 
+     const query = `
+             INSERT INTO leads (company_id, user_id, name, contact, source, description, status) 
+@@ -54,6 +60,7 @@
+       },
+     });
+   } catch (er: any) {
++    if (respondToAccessError(er, res)) return;
+     console.log(er);
+     return res.status(500).json({
+       success: false,
+@@ -66,6 +73,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session?.company_id;
+     if (!company_id) {
+@@ -91,6 +100,7 @@
+ 
+     return res.status(200).json({ success: true, data: rows });
+   } catch (er: any) {
++    if (respondToAccessError(er, res)) return;
+     console.log(er);
+     return res.status(500).json({
+       success: false,
+@@ -103,6 +113,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session?.company_id;
+     if (!company_id) {
+@@ -126,6 +138,7 @@
+ 
+     return res.status(200).json({ success: true, data: rows[0] });
+   } catch (er: any) {
++    if (respondToAccessError(er, res)) return;
+     console.log(er);
+     return res.status(500).json({
+       success: false,
+@@ -138,6 +151,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 1000)) return;
++
+   try {
+     const company_id = req.session?.company_id;
+     if (!company_id) {
+@@ -167,6 +182,7 @@
+       .status(200)
+       .json({ success: true, message: "Лид успешно удален" });
+   } catch (er: any) {
++    if (respondToAccessError(er, res)) return;
+     console.log(er);
+     return res.status(500).json({
+       success: false,
+@@ -179,12 +195,13 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 500)) return;
++
+   const connection = await pool.getConnection();
+ 
+   try {
+     const company_id = req.session?.company_id;
+     if (!company_id) {
+-      connection.release();
+       return res
+         .status(401)
+         .json({ success: false, message: "Сессия не найдена" });
+@@ -209,7 +226,6 @@
+     } = req.body;
+ 
+     if (status === "lost" && !loss_reason_id) {
+-      connection.release();
+       return res.status(400).json({
+         success: false,
+         message: "Поле 'loss_reason_id' обязательно при статусе 'lost'.",
+@@ -222,7 +238,6 @@
+     );
+ 
+     if (currentLeadRows.length === 0) {
+-      connection.release();
+       return res.status(404).json({ success: false, message: "Лид не найден" });
+     }
+ 
+@@ -233,7 +248,6 @@
+       status !== undefined &&
+       status !== currentStatus
+     ) {
+-      connection.release();
+       return res.status(400).json({
+         success: false,
+         message: `Ошибка: Нельзя изменить статус лида, так как он уже закрыт со статусом '${currentStatus}'.`,
+@@ -241,6 +255,7 @@
+     }
+ 
+     await connection.beginTransaction();
++    if (user_id !== undefined && user_id !== null) await ownedUser(connection, user_id, company_id);
+ 
+     const fields: string[] = [];
+     const values: any[] = [];
+@@ -342,6 +357,7 @@
+     });
+   } catch (er: any) {
+     await connection.rollback();
++    if (respondToAccessError(er, res)) return;
+     console.log(er);
+     return res.status(500).json({ success: false, message: er.message || er });
+   } finally {
+--- a/backend/controllers/ScheduleController.ts
++++ b/backend/controllers/ScheduleController.ts
+@@ -1,14 +1,13 @@
++import { AccessError, ownedGroup, ownedUser, recordId, respondToAccessError } from "../security/ownership.js";
++import { authorize } from "../middleware/auth.js";
+ import { Request, Response } from "express";
+ import pool from "../data_base_connect.js";
+ import { ResultSetHeader, RowDataPacket } from "mysql2";
+ export const getSchedule = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 0)) return;
++
+   try {
+-    let company_id = req.session?.company_id;
+-    if (!company_id && req.headers['x-session-id']) {
+-       // Если фронтенд шлёт какую-то строку сессии, временно захардкодь ID компании для тестов, 
+-       // либо вытащи реальный ID из базы по этому токену. Для проверки поставим 1:
+-       company_id = 1; 
+-    }
++    const company_id = req.session.company_id;
+     if (!company_id || company_id === -1) {
+       return res
+         .status(401)
+@@ -52,6 +51,8 @@
+ };
+ 
+ export const getLessonDetails = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 0)) return;
++
+   try {
+     const id = req.params.id as string;
+     const company_id = req.session.company_id;
+@@ -103,8 +104,8 @@
+       };
+ 
+       const [groupStudents]: any = await pool.query(
+-        "SELECT client_id FROM group_members WHERE group_id = ?",
+-        [groupId],
++        "SELECT gm.client_id FROM group_members gm JOIN clients c ON c.id = gm.client_id WHERE gm.group_id = ? AND c.company_id = ?",
++        [groupId, company_id],
+       );
+ 
+       attendanceData = groupStudents.map((student: any) => ({
+@@ -151,8 +152,8 @@
+       };
+ 
+       const [attRows]: any = await pool.query(
+-        "SELECT client_id, attendance_status, amount_charged FROM lesson_attendance WHERE lesson_id = ?",
+-        [lessonId],
++        "SELECT la.client_id, la.attendance_status, la.amount_charged FROM lesson_attendance la JOIN clients c ON c.id = la.client_id WHERE la.lesson_id = ? AND c.company_id = ?",
++        [lessonId, company_id],
+       );
+       attendanceData = attRows;
+     }
+@@ -163,8 +164,8 @@
+     const studentFields = isForeignLessonForTeacher ? "c.id, c.name, 0 AS balance" : "c.id, c.name, c.balance";
+     
+     const [studentsData]: any = await pool.query(
+-      `SELECT ${studentFields} FROM clients c JOIN group_members gm ON c.id = gm.client_id WHERE gm.group_id = ?`,
+-      [groupId],
++      `SELECT ${studentFields} FROM clients c JOIN group_members gm ON c.id = gm.client_id WHERE gm.group_id = ? AND c.company_id = ?`,
++      [groupId, company_id],
+     );
+ 
+     const [allTeachers]: any = await pool.query(
+@@ -190,6 +191,8 @@
+ };
+ 
+ export const closeLesson = async (req: Request, res: Response): Promise<void> => {
++  if (!authorize(req, res, 0)) return;
++
+   const {
+     lessonId,
+     groupId,
+@@ -210,7 +213,7 @@
+     !startDateTime ||
+     !endDateTime ||
+     !teacherId ||
+-    !students
++    !Array.isArray(students)
+   ) {
+     res.status(400).json({ error: "Переданы некорректные или неполные данные формы" });
+     return;
+@@ -238,17 +241,47 @@
+ 
+   try {
+     await connection.beginTransaction();
++    const group = await ownedGroup(connection, groupId, company_id!);
++    await ownedUser(connection, teacherId, company_id!);
++
++    let existingLesson: any = null;
++    if (typeof lessonId === "string" && lessonId.startsWith("temp-")) {
++      const match = /^temp-([1-9]\d*)-(\d{4}-\d{2}-\d{2})$/.exec(lessonId);
++      if (!match || match[2] !== strLessonDate) throw new AccessError(400, "Invalid schedule occurrence");
++      const [templates] = await connection.query<RowDataPacket[]>(
++        "SELECT id FROM group_schedules WHERE id = ? AND group_id = ?",
++        [recordId(match[1]), recordId(groupId)]);
++      if (!templates.length) throw new AccessError(404, "Schedule not found");
++      if (user_rank < 500 && Number(group.users_id) !== Number(current_user_id)) {
++        throw new AccessError(403, "Cannot close another teacher's lesson");
++      }
++    } else {
++      const [lessons] = await connection.query<RowDataPacket[]>(
++        "SELECT l.id, l.group_id, l.user_id, l.status, l.teacher_pay FROM lessons l JOIN `groups` g ON g.id = l.group_id JOIN users u ON u.id = g.users_id WHERE l.id = ? AND u.company_id = ? FOR UPDATE",
++        [recordId(lessonId), company_id]);
++      existingLesson = lessons[0];
++      if (!existingLesson) throw new AccessError(404, "Lesson not found");
++      if (Number(existingLesson.group_id) !== Number(groupId)) throw new AccessError(400, "Lesson/group mismatch");
++      if (user_rank < 500 && (Number(existingLesson.user_id) !== Number(current_user_id) || Number(existingLesson.status) === 2)) {
++        throw new AccessError(403, "Lesson is read-only");
++      }
++    }
++    const studentIds = students.map((student: any) => recordId(student.clientId));
++    if (new Set(studentIds).size !== studentIds.length) throw new AccessError(400, "Duplicate students");
++    for (const clientId of studentIds) {
++      const [members] = await connection.query<RowDataPacket[]>(
++        "SELECT c.id FROM clients c JOIN group_members gm ON gm.client_id = c.id WHERE c.id = ? AND c.company_id = ? AND gm.group_id = ?",
++        [clientId, company_id, recordId(groupId)]);
++      if (!members.length) throw new AccessError(404, "Group member not found");
++    }
+ 
+     // === ФИНАНСОВАЯ МОДЕРАЦИЯ ДЛЯ УЧИТЕЛЯ ===
+     let finalTeacherPay = Number(teacherPay);
+     let validatedStudents = students;
+ 
+     if (user_rank < 500) {
+-      const [teacherRow]: any = await connection.query(
+-        "SELECT balance FROM users WHERE id = ?",
+-        [current_user_id]
+-      );
+-      finalTeacherPay = teacherRow.length > 0 ? Number(teacherRow[0].balance) : 1500.00;
++      // Retain the existing planned payment; never use accumulated balance as a rate.
++      finalTeacherPay = existingLesson ? Number(existingLesson.teacher_pay) : 1500.00;
+ 
+       validatedStudents = students.map((s: any) => ({
+         ...s,
+@@ -283,20 +316,20 @@
+           isAlreadyClosed = true;
+ 
+           const [oldTransactions]: any = await connection.query(
+-            "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ?",
+-            [realLessonId]
++            "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ? AND company_id = ?",
++            [realLessonId, company_id]
+           );
+ 
+           for (const tx of oldTransactions) {
+             if (tx.type === 'revenue' && tx.client_id) {
+-              await connection.query("UPDATE clients SET balance = balance + ? WHERE id = ?", [tx.amount, tx.client_id]);
++              await connection.query("UPDATE clients SET balance = balance + ? WHERE id = ? AND company_id = ?", [tx.amount, tx.client_id, company_id]);
+             }
+             if (tx.type === 'expense' && tx.user_id) {
+-              await connection.query("UPDATE users SET balance = balance - ? WHERE id = ?", [tx.amount, tx.user_id]);
++              await connection.query("UPDATE users SET balance = balance - ? WHERE id = ? AND company_id = ?", [tx.amount, tx.user_id, company_id]);
+             }
+           }
+ 
+-          await connection.query("DELETE FROM financial_transactions WHERE lesson_id = ?", [realLessonId]);
++          await connection.query("DELETE FROM financial_transactions WHERE lesson_id = ? AND company_id = ?", [realLessonId, company_id]);
+         }
+       }
+ 
+@@ -354,8 +387,8 @@
+         );
+ 
+         await connection.query(
+-          "UPDATE clients SET balance = balance - ? WHERE id = ?",
+-          [student.amountCharged, student.clientId],
++          "UPDATE clients SET balance = balance - ? WHERE id = ? AND company_id = ?",
++          [student.amountCharged, student.clientId, company_id],
+         );
+       }
+     }
+@@ -374,8 +407,8 @@
+       );
+ 
+       await connection.query(
+-        "UPDATE users SET balance = balance + ? WHERE id = ?",
+-        [finalTeacherPay, teacherId],
++        "UPDATE users SET balance = balance + ? WHERE id = ? AND company_id = ?",
++        [finalTeacherPay, teacherId, company_id],
+       );
+     }
+ 
+@@ -390,6 +423,7 @@
+     });
+   } catch (error: any) {
+     await connection.rollback();
++    if (respondToAccessError(error, res)) return;
+     console.error("Ошибка в closeLesson:", error);
+     if (error.message.includes("403")) {
+       res.status(403).json({ error: "Доступ ограничен" });
+--- a/backend/controllers/UsersController.ts
++++ b/backend/controllers/UsersController.ts
+@@ -1,3 +1,4 @@
++import { authorize } from "../middleware/auth.js";
+ import { Request, Response } from "express";
+ import pool from "../data_base_connect.js";
+ import bcrypt from "bcrypt";
+@@ -6,6 +7,8 @@
+   req: Request,
+   res: Response,
+ ): Promise<Response | void> => {
++  if (!authorize(req, res, 500)) return;
++
+   try {
+     const company_id = req.session.company_id;
+     if (!company_id) {
+@@ -38,6 +41,8 @@
+ };
+ 
+ export const adduser = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 1000)) return;
++
+   const { full_name, role, rank, email, contact, birthday, gender, password } =
+     req.body;
+ 
+@@ -100,6 +105,8 @@
+ };
+ 
+ export const deluser = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 1000)) return;
++
+   const { id } = req.params;
+   const company_id = req.session.company_id;
+   if (!company_id) {
+@@ -170,6 +177,8 @@
+ };
+ 
+ export const resetuser = async (req: Request, res: Response) => {
++  if (!authorize(req, res, 1000)) return;
++
+   let {
+     id,
+     full_name,
+--- /dev/null
++++ b/backend/middleware/auth.ts
+@@ -0,0 +1,50 @@
++import type { Request, Response, NextFunction } from "express";
++import type { RowDataPacket } from "mysql2";
++import pool from "../data_base_connect.js";
++
++export function hasValidSession(req: Request): boolean {
++  const s = req.session;
++  return !!s && typeof s.user_id === "number" && Number.isSafeInteger(s.user_id) && s.user_id > 0 &&
++    typeof s.company_id === "number" && Number.isSafeInteger(s.company_id) && s.company_id > 0 &&
++    typeof s.rank === "number" && Number.isSafeInteger(s.rank) && s.rank >= 0;
++}
++
++// Used by controllers as well as middleware, so direct calls fail closed.
++export function authorize(req: Request, res: Response, minimumRank = 0): boolean {
++  if (!hasValidSession(req)) {
++    res.status(401).json({ success: false, message: "Unauthorized" });
++    return false;
++  }
++  if (req.session.rank! < minimumRank) {
++    res.status(403).json({ success: false, message: "Insufficient permissions" });
++    return false;
++  }
++  return true;
++}
++
++export async function requireAuth(req: Request, res: Response, next: NextFunction) {
++  if (!authorize(req, res)) return;
++  try {
++    // Recheck membership and permissions: deleted users and stale ranks must not retain access.
++    const [rows] = await pool.query<RowDataPacket[]>(
++      "SELECT id, company_id, `rank`, role FROM users WHERE id = ? AND company_id = ?",
++      [req.session.user_id, req.session.company_id],
++    );
++    const user = rows[0];
++    if (!user || !Number.isSafeInteger(user.rank) || user.rank < 0) {
++      res.status(401).json({ success: false, message: "Session is no longer valid" });
++      return;
++    }
++    req.session.rank = user.rank;
++    req.session.user_role = user.role;
++    next();
++  } catch (error) {
++    console.error("Authentication lookup failed:", error);
++    res.status(503).json({ success: false, message: "Unable to verify authentication" });
++  }
++}
++
++export const requireRank = (minimumRank: number) =>
++  (req: Request, res: Response, next: NextFunction) => {
++    if (authorize(req, res, minimumRank)) next();
++  };
+--- a/backend/package.json
++++ b/backend/package.json
+@@ -4,8 +4,9 @@
+   "description": "",
+   "main": "index.js",
+   "scripts": {
+-    "test": "echo \"Error: no test specified\" && exit 1",
+-    "dev": "tsx server.ts"
++    "test": "node --test tests/*.test.cjs",
++    "dev": "tsx server.ts",
++    "typecheck": "tsc --noEmit"
+   },
+   "keywords": [],
+   "author": "",
+--- a/backend/router.ts
++++ b/backend/router.ts
+@@ -1,3 +1,4 @@
++import { requireAuth, requireRank } from "./middleware/auth.js";
+ import { Router } from "express";
+ import { getusers, adduser, deluser, resetuser } from "./controllers/UsersController.js"; 
+ import { getglobalinfo, checkconnect, getallsession, getUserProfile} from "./controllers/BackController.js"
+@@ -23,55 +24,55 @@
+ const router: Router = Router();
+ 
+ router.get('/checkconnect', checkconnect);
+-router.get('/getsession', getallsession);
+-router.get("/getglobalinfo", getglobalinfo);
+-router.get("/getcurrentuser", getUserProfile)
++router.get("/getsession", requireAuth, requireRank(0), getallsession);
++router.get("/getglobalinfo", requireAuth, requireRank(0), getglobalinfo);
++router.get("/getcurrentuser", requireAuth, requireRank(0), getUserProfile);
+ 
+ router.post("/signin", APIsignin);
+ router.post("/signup", APIsignup);
+-router.get("/logout", logout);
++router.get("/logout", requireAuth, requireRank(0), logout);
+ 
+-router.post("/adduser", adduser);
+-router.get("/getusers", getusers);
+-router.delete("/deluser/:id", deluser);
+-router.post('/resetuser', resetuser);
++router.post("/adduser", requireAuth, requireRank(1000), adduser);
++router.get("/getusers", requireAuth, requireRank(500), getusers);
++router.delete("/deluser/:id", requireAuth, requireRank(1000), deluser);
++router.post("/resetuser", requireAuth, requireRank(1000), resetuser);
+ 
+-router.get("/getclient", APIGetClients);
+-router.post('/addclients', addclient);
+-router.delete('/delclients/:id', delclient);
+-router.patch('/updateclient/:id', updateClient);
++router.get("/getclient", requireAuth, requireRank(500), APIGetClients);
++router.post("/addclients", requireAuth, requireRank(500), addclient);
++router.delete("/delclients/:id", requireAuth, requireRank(1000), delclient);
++router.patch("/updateclient/:id", requireAuth, requireRank(500), updateClient);
+ 
+-router.get("/getgroups", getgroups);
+-router.post('/creategroup', creategroup);
+-router.delete('/deletegroup/:id', deleteGroup);
+-router.patch('/updategroup/:id', updategroup);
++router.get("/getgroups", requireAuth, requireRank(500), getgroups);
++router.post("/creategroup", requireAuth, requireRank(500), creategroup);
++router.delete("/deletegroup/:id", requireAuth, requireRank(500), deleteGroup);
++router.patch("/updategroup/:id", requireAuth, requireRank(500), updategroup);
+ 
+-router.get('/schedule', getSchedule);
+-router.get('/getlessons/:id', getLessonDetails);
+-router.post('/lessons/close', closeLesson);
++router.get("/schedule", requireAuth, requireRank(0), getSchedule);
++router.get("/getlessons/:id", requireAuth, requireRank(0), getLessonDetails);
++router.post("/lessons/close", requireAuth, requireRank(0), closeLesson);
+ 
+-router.post('/create-lead', createLead);
+-router.get('/get-lead', getLeads);
+-router.get('/get-lead-by-id/:id', getLeadById);
+-router.patch('/update-lead/:id', updateLead);
+-router.delete('/delete-lead/:id', deleteLead);
++router.post("/create-lead", requireAuth, requireRank(500), createLead);
++router.get("/get-lead", requireAuth, requireRank(500), getLeads);
++router.get("/get-lead-by-id/:id", requireAuth, requireRank(500), getLeadById);
++router.patch("/update-lead/:id", requireAuth, requireRank(500), updateLead);
++router.delete("/delete-lead/:id", requireAuth, requireRank(1000), deleteLead);
+ 
+-router.get('/getaccupancygroups', get_accupancy_groups);
+-router.get('/get_transactions_list', get_transactions_list);
+-router.get('/revenue-sources', getRevenueSources);
+-router.get('/getFinancialTimeline', getFinancialTimeline);
+-router.post('/finance/add-expense', addManualExpense);
+-router.get('/finance/expenses-structure', getExpenses);
+-router.get("/finance/expenses-structure-by-group", getExpensesStructure);
+-router.get('/finance/client-debtors', getClientDebtors);
+-router.get('/finance/get-all-state', getAllState);
+-router.get('/get-chart-state', getChartState);
+-router.get('/hr/get-teachers-workload', getTeachersWorkload);
+-router.get('/hr/get-attendance-trends', getAttendanceTrends);
++router.get("/getaccupancygroups", requireAuth, requireRank(500), get_accupancy_groups);
++router.get("/get_transactions_list", requireAuth, requireRank(1000), get_transactions_list);
++router.get("/revenue-sources", requireAuth, requireRank(1000), getRevenueSources);
++router.get("/getFinancialTimeline", requireAuth, requireRank(1000), getFinancialTimeline);
++router.post("/finance/add-expense", requireAuth, requireRank(500), addManualExpense);
++router.get("/finance/expenses-structure", requireAuth, requireRank(500), getExpenses);
++router.get("/finance/expenses-structure-by-group", requireAuth, requireRank(1000), getExpensesStructure);
++router.get("/finance/client-debtors", requireAuth, requireRank(500), getClientDebtors);
++router.get("/finance/get-all-state", requireAuth, requireRank(500), getAllState);
++router.get("/get-chart-state", requireAuth, requireRank(500), getChartState);
++router.get("/hr/get-teachers-workload", requireAuth, requireRank(500), getTeachersWorkload);
++router.get("/hr/get-attendance-trends", requireAuth, requireRank(500), getAttendanceTrends);
+ 
+-router.post('/createfeedback', create_feedback);
++router.post("/createfeedback", requireAuth, requireRank(0), create_feedback);
+ router.get('/getfeedbacks', get_all_feedbacks);
+-router.get('/getmyfeedback', get_my_feedbacks);
+-router.put('/updatefeedback:id', update_feedback);
+-router.delete('/deletefeedback/:id', delete_feedback);
++router.get("/getmyfeedback", requireAuth, requireRank(0), get_my_feedbacks);
++router.put("/updatefeedback/:id", requireAuth, requireRank(0), update_feedback);
++router.delete("/deletefeedback/:id", requireAuth, requireRank(0), delete_feedback);
+ export default router;--- /dev/null
++++ b/backend/security/ownership.ts
+@@ -0,0 +1,43 @@
++import type { PoolConnection, Pool } from "mysql2/promise";
++import type { RowDataPacket } from "mysql2";
++import type { Response } from "express";
++
++type Database = Pool | PoolConnection;
++export class AccessError extends Error {
++  constructor(public status: number, message: string) { super(message); }
++}
++export function respondToAccessError(error: unknown, res: Response): boolean {
++  if (!(error instanceof AccessError)) return false;
++  res.status(error.status).json({ success: false, error: error.message });
++  return true;
++}
++export function recordId(value: unknown): number {
++  if ((typeof value !== "number" && typeof value !== "string") ||
++      (typeof value === "string" && !/^[1-9]\d*$/.test(value))) {
++    throw new AccessError(400, "Invalid record ID");
++  }
++  const id = Number(value);
++  if (!Number.isSafeInteger(id) || id <= 0) throw new AccessError(400, "Invalid record ID");
++  return id;
++}
++export async function ownedUser(db: Database, value: unknown, companyId: number) {
++  const id = recordId(value);
++  const [rows] = await db.query<RowDataPacket[]>(
++    "SELECT id FROM users WHERE id = ? AND company_id = ?", [id, companyId]);
++  if (!rows.length) throw new AccessError(404, "User not found");
++}
++export async function ownedGroup(db: Database, value: unknown, companyId: number) {
++  const id = recordId(value);
++  const [rows] = await db.query<RowDataPacket[]>(
++    "SELECT g.id, g.users_id FROM `groups` g JOIN users u ON u.id = g.users_id WHERE g.id = ? AND u.company_id = ?",
++    [id, companyId]);
++  if (!rows.length) throw new AccessError(404, "Group not found");
++  return rows[0];
++}
++export async function ownedGroups(db: Database, values: unknown, companyId: number) {
++  if (values === undefined) return;
++  if (!Array.isArray(values)) throw new AccessError(400, "group_ids must be an array");
++  const ids = values.map(recordId);
++  if (new Set(ids).size !== ids.length) throw new AccessError(400, "Duplicate group IDs");
++  for (const id of ids) await ownedGroup(db, id, companyId);
++}
+--- /dev/null
++++ b/backend/tests/access-control.test.cjs
+@@ -0,0 +1,193 @@
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const path = require('node:path');
++const vm = require('node:vm');
++const ts = require('typescript');
++const express = require('express');
++const root = path.resolve(__dirname, '..');
++const session = (rank = 1000) => ({ user_id: 7, company_id: 1, rank });
++const response = () => ({ code: 200, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } });
++
++// Load the actual TypeScript modules, replacing only the database and unused authentication dependencies.
++// No application database or external service is contacted.
++function harness(answer = () => []) {
++  const calls = [], cache = new Map();
++  const conn = {
++    async query(sql, args) { calls.push({ sql, args }); return [answer(sql, args)]; },
++    async execute(sql, args) { return this.query(sql, args); },
++    async beginTransaction() { calls.push({ sql: 'BEGIN' }); },
++    async commit() { calls.push({ sql: 'COMMIT' }); },
++    async rollback() { calls.push({ sql: 'ROLLBACK' }); },
++    release() { calls.push({ sql: 'RELEASE' }); },
++  };
++  const pool = { ...conn, async getConnection() { calls.push({ sql: 'CONNECT' }); return conn; } };
++  function load(file) {
++    const absolute = path.resolve(root, file);
++    if (cache.has(absolute)) return cache.get(absolute);
++    const module = { exports: {} }; cache.set(absolute, module.exports);
++    const code = ts.transpileModule(fs.readFileSync(absolute, 'utf8'), {
++      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
++    }).outputText;
++    const requireModule = name => {
++      if (name.includes('data_base_connect')) return { __esModule: true, default: pool };
++      if (name === 'dotenv/config') return {};
++      if (name === 'bcrypt') return {};
++      if (name.startsWith('.')) return load(path.relative(root, path.resolve(path.dirname(absolute), name.replace(/\.js$/, '.ts'))));
++      return require(name);
++    };
++    vm.runInNewContext(code, { module, exports: module.exports, require: requireModule,
++      console: { log() {}, error() {} }, process, Date, Set, Promise }, { filename: absolute });
++    return module.exports;
++  }
++  return { load, calls, pool };
++}
++const mutation = calls => calls.filter(c => /^(INSERT|UPDATE|DELETE)/.test(c.sql.trim()));
++const req = overrides => ({ session: session(), params: { id: '9' }, query: {}, headers: {}, body: {}, ...overrides });
++
++for (const bad of [{}, { company_id: 1, user_id: 7 }, { ...session(), rank: NaN }, { ...session(), user_id: -1 }, { ...session(), company_id: '1' }]) {
++  test(`invalid session fails before SQL: ${JSON.stringify(bad)}`, async () => {
++    const h = harness(); const auth = h.load('middleware/auth.ts'); const res = response();
++    let next = false; await auth.requireAuth(req({ session: bad }), res, () => { next = true; });
++    assert.equal(res.code, 401); assert.equal(next, false); assert.equal(h.calls.length, 0);
++  });
++}
++test('permissions are refreshed from the database after demotion', async () => {
++  const h = harness(() => [{ id: 7, company_id: 1, rank: 100, role: 'Teacher' }]);
++  const auth = h.load('middleware/auth.ts'); const request = req(); const res = response(); let allowed = false;
++  await auth.requireAuth(request, res, () => auth.requireRank(500)(request, res, () => { allowed = true; }));
++  assert.equal(res.code, 403); assert.equal(allowed, false); assert.equal(request.session.rank, 100);
++});
++test('deleted user is rejected', async () => {
++  const h = harness(); const res = response(); let next = false;
++  await h.load('middleware/auth.ts').requireAuth(req(), res, () => { next = true; });
++  assert.equal(res.code, 401); assert.equal(next, false);
++});
++for (const [file, handler] of [['ClientController','delclient'], ['ClientController','updateClient'], ['ScheduleController','closeLesson'], ['FinanceController','addManualExpense'], ['AnalyticController','getChartState']]) {
++  test(`${handler} rejects unauthenticated direct calls`, async () => {
++    const h = harness(); const res = response();
++    await h.load(`controllers/${file}.ts`)[handler](req({ session: {} }), res);
++    assert.equal(res.code, 401); assert.equal(h.calls.length, 0);
++  });
++}
++test('fake X-Session-ID cannot open the calendar', async () => {
++  const h = harness(); const res = response();
++  await h.load('controllers/ScheduleController.ts').getSchedule(req({ session: {}, headers: { 'x-session-id': 'anything' }, query: { startDate: '2026-01-01', endDate: '2026-01-07' } }), res);
++  assert.equal(res.code, 401); assert.equal(h.calls.length, 0);
++});
++test('foreign client deletion is scoped and makes no membership deletion', async () => {
++  const h = harness(() => ({ affectedRows: 0 })); const res = response();
++  await h.load('controllers/ClientController.ts').delclient(req(), res);
++  assert.equal(res.code, 404); const writes = mutation(h.calls);
++  assert.equal(writes.length, 1); assert.match(writes[0].sql, /company_id = \?/); assert.deepEqual([...writes[0].args], [9, 1]);
++});
++test('foreign client update performs no mutation', async () => {
++  const h = harness(); const res = response();
++  await h.load('controllers/ClientController.ts').updateClient(req({ body: { name: 'Changed' } }), res);
++  assert.equal(res.code, 404); assert.equal(mutation(h.calls).length, 0);
++  assert.match(h.calls.find(c => c.sql.startsWith('SELECT')).sql, /company_id = \?/);
++});
++test('client cannot be reassigned to another company', async () => {
++  const h = harness(); const res = response();
++  await h.load('controllers/ClientController.ts').updateClient(req({ body: { name: 'Changed', company_id: 2 } }), res);
++  assert.equal(res.code, 403); assert.equal(h.calls.length, 0);
++});
++test('valid client update stays scoped to its company', async () => {
++  const h = harness(sql => sql.startsWith('SELECT name') ? [{ name: 'Own', balance: 100, company_id: 1 }] : { affectedRows: 1 }); const res = response();
++  await h.load('controllers/ClientController.ts').updateClient(req({ body: { name: 'Changed' } }), res);
++  assert.equal(res.code, 200); const write = mutation(h.calls)[0]; assert.match(write.sql, /company_id = \?/);
++  assert.deepEqual([...write.args], ['Changed', 9, 1]);
++});
++test('foreign group cannot be attached to a new client', async () => {
++  const h = harness(); const res = response();
++  await h.load('controllers/ClientController.ts').addclient(req({ body: { name: 'New', group_ids: [22] } }), res);
++  assert.equal(res.code, 404); assert.equal(mutation(h.calls).length, 0);
++});
++test('foreign group cannot replace an existing client membership', async () => {
++  const h = harness(sql => sql.startsWith('SELECT name') ? [{ name: 'Own', balance: 0, company_id: 1 }] : []); const res = response();
++  await h.load('controllers/ClientController.ts').updateClient(req({ body: { group_ids: [22] } }), res);
++  assert.equal(res.code, 404); assert.equal(mutation(h.calls).length, 0);
++});
++test('foreign group cannot be reassigned to an owned teacher', async () => {
++  const h = harness(); const res = response();
++  await h.load('controllers/GroupController.ts').updategroup(req({ body: { users_id: 7 } }), res);
++  assert.equal(res.code, 404); assert.equal(mutation(h.calls).length, 0);
++});
++test('foreign teacher cannot be assigned to a new group', async () => {
++  const h = harness(); const res = response();
++  await h.load('controllers/GroupController.ts').creategroup(req({ body: { name: 'New', users_id: 77, status: 1, start_date: '2026-01-01', max_students: 10 } }), res);
++  assert.equal(res.code, 404); assert.equal(mutation(h.calls).length, 0);
++});
++test('foreign financial chart is rejected before SQL', async () => {
++  const h = harness(); const res = response();
++  await h.load('controllers/AnalyticController.ts').getChartState(req({ query: { companyId: '2' } }), res);
++  assert.equal(res.code, 403); assert.equal(h.calls.length, 0);
++});
++test('teacher cannot create manual expenses', async () => {
++  const h = harness(); const res = response();
++  await h.load('controllers/FinanceController.ts').addManualExpense(req({ session: session(100), body: { amount: 100, category: 'Rent' } }), res);
++  assert.equal(res.code, 403); assert.equal(h.calls.length, 0);
++});
++test('lead cannot be assigned to a foreign employee', async () => {
++  const h = harness(); const res = response();
++  await h.load('controllers/LeadController.ts').createLead(req({ body: { name: 'New', contact: '123', user_id: 77 } }), res);
++  assert.equal(res.code, 404); assert.equal(mutation(h.calls).length, 0);
++});
++const lessonBody = { lessonId: 9, groupId: 10, teacherId: 7, teacherPay: 1500, startDateTime: '2020-01-01T10:00:00.000Z', endDateTime: '2020-01-01T11:00:00.000Z', students: [{ clientId: 12, attendanceStatus: 1, amountCharged: 800 }] };
++function lessonRows(sql) {
++  if (sql.startsWith('SELECT g.id')) return [{ id: 10, users_id: 7 }];
++  if (sql.startsWith('SELECT id FROM users')) return [{ id: 7 }];
++  if (sql.startsWith('SELECT l.id')) return [{ id: 9, group_id: 10, user_id: 7, status: 1, teacher_pay: 1500 }];
++  return [];
++}
++test('foreign student cannot be charged for an owned lesson', async () => {
++  const h = harness(lessonRows); const res = response();
++  await h.load('controllers/ScheduleController.ts').closeLesson(req({ body: lessonBody }), res);
++  assert.equal(res.code, 404); assert.equal(mutation(h.calls).length, 0);
++});
++test('foreign existing lesson is rejected before financial writes', async () => {
++  const h = harness(sql => sql.startsWith('SELECT l.id') ? [] : lessonRows(sql)); const res = response();
++  await h.load('controllers/ScheduleController.ts').closeLesson(req({ body: lessonBody }), res);
++  assert.equal(res.code, 404); assert.equal(mutation(h.calls).length, 0);
++});
++test('forged group ID on an existing lesson is rejected', async () => {
++  const h = harness(sql => sql.startsWith('SELECT l.id') ? [{ id: 9, group_id: 999, user_id: 7, status: 1 }] : lessonRows(sql)); const res = response();
++  await h.load('controllers/ScheduleController.ts').closeLesson(req({ body: lessonBody }), res);
++  assert.equal(res.code, 400); assert.equal(mutation(h.calls).length, 0);
++});
++test('teacher cannot bypass read-only state of a completed lesson', async () => {
++  const h = harness(sql => sql.startsWith('SELECT l.id') ? [{ id: 9, group_id: 10, user_id: 7, status: 2 }] : lessonRows(sql)); const res = response();
++  await h.load('controllers/ScheduleController.ts').closeLesson(req({ session: session(100), body: lessonBody }), res);
++  assert.equal(res.code, 403); assert.equal(mutation(h.calls).length, 0);
++});
++test('valid teacher lesson preserves planned pay and scopes balances', async () => {
++  const h = harness(sql => {
++    if (sql.startsWith('SELECT c.id')) return [{ id: 12 }];
++    if (sql.startsWith('SELECT status')) return [{ status: 1, user_id: 7 }];
++    if (/^(INSERT|UPDATE)/.test(sql.trim())) return { affectedRows: 1, insertId: 9 };
++    return lessonRows(sql);
++  }); const res = response();
++  await h.load('controllers/ScheduleController.ts').closeLesson(req({ session: session(100), body: { ...lessonBody, teacherPay: 99999 } }), res);
++  assert.equal(res.code, 200);
++  assert.equal(h.calls.some(c => c.sql.includes('SELECT balance FROM users')), false);
++  const teacherWrite = h.calls.find(c => c.sql.startsWith('UPDATE users SET balance'));
++  assert.deepEqual([...teacherWrite.args], [1500, 7, 1]);
++});
++test('all protected HTTP routes reject requests without a cookie, including fake headers', async () => {
++  const h = harness(); const router = h.load('router.ts').default;
++  const app = express(); app.use(express.json()); app.use((req, res, next) => { req.session = {}; next(); }); app.use(router);
++  const server = app.listen(0, '127.0.0.1');
++  await new Promise(resolve => server.once('listening', resolve));
++  try {
++    const publicPaths = new Set(['/signin', '/signup', '/checkconnect', '/getfeedbacks']);
++    const routes = router.stack.filter(layer => layer.route && !publicPaths.has(layer.route.path));
++    assert.ok(routes.length >= 35);
++    for (const layer of routes) {
++      const method = Object.keys(layer.route.methods)[0].toUpperCase();
++      const url = `http://127.0.0.1:${server.address().port}${layer.route.path.replace(':id', '9')}`;
++      const result = await fetch(url, { method, headers: { 'X-Session-ID': 'forged' } });
++      assert.equal(result.status, 401, `${method} ${layer.route.path}`);
++    }
++    assert.equal(h.calls.length, 0);
++  } finally { await new Promise(resolve => server.close(resolve)); }
++});
+--- a/frontend/src/logic/ClientRequests.ts
++++ b/frontend/src/logic/ClientRequests.ts
+@@ -6,6 +6,7 @@
+       `https://api.soft-skills-crm.ru/delclients/${client.id}`,
+       {
+         method: "DELETE",
++        credentials: "include",
+       },
+     );
+ 
