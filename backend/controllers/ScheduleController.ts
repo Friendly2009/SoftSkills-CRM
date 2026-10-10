@@ -1,14 +1,13 @@
+import { AccessError, ownedGroup, ownedUser, recordId, respondToAccessError } from "../security/ownership.js";
+import { authorize } from "../middleware/auth.js";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 export const getSchedule = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 0)) return;
+
   try {
-    let company_id = req.session?.company_id;
-    if (!company_id && req.headers['x-session-id']) {
-       // Если фронтенд шлёт какую-то строку сессии, временно захардкодь ID компании для тестов, 
-       // либо вытащи реальный ID из базы по этому токену. Для проверки поставим 1:
-       company_id = 1; 
-    }
+    const company_id = req.session.company_id;
     if (!company_id || company_id === -1) {
       return res
         .status(401)
@@ -52,6 +51,8 @@ export const getSchedule = async (req: Request, res: Response) => {
 };
 
 export const getLessonDetails = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 0)) return;
+
   try {
     const id = req.params.id as string;
     const company_id = req.session.company_id;
@@ -103,8 +104,8 @@ export const getLessonDetails = async (req: Request, res: Response) => {
       };
 
       const [groupStudents]: any = await pool.query(
-        "SELECT client_id FROM group_members WHERE group_id = ?",
-        [groupId],
+        "SELECT gm.client_id FROM group_members gm JOIN clients c ON c.id = gm.client_id WHERE gm.group_id = ? AND c.company_id = ?",
+        [groupId, company_id],
       );
 
       attendanceData = groupStudents.map((student: any) => ({
@@ -151,8 +152,8 @@ export const getLessonDetails = async (req: Request, res: Response) => {
       };
 
       const [attRows]: any = await pool.query(
-        "SELECT client_id, attendance_status, amount_charged FROM lesson_attendance WHERE lesson_id = ?",
-        [lessonId],
+        "SELECT la.client_id, la.attendance_status, la.amount_charged FROM lesson_attendance la JOIN clients c ON c.id = la.client_id WHERE la.lesson_id = ? AND c.company_id = ?",
+        [lessonId, company_id],
       );
       attendanceData = attRows;
     }
@@ -163,8 +164,8 @@ export const getLessonDetails = async (req: Request, res: Response) => {
     const studentFields = isForeignLessonForTeacher ? "c.id, c.name, 0 AS balance" : "c.id, c.name, c.balance";
     
     const [studentsData]: any = await pool.query(
-      `SELECT ${studentFields} FROM clients c JOIN group_members gm ON c.id = gm.client_id WHERE gm.group_id = ?`,
-      [groupId],
+      `SELECT ${studentFields} FROM clients c JOIN group_members gm ON c.id = gm.client_id WHERE gm.group_id = ? AND c.company_id = ?`,
+      [groupId, company_id],
     );
 
     const [allTeachers]: any = await pool.query(
@@ -190,6 +191,8 @@ export const getLessonDetails = async (req: Request, res: Response) => {
 };
 
 export const closeLesson = async (req: Request, res: Response): Promise<void> => {
+  if (!authorize(req, res, 0)) return;
+
   const {
     lessonId,
     groupId,
@@ -210,7 +213,7 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
     !startDateTime ||
     !endDateTime ||
     !teacherId ||
-    !students
+    !Array.isArray(students)
   ) {
     res.status(400).json({ error: "Переданы некорректные или неполные данные формы" });
     return;
@@ -238,17 +241,47 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
 
   try {
     await connection.beginTransaction();
+    const group = await ownedGroup(connection, groupId, company_id!);
+    await ownedUser(connection, teacherId, company_id!);
+
+    let existingLesson: any = null;
+    if (typeof lessonId === "string" && lessonId.startsWith("temp-")) {
+      const match = /^temp-([1-9]\d*)-(\d{4}-\d{2}-\d{2})$/.exec(lessonId);
+      if (!match || match[2] !== strLessonDate) throw new AccessError(400, "Invalid schedule occurrence");
+      const [templates] = await connection.query<RowDataPacket[]>(
+        "SELECT id FROM group_schedules WHERE id = ? AND group_id = ?",
+        [recordId(match[1]), recordId(groupId)]);
+      if (!templates.length) throw new AccessError(404, "Schedule not found");
+      if (user_rank < 500 && Number(group.users_id) !== Number(current_user_id)) {
+        throw new AccessError(403, "Cannot close another teacher's lesson");
+      }
+    } else {
+      const [lessons] = await connection.query<RowDataPacket[]>(
+        "SELECT l.id, l.group_id, l.user_id, l.status, l.teacher_pay FROM lessons l JOIN `groups` g ON g.id = l.group_id JOIN users u ON u.id = g.users_id WHERE l.id = ? AND u.company_id = ? FOR UPDATE",
+        [recordId(lessonId), company_id]);
+      existingLesson = lessons[0];
+      if (!existingLesson) throw new AccessError(404, "Lesson not found");
+      if (Number(existingLesson.group_id) !== Number(groupId)) throw new AccessError(400, "Lesson/group mismatch");
+      if (user_rank < 500 && (Number(existingLesson.user_id) !== Number(current_user_id) || Number(existingLesson.status) === 2)) {
+        throw new AccessError(403, "Lesson is read-only");
+      }
+    }
+    const studentIds = students.map((student: any) => recordId(student.clientId));
+    if (new Set(studentIds).size !== studentIds.length) throw new AccessError(400, "Duplicate students");
+    for (const clientId of studentIds) {
+      const [members] = await connection.query<RowDataPacket[]>(
+        "SELECT c.id FROM clients c JOIN group_members gm ON gm.client_id = c.id WHERE c.id = ? AND c.company_id = ? AND gm.group_id = ?",
+        [clientId, company_id, recordId(groupId)]);
+      if (!members.length) throw new AccessError(404, "Group member not found");
+    }
 
     // === ФИНАНСОВАЯ МОДЕРАЦИЯ ДЛЯ УЧИТЕЛЯ ===
     let finalTeacherPay = Number(teacherPay);
     let validatedStudents = students;
 
     if (user_rank < 500) {
-      const [teacherRow]: any = await connection.query(
-        "SELECT balance FROM users WHERE id = ?",
-        [current_user_id]
-      );
-      finalTeacherPay = teacherRow.length > 0 ? Number(teacherRow[0].balance) : 1500.00;
+      // Retain the existing planned payment; never use accumulated balance as a rate.
+      finalTeacherPay = existingLesson ? Number(existingLesson.teacher_pay) : 1500.00;
 
       validatedStudents = students.map((s: any) => ({
         ...s,
@@ -283,20 +316,20 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
           isAlreadyClosed = true;
 
           const [oldTransactions]: any = await connection.query(
-            "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ?",
-            [realLessonId]
+            "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ? AND company_id = ?",
+            [realLessonId, company_id]
           );
 
           for (const tx of oldTransactions) {
             if (tx.type === 'revenue' && tx.client_id) {
-              await connection.query("UPDATE clients SET balance = balance + ? WHERE id = ?", [tx.amount, tx.client_id]);
+              await connection.query("UPDATE clients SET balance = balance + ? WHERE id = ? AND company_id = ?", [tx.amount, tx.client_id, company_id]);
             }
             if (tx.type === 'expense' && tx.user_id) {
-              await connection.query("UPDATE users SET balance = balance - ? WHERE id = ?", [tx.amount, tx.user_id]);
+              await connection.query("UPDATE users SET balance = balance - ? WHERE id = ? AND company_id = ?", [tx.amount, tx.user_id, company_id]);
             }
           }
 
-          await connection.query("DELETE FROM financial_transactions WHERE lesson_id = ?", [realLessonId]);
+          await connection.query("DELETE FROM financial_transactions WHERE lesson_id = ? AND company_id = ?", [realLessonId, company_id]);
         }
       }
 
@@ -354,8 +387,8 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
         );
 
         await connection.query(
-          "UPDATE clients SET balance = balance - ? WHERE id = ?",
-          [student.amountCharged, student.clientId],
+          "UPDATE clients SET balance = balance - ? WHERE id = ? AND company_id = ?",
+          [student.amountCharged, student.clientId, company_id],
         );
       }
     }
@@ -374,8 +407,8 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       );
 
       await connection.query(
-        "UPDATE users SET balance = balance + ? WHERE id = ?",
-        [finalTeacherPay, teacherId],
+        "UPDATE users SET balance = balance + ? WHERE id = ? AND company_id = ?",
+        [finalTeacherPay, teacherId, company_id],
       );
     }
 
@@ -390,6 +423,7 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
     });
   } catch (error: any) {
     await connection.rollback();
+    if (respondToAccessError(error, res)) return;
     console.error("Ошибка в closeLesson:", error);
     if (error.message.includes("403")) {
       res.status(403).json({ error: "Доступ ограничен" });

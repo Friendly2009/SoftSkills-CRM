@@ -1,3 +1,4 @@
+import { authorize } from "../middleware/auth.js";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 import bcrypt from "bcrypt";
@@ -6,6 +7,8 @@ export const getusers = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session.company_id;
     if (!company_id) {
@@ -38,6 +41,8 @@ export const getusers = async (
 };
 
 export const adduser = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 1000)) return;
+
   const { full_name, role, rank, email, contact, birthday, gender, password } =
     req.body;
 
@@ -100,6 +105,8 @@ export const adduser = async (req: Request, res: Response) => {
 };
 
 export const deluser = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 1000)) return;
+
   const { id } = req.params;
   const company_id = req.session.company_id;
   if (!company_id) {
@@ -170,6 +177,8 @@ export const deluser = async (req: Request, res: Response) => {
 };
 
 export const resetuser = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 1000)) return;
+
   let {
     id,
     full_name,

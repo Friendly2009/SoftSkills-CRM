@@ -1,3 +1,5 @@
+import { ownedUser, respondToAccessError } from "../security/ownership.js";
+import { authorize } from "../middleware/auth.js";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
@@ -6,6 +8,8 @@ export const createLead = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session?.company_id;
     if (!company_id) {
@@ -27,6 +31,8 @@ export const createLead = async (
         message: "Поля 'name' и 'contact' обязательны для заполнения",
       });
     }
+
+    if (user_id !== undefined && user_id !== null) await ownedUser(pool, user_id, company_id);
 
     const query = `
             INSERT INTO leads (company_id, user_id, name, contact, source, description, status) 
@@ -54,6 +60,7 @@ export const createLead = async (
       },
     });
   } catch (er: any) {
+    if (respondToAccessError(er, res)) return;
     console.log(er);
     return res.status(500).json({
       success: false,
@@ -66,6 +73,8 @@ export const getLeads = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session?.company_id;
     if (!company_id) {
@@ -91,6 +100,7 @@ export const getLeads = async (
 
     return res.status(200).json({ success: true, data: rows });
   } catch (er: any) {
+    if (respondToAccessError(er, res)) return;
     console.log(er);
     return res.status(500).json({
       success: false,
@@ -103,6 +113,8 @@ export const getLeadById = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session?.company_id;
     if (!company_id) {
@@ -126,6 +138,7 @@ export const getLeadById = async (
 
     return res.status(200).json({ success: true, data: rows[0] });
   } catch (er: any) {
+    if (respondToAccessError(er, res)) return;
     console.log(er);
     return res.status(500).json({
       success: false,
@@ -138,6 +151,8 @@ export const deleteLead = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 1000)) return;
+
   try {
     const company_id = req.session?.company_id;
     if (!company_id) {
@@ -167,6 +182,7 @@ export const deleteLead = async (
       .status(200)
       .json({ success: true, message: "Лид успешно удален" });
   } catch (er: any) {
+    if (respondToAccessError(er, res)) return;
     console.log(er);
     return res.status(500).json({
       success: false,
@@ -179,12 +195,13 @@ export const updateLead = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 500)) return;
+
   const connection = await pool.getConnection();
 
   try {
     const company_id = req.session?.company_id;
     if (!company_id) {
-      connection.release();
       return res
         .status(401)
         .json({ success: false, message: "Сессия не найдена" });
@@ -209,7 +226,6 @@ export const updateLead = async (
     } = req.body;
 
     if (status === "lost" && !loss_reason_id) {
-      connection.release();
       return res.status(400).json({
         success: false,
         message: "Поле 'loss_reason_id' обязательно при статусе 'lost'.",
@@ -222,7 +238,6 @@ export const updateLead = async (
     );
 
     if (currentLeadRows.length === 0) {
-      connection.release();
       return res.status(404).json({ success: false, message: "Лид не найден" });
     }
 
@@ -233,7 +248,6 @@ export const updateLead = async (
       status !== undefined &&
       status !== currentStatus
     ) {
-      connection.release();
       return res.status(400).json({
         success: false,
         message: `Ошибка: Нельзя изменить статус лида, так как он уже закрыт со статусом '${currentStatus}'.`,
@@ -241,6 +255,7 @@ export const updateLead = async (
     }
 
     await connection.beginTransaction();
+    if (user_id !== undefined && user_id !== null) await ownedUser(connection, user_id, company_id);
 
     const fields: string[] = [];
     const values: any[] = [];
@@ -342,6 +357,7 @@ export const updateLead = async (
     });
   } catch (er: any) {
     await connection.rollback();
+    if (respondToAccessError(er, res)) return;
     console.log(er);
     return res.status(500).json({ success: false, message: er.message || er });
   } finally {

@@ -1,3 +1,4 @@
+import { authorize } from "../middleware/auth.js";
 import "dotenv/config";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
@@ -7,6 +8,8 @@ export const get_accupancy_groups = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session?.company_id;
     if (!company_id) {
@@ -40,6 +43,8 @@ export const get_transactions_list = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 1000)) return;
+
   try {
     const company_id = req.session.company_id;
     if (!company_id) {
@@ -88,6 +93,8 @@ WHERE ft.type != 'revenue' and ft.company_id = ?`,
 };
 
 export const getRevenueSources = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 1000)) return;
+
   try {
     const company_id = req.session.company_id;
     if (!company_id || company_id === -1) {
@@ -127,6 +134,8 @@ GROUP BY g.id, g.name`,
 };
 
 export const getFinancialTimeline = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 1000)) return;
+
   try {
     const company_id = req.session.company_id;
     if (!company_id || company_id === -1) {
@@ -186,6 +195,8 @@ export const getFinancialTimeline = async (req: Request, res: Response) => {
 };
 
 export const getExpensesStructure = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 1000)) return;
+
   try {
     const company_id = req.session.company_id;
     if (!company_id || isNaN(company_id)) {
@@ -226,6 +237,8 @@ export const getExpensesStructure = async (req: Request, res: Response) => {
 };
 
 export const getClientDebtors = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session.company_id;
     if (!company_id || isNaN(company_id)) {
@@ -266,6 +279,8 @@ ORDER BY c.balance ASC;
 };
 
 export const getAllState = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session?.company_id;
 
@@ -326,9 +341,13 @@ export const getAllState = async (req: Request, res: Response) => {
 };
 
 export const getChartState = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   try {
-    const companyId =
-      parseInt(req.query.companyId as string, 10) || req.session?.company_id;
+    const companyId = req.session.company_id!;
+    if (req.query.companyId !== undefined && Number(req.query.companyId) !== companyId) {
+      return res.status(403).json({ success: false, message: "Company access denied" });
+    }
 
     if (!companyId || isNaN(companyId)) {
       return res
@@ -401,6 +420,8 @@ export const getChartState = async (req: Request, res: Response) => {
 };
 
 export const getTeachersWorkload = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session?.company_id;
     const parsedCompanyId = parseInt(String(company_id), 10);
@@ -452,6 +473,8 @@ export const getTeachersWorkload = async (req: Request, res: Response) => {
 };
 
 export const getAttendanceTrends = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session?.company_id;
     const parsedCompanyId = parseInt(String(company_id), 10);

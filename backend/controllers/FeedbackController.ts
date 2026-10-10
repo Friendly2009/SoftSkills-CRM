@@ -1,3 +1,4 @@
+import { authorize } from "../middleware/auth.js";
 import { Response } from "express";
 import pool from "../data_base_connect.js";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
@@ -16,6 +17,8 @@ export const create_feedback = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
+  if (!authorize(req, res, 0)) return;
+
   try {
     const { message, rate } = req.body;
     const userId = req.session.user_id;
@@ -83,6 +86,8 @@ export const get_my_feedbacks = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
+  if (!authorize(req, res, 0)) return;
+
   try {
     const userId = req.session.user_id;
 
@@ -106,6 +111,8 @@ export const update_feedback = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
+  if (!authorize(req, res, 0)) return;
+
   try {
     const { id } = req.params;
     const { message, rate } = req.body;
@@ -149,6 +156,8 @@ export const delete_feedback = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
+  if (!authorize(req, res, 0)) return;
+
   try {
     const { id } = req.params;
     const userId = req.session.user_id;

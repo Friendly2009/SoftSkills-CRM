@@ -1,7 +1,10 @@
+import { authorize } from "../middleware/auth.js";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 
 export const getglobalinfo = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 0)) return;
+
   try {
     const [rows] = await pool.query(
       "SELECT name FROM company WHERE id = ?",
@@ -47,6 +50,8 @@ export const checkconnect = async (req: Request, res: Response) => {
 };
 
 export const getallsession = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 0)) return;
+
   try {
     return res.status(200).json({
       success: true,
@@ -70,6 +75,8 @@ export const getallsession = async (req: Request, res: Response) => {
 };
 
 export const getUserProfile = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 0)) return;
+
   const userId = req.session.user_id;
   const companyId = req.session.company_id;
 

@@ -1,3 +1,5 @@
+import { ownedGroups, respondToAccessError } from "../security/ownership.js";
+import { authorize } from "../middleware/auth.js";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
@@ -6,6 +8,8 @@ export const APIGetClients = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session.company_id;
 
@@ -42,12 +46,14 @@ export const APIGetClients = async (
           )
           FROM group_members gm_sub
           JOIN group_schedules gs ON gm_sub.group_id = gs.group_id
+          JOIN \`groups\` vg ON vg.id = gs.group_id
+          JOIN users vu ON vu.id = vg.users_id AND vu.company_id = c.company_id
           WHERE gm_sub.client_id = c.id
         ) AS next_visit
 
       FROM clients c
       LEFT JOIN group_members gm ON c.id = gm.client_id
-      LEFT JOIN \`groups\` g ON gm.group_id = g.id
+      LEFT JOIN \`groups\` g ON gm.group_id = g.id AND EXISTS (SELECT 1 FROM users gu WHERE gu.id = g.users_id AND gu.company_id = c.company_id)
       WHERE c.company_id = ?
       GROUP BY c.id`,
       [company_id],
@@ -93,6 +99,8 @@ export const addclient = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  if (!authorize(req, res, 500)) return;
+
   const { name, group_ids, balance, skills, status, contact } = req.body;
 
   const company_id = req.session.company_id;
@@ -107,6 +115,7 @@ export const addclient = async (
 
   try {
     await connection.beginTransaction();
+    await ownedGroups(connection, group_ids, company_id);
 
     const [clientResult] = await connection.query(
       `INSERT INTO clients (name, balance, skills, status, contact, company_id) 
@@ -133,6 +142,7 @@ export const addclient = async (
     });
   } catch (ex) {
     await connection.rollback();
+    if (respondToAccessError(ex, res)) return;
     console.error("Ошибка при добавлении клиента:", ex);
     return res.status(500).json({
       success: false,
@@ -147,9 +157,12 @@ export const delclient = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
-  const clientId = parseInt(req.params.id as string, 10);
+  if (!authorize(req, res, 1000)) return;
 
-  if (isNaN(clientId)) {
+  const company_id = req.session.company_id!;
+  const clientId = Number(req.params.id);
+
+  if (!Number.isSafeInteger(clientId) || clientId <= 0) {
     res.status(400).json({ error: "Некорректный ID клиента" });
     return;
   }
@@ -161,13 +174,9 @@ export const delclient = async (
   try {
     await connection.beginTransaction();
 
-    await connection.execute(`DELETE FROM group_members WHERE client_id = ?`, [
-      clientId,
-    ]);
-
     const [result] = await connection.execute<ResultSetHeader>(
-      `DELETE FROM clients WHERE id = ?`,
-      [clientId],
+      `DELETE FROM clients WHERE id = ? AND company_id = ?`,
+      [clientId, company_id],
     );
 
     if (result.affectedRows === 0) {
@@ -189,14 +198,16 @@ export const delclient = async (
 };
 
 export async function updateClient(req: Request, res: Response) {
-  const clientId = parseInt(req.params.id as string, 10);
+  if (!authorize(req, res, 500)) return;
+  const company_id = req.session.company_id!;
+  const clientId = Number(req.params.id);
 
-  if (isNaN(clientId)) {
+  if (!Number.isSafeInteger(clientId) || clientId <= 0) {
     res.status(400).json({ error: "Некорректный ID клиента" });
     return;
   }
 
-  const { name, balance, skills, status, contact, company_id, group_ids } =
+  const { name, balance, skills, status, contact, group_ids } =
     req.body;
 
   const targetBalance = balance !== undefined ? parseInt(String(balance), 10) : undefined;
@@ -207,7 +218,9 @@ export async function updateClient(req: Request, res: Response) {
   if (skills !== undefined) clientFields.skills = skills;
   if (status !== undefined) clientFields.status = status;
   if (contact !== undefined) clientFields.contact = contact;
-  if (company_id !== undefined) clientFields.company_id = company_id;
+  if (req.body.company_id !== undefined && Number(req.body.company_id) !== company_id) {
+    return res.status(403).json({ error: "Company reassignment is forbidden" });
+  }
 
   if (Object.keys(clientFields).length === 0 && group_ids === undefined) {
     res.status(400).json({ error: "Нет данных для обновления" });
@@ -222,8 +235,8 @@ export async function updateClient(req: Request, res: Response) {
     await connection.beginTransaction();
 
     const [clientRows]: any = await connection.execute(
-      `SELECT name, balance, company_id FROM clients WHERE id = ?`,
-      [clientId],
+      `SELECT name, balance, company_id FROM clients WHERE id = ? AND company_id = ? FOR UPDATE`,
+      [clientId, company_id],
     );
 
     if (!clientRows || clientRows.length === 0) {
@@ -232,20 +245,21 @@ export async function updateClient(req: Request, res: Response) {
       return;
     }
 
+    await ownedGroups(connection, group_ids, company_id);
+
     const oldAmountNum = Number(clientRows[0].balance);
     const clientName = clientRows[0].name;
-    const clientCompanyId =
-      company_id !== undefined ? company_id : clientRows[0].company_id;
+    const clientCompanyId = company_id;
 
     if (Object.keys(clientFields).length > 0) {
       const keys = Object.keys(clientFields);
       const setClause = keys.map((key) => `${key} = ?`).join(", ");
       const values = keys.map((key) => clientFields[key]);
 
-      values.push(clientId);
+      values.push(clientId, company_id);
 
       await connection.execute(
-        `UPDATE clients SET ${setClause} WHERE id = ?`,
+        `UPDATE clients SET ${setClause} WHERE id = ? AND company_id = ?`,
         values,
       );
 
@@ -295,6 +309,7 @@ export async function updateClient(req: Request, res: Response) {
     res.status(200).json({ message: "Данные клиента успешно обновлены" });
   } catch (error) {
     await connection.rollback();
+    if (respondToAccessError(error, res)) return;
     console.error("Ошибка при обновлении клиента:", error);
     res.status(500).json({ error: "Внутренняя ошибка сервера" });
   } finally {

@@ -1,8 +1,12 @@
+import { ownedUser, respondToAccessError } from "../security/ownership.js";
+import { authorize } from "../middleware/auth.js";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
 
 export const getgroups = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session.company_id;
     if (!company_id) {
@@ -95,6 +99,8 @@ export const getgroups = async (req: Request, res: Response) => {
 
 
 export const creategroup = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   const company_id = req.session.company_id;
   if (!company_id) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -126,6 +132,7 @@ export const creategroup = async (req: Request, res: Response) => {
 
     connect = await pool.getConnection();
     await connect.beginTransaction();
+    await ownedUser(connect, users_id, company_id);
 
     const [groupResult] = await connect.query<ResultSetHeader>(
       "INSERT INTO `groups` (name, users_id, status, start_date, end_date, max_students) VALUES (?, ?, ?, ?, ?, ?)",
@@ -165,6 +172,7 @@ export const creategroup = async (req: Request, res: Response) => {
     if (connect) {
       await connect.rollback();
     }
+    if (respondToAccessError(error, res)) return;
     console.error("Ошибка при создании группы:", error);
     return res.status(500).json({ message: "Внутренняя ошибка сервера" });
   } finally {
@@ -178,6 +186,8 @@ export const deleteGroup = async (
   req: Request,
   res: Response,
 ) => {
+  if (!authorize(req, res, 500)) return;
+
   const groupId = parseInt(req.params.id as string, 10);
   const companyId = req.session.company_id;
 
@@ -242,6 +252,8 @@ export const deleteGroup = async (
 };
 
 export const updategroup = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   const group_id = req.params.id;
   const company_id = req.session.company_id;
 
@@ -270,8 +282,8 @@ export const updategroup = async (req: Request, res: Response) => {
     await connection.beginTransaction();
 
     const [groupCheck] = await connection.query<RowDataPacket[]>(
-      "SELECT id FROM `groups` WHERE id = ?",
-      [group_id],
+      "SELECT g.id FROM `groups` g JOIN users u ON u.id = g.users_id WHERE g.id = ? AND u.company_id = ?",
+      [group_id, company_id],
     );
 
     if (groupCheck.length === 0) {
@@ -334,6 +346,7 @@ export const updategroup = async (req: Request, res: Response) => {
       .json({ success: true, message: "Группа успешно обновлена" });
   } catch (er) {
     await connection.rollback();
+    if (respondToAccessError(er, res)) return;
     console.error(er);
     return res.status(500).json({ success: false, message: er });
   } finally {

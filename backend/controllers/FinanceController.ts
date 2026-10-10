@@ -1,8 +1,11 @@
+import { authorize } from "../middleware/auth.js";
 import "dotenv/config";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 
 export const addManualExpense = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session.company_id;
     if (!company_id || company_id === -1) {
@@ -52,6 +55,8 @@ export const addManualExpense = async (req: Request, res: Response) => {
 };
 
 export const getExpenses = async (req: Request, res: Response) => {
+  if (!authorize(req, res, 500)) return;
+
   try {
     const company_id = req.session.company_id;
     if (!company_id || isNaN(company_id)) {
