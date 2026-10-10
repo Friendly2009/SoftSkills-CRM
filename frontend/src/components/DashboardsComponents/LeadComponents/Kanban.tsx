@@ -119,7 +119,7 @@ export const LeadKanban: React.FC = () => {
     const getLeads = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get-lead`, {
+            const response = await fetch(`https://api.soft-skills-crm.ru/get-lead`, {
                 credentials: "include"
             });
             if (!response.ok) throw new Error('Ошибка загрузки лидов для Канбана');
@@ -138,7 +138,7 @@ export const LeadKanban: React.FC = () => {
 
     const updateLeadStatusInDb = async (id: number, nextStatus: string, reasonId: number | null = null) => {
         try {
-            const response = await fetch(`${process.env.HOST}:${process.env.PORT}/update-lead/${id}`, {
+            const response = await fetch(`https://api.soft-skills-crm.ru/update-lead/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -147,7 +147,6 @@ export const LeadKanban: React.FC = () => {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                alert(result.message);
                 await getLeads(); 
             } else {
                 alert(result.message || "Ошибка обновления");

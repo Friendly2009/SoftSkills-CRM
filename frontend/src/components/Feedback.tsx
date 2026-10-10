@@ -122,10 +122,22 @@ export const ReviewsPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [rate, setRate] = useState(5);
 
-  const API_BASE = `${import.meta.env.VITE_HOST || 'http://localhost'}:${import.meta.env.VITE_PORT || '3000'}`;
+  const API_BASE = `https://api.soft-skills-crm.ru`;
   const fetchCurrentUser = async () => {
     try {
+      const sessionId = localStorage.getItem("sessionId");
+
+      const headers: Record<string, string> = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+
+      if (sessionId) {
+        headers["X-Session-ID"] = sessionId;
+      }
       const response = await fetch(`${API_BASE}/getsession`, {
+        method: 'GET',
+        headers: headers,
         credentials: 'include'
       });
       if (response.ok) {

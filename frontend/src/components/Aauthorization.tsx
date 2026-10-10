@@ -1,8 +1,10 @@
 import { useState } from "react";
 import login from '@/components/css/login.module.css'
 import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { IdebugProps } from "@/interfaces/debugInterface";
 
-export const LoginForm = () => {
+export const LoginForm: React.FC<IdebugProps> = (isdebug) => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -10,38 +12,63 @@ export const LoginForm = () => {
     login: '',
     password: ''
   });
+
   const backbtnOnClick = () => {
     navigate("/index");
-  }
+  };
+
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    let response: Response;
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/signin`, {
-        credentials: "include",
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      if (isdebug) {
+        const debugResponse = await fetch(`https://api.soft-skills-crm.ru/signin`, {
+          credentials: "include",
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        response = debugResponse;
+      } else {
+        const releaseResponse = await fetch(`https://api.soft-skills-crm.ru/signin`, {
+          credentials: "include",
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        response = releaseResponse;
+      }
 
       if (!response.ok) {
         let serverErrorText = "";
         try {
-          const errData = await response.json();
-          serverErrorText = JSON.stringify(errData);
-        } catch {
-          serverErrorText = await response.text();
+          const rawText = await response.text();
+          try {
+            const errData = JSON.parse(rawText);
+            serverErrorText = JSON.stringify(errData);
+          } catch {
+            serverErrorText = rawText;
+          }
+        } catch (readError) {
+          serverErrorText = "Не удалось прочитать текст ошибки с сервера";
         }
-
         console.error(`Сервер вернул статус: ${response.status} (${response.statusText})`);
         console.error(`Сообщение от сервера: ${serverErrorText}`);
-
         throw new Error(`Не авторизован. Статус: ${response.status}`);
       }
 
       const data = await response.json();
       console.log('Успешный вход:' + JSON.stringify(data));
+
+      // ИСПРАВЛЕНО: Если бэкенд прислал sessionId, бережно сохраняем его в память браузера
+      if (data.sessionId) {
+        localStorage.setItem('sessionId', data.sessionId);
+      }
+
       navigate('/dashboard');
 
     } catch (ex) {
@@ -49,9 +76,11 @@ export const LoginForm = () => {
     }
   };
 
+
   const handleSupportClick = async () => {
     navigate('/support');
   };
+
   return (
     <div className={login['page-wrapper']}>
       <div className={login['login-card']}>
@@ -67,6 +96,7 @@ export const LoginForm = () => {
               type="text"
               id="name"
               name="name"
+              value={formData.company}
               onChange={(e) => { setFormData({ ...formData, company: e.target.value }) }}
               placeholder="Введите название компании..."
               className={login.input}
@@ -75,11 +105,12 @@ export const LoginForm = () => {
           </div>
 
           <div className={login['input-group']}>
-            <label htmlFor="email" className={login.label} ></label>
+            <label htmlFor="email" className={login.label}>Эл. почта</label>
             <input
               type="email"
               id="email"
               name="email"
+              value={formData.login}
               onChange={(e) => { setFormData({ ...formData, login: e.target.value }) }}
               placeholder="Введите Эл. почту"
               className={login.input}
@@ -93,6 +124,7 @@ export const LoginForm = () => {
               type="password"
               id="key"
               name="key"
+              value={formData.password}
               onChange={(e) => { setFormData({ ...formData, password: e.target.value }) }}
               placeholder="••••••••"
               className={login.input}

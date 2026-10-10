@@ -6,7 +6,7 @@ export const getAccupancyGroups = async (
     setLoading: Dispatch<SetStateAction<boolean>>
 ): Promise<void> => {
     try {
-        const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getaccupancygroups`, {
+        const response = await fetch(`https://api.soft-skills-crm.ru/getaccupancygroups`, {
             method: 'GET',
             credentials: "include"
         });
