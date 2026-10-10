@@ -6,6 +6,7 @@ export const deleteClient = async (client: ClientTemplate) => {
       `https://api.soft-skills-crm.ru/delclients/${client.id}`,
       {
         method: "DELETE",
+        credentials: "include",
       },
     );
 
