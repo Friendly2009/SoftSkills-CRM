@@ -2,13 +2,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const vm = require('node:vm');
 const ts = require('typescript');
 const express = require('express');
 const root = path.resolve(__dirname, '..');
 const session = (rank = 1000) => ({ user_id: 7, company_id: 1, rank });
 const response = () => ({ code: 200, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } });
 
+// Load the actual TypeScript modules, replacing only the database and unused authentication dependencies.
+// No application database or external service is contacted.
 function harness(answer = () => []) {
   const calls = [], cache = new Map();
   const conn = {
@@ -34,8 +35,9 @@ function harness(answer = () => []) {
       if (name.startsWith('.')) return load(path.relative(root, path.resolve(path.dirname(absolute), name.replace(/\.js$/, '.ts'))));
       return require(name);
     };
-    vm.runInNewContext(code, { module, exports: module.exports, require: requireModule,
-      console: { log() {}, error() {} }, process, Date, Set, Promise }, { filename: absolute });
+    // Execute local source in the same JS realm as Express, preserving native Promises.
+    const execute = new Function('module', 'exports', 'require', 'console', 'process', code);
+    execute(module, module.exports, requireModule, { log() {}, error() {} }, process);
     return module.exports;
   }
   return { load, calls, pool };
@@ -188,4 +190,25 @@ test('all protected HTTP routes reject requests without a cookie, including fake
     }
     assert.equal(h.calls.length, 0);
   } finally { await new Promise(resolve => server.close(resolve)); }
+});
+
+test('logout rejects a direct call with an empty session before destroy', () => {
+  const h = harness(); const res = response();
+  h.load('controllers/AuthController.ts').logout(req({ session: {} }), res);
+  assert.equal(res.code, 401); assert.equal(h.calls.length, 0);
+});
+test('authorized logout destroys the session and clears its cookie', () => {
+  const h = harness(); const res = response(); let destroyed = false, cookie;
+  res.clearCookie = name => { cookie = name; };
+  h.load('controllers/AuthController.ts').logout(req({ session: { ...session(), destroy(callback) { destroyed = true; callback(null); } } }), res);
+  assert.equal(res.code, 200); assert.equal(destroyed, true); assert.equal(cookie, 'connect.sid');
+});
+
+test('every protected route revalidates membership before its handler', () => {
+  const h = harness(); const router = h.load('router.ts').default;
+  const auth = h.load('middleware/auth.ts');
+  const publicPaths = new Set(['/signin', '/signup', '/checkconnect', '/getfeedbacks']);
+  for (const layer of router.stack.filter(layer => layer.route && !publicPaths.has(layer.route.path))) {
+    assert.equal(layer.route.stack[0].handle, auth.requireAuth, `Missing requireAuth on ${layer.route.path}`);
+  }
 });

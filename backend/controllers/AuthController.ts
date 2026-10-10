@@ -1,3 +1,4 @@
+import { authorize } from "../middleware/auth.js";
 import "dotenv/config";
 import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
@@ -148,6 +149,7 @@ export const APIsignin = async (
 };
 
 export const logout = (req: Request, res: Response) => {
+  if (!authorize(req, res)) return;
   req.session.destroy((err) => {
     if (err) {
       console.error("Ошибка сессии:", err);

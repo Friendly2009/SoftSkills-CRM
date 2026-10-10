@@ -1,3 +1,4 @@
+import { requireAuth, requireRank } from "./middleware/auth.js";
 import { Router } from "express";
 import { getusers, adduser, deluser, resetuser } from "./controllers/UsersController.js"; 
 import { getglobalinfo, checkconnect, getallsession, getUserProfile} from "./controllers/BackController.js"
@@ -23,55 +24,55 @@ import {
 const router: Router = Router();
 
 router.get('/checkconnect', checkconnect);
-router.get('/getsession', getallsession);
-router.get("/getglobalinfo", getglobalinfo);
-router.get("/getcurrentuser", getUserProfile)
+router.get("/getsession", requireAuth, requireRank(0), getallsession);
+router.get("/getglobalinfo", requireAuth, requireRank(0), getglobalinfo);
+router.get("/getcurrentuser", requireAuth, requireRank(0), getUserProfile);
 
 router.post("/signin", APIsignin);
 router.post("/signup", APIsignup);
-router.get("/logout", logout);
+router.get("/logout", requireAuth, requireRank(0), logout);
 
-router.post("/adduser", adduser);
-router.get("/getusers", getusers);
-router.delete("/deluser/:id", deluser);
-router.post('/resetuser', resetuser);
+router.post("/adduser", requireAuth, requireRank(1000), adduser);
+router.get("/getusers", requireAuth, requireRank(500), getusers);
+router.delete("/deluser/:id", requireAuth, requireRank(1000), deluser);
+router.post("/resetuser", requireAuth, requireRank(1000), resetuser);
 
-router.get("/getclient", APIGetClients);
-router.post('/addclients', addclient);
-router.delete('/delclients/:id', delclient);
-router.patch('/updateclient/:id', updateClient);
+router.get("/getclient", requireAuth, requireRank(500), APIGetClients);
+router.post("/addclients", requireAuth, requireRank(500), addclient);
+router.delete("/delclients/:id", requireAuth, requireRank(1000), delclient);
+router.patch("/updateclient/:id", requireAuth, requireRank(500), updateClient);
 
-router.get("/getgroups", getgroups);
-router.post('/creategroup', creategroup);
-router.delete('/deletegroup/:id', deleteGroup);
-router.patch('/updategroup/:id', updategroup);
+router.get("/getgroups", requireAuth, requireRank(500), getgroups);
+router.post("/creategroup", requireAuth, requireRank(500), creategroup);
+router.delete("/deletegroup/:id", requireAuth, requireRank(500), deleteGroup);
+router.patch("/updategroup/:id", requireAuth, requireRank(500), updategroup);
 
-router.get('/schedule', getSchedule);
-router.get('/getlessons/:id', getLessonDetails);
-router.post('/lessons/close', closeLesson);
+router.get("/schedule", requireAuth, requireRank(0), getSchedule);
+router.get("/getlessons/:id", requireAuth, requireRank(0), getLessonDetails);
+router.post("/lessons/close", requireAuth, requireRank(0), closeLesson);
 
-router.post('/create-lead', createLead);
-router.get('/get-lead', getLeads);
-router.get('/get-lead-by-id/:id', getLeadById);
-router.patch('/update-lead/:id', updateLead);
-router.delete('/delete-lead/:id', deleteLead);
+router.post("/create-lead", requireAuth, requireRank(500), createLead);
+router.get("/get-lead", requireAuth, requireRank(500), getLeads);
+router.get("/get-lead-by-id/:id", requireAuth, requireRank(500), getLeadById);
+router.patch("/update-lead/:id", requireAuth, requireRank(500), updateLead);
+router.delete("/delete-lead/:id", requireAuth, requireRank(1000), deleteLead);
 
-router.get('/getaccupancygroups', get_accupancy_groups);
-router.get('/get_transactions_list', get_transactions_list);
-router.get('/revenue-sources', getRevenueSources);
-router.get('/getFinancialTimeline', getFinancialTimeline);
-router.post('/finance/add-expense', addManualExpense);
-router.get('/finance/expenses-structure', getExpenses);
-router.get("/finance/expenses-structure-by-group", getExpensesStructure);
-router.get('/finance/client-debtors', getClientDebtors);
-router.get('/finance/get-all-state', getAllState);
-router.get('/get-chart-state', getChartState);
-router.get('/hr/get-teachers-workload', getTeachersWorkload);
-router.get('/hr/get-attendance-trends', getAttendanceTrends);
+router.get("/getaccupancygroups", requireAuth, requireRank(500), get_accupancy_groups);
+router.get("/get_transactions_list", requireAuth, requireRank(1000), get_transactions_list);
+router.get("/revenue-sources", requireAuth, requireRank(1000), getRevenueSources);
+router.get("/getFinancialTimeline", requireAuth, requireRank(1000), getFinancialTimeline);
+router.post("/finance/add-expense", requireAuth, requireRank(500), addManualExpense);
+router.get("/finance/expenses-structure", requireAuth, requireRank(500), getExpenses);
+router.get("/finance/expenses-structure-by-group", requireAuth, requireRank(1000), getExpensesStructure);
+router.get("/finance/client-debtors", requireAuth, requireRank(500), getClientDebtors);
+router.get("/finance/get-all-state", requireAuth, requireRank(500), getAllState);
+router.get("/get-chart-state", requireAuth, requireRank(500), getChartState);
+router.get("/hr/get-teachers-workload", requireAuth, requireRank(500), getTeachersWorkload);
+router.get("/hr/get-attendance-trends", requireAuth, requireRank(500), getAttendanceTrends);
 
-router.post('/createfeedback', create_feedback);
+router.post("/createfeedback", requireAuth, requireRank(0), create_feedback);
 router.get('/getfeedbacks', get_all_feedbacks);
-router.get('/getmyfeedback', get_my_feedbacks);
-router.put('/updatefeedback:id', update_feedback);
-router.delete('/deletefeedback/:id', delete_feedback);
+router.get("/getmyfeedback", requireAuth, requireRank(0), get_my_feedbacks);
+router.put("/updatefeedback/:id", requireAuth, requireRank(0), update_feedback);
+router.delete("/deletefeedback/:id", requireAuth, requireRank(0), delete_feedback);
 export default router;
