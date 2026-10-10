@@ -18,6 +18,16 @@ export const ClientTable: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isForbidden, setIsForbidden] = useState<boolean>(false);
     const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
+    const runClientMutation = async (operation: () => Promise<unknown>): Promise<boolean> => {
+        try {
+            await operation();
+            return true;
+        } catch (error) {
+            alert(error instanceof Error ? error.message : "Не удалось сохранить изменения");
+            return false;
+        }
+    };
+
     const [menu, setMenu] = useState<MoreActionProps>({
         isOpen: false,
         x: 0,
@@ -84,7 +94,8 @@ export const ClientTable: React.FC = () => {
             setIsResetModalWinOpen(true);
         }
         if (isDeleteMode) {
-            await deleteClient(client);
+            const deleted = await runClientMutation(() => deleteClient(client));
+            if (!deleted) return;
             setIsDeleteMode(false);
             setClient(await getClient());
             getCompanyGroups();
@@ -181,7 +192,8 @@ export const ClientTable: React.FC = () => {
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log(JSON.stringify(formData));
-        await addClient(formData);
+        const added = await runClientMutation(() => addClient(formData));
+        if (!added) return;
         getCompanyGroups();
         setClient(await getClient());
         setIsModalOpen(false);
@@ -189,7 +201,8 @@ export const ClientTable: React.FC = () => {
 
     const handleResetFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await updateClient(resetFormData);
+        const updated = await runClientMutation(() => updateClient(resetFormData));
+        if (!updated) return;
         getCompanyGroups();
         setClient(await getClient());
         setIsResetModalWinOpen(false);
@@ -426,7 +439,8 @@ export const ClientTable: React.FC = () => {
                                                 },
 
                                                 onDelete: async (clientToDelete) => {
-                                                    await deleteClient(clientToDelete);
+                                                    const deleted = await runClientMutation(() => deleteClient(clientToDelete));
+                                                    if (!deleted) return;
 
                                                     setMoreAction(false);
                                                     setMenu(prev => ({ ...prev, isOpen: false }));
@@ -457,8 +471,9 @@ export const ClientTable: React.FC = () => {
                             client={menu.client}
                             onClose={() => setMenu(prev => ({ ...prev, isOpen: false }))}
                             onDelete={async (targetClient) => {
-                                await deleteClient(targetClient);
-                                setClient(await getClient());
+                                if (await runClientMutation(() => deleteClient(targetClient))) {
+                                    setClient(await getClient());
+                                }
                             }}
                             onTopUp={(targetClient) => {
                                 setTopUpClient(targetClient);

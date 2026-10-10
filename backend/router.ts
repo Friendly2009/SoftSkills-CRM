@@ -3,7 +3,7 @@ import { Router } from "express";
 import { getusers, adduser, deluser, resetuser } from "./controllers/UsersController.js"; 
 import { getglobalinfo, checkconnect, getallsession, getUserProfile} from "./controllers/BackController.js"
 import { APIsignup, APIsignin, logout } from './controllers/AuthController.js'
-import { APIGetClients, addclient, delclient, updateClient } from './controllers/ClientController.js'
+import { APIGetClients, addclient, delclient, updateClient, topUpClient } from './controllers/ClientController.js'
 import { getgroups, creategroup, deleteGroup, updategroup } from './controllers/GroupController.js'
 import { getSchedule, getLessonDetails, closeLesson } from './controllers/ScheduleController.js';
 import { get_accupancy_groups, get_transactions_list, 
@@ -41,6 +41,7 @@ router.get("/getclient", requireAuth, requireRank(500), APIGetClients);
 router.post("/addclients", requireAuth, requireRank(500), addclient);
 router.delete("/delclients/:id", requireAuth, requireRank(1000), delclient);
 router.patch("/updateclient/:id", requireAuth, requireRank(500), updateClient);
+router.post("/clients/:id/top-up", requireAuth, requireRank(500), topUpClient);
 
 router.get("/getgroups", requireAuth, requireRank(500), getgroups);
 router.post("/creategroup", requireAuth, requireRank(500), creategroup);

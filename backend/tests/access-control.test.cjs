@@ -212,3 +212,73 @@ test('every protected route revalidates membership before its handler', () => {
     assert.equal(layer.route.stack[0].handle, auth.requireAuth, `Missing requireAuth on ${layer.route.path}`);
   }
 });
+
+test('top-up input is validated before opening a database connection', async () => {
+  const h = harness(); const res = response();
+  await h.load('controllers/ClientController.ts').topUpClient(req({ body: { amount: 'NaN' } }), res);
+  assert.equal(res.code, 400); assert.equal(h.calls.length, 0);
+});
+test('top-up is rejected for a client in another company without a ledger write', async () => {
+  const h = harness(); const res = response();
+  await h.load('controllers/ClientController.ts').topUpClient(req({ body: { amount: 500 } }), res);
+  assert.equal(res.code, 404); assert.equal(mutation(h.calls).length, 0);
+});
+test('top-up locks the company-owned balance and records a ledger transaction atomically', async () => {
+  const h = harness(sql => {
+    if (sql.startsWith('SELECT id, name, balance')) return [{ id: 9, name: 'Client', balance: '-50.25' }];
+    if (sql.startsWith('UPDATE clients SET balance')) return { affectedRows: 1 };
+    if (sql.startsWith('INSERT INTO financial_transactions')) return { affectedRows: 1, insertId: 88 };
+    return [];
+  }); const res = response();
+  await h.load('controllers/ClientController.ts').topUpClient(req({ body: { amount: 500 } }), res);
+  assert.equal(res.code, 200); assert.equal(res.body.data.balance, 449.75); assert.equal(res.body.data.transactionId, 88);
+  const select = h.calls.find(c => c.sql.startsWith('SELECT id, name, balance'));
+  assert.match(select.sql, /company_id = \? FOR UPDATE/); assert.deepEqual([...select.args], [9, 1]);
+  const update = h.calls.find(c => c.sql.startsWith('UPDATE clients SET balance'));
+  assert.match(update.sql, /company_id = \?/); assert.deepEqual([...update.args], [500, 9, 1]);
+  assert.equal(h.calls.find(c => c.sql.startsWith('INSERT INTO financial_transactions')).args[3], 500);
+  assert.ok(h.calls.findIndex(c => c.sql.startsWith('UPDATE clients SET balance')) < h.calls.findIndex(c => c.sql.startsWith('INSERT INTO financial_transactions')));
+  assert.ok(h.calls.some(c => c.sql === 'COMMIT')); assert.equal(h.calls.some(c => c.sql === 'ROLLBACK'), false);
+});
+test('failed top-up ledger insertion rolls back the balance update', async () => {
+  const h = harness(sql => {
+    if (sql.startsWith('SELECT id, name, balance')) return [{ id: 9, name: 'Client', balance: 100 }];
+    if (sql.startsWith('UPDATE clients SET balance')) return { affectedRows: 1 };
+    if (sql.startsWith('INSERT INTO financial_transactions')) throw new Error('ledger unavailable');
+    return [];
+  }); const res = response();
+  await h.load('controllers/ClientController.ts').topUpClient(req({ body: { amount: 500 } }), res);
+  assert.equal(res.code, 500); assert.ok(h.calls.some(c => c.sql === 'ROLLBACK')); assert.equal(h.calls.some(c => c.sql === 'COMMIT'), false);
+});
+test('repeated completed lesson submission with the same attendance and ledger data is a no-op', async () => {
+  const h = harness(sql => {
+    if (sql.startsWith('SELECT g.id')) return [{ id: 10, users_id: 7 }];
+    if (sql.startsWith('SELECT id FROM users')) return [{ id: 7 }];
+    if (sql.startsWith('SELECT l.id')) return [{ id: 9, group_id: 10, user_id: 7, status: 2, teacher_pay: 1500, lesson_date: '2020-01-01', start_time: '10:00:00', end_time: '11:00:00' }];
+    if (sql.startsWith('SELECT c.id')) return [{ id: 12 }];
+    if (sql.startsWith('SELECT client_id, attendance_status')) return [{ client_id: 12, attendance_status: 1, amount_charged: 800 }];
+    if (sql.startsWith('SELECT client_id, user_id, type')) return [
+      { client_id: null, user_id: 7, type: 'expense', amount: 1500 },
+      { client_id: 12, user_id: null, type: 'revenue', amount: 800 },
+    ];
+    return [];
+  }); const res = response();
+  await h.load('controllers/ScheduleController.ts').closeLesson(req({ body: lessonBody }), res);
+  assert.equal(res.code, 200); assert.equal(res.body.idempotent, true); assert.equal(res.body.realLessonId, 9);
+  assert.equal(mutation(h.calls).length, 0); assert.ok(h.calls.some(c => c.sql === 'COMMIT'));
+});
+test('new request to an existing schedule occurrence reuses its locked lesson row', async () => {
+  const h = harness(sql => {
+    if (sql.startsWith('SELECT g.id')) return [{ id: 10, users_id: 7 }];
+    if (sql.startsWith('SELECT id FROM users')) return [{ id: 7 }];
+    if (sql.startsWith('SELECT id, start_time FROM group_schedules')) return [{ id: 3, start_time: '10:00:00' }];
+    if (sql.startsWith('SELECT id, lesson_date')) return [{ id: 9, lesson_date: '2020-01-01', start_time: '10:00:00', end_time: '11:00:00', group_id: 10, user_id: 7, teacher_pay: 1500, status: 1 }];
+    if (sql.startsWith('SELECT c.id')) return [{ id: 12 }];
+    if (sql.startsWith('SELECT status')) return [{ status: 1, user_id: 7 }];
+    if (sql.startsWith('UPDATE lessons')) return { affectedRows: 1 };
+    return [];
+  }); const res = response();
+  await h.load('controllers/ScheduleController.ts').closeLesson(req({ body: { ...lessonBody, lessonId: 'temp-3-2020-01-01' } }), res);
+  assert.equal(res.code, 200); assert.equal(h.calls.filter(c => c.sql.startsWith('INSERT INTO lessons')).length, 0);
+  assert.ok(h.calls.some(c => c.sql.startsWith('UPDATE lessons')));
+});

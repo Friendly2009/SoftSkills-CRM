@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ClientTemplate } from '@/interfaces/clientsInterfaces';
-import { updateClient } from '@/logic/ClientRequests';
+import { topUpClient } from '@/logic/ClientRequests';
 interface TopUpProps {
     client: ClientTemplate;
     onClose: () => void;
@@ -32,16 +32,8 @@ export const TopUp: React.FC<TopUpProps> = ({ client, onClose, onSuccess }) => {
 
         setLoading(true);
         setMessage(null);
-        const currentBalance = Number(client.balance) || 0;
-        const topUpAmount = Number(numAmount) || 0;
-
-        const newBalance = currentBalance + topUpAmount;
-
         try {
-            await updateClient({
-                ...client,
-                balance: newBalance
-            });
+            await topUpClient(client.id, numAmount);
 
             setMessage({ type: 'success', text: `Счет успешно пополнен на ${numAmount} ₽` });
             setAmount('');
@@ -53,7 +45,10 @@ export const TopUp: React.FC<TopUpProps> = ({ client, onClose, onSuccess }) => {
             }, 1000);
 
         } catch (error) {
-            setMessage({ type: 'error', text: 'Ошибка при пополнении. Попробуйте позже.' });
+            setMessage({
+                type: 'error',
+                text: error instanceof Error ? error.message : 'Ошибка при пополнении. Попробуйте позже.',
+            });
         } finally {
             setLoading(false);
         }

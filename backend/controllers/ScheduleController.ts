@@ -249,18 +249,25 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       const match = /^temp-([1-9]\d*)-(\d{4}-\d{2}-\d{2})$/.exec(lessonId);
       if (!match || match[2] !== strLessonDate) throw new AccessError(400, "Invalid schedule occurrence");
       const [templates] = await connection.query<RowDataPacket[]>(
-        "SELECT id FROM group_schedules WHERE id = ? AND group_id = ?",
+        "SELECT id, start_time FROM group_schedules WHERE id = ? AND group_id = ? FOR UPDATE",
         [recordId(match[1]), recordId(groupId)]);
       if (!templates.length) throw new AccessError(404, "Schedule not found");
+      const [scheduledLessons] = await connection.query<RowDataPacket[]>(
+        "SELECT id, lesson_date, start_time, end_time, group_id, user_id, teacher_pay, status FROM lessons WHERE group_id = ? AND lesson_date = ? AND start_time = ? FOR UPDATE",
+        [recordId(groupId), strLessonDate, String(templates[0].start_time).slice(0, 8)]);
+      existingLesson = scheduledLessons[0] || null;
       if (user_rank < 500 && Number(group.users_id) !== Number(current_user_id)) {
         throw new AccessError(403, "Cannot close another teacher's lesson");
       }
     } else {
       const [lessons] = await connection.query<RowDataPacket[]>(
-        "SELECT l.id, l.group_id, l.user_id, l.status, l.teacher_pay FROM lessons l JOIN `groups` g ON g.id = l.group_id JOIN users u ON u.id = g.users_id WHERE l.id = ? AND u.company_id = ? FOR UPDATE",
+        "SELECT l.id, l.lesson_date, l.start_time, l.end_time, l.group_id, l.user_id, l.status, l.teacher_pay FROM lessons l JOIN `groups` g ON g.id = l.group_id JOIN users u ON u.id = g.users_id WHERE l.id = ? AND u.company_id = ? FOR UPDATE",
         [recordId(lessonId), company_id]);
       existingLesson = lessons[0];
       if (!existingLesson) throw new AccessError(404, "Lesson not found");
+      if (Number(existingLesson.user_id) !== Number(teacherId) && Number(req.session.rank) < 1000) {
+        throw new AccessError(403, "Cannot reassign a lesson to another teacher");
+      }
       if (Number(existingLesson.group_id) !== Number(groupId)) throw new AccessError(400, "Lesson/group mismatch");
       if (user_rank < 500 && (Number(existingLesson.user_id) !== Number(current_user_id) || Number(existingLesson.status) === 2)) {
         throw new AccessError(403, "Lesson is read-only");
@@ -290,9 +297,53 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
     }
 
     let realLessonId: number;
-    let isAlreadyClosed = false;
+    let isAlreadyClosed = Number(existingLesson?.status) === 2;
 
-    if (isNaN(Number(lessonId))) {
+    if (isAlreadyClosed) {
+      const sameDate = String(existingLesson.lesson_date).slice(0, 10) === strLessonDate;
+      const sameStart = String(existingLesson.start_time).slice(0, 8) === strStartTime;
+      const sameEnd = String(existingLesson.end_time).slice(0, 8) === strEndTime;
+      const sameTeacher = Number(existingLesson.user_id) === Number(teacherId);
+      const samePay = Math.round(Number(existingLesson.teacher_pay) * 100) === Math.round(finalTeacherPay * 100);
+      if (sameDate && sameStart && sameEnd && sameTeacher && samePay) {
+        const lessonIdToCheck = Number(existingLesson.id);
+        const [savedAttendance] = await connection.query<RowDataPacket[]>(
+          "SELECT client_id, attendance_status, amount_charged FROM lesson_attendance WHERE lesson_id = ? ORDER BY client_id",
+          [lessonIdToCheck]);
+        const expectedAttendance = validatedStudents.map((student: any) => ({
+          client_id: Number(student.clientId),
+          attendance_status: Number(student.attendanceStatus),
+          amount_charged: Math.round(Number(student.amountCharged) * 100),
+        })).sort((a, b) => a.client_id - b.client_id);
+        const currentAttendance = savedAttendance.map(row => ({
+          client_id: Number(row.client_id),
+          attendance_status: Number(row.attendance_status),
+          amount_charged: Math.round(Number(row.amount_charged) * 100),
+        }));
+        const attendanceMatches = JSON.stringify(currentAttendance) === JSON.stringify(expectedAttendance);
+        const [savedTransactions] = await connection.query<RowDataPacket[]>(
+          "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ? AND company_id = ? ORDER BY type, client_id, user_id",
+          [lessonIdToCheck, company_id]);
+        const expectedTransactions = [
+          ...validatedStudents.filter((student: any) => Number(student.attendanceStatus) === 1 && Number(student.amountCharged) > 0)
+            .map((student: any) => ({ client_id: Number(student.clientId), user_id: null, type: "revenue", amount: Math.round(Number(student.amountCharged) * 100) })),
+          ...(finalTeacherPay > 0 ? [{ client_id: null, user_id: Number(teacherId), type: "expense", amount: Math.round(finalTeacherPay * 100) }] : []),
+        ].sort((a, b) => a.type.localeCompare(b.type) || Number(a.client_id || a.user_id) - Number(b.client_id || b.user_id));
+        const currentTransactions = savedTransactions.map(row => ({
+          client_id: row.client_id == null ? null : Number(row.client_id),
+          user_id: row.user_id == null ? null : Number(row.user_id),
+          type: row.type,
+          amount: Math.round(Number(row.amount) * 100),
+        }));
+        if (attendanceMatches && JSON.stringify(currentTransactions) === JSON.stringify(expectedTransactions)) {
+          await connection.commit();
+          res.status(200).json({ success: true, realLessonId: lessonIdToCheck, idempotent: true, message: `Урок №${lessonIdToCheck} уже проведён с теми же данными.` });
+          return;
+        }
+      }
+    }
+
+    if (isNaN(Number(lessonId)) && !existingLesson) {
       const [insertLessonResult] = await connection.query<ResultSetHeader>(
         `INSERT INTO lessons (lesson_date, start_time, end_time, status, group_id, user_id, teacher_pay) 
          VALUES (?, ?, ?, 1, ?, ?, ?)`,
@@ -300,20 +351,9 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
       );
       realLessonId = insertLessonResult.insertId;
     } else {
-      realLessonId = Number(lessonId);
+      realLessonId = Number(existingLesson?.id ?? lessonId);
 
-      const [rows]: any = await connection.query<RowDataPacket[]>(
-        "SELECT status, user_id FROM lessons WHERE id = ?",
-        [realLessonId],
-      );
-
-      if (rows.length > 0) {
-        if (user_rank < 500 && Number(rows[0].user_id) !== Number(current_user_id)) {
-          throw new Error("403: Попытка изменения чужого урока");
-        }
-
-        if (Number(rows[0].status) === 2) {
-          isAlreadyClosed = true;
+      if (existingLesson && Number(existingLesson.status) === 2) {
 
           const [oldTransactions]: any = await connection.query(
             "SELECT client_id, user_id, type, amount FROM financial_transactions WHERE lesson_id = ? AND company_id = ?",
@@ -330,7 +370,6 @@ export const closeLesson = async (req: Request, res: Response): Promise<void> =>
           }
 
           await connection.query("DELETE FROM financial_transactions WHERE lesson_id = ? AND company_id = ?", [realLessonId, company_id]);
-        }
       }
 
       await connection.query(

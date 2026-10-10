@@ -210,7 +210,10 @@ export async function updateClient(req: Request, res: Response) {
   const { name, balance, skills, status, contact, group_ids } =
     req.body;
 
-  const targetBalance = balance !== undefined ? parseInt(String(balance), 10) : undefined;
+  const targetBalance = balance !== undefined ? Number(balance) : undefined;
+  if (targetBalance !== undefined && (!Number.isFinite(targetBalance) || Math.round(targetBalance * 100) !== targetBalance * 100)) {
+    return res.status(400).json({ success: false, message: "Balance must be a valid amount with at most two decimal places" });
+  }
 
   const clientFields: Record<string, any> = {};
   if (name !== undefined) clientFields.name = name;
@@ -316,3 +319,47 @@ export async function updateClient(req: Request, res: Response) {
     connection.release();
   }
 }
+
+
+export const topUpClient = async (req: Request, res: Response): Promise<Response | void> => {
+  if (!authorize(req, res, 500)) return;
+  const companyId = req.session.company_id!;
+  const clientId = Number(req.params.id);
+  const amount = Number(req.body?.amount);
+  if (!Number.isSafeInteger(clientId) || clientId <= 0) {
+    return res.status(400).json({ success: false, message: "Invalid client ID" });
+  }
+  if (!Number.isFinite(amount) || amount <= 0 || amount > 1000000 || Math.round(amount * 100) !== amount * 100) {
+    return res.status(400).json({ success: false, message: "Amount must be positive and have at most two decimal places" });
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [rows] = await connection.execute<RowDataPacket[]>(
+      "SELECT id, name, balance FROM clients WHERE id = ? AND company_id = ? FOR UPDATE",
+      [clientId, companyId],
+    );
+    if (!rows.length) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: "Client not found" });
+    }
+    const [update] = await connection.execute<ResultSetHeader>(
+      "UPDATE clients SET balance = balance + ? WHERE id = ? AND company_id = ?",
+      [amount, clientId, companyId],
+    );
+    if (update.affectedRows !== 1) throw new Error("Client balance update failed");
+    const [transaction] = await connection.execute<ResultSetHeader>(
+      "INSERT INTO financial_transactions (company_id, lesson_id, client_id, user_id, amount, type, description) VALUES (?, NULL, ?, ?, ?, 'wallet_topup', ?)",
+      [companyId, clientId, req.session.user_id!, amount, `Пополнение счёта клиента ${rows[0].name} (${clientId})`],
+    );
+    await connection.commit();
+    return res.status(200).json({ success: true, data: { clientId, amount, balance: Number(rows[0].balance) + amount, transactionId: transaction.insertId } });
+  } catch (error) {
+    await connection.rollback();
+    console.error("Ошибка пополнения счёта клиента:", error);
+    return res.status(500).json({ success: false, message: "Не удалось пополнить счёт клиента" });
+  } finally {
+    connection.release();
+  }
+};
