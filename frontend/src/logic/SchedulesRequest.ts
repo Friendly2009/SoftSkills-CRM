@@ -16,13 +16,30 @@ export const formatDateToString = (
   return localDate.toISOString().split("T")[0];
 };
 
-export const getSchedule = async (startDate: string, endDate: string) => {
+export const getSchedule = async (startDate: any, endDate: any) => {
   try {
-    const url = `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/schedule?startDate=${startDate}&endDate=${endDate}`;
+    const formatPart = (date: any) => {
+      if (!date) return "";
+      if (date instanceof Date) return date.toISOString().split("T")[0];
+      return String(date).trim();
+    };
+
+    const sDate = formatPart(startDate);
+    const eDate = formatPart(endDate);
+
+    if (!sDate || !eDate || sDate === "undefined" || eDate === "undefined") {
+      console.warn("getSchedule отложен: даты еще не готовы", {
+        startDate,
+        endDate,
+      });
+      return { success: true, data: { templates: [], realLessons: [] } };
+    }
+
+    const url = `https://api.soft-skills-crm.ru/schedule?startDate=${sDate}&endDate=${eDate}`;
 
     const response = await fetch(url, {
       method: "GET",
-      credentials: "include", 
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -38,10 +55,13 @@ export const getSchedule = async (startDate: string, endDate: string) => {
 };
 
 export const getLessonModal = async (id: string) => {
-  const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getlessons/${id}`, {
-    method: "GET",
-    credentials: "include",
-  });
+  const response = await fetch(
+    `https://api.soft-skills-crm.ru/getlessons/${id}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
   const result = await response.json();
   return result;
 };

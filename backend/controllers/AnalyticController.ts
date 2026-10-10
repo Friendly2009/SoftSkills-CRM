@@ -21,12 +21,12 @@ export const get_accupancy_groups = async (
       [company_id],
     );
 
-    if (!rows || rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Компания не найдена" });
-    }
-    return res.status(200).json({ success: true, data: rows });
+    const occupancyGroups = rows || [];
+
+    return res.status(200).json({
+      success: true,
+      data: occupancyGroups,
+    });
   } catch (er) {
     console.log(er);
     return res.status(500).json({
@@ -48,7 +48,10 @@ export const get_transactions_list = async (
         .json({ success: false, message: "Сессия не найдена или истекла" });
     }
     if (req.session?.rank! < 1000) {
-      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
     }
     const [rows]: any = await pool.query(
       `SELECT 
@@ -69,14 +72,11 @@ LEFT JOIN users u ON u.id = ft.user_id
 WHERE ft.type != 'revenue' and ft.company_id = ?`,
       [company_id],
     );
-    if (!rows || rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "data nor found" });
-    }
+    const transactions = rows || [];
+
     return res.status(200).json({
       success: true,
-      data: rows,
+      data: transactions,
     });
   } catch (error) {
     console.log(error);
@@ -94,7 +94,10 @@ export const getRevenueSources = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
     if (req.session?.rank! < 1000) {
-      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
     }
     const [rows]: any = await pool.query(
       `SELECT 
@@ -130,7 +133,10 @@ export const getFinancialTimeline = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
     if (req.session?.rank! < 1000) {
-      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
     }
     const [debtRows]: any = await pool.query(
       `SELECT COALESCE(SUM(ABS(balance)), 0) AS total_client_debt 
@@ -188,7 +194,10 @@ export const getExpensesStructure = async (req: Request, res: Response) => {
         .json({ success: false, message: "User is not authorized" });
     }
     if (req.session?.rank! < 1000) {
-      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
     }
     const [rows]: any = await pool.query(
       `SELECT 
@@ -225,7 +234,10 @@ export const getClientDebtors = async (req: Request, res: Response) => {
         .json({ success: false, message: "User is not authorized" });
     }
     if (req.session?.rank! < 500) {
-      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
     }
     const [rows]: any = await pool.query(
       `SELECT 
@@ -264,7 +276,10 @@ export const getAllState = async (req: Request, res: Response) => {
         .json({ success: false, message: "user is unauthorized" });
     }
     if (req.session?.rank! < 500) {
-      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
     }
     const [[financeRows], [debtRows]] = await Promise.all([
       pool.query<RowDataPacket[]>(
@@ -312,7 +327,8 @@ export const getAllState = async (req: Request, res: Response) => {
 
 export const getChartState = async (req: Request, res: Response) => {
   try {
-    const companyId = parseInt(req.query.companyId as string, 10) || req.session?.company_id;
+    const companyId =
+      parseInt(req.query.companyId as string, 10) || req.session?.company_id;
 
     if (!companyId || isNaN(companyId)) {
       return res
@@ -320,7 +336,10 @@ export const getChartState = async (req: Request, res: Response) => {
         .json({ success: false, message: "Invalid or missing company ID" });
     }
     if (req.session?.rank! < 500) {
-      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
     }
     const [financeRows]: any = await pool.query(
       `
@@ -390,9 +409,13 @@ export const getTeachersWorkload = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
     if (req.session?.rank! < 500) {
-      return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
+      return res.status(403).json({
+        success: false,
+        message: "not enough rights to perform the action",
+      });
     }
-    const [rows] = await pool.query<RowDataPacket[]>(`
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `
       SELECT 
         u.id AS teacher_id,
         u.full_name AS teacher_name,
@@ -406,21 +429,25 @@ export const getTeachersWorkload = async (req: Request, res: Response) => {
       WHERE u.company_id = ? AND g.status IN (1, 2)
       GROUP BY u.id, u.full_name
       ORDER BY weekly_hours DESC
-    `, [parsedCompanyId]);
+    `,
+      [parsedCompanyId],
+    );
 
-    const formattedData = rows.map(row => ({
+    const formattedData = rows.map((row) => ({
       teacherId: row.teacher_id,
       name: row.teacher_name,
-      hours: parseFloat(Number(row.weekly_hours).toFixed(1))
+      hours: parseFloat(Number(row.weekly_hours).toFixed(1)),
     }));
 
     return res.status(200).json({
       success: true,
-      data: formattedData
+      data: formattedData,
     });
   } catch (error: any) {
     console.error("Error in getTeachersWorkload:", error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -428,23 +455,24 @@ export const getAttendanceTrends = async (req: Request, res: Response) => {
   try {
     const company_id = req.session?.company_id;
     const parsedCompanyId = parseInt(String(company_id), 10);
-    const range = (req.query.range as string) || 'month';
+    const range = (req.query.range as string) || "month";
 
     if (!company_id || isNaN(parsedCompanyId)) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    let interval = '1 MONTH';
-    let dateFormat = '%d.%m';
+    let interval = "1 MONTH";
+    let dateFormat = "%d.%m";
 
-    if (range === 'week') {
-      interval = '7 DAY';
-    } else if (range === 'quarter') {
-      interval = '3 MONTH';
-      dateFormat = 'Неделя %v';
+    if (range === "week") {
+      interval = "7 DAY";
+    } else if (range === "quarter") {
+      interval = "3 MONTH";
+      dateFormat = "Неделя %v";
     }
 
-    const [rows] = await pool.query<RowDataPacket[]>(`
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `
       SELECT 
         DATE_FORMAT(l.lesson_date, ?) AS period_label,
         l.lesson_date AS raw_date,
@@ -457,25 +485,29 @@ export const getAttendanceTrends = async (req: Request, res: Response) => {
         AND l.id IN (SELECT id FROM lessons WHERE group_id IN (SELECT id FROM \`groups\` WHERE users_id IN (SELECT id FROM users WHERE company_id = ?)))
       GROUP BY period_label, raw_date
       ORDER BY raw_date ASC
-    `, [dateFormat, parsedCompanyId]);
+    `,
+      [dateFormat, parsedCompanyId],
+    );
 
-    const formattedData = rows.map(row => {
+    const formattedData = rows.map((row) => {
       const total = Number(row.total_scheduled);
       const attended = Number(row.total_attended);
       const rate = total > 0 ? Math.round((attended / total) * 100) : 100;
 
       return {
         period: row.period_label,
-        rate: rate
+        rate: rate,
       };
     });
 
     return res.status(200).json({
       success: true,
-      data: formattedData
+      data: formattedData,
     });
   } catch (error: any) {
     console.error("Error in getAttendanceTrends:", error);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };

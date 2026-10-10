@@ -41,7 +41,7 @@ export const ProfilePage: React.FC = () => {
 
   const handleLogoutClick = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/logout`);
+      const response = await fetch(`https://api.soft-skills-crm.ru/logout`);
       if (!response.ok) {
         throw new Error("something went wrong...");
       }
@@ -86,7 +86,7 @@ export const ProfilePage: React.FC = () => {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/resetuser`, {
+      const response = await fetch(`https://api.soft-skills-crm.ru/resetuser`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +125,20 @@ export const ProfilePage: React.FC = () => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getcurrentuser`, {
+        const sessionId = localStorage.getItem("sessionId");
+
+        const headers: Record<string, string> = {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        };
+
+        if (sessionId) {
+          headers["X-Session-ID"] = sessionId;
+        }
+
+        const response = await fetch(`https://api.soft-skills-crm.ru/getcurrentuser`, {
+          method: 'GET',
+          headers: headers,
           credentials: "include"
         });
 
@@ -350,9 +363,9 @@ export const ProfilePage: React.FC = () => {
           Поддержка
           <span className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
         </a>
-        <br/>
+        <br />
         <a
-        onClick={() => {navigate('/Feedback')}}
+          onClick={() => { navigate('/Feedback') }}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-sm font-semibold text-sky-500 hover:text-sky-600 transition-colors group"

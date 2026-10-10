@@ -1,7 +1,7 @@
 export const get_transactions_list = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get_transactions_list`,
+      `https://api.soft-skills-crm.ru/get_transactions_list`,
       {
         method: `GET`,
         credentials: `include`,
@@ -27,10 +27,13 @@ export const get_transactions_list = async () => {
 
 export const getRevenueSources = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/revenue-sources`, {
-      method: `GET`,
-      credentials: `include`,
-    });
+    const response = await fetch(
+      `https://api.soft-skills-crm.ru/revenue-sources`,
+      {
+        method: `GET`,
+        credentials: `include`,
+      },
+    );
 
     if (response.status === 403) {
       return { status: 403 };
@@ -50,10 +53,13 @@ export const getRevenueSources = async () => {
 
 export const getFinancialTimelineData = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/getFinancialTimeline`, {
-      method: `GET`,
-      credentials: `include`,
-    });
+    const response = await fetch(
+      `https://api.soft-skills-crm.ru/getFinancialTimeline`,
+      {
+        method: `GET`,
+        credentials: `include`,
+      },
+    );
 
     if (response.status === 403) {
       return { status: 403 };
@@ -77,14 +83,17 @@ export const addManualExpenseRequest = async (expenseData: {
   comment: string;
 }) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/add-expense`, {
-      method: "POST",
-      headers: {
-        "Content-Type": `application/json`,
+    const response = await fetch(
+      `https://api.soft-skills-crm.ru/finance/add-expense`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": `application/json`,
+        },
+        credentials: `include`,
+        body: JSON.stringify(expenseData),
       },
-      credentials: `include`,
-      body: JSON.stringify(expenseData),
-    });
+    );
 
     if (response.status === 403) {
       return { success: false, status: 403, message: `Доступ запрещен` };
@@ -100,7 +109,7 @@ export const addManualExpenseRequest = async (expenseData: {
 export const getExpensesData = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/expenses-structure`,
+      `https://api.soft-skills-crm.ru/finance/expenses-structure`,
       {
         method: `GET`,
         credentials: `include`,
@@ -125,7 +134,7 @@ export const getExpensesData = async () => {
 export const getExpensesStructureData = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/expenses-structure-by-group`,
+      `https://api.soft-skills-crm.ru/finance/expenses-structure-by-group`,
       {
         method: `GET`,
         credentials: `include`,
@@ -150,7 +159,7 @@ export const getExpensesStructureData = async () => {
 export const getDebtClient = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/client-debtors`,
+      `https://api.soft-skills-crm.ru/finance/client-debtors`,
       {
         method: `GET`,
         credentials: `include`,
@@ -174,13 +183,28 @@ export const getDebtClient = async () => {
 
 export const fetchFinanceSummary = async () => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/finance/get-all-state`, {
-      method: `GET`,
-      credentials: `include`,
-    });
+    const sessionId = localStorage.getItem("sessionId");
 
-    if (response.status === 403) {
-      return { success: false, status: 403 };
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    if (sessionId) {
+      headers["X-Session-ID"] = sessionId;
+    }
+
+    const response = await fetch(
+      `https://api.soft-skills-crm.ru/finance/get-all-state`,
+      {
+        method: `GET`,
+        headers: headers,
+        credentials: `include`,
+      },
+    );
+
+    if (response.status === 401 || response.status === 403) {
+      return { success: false, status: response.status };
     }
 
     const result = await response.json();
@@ -204,13 +228,28 @@ export const fetchFinanceSummary = async () => {
 
 export const getFinanceChartData = async (): Promise<any> => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_HOST}:${import.meta.env.VITE_PORT}/get-chart-state`, {
-      method: `GET`,
-      credentials: `include`,
-    });
+    const sessionId = localStorage.getItem("sessionId");
 
-    if (response.status === 403) {
-      return { status: 403 };
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    };
+
+    if (sessionId) {
+      headers["X-Session-ID"] = sessionId;
+    }
+
+    const response = await fetch(
+      `https://api.soft-skills-crm.ru/get-chart-state`,
+      {
+        method: `GET`,
+        headers: headers,
+        credentials: `include`,
+      },
+    );
+
+    if (response.status === 401 || response.status === 403) {
+      return { status: response.status };
     }
 
     const result = await response.json();
