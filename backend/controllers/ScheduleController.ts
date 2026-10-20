@@ -25,12 +25,12 @@ export const getSchedule = async (req: Request, res: Response) => {
     }
 
     const [templates] = await pool.query(
-      "SELECT * FROM select_schedules_of_groups WHERE company_id = ?",
+      "SELECT gs.id AS schedule_id, gs.group_id, gs.day_of_week, gs.start_time, gs.end_time, g.name AS group_name, u.full_name AS user_name FROM group_schedules gs JOIN `groups` g ON gs.group_id = g.id JOIN users u ON g.users_id = u.id WHERE u.company_id = ?",
       [company_id],
     );
 
     const [realLessons] = await pool.query(
-      `SELECT l.id, l.lesson_date, l.start_time, l.end_time, l.status, l.group_id, g.name AS group_name
+      `SELECT l.id, DATE_FORMAT(l.lesson_date, '%Y-%m-%d') AS lesson_date, l.start_time, l.end_time, l.status, l.group_id, g.name AS group_name, u.full_name AS user_name
        FROM lessons l
        JOIN \`groups\` g ON l.group_id = g.id
        JOIN users u ON g.users_id = u.id

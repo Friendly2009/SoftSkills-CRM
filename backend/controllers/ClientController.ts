@@ -16,7 +16,7 @@ export const APIGetClients = async (
     if (!company_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-    if (req.session?.rank! < 500) {
+    if (Number(req.session?.rank || 0) < 500) {
       return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
     }
     const [clients] = await pool.query<RowDataPacket[]>(
@@ -107,7 +107,7 @@ export const addclient = async (
   if (!company_id) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
-  if (req.session?.rank! < 500) {
+  if (Number(req.session?.rank || 0) < 500) {
     return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
   }
 
@@ -166,7 +166,7 @@ export const delclient = async (
     res.status(400).json({ error: "Некорректный ID клиента" });
     return;
   }
-  if (req.session?.rank! < 1000) {
+  if (Number(req.session?.rank || 0) < 1000) {
     return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
   }
   const connection = await pool.getConnection();
@@ -229,7 +229,7 @@ export async function updateClient(req: Request, res: Response) {
     res.status(400).json({ error: "Нет данных для обновления" });
     return;
   }
-  if (req.session?.rank! < 500) {
+  if (Number(req.session?.rank || 0) < 500) {
     return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
   }
   const connection = await pool.getConnection();
@@ -251,6 +251,10 @@ export async function updateClient(req: Request, res: Response) {
     await ownedGroups(connection, group_ids, company_id);
 
     const oldAmountNum = Number(clientRows[0].balance);
+    if (targetBalance !== undefined && (!Number.isFinite(targetBalance) || !Number.isFinite(Number(req.body.expected_balance)) || Number(req.body.expected_balance) !== oldAmountNum)) {
+      await connection.rollback();
+      return res.status(409).json({ success: false, message: "Баланс изменился. Обновите карточку перед корректировкой." });
+    }
     const clientName = clientRows[0].name;
     const clientCompanyId = company_id;
 

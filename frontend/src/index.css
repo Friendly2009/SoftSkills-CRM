@@ -1,13 +1,5 @@
 @import "tailwindcss";
-
-@font-face {
-    font-family: 'JetBrainsFont';
-    src: url('/fonts/JetBrainsMono-Medium.woff2') format('woff2'),
-         url('/fonts/JetBrainsMono-Medium.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
-
+@import "./shared/styles/tokens.css";
 @theme {
-    --font-sans: 'JetBrainsFont', 'Inter', system-ui, sans-serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }

@@ -1,4 +1,5 @@
 import { requireAuth, requireRank } from "./middleware/auth.js";
+import { importRows } from './controllers/ImportController.js';
 import { Router } from "express";
 import { getusers, adduser, deluser, resetuser } from "./controllers/UsersController.js"; 
 import { getglobalinfo, checkconnect, getallsession, getUserProfile} from "./controllers/BackController.js"
@@ -22,6 +23,7 @@ import {
   delete_feedback 
 } from './controllers/FeedbackController.js';
 const router: Router = Router();
+router.post('/import', importRows);
 
 router.get('/checkconnect', checkconnect);
 router.get("/getsession", requireAuth, requireRank(0), getallsession);

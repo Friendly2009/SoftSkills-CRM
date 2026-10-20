@@ -34,7 +34,7 @@ app.use(cors({
   credentials: true,          
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
@@ -50,10 +50,15 @@ app.use(
   }),
 );
 
+app.use("/api", routes);
 app.use("/", routes);
 
-const buildPath = path.join(__dirname, "..", "frontend");
+const buildPath = path.join(__dirname, "..", "frontend", "dist");
 app.use(express.static(buildPath));
+app.get("/{*path}", (req, res) => {
+  if (req.path.startsWith("/api/")) return res.status(404).json({ success: false, message: "Not found" });
+  res.sendFile(path.join(buildPath, "index.html"));
+});
 
 setInterval(() => {}, 24 * 60 * 60 * 1000);
 
