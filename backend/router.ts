@@ -1,3 +1,5 @@
+import { importRows } from './controllers/ImportController.js';
+import { topUpClient } from './controllers/WalletController.js';
 import { Router } from "express";
 import { getusers, adduser, deluser, resetuser } from "./controllers/UsersController.js"; 
 import { getglobalinfo, checkconnect, getallsession, getUserProfile} from "./controllers/BackController.js"
@@ -21,6 +23,7 @@ import {
   delete_feedback 
 } from './controllers/FeedbackController.js';
 const router: Router = Router();
+router.post('/import', importRows);
 
 router.get('/checkconnect', checkconnect);
 router.get('/getsession', getallsession);
@@ -40,6 +43,7 @@ router.get("/getclient", APIGetClients);
 router.post('/addclients', addclient);
 router.delete('/delclients/:id', delclient);
 router.patch('/updateclient/:id', updateClient);
+router.post('/clients/:id/top-up', topUpClient);
 
 router.get("/getgroups", getgroups);
 router.post('/creategroup', creategroup);

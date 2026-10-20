@@ -12,7 +12,7 @@ export const APIGetClients = async (
     if (!company_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-    if (req.session?.rank! < 500) {
+    if (Number(req.session?.rank || 0) < 500) {
       return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
     }
     const [clients] = await pool.query<RowDataPacket[]>(
@@ -99,7 +99,7 @@ export const addclient = async (
   if (!company_id) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
-  if (req.session?.rank! < 500) {
+  if (Number(req.session?.rank || 0) < 500) {
     return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
   }
 
@@ -147,19 +147,24 @@ export const delclient = async (
   req: Request,
   res: Response,
 ): Promise<Response | void> => {
+  const companyId = req.session.company_id;
+  if (!companyId) return res.status(401).json({ success: false, message: "Не авторизован" });
   const clientId = parseInt(req.params.id as string, 10);
 
   if (isNaN(clientId)) {
     res.status(400).json({ error: "Некорректный ID клиента" });
     return;
   }
-  if (req.session?.rank! < 1000) {
+  if (Number(req.session?.rank || 0) < 1000) {
     return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
   }
   const connection = await pool.getConnection();
 
   try {
     await connection.beginTransaction();
+
+    const [owned] = await connection.query<RowDataPacket[]>("SELECT id FROM clients WHERE id = ? AND company_id = ? FOR UPDATE", [clientId, companyId]);
+    if (!owned.length) { await connection.rollback(); return res.status(404).json({ success: false, message: "Клиент не найден" }); }
 
     await connection.execute(`DELETE FROM group_members WHERE client_id = ?`, [
       clientId,
@@ -189,6 +194,8 @@ export const delclient = async (
 };
 
 export async function updateClient(req: Request, res: Response) {
+  const companyId = req.session.company_id;
+  if (!companyId) return res.status(401).json({ success: false, message: "Не авторизован" });
   const clientId = parseInt(req.params.id as string, 10);
 
   if (isNaN(clientId)) {
@@ -196,10 +203,10 @@ export async function updateClient(req: Request, res: Response) {
     return;
   }
 
-  const { name, balance, skills, status, contact, company_id, group_ids } =
+  const { name, balance, skills, status, contact, group_ids } =
     req.body;
 
-  const targetBalance = balance !== undefined ? parseInt(String(balance), 10) : undefined;
+  const targetBalance = balance !== undefined ? Number(balance) : undefined;
 
   const clientFields: Record<string, any> = {};
   if (name !== undefined) clientFields.name = name;
@@ -207,13 +214,13 @@ export async function updateClient(req: Request, res: Response) {
   if (skills !== undefined) clientFields.skills = skills;
   if (status !== undefined) clientFields.status = status;
   if (contact !== undefined) clientFields.contact = contact;
-  if (company_id !== undefined) clientFields.company_id = company_id;
+
 
   if (Object.keys(clientFields).length === 0 && group_ids === undefined) {
     res.status(400).json({ error: "Нет данных для обновления" });
     return;
   }
-  if (req.session?.rank! < 500) {
+  if (Number(req.session?.rank || 0) < 500) {
     return res.status(403).json({ success: false, message: "not enough rights to perform the action" });
   }
   const connection = await pool.getConnection();
@@ -222,8 +229,8 @@ export async function updateClient(req: Request, res: Response) {
     await connection.beginTransaction();
 
     const [clientRows]: any = await connection.execute(
-      `SELECT name, balance, company_id FROM clients WHERE id = ?`,
-      [clientId],
+      `SELECT name, balance, company_id FROM clients WHERE id = ? AND company_id = ? FOR UPDATE`,
+      [clientId, companyId],
     );
 
     if (!clientRows || clientRows.length === 0) {
@@ -233,9 +240,12 @@ export async function updateClient(req: Request, res: Response) {
     }
 
     const oldAmountNum = Number(clientRows[0].balance);
+    if (targetBalance !== undefined && (!Number.isFinite(targetBalance) || !Number.isFinite(Number(req.body.expected_balance)) || Number(req.body.expected_balance) !== oldAmountNum)) {
+      await connection.rollback();
+      return res.status(409).json({ success: false, message: "Баланс изменился. Обновите карточку перед корректировкой." });
+    }
     const clientName = clientRows[0].name;
-    const clientCompanyId =
-      company_id !== undefined ? company_id : clientRows[0].company_id;
+    const clientCompanyId = companyId;
 
     if (Object.keys(clientFields).length > 0) {
       const keys = Object.keys(clientFields);

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import pool from "../data_base_connect.js";
 
 export const getglobalinfo = async (req: Request, res: Response) => {
+  if (!req.session.user_id || !req.session.company_id) return res.status(401).json({ success: false, message: "Не авторизован" });
   try {
     const [rows] = await pool.query(
       "SELECT name FROM company WHERE id = ?",
