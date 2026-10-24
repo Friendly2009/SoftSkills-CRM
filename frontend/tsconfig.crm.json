@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "types": ["node", "vitest/globals"] },
+  "include": ["src/crm", "src/data", "src/global.d.ts", "tests/crm*.test.ts", "tests/crm*.test.tsx"]
+}

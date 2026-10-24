@@ -1,3 +1,4 @@
+import { legacyFetch } from "@/data/runtime";
 import React, { useEffect, useState } from "react";
 import style from '@/components/css/dashboard/client.module.css';
 import { MoreAction } from '@/components/DashboardsComponents/СlientsComponents/MoreActions.tsx';
@@ -18,16 +19,6 @@ export const ClientTable: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isForbidden, setIsForbidden] = useState<boolean>(false);
     const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
-    const runClientMutation = async (operation: () => Promise<unknown>): Promise<boolean> => {
-        try {
-            await operation();
-            return true;
-        } catch (error) {
-            alert(error instanceof Error ? error.message : "Не удалось сохранить изменения");
-            return false;
-        }
-    };
-
     const [menu, setMenu] = useState<MoreActionProps>({
         isOpen: false,
         x: 0,
@@ -94,8 +85,7 @@ export const ClientTable: React.FC = () => {
             setIsResetModalWinOpen(true);
         }
         if (isDeleteMode) {
-            const deleted = await runClientMutation(() => deleteClient(client));
-            if (!deleted) return;
+            await deleteClient(client);
             setIsDeleteMode(false);
             setClient(await getClient());
             getCompanyGroups();
@@ -104,7 +94,7 @@ export const ClientTable: React.FC = () => {
 
     const getCompanyGroups = async () => {
         try {
-            const response = await fetch(`https://api.soft-skills-crm.ru/getgroups`, { credentials: "include" });
+            const response = await legacyFetch(`https://api.soft-skills-crm.ru/getgroups`, { credentials: "include" });
 
             if (response.status === 403) {
                 setIsReadOnly(true);
@@ -192,8 +182,7 @@ export const ClientTable: React.FC = () => {
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         console.log(JSON.stringify(formData));
-        const added = await runClientMutation(() => addClient(formData));
-        if (!added) return;
+        await addClient(formData);
         getCompanyGroups();
         setClient(await getClient());
         setIsModalOpen(false);
@@ -201,8 +190,7 @@ export const ClientTable: React.FC = () => {
 
     const handleResetFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const updated = await runClientMutation(() => updateClient(resetFormData));
-        if (!updated) return;
+        await updateClient(resetFormData);
         getCompanyGroups();
         setClient(await getClient());
         setIsResetModalWinOpen(false);
@@ -439,8 +427,7 @@ export const ClientTable: React.FC = () => {
                                                 },
 
                                                 onDelete: async (clientToDelete) => {
-                                                    const deleted = await runClientMutation(() => deleteClient(clientToDelete));
-                                                    if (!deleted) return;
+                                                    await deleteClient(clientToDelete);
 
                                                     setMoreAction(false);
                                                     setMenu(prev => ({ ...prev, isOpen: false }));
@@ -471,9 +458,8 @@ export const ClientTable: React.FC = () => {
                             client={menu.client}
                             onClose={() => setMenu(prev => ({ ...prev, isOpen: false }))}
                             onDelete={async (targetClient) => {
-                                if (await runClientMutation(() => deleteClient(targetClient))) {
-                                    setClient(await getClient());
-                                }
+                                await deleteClient(targetClient);
+                                setClient(await getClient());
                             }}
                             onTopUp={(targetClient) => {
                                 setTopUpClient(targetClient);

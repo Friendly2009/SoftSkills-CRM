@@ -1,41 +1,27 @@
+import { legacyFetch } from "@/data/runtime";
 import { ClientTemplate } from "../interfaces/clientsInterfaces.ts";
 
-export const deleteClient = async (client: ClientTemplate): Promise<void> => {
+export const deleteClient = async (client: ClientTemplate) => {
   try {
-    const response = await fetch(
+    const response = await legacyFetch(
       `https://api.soft-skills-crm.ru/delclients/${client.id}`,
       {
         method: "DELETE",
-        credentials: "include",
       },
     );
 
     if (!response.ok) {
       throw new Error(`Ошибка сервера: ${response.status}`);
     }
-    return;
+    console.log("User was deleted");
   } catch (ex) {
-    throw ex;
+    console.error(ex);
   }
-};
-
-export const topUpClient = async (clientId: number, amount: number): Promise<{ balance: number; transactionId: number }> => {
-  const response = await fetch(`https://api.soft-skills-crm.ru/clients/${clientId}/top-up`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ amount }),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || `Не удалось пополнить счёт (${response.status})`);
-  }
-  return data.data;
 };
 
 export const getClient = async () => {
   try {
-    const response = await fetch(`https://api.soft-skills-crm.ru/getclient`, {
+    const response = await legacyFetch(`https://api.soft-skills-crm.ru/getclient`, {
       credentials: "include",
     });
 
@@ -63,7 +49,7 @@ export const getClient = async () => {
 
 export const addClient = async (formData: ClientTemplate) => {
   try {
-    const response = await fetch(`https://api.soft-skills-crm.ru/addclients`, {
+    const response = await legacyFetch(`https://api.soft-skills-crm.ru/addclients`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -72,17 +58,21 @@ export const addClient = async (formData: ClientTemplate) => {
       body: JSON.stringify(formData), 
     });
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.message || `Ошибка сервера: ${response.status}`);
-    return data;
+    if (!response.ok) {
+      throw new Error("something went wrong");
+    }
+
+    const data = await response.json();
+    console.log(data);
   } catch (ex) {
-    throw ex;
+    alert("Произошла ошибка при отправке данных");
+    console.error(ex);
   }
 };
 
 export const updateClient = async (updateFormData: ClientTemplate) => {
   try {
-    const response = await fetch(
+    const response = await legacyFetch(
       `https://api.soft-skills-crm.ru/updateclient/${updateFormData.id}`,
       {
         method: "PATCH",
@@ -94,10 +84,13 @@ export const updateClient = async (updateFormData: ClientTemplate) => {
       },
     );
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.message || `Ошибка сервера: ${response.status}`);
-    return data;
+    if (!response) {
+      throw new Error("something went wrong");
+    }
+    const data = await response.json();
+    console.log(data);
   } catch (ex) {
-    throw ex;
+    console.log(ex);
+    alert("something went wrong");
   }
 };
