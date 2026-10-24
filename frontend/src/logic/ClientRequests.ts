@@ -1,0 +1,96 @@
+import { legacyFetch } from "@/data/runtime";
+import { ClientTemplate } from "../interfaces/clientsInterfaces.ts";
+
+export const deleteClient = async (client: ClientTemplate) => {
+  try {
+    const response = await legacyFetch(
+      `https://api.soft-skills-crm.ru/delclients/${client.id}`,
+      {
+        method: "DELETE",
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Ошибка сервера: ${response.status}`);
+    }
+    console.log("User was deleted");
+  } catch (ex) {
+    console.error(ex);
+  }
+};
+
+export const getClient = async () => {
+  try {
+    const response = await legacyFetch(`https://api.soft-skills-crm.ru/getclient`, {
+      credentials: "include",
+    });
+
+    if (response.status === 403) {
+      return { status: 403 };
+    }
+
+    if (!response.ok) {
+      throw new Error("oooops, something went wrong");
+    }
+    
+    const data = await response.json();
+    const rawClients = data.data || [];
+
+    return rawClients.map((client: any) => ({
+      ...client,
+      next_visit: client.next_visit ? new Date(client.next_visit) : null
+    }));
+  } catch (ex) {
+    console.error("Ошибка в getClient:", ex);
+    throw ex;
+  }
+};
+
+
+export const addClient = async (formData: ClientTemplate) => {
+  try {
+    const response = await legacyFetch(`https://api.soft-skills-crm.ru/addclients`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(formData), 
+    });
+
+    if (!response.ok) {
+      throw new Error("something went wrong");
+    }
+
+    const data = await response.json();
+    console.log(data);
+  } catch (ex) {
+    alert("Произошла ошибка при отправке данных");
+    console.error(ex);
+  }
+};
+
+export const updateClient = async (updateFormData: ClientTemplate) => {
+  try {
+    const response = await legacyFetch(
+      `https://api.soft-skills-crm.ru/updateclient/${updateFormData.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          },
+        credentials: "include",
+        body: JSON.stringify(updateFormData), 
+      },
+    );
+
+    if (!response) {
+      throw new Error("something went wrong");
+    }
+    const data = await response.json();
+    console.log(data);
+  } catch (ex) {
+    console.log(ex);
+    alert("something went wrong");
+  }
+};

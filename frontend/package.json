@@ -5,18 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build && node scripts/copy-spa-fallback.mjs",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
-    "test": "vitest run",
-    "format": "prettier --write src"
+    "test:crm": "vitest run --config vitest.crm.config.ts",
+    "typecheck:crm": "tsc --noEmit -p tsconfig.crm.json"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "caniuse-lite": "^1.0.30001810",
     "clsx": "2.1.1",
-    "exceljs": "^4.4.0",
     "lucide-react": "^1.31.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -25,7 +22,6 @@
     "tailwind-merge": "3.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
     "@tailwindcss/vite": "4.1.17",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -36,15 +32,11 @@
     "@vitejs/plugin-react": "5.1.1",
     "@vitest/ui": "^4.1.8",
     "autoprefixer": "^10.5.4",
-    "eslint": "^9.39.5",
-    "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^29.1.1",
     "msw": "^2.14.6",
     "postcss": "^8.5.26",
-    "prettier": "^3.9.10",
     "tailwindcss": "^4.1.17",
     "typescript": "5.9.3",
-    "typescript-eslint": "^8.71.2",
     "vite": "7.3.2",
     "vite-plugin-env-compatible": "^2.0.1",
     "vite-plugin-singlefile": "2.3.0",
