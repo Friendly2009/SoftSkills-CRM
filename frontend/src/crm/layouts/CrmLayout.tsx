@@ -14,7 +14,6 @@ import { Schedule } from "../components/Schedule/Schedule";
 import { Analytics } from "../components/Dashboard/Analytics";
 import { Finance } from "../components/Finance/Finance";
 import { Settings } from "../components/Settings/Settings";
-import { Ai } from "../pages/Ai";
 import { Profile } from "../pages/Profile";
 import { News } from "../pages/News";
 import "../styles/crm.css";
@@ -32,8 +31,7 @@ export function CrmLayout() {
         <Sidebar collapsed={collapsed} onSupport={() => setSupport(true)} />
         <main className="crm-main">
           <Routes>
-            <Route index element={<Navigate to="ai" replace />} />
-            <Route path="ai" element={<Ai />} />
+            <Route index element={<Navigate to="analytics" replace />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="schedule" element={<Schedule />} />
             <Route path="finance" element={<Finance />} />
@@ -62,7 +60,7 @@ export function CrmLayout() {
               path="client/:id"
               element={<RecordDetails entity="clients" />}
             />
-            <Route path="*" element={<Navigate to="/dashboard/ai" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard/analytics" replace />} />
           </Routes>
         </main>
       </div>

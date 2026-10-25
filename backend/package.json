@@ -12,27 +12,33 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node --watch --import tsx src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "migrate": "node --import tsx src/migrate.ts",
+    "test": "node --import tsx --test test/*.test.ts",
+    "test:integration": "node --import tsx --test test/integration/*.test.ts",
+    "openapi": "node --import tsx src/openapi.ts"
+  },
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "body-parser": "^2.2.2",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "ejs": "^5.0.1",
-    "express": "^5.2.1",
-    "express-session": "^1.19.0",
-    "mysql2": "^3.20.0"
+    "dotenv": "16.6.1",
+    "exceljs": "4.4.0",
+    "express": "5.3.0",
+    "mysql2": "3.24.6",
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cors": "^2.8.19",
-    "@types/dotenv": "^6.1.1",
-    "@types/express": "^5.0.6",
-    "@types/express-session": "^1.19.0",
-    "@types/node": "^25.9.4",
-    "eslint": "^10.2.0",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.22.3",
-    "typescript": "^6.0.3",
-    "vitest": "^5.0.5"
+    "@types/express": "5.0.3",
+    "@types/node": "22.18.10",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "uuid": "11.1.1"
   }
 }

@@ -1,0 +1,22 @@
+[Unit]
+Description=SoftSkills CRM API
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=softskills
+Group=softskills
+WorkingDirectory=/opt/softskills/backend
+EnvironmentFile=/etc/softskills/backend.env
+ExecStart=/usr/bin/node /opt/softskills/backend/dist/server.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
