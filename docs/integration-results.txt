@@ -1,0 +1,48 @@
+[ { version: '8.0.46-0ubuntu0.24.04.3' } ]
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 migrate
+> node --import tsx src/migrate.ts
+
+Applied 003_preferences.sql
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 migrate
+> node --import tsx src/migrate.ts
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 test:integration
+> node --import tsx --test test/integration/*.test.ts
+
+✔ health, CSRF, bad origin, input errors and legacy routes (1969.258975ms)
+✔ tenant and branch isolation, user management authorization (85.154243ms)
+✔ concurrent normalized contacts cannot create duplicate people (37.737058ms)
+✔ concurrent enrollments respect capacity; students can join multiple groups (69.499878ms)
+✔ concurrent scheduling prevents overlaps; adjacent times accepted (102.408189ms)
+✔ payments are atomic, exact and idempotent across concurrent requests (62.166106ms)
+✔ teacher first completion, retry, manager corrections, salary reversal (206.117937ms)
+✔ payer/student portals expose only linked learning data; no broad finance (81.8842ms)
+✔ refund and manual reversal preserve history; excessive cash out rejected (103.341625ms)
+✔ salary payments separate from accrual and manager cannot pay salary (56.723206ms)
+✔ cancel conducted lesson compensates all charges and subscription usage (37.611246ms)
+✔ lead conversion reuses person, payer and student (75.243409ms)
+✔ subscription freeze extends actual duration; expiry does not change money (81.236178ms)
+✔ XLSX import atomic rollback, child without contacts, retry safety (188.60476ms)
+✔ OpenAPI generated from actual registered routes and logout revocation (34.242313ms)
+✔ expired subscription cannot consume unused allowance even for a past lesson (103.839317ms)
+✔ room collision with a different teacher is rejected, rescheduling frees slot (178.448692ms)
+✔ comments, announcements, tasks, internal notifications and own profile (130.728255ms)
+✔ concurrent withdrawals cannot overdraw cash (51.587224ms)
+✔ frozen and exhausted passes reject new consumption atomically (146.483349ms)
+✔ changing permissions revokes active sessions and protects own director account (41.35809ms)
+✔ employee plus payer roles unite scoped work access and own children across branches (533.909854ms)
+✔ analytics aggregates four widgets, scopes branches and persists user preferences (159.139573ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6873.176223

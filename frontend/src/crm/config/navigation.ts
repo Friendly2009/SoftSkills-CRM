@@ -1,5 +1,4 @@
 import {
-  Sparkles,
   ChartNoAxesCombined,
   CalendarDays,
   CalendarRange,
@@ -15,7 +14,6 @@ import {
   LockKeyhole,
 } from "lucide-react";
 export const navigation = [
-  { path: "ai", label: "ИИ", icon: Sparkles },
   { path: "analytics", label: "Аналитика", icon: ChartNoAxesCombined },
   { path: "schedule", label: "Уроки (новый)", icon: CalendarDays },
   { path: "lessons", label: "Уроки", icon: CalendarRange },
