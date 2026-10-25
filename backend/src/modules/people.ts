@@ -264,7 +264,7 @@ export function peopleRoutes(app: Express) {
         .string()
         .trim()
         .toLowerCase()
-        .regex(/^[a-z0-9_.@-]{3,100}$/),
+        .regex(/^[a-z0-9_.-]{3,100}$/),
       password,
       roles,
       branchIds: z.array(id).max(100).default([]),
@@ -296,6 +296,10 @@ export function peopleRoutes(app: Express) {
           JSON.stringify(b.branchIds),
         ],
       );
+      await c.db.execute(
+        "INSERT INTO crm_memberships(user_id,org_id) VALUES(?,?)",
+        [userId, c.actor.org],
+      );
       return { id: userId };
     },
   );
@@ -317,6 +321,25 @@ export function peopleRoutes(app: Express) {
     async (c, b) => {
       permit(c.actor, "director");
       const u = await get(c.db, c.actor, "users", String(c.req.params.id));
+      if (
+        u.active &&
+        (typeof u.roles === "string" ? JSON.parse(u.roles) : u.roles).includes(
+          "director",
+        ) &&
+        (!b.active || !b.roles.includes("director"))
+      ) {
+        const directors = await rows(
+          c.db,
+          `SELECT id FROM crm_users WHERE org_id=? AND active=TRUE AND JSON_CONTAINS(roles, '"director"')`,
+          [c.actor.org],
+        );
+        assert(
+          directors.length > 1,
+          409,
+          "LAST_DIRECTOR",
+          "Cannot remove or block the last director",
+        );
+      }
       assert(
         u.id !== c.actor.id,
         409,
@@ -345,7 +368,11 @@ export function peopleRoutes(app: Express) {
     },
   );
 }
-async function validateRoleLinks(c: Context, person: string, roles: string[]) {
+export async function validateRoleLinks(
+  c: Context,
+  person: string,
+  roles: string[],
+) {
   for (const [role, table] of [
     ["teacher", "staff"],
     ["payer", "payers"],

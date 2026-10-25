@@ -1,3 +1,4 @@
+import { log } from "./core/logger.js";
 import express from "express";
 import { randomUUID } from "node:crypto";
 import { ZodError } from "zod";
@@ -22,6 +23,18 @@ export function createApp() {
   if (cfg.trustProxy) app.set("trust proxy", 1);
   app.use((req, res, next) => {
     res.locals.requestId = randomUUID();
+    const started = Date.now();
+    res.once("finish", () =>
+      log({
+        level: "info",
+        event: "http",
+        requestId: res.locals.requestId,
+        method: req.method,
+        route: req.route?.path ?? "unmatched",
+        status: res.statusCode,
+        durationMs: Date.now() - started,
+      }),
+    );
     res.set({
       "X-Request-Id": res.locals.requestId,
       "X-Content-Type-Options": "nosniff",
@@ -30,7 +43,7 @@ export function createApp() {
     });
     const origin = req.get("origin");
     if (origin) {
-      if (origin !== cfg.origin)
+      if (!cfg.origins.includes(origin))
         return next(
           new AppError(403, "ORIGIN_FORBIDDEN", "Origin not allowed"),
         );
@@ -62,22 +75,52 @@ export function createApp() {
     res.json({ status: "ok", requestId: res.locals.requestId }),
   );
   app.get("/health/ready", async (_, res) => {
-    await transaction(null, async (db) => {
-      const migration = (
-        await rows(db, "SELECT name FROM crm_migrations WHERE name=?", [
-          "003_preferences.sql",
-        ])
-      )[0];
-      assert(migration, 503, "MIGRATIONS_REQUIRED", "Run migrations");
-    });
+    try {
+      await transaction(null, async (db) => {
+        const migration = (
+          await rows(db, "SELECT name FROM crm_migrations WHERE name=?", [
+            "004_identity.sql",
+          ])
+        )[0];
+        assert(migration, 503, "MIGRATIONS_REQUIRED", "Run migrations");
+      });
+    } catch {
+      throw new AppError(
+        503,
+        "NOT_READY",
+        "Database unavailable or migrations required",
+      );
+    }
     res.json({ status: "ready", requestId: res.locals.requestId });
   });
   app.get("/api/v1/openapi.json", (_, res) => res.json(openapi()));
   app.use("/api/v1", async (req, res, next) => {
+    if (req.path === "/auth/csrf" && req.method === "GET") return next();
     if (
-      ["/auth/login", "/auth/register"].includes(req.path) &&
+      ["/auth/login", "/auth/register", "/auth/invitations/accept"].includes(
+        req.path,
+      ) &&
       req.method === "POST"
     ) {
+      const supplied = req.get("X-CSRF-Token") ?? "";
+      const saved = req.headers.cookie
+        ?.split(";")
+        .map((v) => v.trim())
+        .find((v) => v.startsWith("crm_precsrf="))
+        ?.slice(12);
+      const parts = supplied.split(".");
+      const value = parts.slice(0, 2).join(".");
+      assert(
+        supplied === saved &&
+          /^[a-f0-9]{64}$/.test(parts[0] ?? "") &&
+          parts.length === 3 &&
+          Number(parts[1]) <= Date.now() &&
+          Date.now() - Number(parts[1]) < 3600000 &&
+          parts[2] === digest("precsrf:" + value, cfg.secret),
+        403,
+        "CSRF",
+        "Bootstrap /auth/csrf first",
+      );
       next();
       return;
     }
@@ -95,7 +138,7 @@ export function createApp() {
         (
           await rows(
             db,
-            "SELECT u.*,s.csrf FROM crm_sessions s JOIN crm_users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>UTC_TIMESTAMP(3) AND u.active=TRUE",
+            "SELECT u.*,s.csrf FROM crm_sessions s JOIN crm_users u ON u.id=s.user_id JOIN crm_memberships m ON m.user_id=u.id AND m.org_id=u.org_id WHERE s.token_hash=? AND s.expires_at>UTC_TIMESTAMP(3) AND u.active=TRUE",
             [hash],
           )
         )[0],

@@ -118,7 +118,17 @@ function visibilityBase(c: Context, name: string) {
   const where = ["r.org_id=?"];
   const args: unknown[] = [c.actor.org];
   const staff = has(c.actor, "director", "manager");
-  if (!has(c.actor, "director") && c.actor.branches.length) {
+  if (
+    !has(c.actor, "director") &&
+    has(c.actor, "manager", "teacher") &&
+    !c.actor.branches.length
+  )
+    where.push("FALSE");
+  if (
+    !has(c.actor, "director") &&
+    has(c.actor, "manager", "teacher") &&
+    c.actor.branches.length
+  ) {
     if (def.branch) {
       where.push(
         `r.branch_id IN (${c.actor.branches.map(() => "?").join(",")})`,
@@ -287,6 +297,9 @@ export async function visible(c: Context, name: string, id: string) {
   return row;
 }
 export function redact(c: Context, name: string, row: any) {
+  // Public portal DTOs are allowlists: newly added database fields never leak by default.
+  if (!has(c.actor, "director", "manager", "teacher"))
+    return portalDTO(name, row);
   const value = { ...row };
   delete value.password_hash;
   if (name === "staff" && !has(c.actor, "director")) delete value.rate;
@@ -405,7 +418,11 @@ export function resourceRoutes(app: Express) {
         `SELECT r.* FROM crm_students r WHERE ${where.join(" AND ")} ORDER BY r.id LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
         args,
       );
-      return { items: list, page: q.page, pageSize: q.pageSize };
+      return {
+        items: list.map((v) => redact(c, "students", v)),
+        page: q.page,
+        pageSize: q.pageSize,
+      };
     },
   );
   route(
@@ -443,7 +460,9 @@ export function resourceRoutes(app: Express) {
             delete v.discount;
             delete v.payer_id;
           }
-          return v;
+          return !has(c.actor, "director", "manager", "teacher")
+            ? portalDTO("attendance", v)
+            : v;
         }),
         page: q.page,
         pageSize: q.pageSize,
@@ -718,4 +737,43 @@ function simple(
         return { id: entityId };
       },
     );
+}
+
+export const portalFields: Record<string, string[]> = {
+  people: ["id", "name", "birthday", "active"],
+  payers: ["id", "person_id"],
+  students: ["id", "person_id", "branch_id", "active"],
+  groups: ["id", "name", "subject", "status", "start_date", "end_date"],
+  lessons: [
+    "id",
+    "name",
+    "starts_at",
+    "ends_at",
+    "status",
+    "group_id",
+    "room_id",
+  ],
+  subscriptions: [
+    "id",
+    "student_id",
+    "starts_at",
+    "ends_at",
+    "allowance",
+    "frozen_at",
+  ],
+  accounts: ["id", "name", "kind"],
+  ledger: ["id", "account_id", "amount", "kind", "created_at"],
+  attendance: [
+    "id",
+    "lesson_id",
+    "student_id",
+    "attendance",
+    "price",
+    "discount",
+  ],
+};
+export function portalDTO(name: string, row: Record<string, unknown>) {
+  return Object.fromEntries(
+    (portalFields[name] ?? []).filter((k) => k in row).map((k) => [k, row[k]]),
+  );
 }

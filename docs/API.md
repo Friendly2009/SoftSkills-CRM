@@ -23,24 +23,78 @@ ID — UUID. `price`, `discount`, `rate`, `salary`, `amount`, `balance` — **с
 `from/to` доступны для занятий, ledger, audit; верхняя граница исключающая.
 Неприменимый фильтр отклоняется. Подколлекции members/attendance/comments/notifications имеют items/page/pageSize.
 
-## Регистрация и сессия
+## Регистрация, вход и CSRF
 
-```bash
-curl -c cookies.txt http://127.0.0.1:3000/api/v1/auth/register \
-  -H 'Content-Type: application/json' \
-  -d '{"organization":"Учебный центр","name":"Андрей","login":"andrey","email":"andrey@example.com","password":"Set-a-unique-long-password"}'
+До регистрации, входа или принятия приглашения выполните `GET /auth/csrf`.
+Сохраните HttpOnly cookie `crm_precsrf` и `data.csrfToken` из JSON. Затем передайте
+cookie и `X-CSRF-Token` в POST. Токен действует час. Это защищает и login-CSRF;
+одного CORS/SameSite для этого недостаточно.
+
+`POST /auth/register`:
+```json
+{"companyName":"Учебный центр","fullName":"Андрей","login":"andrey","email":"andrey@example.com","password":"Set-a-unique-long-password","phone":"8 (999) 123-45-67"}
 ```
+`phone` необязателен. Пробелы, скобки и дефисы удаляются; российский 8/7 + 10 цифр
+приводится к +7, международные номера проверяются по формату E.164 (8–15 цифр).
+Это синтаксическая проверка, без подтверждения владения номером или email.
 
-Создаются организация, основной филиал, человек и директор. В ответе `data`:
-`id` (user), `org`, `personId`, `roles`, `branches`, `branchId`, `csrfToken`.
-Логин глобально уникален: это исключает неоднозначность входа между организациями.
-Контактный email уникален внутри организации, может повторяться в другой организации.
+В одной транзакции создаются организация, основной филиал, человек, контакты,
+аккаунт `crm_users`, членство `crm_memberships` и роль `director` в аккаунте.
+`crm_accounts` — финансовые счета CRM, не аккаунты входа.
+В ответе: `id`, `org`, `personId`, `roles`, `branches`, `branchId`, `companySlug`, `csrfToken`.
+`companySlug` — стабильный уникальный `company-<UUID>`, защищён UNIQUE-индексом.
+Названия компаний могут совпадать. Логин уникален **внутри организации**.
+Новые логины: 3–100 латинских букв/цифр и `_.-`, без `@`, в нижнем регистре.
+Это отделяет пространство логинов от email. Email уникален как контакт внутри организации.
 
-`POST /auth/login`: `{login,password}`. `GET /auth/me` возвращает пользователя и `csrfToken`.
-Каждая защищённая запись требует cookie `crm_session` и `X-CSRF-Token` из ответа входа.
-Cookies HttpOnly, SameSite=Lax, 12 часов, Secure в production. Разрешён один APP_ORIGIN.
-`POST /auth/logout` с `{}` отзывает текущую сессию. `POST /profile/password`
-с `{currentPassword,password}` меняет пароль и отзывает все сессии пользователя.
+`POST /auth/login`: `{companySlug,login,password}`. В `login` передаётся логин либо email.
+После регистрации/входа сохраняйте cookie `crm_session` и новый `csrfToken`.
+`GET /auth/me` возвращает текущую сессию, роли, филиалы, companySlug и CSRF.
+Для каждой авторизованной записи требуются cookie `crm_session` и `X-CSRF-Token` сессионного токена.
+В браузере используйте `credentials: "include"`; не сохраняйте session cookie в localStorage.
+
+Cookies: HttpOnly, срок сессии 12 часов, путь `/api/v1`, без Domain; Secure обязателен
+в production. SameSite задаётся `COOKIE_SAME_SITE` (по умолчанию lax).
+Для разных сайтов нужны HTTPS, Secure и SameSite=none; блокировка сторонних cookies
+браузером всё равно может препятствовать работе. Предпочтителен API на том же сайте.
+CORS разрешает только точные `APP_ORIGIN` и `CORS_ORIGINS`, с credentials, без `*`.
+IP/идентификатор входа ограничиваются MySQL-счётчиками: 30 попыток за 15 минут.
+
+| Операция | Запрос |
+|---|---|
+| Текущий профиль | `GET /profile` — разрешённые поля человека и его контакты |
+| Изменить профиль | `PATCH /profile` с `{fullName,email,phone?}`; телефон null/отсутствие удаляет телефон |
+| Сменить пароль | `POST /profile/password` с `{currentPassword,password}`; отзывает **все** сессии |
+| Отозвать остальные сессии | `POST /auth/sessions/revoke-others` с `{}` |
+| Выход | `POST /auth/logout` с `{}`; удаляет сессию из БД и очищает cookie |
+
+## Пользователи и приглашения
+
+Все административные операции доступны только директору своей организации.
+Сначала создайте человека через `POST /people` (`branchId,name,contacts`). Для ролей
+teacher/payer/student создайте соответствующий профиль `/staff`, `/payers`, `/students`.
+
+- Прямое создание: `POST /users` с `{personId,login,password,roles,branchIds}`.
+- Приглашение: `POST /invitations` с `{personId,roles,branchIds,expiresInHours?}`.
+  Срок по умолчанию 48 часов, диапазон 1–168. Ответ `{id,token,expiresInHours}`.
+  Передайте token пользователю приватно вручную. Рассылки нет. Не помещайте его в URL/query/logs.
+- Принятие: `POST /auth/invitations/accept` с `{token,login,password}` после `/auth/csrf`.
+  Создаются аккаунт, членство и сессия. Права берутся только из приглашения.
+- Изменение: `PATCH /users/:id` с `{roles,branchIds,active,password?}`.
+  `active:false` блокирует вход; любые изменения отзывают все сессии этого пользователя.
+  Смена собственных прав через этот маршрут запрещена. Последнего активного директора
+  нельзя заблокировать или лишить роли. Удаление аккаунтов через API не предоставляется.
+
+В БД хранится только HMAC токена приглашения. Принятие, отметка использования и создание
+аккаунта выполняются транзакционно под блокировкой организации и приглашения. Повторное,
+просроченное или заменённое новым приглашение отклоняется. Повторная выдача для того же
+человека аннулирует старую. Параллельные попытки не создают два аккаунта.
+
+`branchIds:[]` не даёт сотруднику служебного доступа к филиалам. Директор имеет доступ ко
+всем филиалам своей организации. Кабинеты плательщика/ученика ограничиваются связью
+с человеком/детьми независимо от служебных филиалов. Смешанные роли объединяют эти
+области доступа. Данные кабинетов возвращаются через allowlist DTO; новые поля БД
+не попадают в них автоматически. organizationId из тела запроса не используется для авторизации.
 
 ## Ресурсы
 

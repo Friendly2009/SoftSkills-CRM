@@ -1,3 +1,4 @@
+import { redactSecrets } from "./logger.js";
 import type { Express, Request, Response } from "express";
 import { z } from "zod";
 import { randomUUID, createHash } from "node:crypto";
@@ -34,7 +35,7 @@ export function document(
     for (const [name, value] of Object.entries(s.properties ?? {}))
       parameters.push({ in: "query", name, schema: value });
   }
-  if (auth && method !== "get")
+  if ((auth || path.startsWith("/auth/")) && method !== "get")
     parameters.push({
       in: "header",
       name: "X-CSRF-Token",
@@ -51,7 +52,11 @@ export function document(
   definitions[openPath] ??= {};
   definitions[openPath][method] = {
     summary,
-    security: auth ? [{ sessionCookie: [] }] : [],
+    security: auth
+      ? [{ sessionCookie: [] }]
+      : method === "post" && path.startsWith("/auth/")
+        ? [{ preCsrfCookie: [] }]
+        : [],
     parameters,
     ...(schema
       ? {
@@ -148,7 +153,7 @@ export function route(
       const current = (
         await rows(
           db,
-          "SELECT u.* FROM crm_users u JOIN crm_sessions s ON s.user_id=u.id WHERE s.token_hash=? AND s.expires_at>UTC_TIMESTAMP(3) AND u.active=TRUE",
+          "SELECT u.* FROM crm_users u JOIN crm_memberships m ON m.user_id=u.id AND m.org_id=u.org_id JOIN crm_sessions s ON s.user_id=u.id WHERE s.token_hash=? AND s.expires_at>UTC_TIMESTAMP(3) AND u.active=TRUE",
           [res.locals.sessionHash],
         )
       )[0];
@@ -193,7 +198,7 @@ export function route(
           path,
           String(req.params.id ?? output?.id ?? ""),
           res.locals.requestId,
-          { input: safe },
+          { input: redactSecrets(safe) },
         );
       }
       if (key)
@@ -203,6 +208,8 @@ export function route(
         );
       return output;
     });
+    if (path === "/auth/logout" || path === "/profile/password")
+      res.clearCookie("crm_session", { path: "/api/v1" });
     res.json({ data, requestId: res.locals.requestId });
   });
 }
@@ -210,10 +217,47 @@ export function openapi() {
   return {
     openapi: "3.1.0",
     info: { title: "SoftSkills CRM API", version: "1.0.0" },
-    paths: definitions,
+    paths: {
+      ...definitions,
+      ...Object.fromEntries(
+        ["live", "ready"].map((name) => [
+          "/health/" + name,
+          {
+            get: {
+              summary:
+                name === "live"
+                  ? "Process liveness"
+                  : "Database and schema readiness",
+              security: [],
+              responses: {
+                "200": {
+                  description: "Healthy",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        type: "object",
+                        required: ["status", "requestId"],
+                        properties: {
+                          status: { type: "string" },
+                          requestId: { type: "string", format: "uuid" },
+                        },
+                      },
+                    },
+                  },
+                },
+                ...(name === "ready"
+                  ? { "503": { description: "Database or schema unavailable" } }
+                  : {}),
+              },
+            },
+          },
+        ]),
+      ),
+    },
     components: {
       securitySchemes: {
         sessionCookie: { type: "apiKey", in: "cookie", name: "crm_session" },
+        preCsrfCookie: { type: "apiKey", in: "cookie", name: "crm_precsrf" },
       },
       schemas: {
         Error: {

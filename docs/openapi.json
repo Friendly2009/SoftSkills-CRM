@@ -5,11 +5,165 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/v1/auth/csrf": {
+      "get": {
+        "summary": "Bootstrap CSRF before login, registration or invitation acceptance",
+        "security": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "requestId"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "csrfToken": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "csrfToken"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/register": {
       "post": {
         "summary": "Register organization and director",
-        "security": [],
-        "parameters": [],
+        "security": [
+          {
+            "preCsrfCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -18,19 +172,19 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
                 "properties": {
-                  "organization": {
+                  "companyName": {
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 255
                   },
-                  "name": {
+                  "fullName": {
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 255
                   },
                   "login": {
                     "type": "string",
-                    "pattern": "^[a-z0-9_.@-]{3,100}$"
+                    "pattern": "^[a-z0-9_.-]{3,100}$"
                   },
                   "email": {
                     "type": "string",
@@ -42,11 +196,15 @@
                     "type": "string",
                     "minLength": 12,
                     "maxLength": 128
+                  },
+                  "phone": {
+                    "type": "string",
+                    "maxLength": 40
                   }
                 },
                 "required": [
-                  "organization",
-                  "name",
+                  "companyName",
+                  "fullName",
                   "login",
                   "email",
                   "password"
@@ -69,7 +227,55 @@
                   ],
                   "properties": {
                     "data": {
-                      "description": "Operation-specific data; see docs/API.md and executable integration scenarios. Sensitive fields are omitted according to role."
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "org": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "personId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "branches": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        },
+                        "companySlug": {
+                          "type": "string"
+                        },
+                        "csrfToken": {
+                          "type": "string"
+                        },
+                        "branchId": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "org",
+                        "personId",
+                        "roles",
+                        "branches",
+                        "companySlug",
+                        "csrfToken",
+                        "branchId"
+                      ],
+                      "additionalProperties": false
                     },
                     "requestId": {
                       "type": "string",
@@ -186,8 +392,21 @@
     "/api/v1/auth/login": {
       "post": {
         "summary": "Sign in",
-        "security": [],
-        "parameters": [],
+        "security": [
+          {
+            "preCsrfCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -196,9 +415,15 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
                 "properties": {
+                  "companySlug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
                   "login": {
                     "type": "string",
-                    "pattern": "^[a-z0-9_.@-]{3,100}$"
+                    "minLength": 1,
+                    "maxLength": 254
                   },
                   "password": {
                     "type": "string",
@@ -207,6 +432,7 @@
                   }
                 },
                 "required": [
+                  "companySlug",
                   "login",
                   "password"
                 ],
@@ -228,7 +454,655 @@
                   ],
                   "properties": {
                     "data": {
-                      "description": "Operation-specific data; see docs/API.md and executable integration scenarios. Sensitive fields are omitted according to role."
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "org": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "personId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "branches": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        },
+                        "companySlug": {
+                          "type": "string"
+                        },
+                        "csrfToken": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "org",
+                        "personId",
+                        "roles",
+                        "branches",
+                        "companySlug",
+                        "csrfToken"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/invitations": {
+      "post": {
+        "summary": "Director creates single-use invitation; deliver token manually",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "personId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "roles": {
+                    "minItems": 1,
+                    "maxItems": 5,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "director",
+                        "manager",
+                        "teacher",
+                        "payer",
+                        "student"
+                      ]
+                    }
+                  },
+                  "branchIds": {
+                    "maxItems": 100,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "expiresInHours": {
+                    "default": 48,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 168
+                  }
+                },
+                "required": [
+                  "personId",
+                  "roles",
+                  "branchIds"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "requestId"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "token": {
+                          "type": "string",
+                          "description": "Returned once; deliver privately. Never log or put in a URL query."
+                        },
+                        "expiresInHours": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "token",
+                        "expiresInHours"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/invitations/accept": {
+      "post": {
+        "summary": "Accept unexpired invitation once",
+        "security": [
+          {
+            "preCsrfCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "login": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9_.-]{3,100}$"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 12,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "token",
+                  "login",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "requestId"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "org": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "personId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "branches": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        },
+                        "companySlug": {
+                          "type": "string"
+                        },
+                        "csrfToken": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "org",
+                        "personId",
+                        "roles",
+                        "branches",
+                        "companySlug",
+                        "csrfToken"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/sessions/revoke-others": {
+      "post": {
+        "summary": "Revoke all sessions except current",
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "requestId"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "revoked": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "revoked"
+                      ],
+                      "additionalProperties": false
                     },
                     "requestId": {
                       "type": "string",
@@ -364,7 +1238,50 @@
                   ],
                   "properties": {
                     "data": {
-                      "description": "Operation-specific data; see docs/API.md and executable integration scenarios. Sensitive fields are omitted according to role."
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "org": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "personId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "branches": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        },
+                        "companySlug": {
+                          "type": "string"
+                        },
+                        "csrfToken": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "org",
+                        "personId",
+                        "roles",
+                        "branches",
+                        "companySlug",
+                        "csrfToken"
+                      ],
+                      "additionalProperties": false
                     },
                     "requestId": {
                       "type": "string",
@@ -522,7 +1439,16 @@
                   ],
                   "properties": {
                     "data": {
-                      "description": "Operation-specific data; see docs/API.md and executable integration scenarios. Sensitive fields are omitted according to role."
+                      "type": "object",
+                      "properties": {
+                        "revoked": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "revoked"
+                      ],
+                      "additionalProperties": false
                     },
                     "requestId": {
                       "type": "string",
@@ -967,45 +1893,78 @@
                         "items": {
                           "type": "array",
                           "items": {
-                            "type": "object",
-                            "required": [
-                              "id",
-                              "org_id"
-                            ],
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "org_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "branch_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "name": {
-                                "type": "string"
-                              },
-                              "birthday": {
-                                "type": [
-                                  "string",
-                                  "null"
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "id",
+                                  "org_id"
                                 ],
-                                "format": "date"
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "org_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "branch_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "birthday": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ],
+                                    "format": "date"
+                                  },
+                                  "comment": {
+                                    "type": "string"
+                                  },
+                                  "active": {
+                                    "type": [
+                                      "integer",
+                                      "boolean"
+                                    ]
+                                  }
+                                },
+                                "additionalProperties": false
                               },
-                              "comment": {
-                                "type": "string"
-                              },
-                              "active": {
-                                "type": [
-                                  "integer",
-                                  "boolean"
-                                ]
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "birthday": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ],
+                                    "format": "date"
+                                  },
+                                  "active": {
+                                    "type": [
+                                      "integer",
+                                      "boolean"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "additionalProperties": false
                               }
-                            },
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "page": {
@@ -1400,45 +2359,78 @@
                   ],
                   "properties": {
                     "data": {
-                      "type": "object",
-                      "required": [
-                        "id",
-                        "org_id"
-                      ],
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "org_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "branch_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "birthday": {
-                          "type": [
-                            "string",
-                            "null"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "org_id"
                           ],
-                          "format": "date"
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "org_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "branch_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "birthday": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "date"
+                            },
+                            "comment": {
+                              "type": "string"
+                            },
+                            "active": {
+                              "type": [
+                                "integer",
+                                "boolean"
+                              ]
+                            }
+                          },
+                          "additionalProperties": false
                         },
-                        "comment": {
-                          "type": "string"
-                        },
-                        "active": {
-                          "type": [
-                            "integer",
-                            "boolean"
-                          ]
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "birthday": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "date"
+                            },
+                            "active": {
+                              "type": [
+                                "integer",
+                                "boolean"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
                         }
-                      },
-                      "additionalProperties": false
+                      ]
                     },
                     "requestId": {
                       "type": "string",
@@ -1814,30 +2806,51 @@
                         "items": {
                           "type": "array",
                           "items": {
-                            "type": "object",
-                            "required": [
-                              "id",
-                              "org_id"
-                            ],
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "id",
+                                  "org_id"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "org_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "person_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "branch_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  }
+                                },
+                                "additionalProperties": false
                               },
-                              "org_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "person_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "branch_id": {
-                                "type": "string",
-                                "format": "uuid"
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "person_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "additionalProperties": false
                               }
-                            },
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "page": {
@@ -2231,40 +3244,71 @@
                         "items": {
                           "type": "array",
                           "items": {
-                            "type": "object",
-                            "required": [
-                              "id",
-                              "org_id"
-                            ],
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "id",
+                                  "org_id"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "org_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "person_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "branch_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "payer_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "active": {
+                                    "type": [
+                                      "integer",
+                                      "boolean"
+                                    ]
+                                  }
+                                },
+                                "additionalProperties": false
                               },
-                              "org_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "person_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "branch_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "payer_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "active": {
-                                "type": [
-                                  "integer",
-                                  "boolean"
-                                ]
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "person_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "branch_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "active": {
+                                    "type": [
+                                      "integer",
+                                      "boolean"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "additionalProperties": false
                               }
-                            },
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "page": {
@@ -3230,7 +4274,7 @@
                   },
                   "login": {
                     "type": "string",
-                    "pattern": "^[a-z0-9_.@-]{3,100}$"
+                    "pattern": "^[a-z0-9_.-]{3,100}$"
                   },
                   "password": {
                     "type": "string",
@@ -5673,30 +6717,51 @@
                   ],
                   "properties": {
                     "data": {
-                      "type": "object",
-                      "required": [
-                        "id",
-                        "org_id"
-                      ],
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "org_id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "org_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "person_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "branch_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            }
+                          },
+                          "additionalProperties": false
                         },
-                        "org_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "person_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "branch_id": {
-                          "type": "string",
-                          "format": "uuid"
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "person_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
                         }
-                      },
-                      "additionalProperties": false
+                      ]
                     },
                     "requestId": {
                       "type": "string",
@@ -5842,40 +6907,71 @@
                   ],
                   "properties": {
                     "data": {
-                      "type": "object",
-                      "required": [
-                        "id",
-                        "org_id"
-                      ],
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "org_id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "org_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "person_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "branch_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "payer_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "active": {
+                              "type": [
+                                "integer",
+                                "boolean"
+                              ]
+                            }
+                          },
+                          "additionalProperties": false
                         },
-                        "org_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "person_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "branch_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "payer_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "active": {
-                          "type": [
-                            "integer",
-                            "boolean"
-                          ]
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "person_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "branch_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "active": {
+                              "type": [
+                                "integer",
+                                "boolean"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
                         }
-                      },
-                      "additionalProperties": false
+                      ]
                     },
                     "requestId": {
                       "type": "string",
@@ -6868,54 +7964,92 @@
                         "items": {
                           "type": "array",
                           "items": {
-                            "type": "object",
-                            "required": [
-                              "id",
-                              "org_id"
-                            ],
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "id",
+                                  "org_id"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "org_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "branch_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "teacher_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "subject": {
+                                    "type": "string"
+                                  },
+                                  "capacity": {
+                                    "type": "integer"
+                                  },
+                                  "status": {
+                                    "type": "string"
+                                  },
+                                  "start_date": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "end_date": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "additionalProperties": false
                               },
-                              "org_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "branch_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "teacher_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "name": {
-                                "type": "string"
-                              },
-                              "subject": {
-                                "type": "string"
-                              },
-                              "capacity": {
-                                "type": "integer"
-                              },
-                              "status": {
-                                "type": "string"
-                              },
-                              "start_date": {
-                                "type": [
-                                  "string",
-                                  "null"
-                                ]
-                              },
-                              "end_date": {
-                                "type": [
-                                  "string",
-                                  "null"
-                                ]
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "subject": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "type": "string"
+                                  },
+                                  "start_date": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "end_date": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "additionalProperties": false
                               }
-                            },
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "page": {
@@ -7295,54 +8429,92 @@
                   ],
                   "properties": {
                     "data": {
-                      "type": "object",
-                      "required": [
-                        "id",
-                        "org_id"
-                      ],
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "org_id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "org_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "branch_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "teacher_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "subject": {
+                              "type": "string"
+                            },
+                            "capacity": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "start_date": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "end_date": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "additionalProperties": false
                         },
-                        "org_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "branch_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "teacher_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "subject": {
-                          "type": "string"
-                        },
-                        "capacity": {
-                          "type": "integer"
-                        },
-                        "status": {
-                          "type": "string"
-                        },
-                        "start_date": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "end_date": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "subject": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "start_date": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "end_date": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
                         }
-                      },
-                      "additionalProperties": false
+                      ]
                     },
                     "requestId": {
                       "type": "string",
@@ -8720,69 +9892,114 @@
                         "items": {
                           "type": "array",
                           "items": {
-                            "type": "object",
-                            "required": [
-                              "id",
-                              "org_id"
-                            ],
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "org_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "branch_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "group_id": {
-                                "type": [
-                                  "string",
-                                  "null"
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "id",
+                                  "org_id"
                                 ],
-                                "format": "uuid"
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "org_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "branch_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "group_id": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ],
+                                    "format": "uuid"
+                                  },
+                                  "teacher_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "room_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "starts_at": {
+                                    "type": "string"
+                                  },
+                                  "ends_at": {
+                                    "type": "string"
+                                  },
+                                  "salary": {
+                                    "type": "string",
+                                    "pattern": "^-?[0-9]+$",
+                                    "description": "Exact integer kopecks"
+                                  },
+                                  "revision": {
+                                    "type": "integer"
+                                  },
+                                  "status": {
+                                    "type": "string",
+                                    "enum": [
+                                      "scheduled",
+                                      "completed",
+                                      "cancelled"
+                                    ]
+                                  },
+                                  "comment": {
+                                    "type": "string"
+                                  }
+                                },
+                                "additionalProperties": false
                               },
-                              "teacher_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "room_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "name": {
-                                "type": "string"
-                              },
-                              "starts_at": {
-                                "type": "string"
-                              },
-                              "ends_at": {
-                                "type": "string"
-                              },
-                              "salary": {
-                                "type": "string",
-                                "pattern": "^-?[0-9]+$",
-                                "description": "Exact integer kopecks"
-                              },
-                              "revision": {
-                                "type": "integer"
-                              },
-                              "status": {
-                                "type": "string",
-                                "enum": [
-                                  "scheduled",
-                                  "completed",
-                                  "cancelled"
-                                ]
-                              },
-                              "comment": {
-                                "type": "string"
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "starts_at": {
+                                    "type": "string"
+                                  },
+                                  "ends_at": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "type": "string",
+                                    "enum": [
+                                      "scheduled",
+                                      "completed",
+                                      "cancelled"
+                                    ]
+                                  },
+                                  "group_id": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ],
+                                    "format": "uuid"
+                                  },
+                                  "room_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "additionalProperties": false
                               }
-                            },
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "page": {
@@ -9200,69 +10417,114 @@
                   ],
                   "properties": {
                     "data": {
-                      "type": "object",
-                      "required": [
-                        "id",
-                        "org_id"
-                      ],
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "org_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "branch_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "group_id": {
-                          "type": [
-                            "string",
-                            "null"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "org_id"
                           ],
-                          "format": "uuid"
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "org_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "branch_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "group_id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "uuid"
+                            },
+                            "teacher_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "room_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "starts_at": {
+                              "type": "string"
+                            },
+                            "ends_at": {
+                              "type": "string"
+                            },
+                            "salary": {
+                              "type": "string",
+                              "pattern": "^-?[0-9]+$",
+                              "description": "Exact integer kopecks"
+                            },
+                            "revision": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "scheduled",
+                                "completed",
+                                "cancelled"
+                              ]
+                            },
+                            "comment": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
                         },
-                        "teacher_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "room_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "starts_at": {
-                          "type": "string"
-                        },
-                        "ends_at": {
-                          "type": "string"
-                        },
-                        "salary": {
-                          "type": "string",
-                          "pattern": "^-?[0-9]+$",
-                          "description": "Exact integer kopecks"
-                        },
-                        "revision": {
-                          "type": "integer"
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "scheduled",
-                            "completed",
-                            "cancelled"
-                          ]
-                        },
-                        "comment": {
-                          "type": "string"
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "starts_at": {
+                              "type": "string"
+                            },
+                            "ends_at": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string",
+                              "enum": [
+                                "scheduled",
+                                "completed",
+                                "cancelled"
+                              ]
+                            },
+                            "group_id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "uuid"
+                            },
+                            "room_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
                         }
-                      },
-                      "additionalProperties": false
+                      ]
                     },
                     "requestId": {
                       "type": "string",
@@ -10606,49 +11868,85 @@
                         "items": {
                           "type": "array",
                           "items": {
-                            "type": "object",
-                            "required": [
-                              "id",
-                              "org_id"
-                            ],
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "id",
+                                  "org_id"
+                                ],
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "org_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "branch_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "student_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "template_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "starts_at": {
+                                    "type": "string"
+                                  },
+                                  "ends_at": {
+                                    "type": "string"
+                                  },
+                                  "allowance": {
+                                    "type": "integer"
+                                  },
+                                  "frozen_at": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "additionalProperties": false
                               },
-                              "org_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "branch_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "student_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "template_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "starts_at": {
-                                "type": "string"
-                              },
-                              "ends_at": {
-                                "type": "string"
-                              },
-                              "allowance": {
-                                "type": "integer"
-                              },
-                              "frozen_at": {
-                                "type": [
-                                  "string",
-                                  "null"
-                                ]
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "student_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "starts_at": {
+                                    "type": "string"
+                                  },
+                                  "ends_at": {
+                                    "type": "string"
+                                  },
+                                  "allowance": {
+                                    "type": "integer"
+                                  },
+                                  "frozen_at": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "additionalProperties": false
                               }
-                            },
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "page": {
@@ -10983,49 +12281,85 @@
                   ],
                   "properties": {
                     "data": {
-                      "type": "object",
-                      "required": [
-                        "id",
-                        "org_id"
-                      ],
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "org_id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "org_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "branch_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "student_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "template_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "starts_at": {
+                              "type": "string"
+                            },
+                            "ends_at": {
+                              "type": "string"
+                            },
+                            "allowance": {
+                              "type": "integer"
+                            },
+                            "frozen_at": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "additionalProperties": false
                         },
-                        "org_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "branch_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "student_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "template_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "starts_at": {
-                          "type": "string"
-                        },
-                        "ends_at": {
-                          "type": "string"
-                        },
-                        "allowance": {
-                          "type": "integer"
-                        },
-                        "frozen_at": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "student_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "starts_at": {
+                              "type": "string"
+                            },
+                            "ends_at": {
+                              "type": "string"
+                            },
+                            "allowance": {
+                              "type": "integer"
+                            },
+                            "frozen_at": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
                         }
-                      },
-                      "additionalProperties": false
+                      ]
                     },
                     "requestId": {
                       "type": "string",
@@ -13934,44 +15268,72 @@
                         "items": {
                           "type": "array",
                           "items": {
-                            "type": "object",
-                            "required": [
-                              "id",
-                              "org_id"
-                            ],
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "org_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "branch_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "person_id": {
-                                "type": [
-                                  "string",
-                                  "null"
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "id",
+                                  "org_id"
                                 ],
-                                "format": "uuid"
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "org_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "branch_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "person_id": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ],
+                                    "format": "uuid"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": [
+                                      "payer",
+                                      "cash",
+                                      "payroll"
+                                    ]
+                                  }
+                                },
+                                "additionalProperties": false
                               },
-                              "name": {
-                                "type": "string"
-                              },
-                              "kind": {
-                                "type": "string",
-                                "enum": [
-                                  "payer",
-                                  "cash",
-                                  "payroll"
-                                ]
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": [
+                                      "payer",
+                                      "cash",
+                                      "payroll"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "additionalProperties": false
                               }
-                            },
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "page": {
@@ -14300,44 +15662,72 @@
                   ],
                   "properties": {
                     "data": {
-                      "type": "object",
-                      "required": [
-                        "id",
-                        "org_id"
-                      ],
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "org_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "branch_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "person_id": {
-                          "type": [
-                            "string",
-                            "null"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "org_id"
                           ],
-                          "format": "uuid"
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "org_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "branch_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "person_id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "payer",
+                                "cash",
+                                "payroll"
+                              ]
+                            }
+                          },
+                          "additionalProperties": false
                         },
-                        "name": {
-                          "type": "string"
-                        },
-                        "kind": {
-                          "type": "string",
-                          "enum": [
-                            "payer",
-                            "cash",
-                            "payroll"
-                          ]
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "payer",
+                                "cash",
+                                "payroll"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
                         }
-                      },
-                      "additionalProperties": false
+                      ]
                     },
                     "requestId": {
                       "type": "string",
@@ -14548,64 +15938,96 @@
                         "items": {
                           "type": "array",
                           "items": {
-                            "type": "object",
-                            "required": [
-                              "id",
-                              "org_id"
-                            ],
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "org_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "account_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "amount": {
-                                "type": "string",
-                                "pattern": "^-?[0-9]+$",
-                                "description": "Exact integer kopecks"
-                              },
-                              "kind": {
-                                "type": "string"
-                              },
-                              "lesson_id": {
-                                "type": [
-                                  "string",
-                                  "null"
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "id",
+                                  "org_id"
                                 ],
-                                "format": "uuid"
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "org_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "account_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "amount": {
+                                    "type": "string",
+                                    "pattern": "^-?[0-9]+$",
+                                    "description": "Exact integer kopecks"
+                                  },
+                                  "kind": {
+                                    "type": "string"
+                                  },
+                                  "lesson_id": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ],
+                                    "format": "uuid"
+                                  },
+                                  "revision": {
+                                    "type": [
+                                      "integer",
+                                      "null"
+                                    ]
+                                  },
+                                  "reversal_of": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ],
+                                    "format": "uuid"
+                                  },
+                                  "operation_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "reason": {
+                                    "type": "string"
+                                  },
+                                  "created_at": {
+                                    "type": "string"
+                                  }
+                                },
+                                "additionalProperties": false
                               },
-                              "revision": {
-                                "type": [
-                                  "integer",
-                                  "null"
-                                ]
-                              },
-                              "reversal_of": {
-                                "type": [
-                                  "string",
-                                  "null"
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "account_id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "amount": {
+                                    "type": "string",
+                                    "pattern": "^-?[0-9]+$",
+                                    "description": "Exact integer kopecks"
+                                  },
+                                  "kind": {
+                                    "type": "string"
+                                  },
+                                  "created_at": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
                                 ],
-                                "format": "uuid"
-                              },
-                              "operation_id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "reason": {
-                                "type": "string"
-                              },
-                              "created_at": {
-                                "type": "string"
+                                "additionalProperties": false
                               }
-                            },
-                            "additionalProperties": false
+                            ]
                           }
                         },
                         "page": {
@@ -14763,64 +16185,96 @@
                   ],
                   "properties": {
                     "data": {
-                      "type": "object",
-                      "required": [
-                        "id",
-                        "org_id"
-                      ],
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "org_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "account_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "amount": {
-                          "type": "string",
-                          "pattern": "^-?[0-9]+$",
-                          "description": "Exact integer kopecks"
-                        },
-                        "kind": {
-                          "type": "string"
-                        },
-                        "lesson_id": {
-                          "type": [
-                            "string",
-                            "null"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "id",
+                            "org_id"
                           ],
-                          "format": "uuid"
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "org_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "account_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "amount": {
+                              "type": "string",
+                              "pattern": "^-?[0-9]+$",
+                              "description": "Exact integer kopecks"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "lesson_id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "uuid"
+                            },
+                            "revision": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ]
+                            },
+                            "reversal_of": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "format": "uuid"
+                            },
+                            "operation_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "created_at": {
+                              "type": "string"
+                            }
+                          },
+                          "additionalProperties": false
                         },
-                        "revision": {
-                          "type": [
-                            "integer",
-                            "null"
-                          ]
-                        },
-                        "reversal_of": {
-                          "type": [
-                            "string",
-                            "null"
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "account_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "amount": {
+                              "type": "string",
+                              "pattern": "^-?[0-9]+$",
+                              "description": "Exact integer kopecks"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "created_at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id"
                           ],
-                          "format": "uuid"
-                        },
-                        "operation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "reason": {
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
+                          "additionalProperties": false
                         }
-                      },
-                      "additionalProperties": false
+                      ]
                     },
                     "requestId": {
                       "type": "string",
@@ -19016,7 +20470,64 @@
                   ],
                   "properties": {
                     "data": {
-                      "description": "Operation-specific data; see docs/API.md and executable integration scenarios. Sensitive fields are omitted according to role."
+                      "type": "object",
+                      "properties": {
+                        "person": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "fullName": {
+                              "type": "string"
+                            },
+                            "birthday": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name",
+                            "fullName",
+                            "birthday"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "contacts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "enum": [
+                                  "email",
+                                  "phone"
+                                ]
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "value"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "person",
+                        "contacts"
+                      ],
+                      "additionalProperties": false
                     },
                     "requestId": {
                       "type": "string",
@@ -19154,60 +20665,32 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
                 "properties": {
-                  "name": {
+                  "fullName": {
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 255
                   },
-                  "contacts": {
-                    "maxItems": 10,
-                    "type": "array",
-                    "items": {
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "kind": {
-                              "type": "string",
-                              "const": "email"
-                            },
-                            "value": {
-                              "type": "string",
-                              "maxLength": 254,
-                              "format": "email",
-                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
-                            }
-                          },
-                          "required": [
-                            "kind",
-                            "value"
-                          ],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "kind": {
-                              "type": "string",
-                              "const": "phone"
-                            },
-                            "value": {
-                              "type": "string",
-                              "maxLength": 40
-                            }
-                          },
-                          "required": [
-                            "kind",
-                            "value"
-                          ],
-                          "additionalProperties": false
-                        }
-                      ]
-                    }
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "phone": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 40
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
-                  "name"
+                  "fullName",
+                  "email"
                 ],
                 "additionalProperties": false
               }
@@ -19227,7 +20710,17 @@
                   ],
                   "properties": {
                     "data": {
-                      "description": "Operation-specific data; see docs/API.md and executable integration scenarios. Sensitive fields are omitted according to role."
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "id"
+                      ],
+                      "additionalProperties": false
                     },
                     "requestId": {
                       "type": "string",
@@ -19400,7 +20893,20 @@
                   ],
                   "properties": {
                     "data": {
-                      "description": "Operation-specific data; see docs/API.md and executable integration scenarios. Sensitive fields are omitted according to role."
+                      "type": "object",
+                      "properties": {
+                        "changed": {
+                          "type": "boolean"
+                        },
+                        "signInRequired": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "changed",
+                        "signInRequired"
+                      ],
+                      "additionalProperties": false
                     },
                     "requestId": {
                       "type": "string",
@@ -20681,6 +22187,71 @@
           }
         }
       }
+    },
+    "/health/live": {
+      "get": {
+        "summary": "Process liveness",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "requestId"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "summary": "Database and schema readiness",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "requestId"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database or schema unavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -20689,6 +22260,11 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "crm_session"
+      },
+      "preCsrfCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "crm_precsrf"
       }
     },
     "schemas": {
