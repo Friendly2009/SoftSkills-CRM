@@ -5,7 +5,15 @@ import { route, type Context } from "../core/api.js";
 import { rows } from "../core/db.js";
 import { permit, branch, get } from "../core/security.js";
 import { assert } from "../core/errors.js";
-import { id, text, contacts, password, pageQuery } from "../core/validation.js";
+import {
+  id,
+  text,
+  contacts,
+  password,
+  pageQuery,
+  email,
+  phone,
+} from "../core/validation.js";
 import { hashPassword, verifyPassword } from "../core/security.js";
 import { visible } from "./resources.js";
 export async function notifyStaff(
@@ -32,7 +40,12 @@ export function collaborationRoutes(app: Express) {
     "/profile",
     { summary: "Read current person profile and contacts" },
     async (c) => ({
-      person: await get(c.db, c.actor, "people", c.actor.personId),
+      person: ((p) => ({
+        id: p.id,
+        name: p.name,
+        fullName: p.name,
+        birthday: p.birthday,
+      }))(await get(c.db, c.actor, "people", c.actor.personId)),
       contacts: await rows(
         c.db,
         "SELECT kind,value FROM crm_contacts WHERE org_id=? AND person_id=?",
@@ -45,23 +58,28 @@ export function collaborationRoutes(app: Express) {
     "patch",
     "/profile",
     {
-      body: z.object({ name: text, contacts }).strict(),
+      body: z
+        .object({ fullName: text, email, phone: phone.nullable().optional() })
+        .strict(),
       summary: "Update own name and contacts without changing permissions",
     },
     async (c, b) => {
       await c.db.execute(
         "UPDATE crm_people SET name=? WHERE org_id=? AND id=?",
-        [b.name, c.actor.org, c.actor.personId],
+        [b.fullName, c.actor.org, c.actor.personId],
       );
       await c.db.execute(
         "UPDATE crm_staff SET name=? WHERE org_id=? AND person_id=?",
-        [b.name, c.actor.org, c.actor.personId],
+        [b.fullName, c.actor.org, c.actor.personId],
       );
       await c.db.execute(
         "DELETE FROM crm_contacts WHERE org_id=? AND person_id=?",
         [c.actor.org, c.actor.personId],
       );
-      for (const v of b.contacts)
+      for (const v of [
+        { kind: "email", value: b.email },
+        ...(b.phone ? [{ kind: "phone", value: b.phone }] : []),
+      ])
         await c.db.execute(
           "INSERT INTO crm_contacts(id,org_id,person_id,kind,value) VALUES(?,?,?,?,?)",
           [randomUUID(), c.actor.org, c.actor.personId, v.kind, v.value],

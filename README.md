@@ -1,4 +1,4 @@
-# SoftSkills CRM — backend v1
+# SoftSkills CRM — backend: сессии и организации
 
 Модульный монолит TypeScript + Express + MySQL для бесплатной беты учебных центров.
 API: `/api/v1`. Рабочий исходный код — `backend/src`, новый интерфейс — `frontend/src/crm`.
@@ -52,8 +52,9 @@ npm run build
 ```
 
 Интеграционные тесты работают с настоящей MySQL, запускают HTTP-сервер на свободном localhost-порту.
-**Используйте отдельную БД с именем, заканчивающимся на `_test`.** Тесты не очищают базу;
-создают новые организации и оставляют фикстуры. Доступ пользователя к этой базе настраивается отдельно.
+**Используйте отдельную БД с именем, заканчивающимся на `_test`.** Тесты создают новые организации и оставляют фикстуры, очищают только auth rate-limit buckets.
+На время проверки отката добавляют и удаляют CHECK-ограничение; на время проверки readiness
+переименовывают запись миграции. Не используйте общую с приложением или параллельными тестами БД. Доступ пользователя к этой базе настраивается отдельно.
 
 ```sql
 CREATE DATABASE softskills_test CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
@@ -67,8 +68,7 @@ DB_NAME=softskills_test npm run migrate
 DB_NAME=softskills_test npm run test:integration
 ```
 
-Повторяющиеся тестовые запуски используют тот же лимит попыток входа, что приложение: 30 на IP за 15 минут.
-При его достижении дождитесь истечения окна; не запускайте тесты против производственной БД.
+Набор выполняется последовательно, только на MySQL 8; SQLite и MariaDB не подменяют интеграционную проверку.
 
 Frontend (из корня проекта):
 
@@ -79,6 +79,51 @@ npm run typecheck:crm
 npm run test:crm
 npm run build
 ```
+
+## Windows PowerShell
+
+```powershell
+cd backend
+npm ci
+Copy-Item .env.example .env
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+# Заполните .env: DB_*, SESSION_SECRET. Не оставляйте replace-*.
+npm run migrate
+npm run build
+npm start
+```
+
+Тесты в отдельной базе после выдачи ей прав:
+```powershell
+$env:DB_NAME = "softskills_test"
+npm run migrate
+npm run test:integration
+Remove-Item Env:DB_NAME
+```
+
+Альтернатива для тестов с Docker из корня: `docker compose -f compose.mysql-test.yml up -d --wait`.
+В отдельном терминале backend задайте DB_PORT=3307, DB_USER=crm_test,
+DB_PASSWORD=local-test-password, DB_NAME=crm_auth_test, затем migrate и test:integration.
+Локальные реквизиты в compose предназначены исключительно для тестовой базы.
+
+## Обновление предыдущей версии
+
+Сохраните свою `.env`, установите зависимости и выполните `npm run migrate`.
+Миграции 001–003 неизменны; 004 добавляет companySlug и членство существующим аккаунтам,
+заменяет глобальный UNIQUE(login) на UNIQUE(org_id,login), создаёт приглашения.
+DDL 004 проверяет metadata перед ALTER и допускает повторный запуск после прерывания.
+До изменения рабочей БД сделайте резервную копию. Slug существующей компании можно
+получить запросом `SELECT id,name,company_slug FROM crm_organizations`.
+Новые поля регистрации и обязательный companySlug при входе меняют контракт API.
+Сотрудникам с пустым `branchIds` директор должен назначить конкретные филиалы.
+Старые scrypt-хеши проверяются и автоматически усиливаются после успешного входа;
+новые используют scrypt N=131072, r=8, p=1 и случайную соль 16 байт.
+
+Логи JSON содержат requestId, метод, шаблон маршрута, статус и длительность, без body,
+query string, cookies и заголовков авторизации. Аудит рекурсивно скрывает секретные поля.
+`/health/live` проверяет процесс, `/health/ready` — доступ к MySQL и миграцию 004.
+При SIGINT/SIGTERM сервер прекращает принимать запросы, ждёт текущие, закрывает пул;
+через 10 секунд завершает процесс принудительно. Ошибка подключения к БД при старте завершает процесс.
 
 ## Документация
 

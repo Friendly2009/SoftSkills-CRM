@@ -1,48 +1,388 @@
-[ { version: '8.0.46-0ubuntu0.24.04.3' } ]
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
-
-> softskills-crm-backend@2.0.0 migrate
-> node --import tsx src/migrate.ts
-
-Applied 003_preferences.sql
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
-
-> softskills-crm-backend@2.0.0 migrate
-> node --import tsx src/migrate.ts
-
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
 > softskills-crm-backend@2.0.0 test:integration
-> node --import tsx --test test/integration/*.test.ts
+> node --import tsx --test --test-concurrency=1 test/integration/*.test.ts
 
-✔ health, CSRF, bad origin, input errors and legacy routes (1969.258975ms)
-✔ tenant and branch isolation, user management authorization (85.154243ms)
-✔ concurrent normalized contacts cannot create duplicate people (37.737058ms)
-✔ concurrent enrollments respect capacity; students can join multiple groups (69.499878ms)
-✔ concurrent scheduling prevents overlaps; adjacent times accepted (102.408189ms)
-✔ payments are atomic, exact and idempotent across concurrent requests (62.166106ms)
-✔ teacher first completion, retry, manager corrections, salary reversal (206.117937ms)
-✔ payer/student portals expose only linked learning data; no broad finance (81.8842ms)
-✔ refund and manual reversal preserve history; excessive cash out rejected (103.341625ms)
-✔ salary payments separate from accrual and manager cannot pay salary (56.723206ms)
-✔ cancel conducted lesson compensates all charges and subscription usage (37.611246ms)
-✔ lead conversion reuses person, payer and student (75.243409ms)
-✔ subscription freeze extends actual duration; expiry does not change money (81.236178ms)
-✔ XLSX import atomic rollback, child without contacts, retry safety (188.60476ms)
-✔ OpenAPI generated from actual registered routes and logout revocation (34.242313ms)
-✔ expired subscription cannot consume unused allowance even for a past lesson (103.839317ms)
-✔ room collision with a different teacher is rejected, rescheduling frees slot (178.448692ms)
-✔ comments, announcements, tasks, internal notifications and own profile (130.728255ms)
-✔ concurrent withdrawals cannot overdraw cash (51.587224ms)
-✔ frozen and exhausted passes reject new consumption atomically (146.483349ms)
-✔ changing permissions revokes active sessions and protects own director account (41.35809ms)
-✔ employee plus payer roles unite scoped work access and own children across branches (533.909854ms)
-✔ analytics aggregates four widgets, scopes branches and persists user preferences (159.139573ms)
-ℹ tests 23
+{"time":"2026-10-25T06:59:28.014Z","level":"info","event":"http","requestId":"dfa15a81-354d-455c-8192-70717abb419e","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:28.412Z","level":"info","event":"http","requestId":"e88d0689-0676-48ba-a90b-e79c5c03b6ad","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":388}
+{"time":"2026-10-25T06:59:28.414Z","level":"info","event":"http","requestId":"78c8cddb-e66d-4173-897e-ff47c3ba6c08","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:28.751Z","level":"info","event":"http","requestId":"c50b5040-6457-41d7-a9d5-d46914eeb392","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":335}
+{"time":"2026-10-25T06:59:28.760Z","level":"info","event":"http","requestId":"410fd47a-7322-4326-b4b0-a0aba8796219","method":"POST","route":"/api/v1/branches","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:28.768Z","level":"info","event":"http","requestId":"932fe1c8-9f23-4171-ab01-b6ee2380d92c","method":"POST","route":"/api/v1/people","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:28.776Z","level":"info","event":"http","requestId":"90839123-57be-4988-a47e-17f1ab328408","method":"POST","route":"/api/v1/payers","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:28.782Z","level":"info","event":"http","requestId":"71a5031f-eb62-4656-a15a-56b518fa1af9","method":"POST","route":"/api/v1/people","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:28.790Z","level":"info","event":"http","requestId":"a83242d3-99e6-4bf0-97c4-e16c97a9be0f","method":"POST","route":"/api/v1/students","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:28.797Z","level":"info","event":"http","requestId":"af16ea85-f0d5-47ae-9ec9-7009ca302432","method":"POST","route":"/api/v1/people","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:28.803Z","level":"info","event":"http","requestId":"1f3c8e95-586a-4496-9ba4-92272f781e92","method":"POST","route":"/api/v1/students","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:28.811Z","level":"info","event":"http","requestId":"a0a886d5-1000-45fa-83ef-48579c254f01","method":"POST","route":"/api/v1/people","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:28.819Z","level":"info","event":"http","requestId":"0fe13aa5-294b-4d19-a54f-bce20d0fac5d","method":"POST","route":"/api/v1/staff","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:28.825Z","level":"info","event":"http","requestId":"ee3b4f23-1537-41f3-b030-9178f9887832","method":"POST","route":"/api/v1/rooms","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:28.832Z","level":"info","event":"http","requestId":"fa36958f-3961-4cf2-967a-025ac54d798e","method":"POST","route":"/api/v1/groups","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:28.839Z","level":"info","event":"http","requestId":"f8b1c768-7b68-4db1-a86e-f59506c3db82","method":"POST","route":"/api/v1/accounts","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:28.846Z","level":"info","event":"http","requestId":"1c7d31e2-e368-412b-8e9c-d7f156e7707e","method":"POST","route":"/api/v1/subscription-templates","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:28.854Z","level":"info","event":"http","requestId":"2d08ee68-6765-4741-82f5-a9a520f8bc3c","method":"POST","route":"/api/v1/subscriptions","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:29.192Z","level":"info","event":"http","requestId":"ecd8d76c-197e-46f7-a849-d246d497c53b","method":"POST","route":"/api/v1/users","status":200,"durationMs":336}
+{"time":"2026-10-25T06:59:29.194Z","level":"info","event":"http","requestId":"97490fb1-2b66-4830-ac2f-3b9bccbb51b7","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:29.504Z","level":"info","event":"http","requestId":"40aa05ee-b092-4d05-bf40-56d5d70b8cd0","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":309}
+{"time":"2026-10-25T06:59:29.511Z","level":"info","event":"http","requestId":"34bcca86-9fbd-4b27-8b29-7a0d35d18e10","method":"POST","route":"/api/v1/people","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:29.816Z","level":"info","event":"http","requestId":"d7b0a03c-d1fc-42f7-887d-b1d833fad10f","method":"POST","route":"/api/v1/users","status":200,"durationMs":304}
+{"time":"2026-10-25T06:59:29.817Z","level":"info","event":"http","requestId":"2c3a915d-cab9-4046-bc79-f21c503a4249","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:30.145Z","level":"info","event":"http","requestId":"6018bedb-bf70-433c-a222-8d7d1e8a9373","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":327}
+{"time":"2026-10-25T06:59:30.465Z","level":"info","event":"http","requestId":"84bac0cb-f078-40b6-b520-eec57ac5dccd","method":"POST","route":"/api/v1/users","status":200,"durationMs":319}
+{"time":"2026-10-25T06:59:30.466Z","level":"info","event":"http","requestId":"782466fd-92cb-4d99-8cf5-d21f77e40d5b","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:30.779Z","level":"info","event":"http","requestId":"9af370dd-5096-444c-819d-10b7faf58cf1","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":312}
+{"time":"2026-10-25T06:59:31.115Z","level":"info","event":"http","requestId":"0b2cb5e3-6fa6-4616-840b-d18aa97d2d23","method":"POST","route":"/api/v1/users","status":200,"durationMs":334}
+{"time":"2026-10-25T06:59:31.116Z","level":"info","event":"http","requestId":"082aabba-7d02-487a-86af-edde1b284502","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:31.490Z","level":"info","event":"http","requestId":"59e64012-f9c5-4614-9c65-500c4277e1a1","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":373}
+{"time":"2026-10-25T06:59:31.494Z","level":"info","event":"http","requestId":"58f3250d-e732-47ce-8c1f-562c637da5de","method":"GET","route":"/health/ready","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.495Z","level":"info","event":"http","requestId":"d9f05b64-3013-46b6-8e1d-526dba626649","method":"GET","route":"unmatched","status":401,"durationMs":1}
+{"time":"2026-10-25T06:59:31.498Z","level":"info","event":"http","requestId":"67f67656-ed19-4f60-ba97-707ff83d899c","method":"POST","route":"unmatched","status":403,"durationMs":2}
+{"time":"2026-10-25T06:59:31.499Z","level":"info","event":"http","requestId":"3b365d4c-9b4b-4c6f-8ef2-170484cb1514","method":"GET","route":"unmatched","status":403,"durationMs":1}
+{"time":"2026-10-25T06:59:31.501Z","level":"info","event":"http","requestId":"4b7b9963-d7f4-4fe0-a473-ee021e99589b","method":"POST","route":"/api/v1/people","status":400,"durationMs":2}
+{"time":"2026-10-25T06:59:31.502Z","level":"info","event":"http","requestId":"e4290240-2189-4083-827a-01af8383eef7","method":"GET","route":"unmatched","status":404,"durationMs":0}
+{"time":"2026-10-25T06:59:31.504Z","level":"info","event":"http","requestId":"e929d122-7f07-44af-a912-4a87fd3d9def","method":"POST","route":"unmatched","status":400,"durationMs":1}
+{"time":"2026-10-25T06:59:31.511Z","level":"info","event":"http","requestId":"5fda7fcc-41a2-4ef2-b27c-163eb371dd61","method":"POST","route":"unmatched","status":413,"durationMs":2}
+✔ health, CSRF, bad origin, input errors and legacy routes (3586.145814ms)
+{"time":"2026-10-25T06:59:31.516Z","level":"info","event":"http","requestId":"6c68af16-e1c1-4c85-a46a-a50347f250dd","method":"GET","route":"/api/v1/people/:id","status":404,"durationMs":3}
+{"time":"2026-10-25T06:59:31.523Z","level":"info","event":"http","requestId":"d90a279d-7070-4d73-877d-85048e807181","method":"POST","route":"/api/v1/people","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:31.529Z","level":"info","event":"http","requestId":"65c89e68-a9df-4427-9e4e-3f2504a75887","method":"GET","route":"/api/v1/people/:id","status":404,"durationMs":5}
+{"time":"2026-10-25T06:59:31.534Z","level":"info","event":"http","requestId":"f8d3bc8a-efde-4901-9a89-ce738f5edf73","method":"GET","route":"/api/v1/people","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:31.549Z","level":"info","event":"http","requestId":"42b17317-e19b-4357-9c07-1ea26b76209e","method":"POST","route":"/api/v1/users","status":403,"durationMs":14}
+{"time":"2026-10-25T06:59:31.553Z","level":"info","event":"http","requestId":"2e4cbd45-cb99-4f41-afb3-1b5d409ecf6e","method":"PATCH","route":"/api/v1/staff/:id","status":403,"durationMs":3}
+{"time":"2026-10-25T06:59:31.557Z","level":"info","event":"http","requestId":"d0f331a4-7b11-43e9-8d1d-0d6d3e543cdd","method":"GET","route":"/api/v1/ledger","status":403,"durationMs":3}
+{"time":"2026-10-25T06:59:31.561Z","level":"info","event":"http","requestId":"326ebccf-29d7-48ca-87f4-e3e64b9250de","method":"GET","route":"/api/v1/staff","status":200,"durationMs":4}
+✔ tenant and branch isolation, user management authorization (48.862131ms)
+{"time":"2026-10-25T06:59:31.574Z","level":"info","event":"http","requestId":"9df31765-800d-44c4-b48e-0f853a776e38","method":"POST","route":"/api/v1/people","status":200,"durationMs":11}
+{"time":"2026-10-25T06:59:31.576Z","level":"info","event":"http","requestId":"c2ff061a-035c-4b79-ab1f-1eed2dea2f3a","method":"POST","route":"/api/v1/people","status":409,"durationMs":12}
+✔ concurrent normalized contacts cannot create duplicate people (15.883593ms)
+{"time":"2026-10-25T06:59:31.589Z","level":"info","event":"http","requestId":"9ef16493-3cf8-49bd-844e-81a6569fa653","method":"POST","route":"/api/v1/groups/:id/members","status":200,"durationMs":10}
+{"time":"2026-10-25T06:59:31.592Z","level":"info","event":"http","requestId":"3ab1959d-a99c-4b7d-8cf3-817e65f00cca","method":"POST","route":"/api/v1/groups/:id/members","status":409,"durationMs":13}
+{"time":"2026-10-25T06:59:31.598Z","level":"info","event":"http","requestId":"d54bacda-f397-41d7-8433-1e2b2497db28","method":"POST","route":"/api/v1/groups","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:31.604Z","level":"info","event":"http","requestId":"ba771233-23a6-4903-a3bc-948a77316ace","method":"POST","route":"/api/v1/groups/:id/members","status":200,"durationMs":5}
+✔ concurrent enrollments respect capacity; students can join multiple groups (26.98873ms)
+{"time":"2026-10-25T06:59:31.619Z","level":"info","event":"http","requestId":"6c8b66f2-07b0-4b12-9602-c52575fae9d7","method":"POST","route":"/api/v1/lessons","status":200,"durationMs":13}
+{"time":"2026-10-25T06:59:31.621Z","level":"info","event":"http","requestId":"a99365f7-a926-4147-bdac-ea4e62835ea7","method":"POST","route":"/api/v1/lessons","status":409,"durationMs":15}
+{"time":"2026-10-25T06:59:31.631Z","level":"info","event":"http","requestId":"95e844d0-006d-4b6e-b36a-d4772a7c481b","method":"POST","route":"/api/v1/lessons","status":200,"durationMs":8}
+{"time":"2026-10-25T06:59:31.636Z","level":"info","event":"http","requestId":"09d7673b-0390-4de6-92ff-ef1369bb221c","method":"POST","route":"/api/v1/rooms","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:31.640Z","level":"info","event":"http","requestId":"c48f433a-6bd2-4e98-924b-4620f508f46f","method":"POST","route":"/api/v1/lessons","status":409,"durationMs":3}
+✔ concurrent scheduling prevents overlaps; adjacent times accepted (36.518015ms)
+{"time":"2026-10-25T06:59:31.650Z","level":"info","event":"http","requestId":"39dd674a-8d69-4c82-8fd4-53a37010cd28","method":"POST","route":"/api/v1/transactions","status":200,"durationMs":8}
+{"time":"2026-10-25T06:59:31.652Z","level":"info","event":"http","requestId":"5d3cc6d2-b9f0-41cb-b354-c38322397daa","method":"POST","route":"/api/v1/transactions","status":200,"durationMs":10}
+{"time":"2026-10-25T06:59:31.657Z","level":"info","event":"http","requestId":"ec661798-ea94-4705-84b8-a092e897e20a","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:31.661Z","level":"info","event":"http","requestId":"80f89dd1-a4ef-4cca-972a-620ed119ffab","method":"POST","route":"/api/v1/transactions","status":409,"durationMs":3}
+{"time":"2026-10-25T06:59:31.664Z","level":"info","event":"http","requestId":"f645aec1-2175-4333-8678-2f2624bc2ccf","method":"POST","route":"/api/v1/transactions","status":400,"durationMs":2}
+✔ payments are atomic, exact and idempotent across concurrent requests (23.332133ms)
+{"time":"2026-10-25T06:59:31.678Z","level":"info","event":"http","requestId":"44461a15-603a-439a-add9-5469376a32aa","method":"POST","route":"/api/v1/lessons/:id/complete","status":200,"durationMs":12}
+{"time":"2026-10-25T06:59:31.682Z","level":"info","event":"http","requestId":"b86b1b0a-5d80-4aea-88d5-bb94720e7a13","method":"POST","route":"/api/v1/lessons/:id/complete","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:31.686Z","level":"info","event":"http","requestId":"70228bd6-2cf1-4f76-af70-9f93f0cde333","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:31.689Z","level":"info","event":"http","requestId":"d31407b6-56e0-4592-92fc-2741a7f90097","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.692Z","level":"info","event":"http","requestId":"83c93114-b5e0-4652-8858-00a6561d56e2","method":"GET","route":"/api/v1/subscriptions/:id/availability","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.695Z","level":"info","event":"http","requestId":"301d1b37-3a26-4b72-8c62-01cb9c715ee1","method":"POST","route":"/api/v1/lessons/:id/complete","status":403,"durationMs":2}
+{"time":"2026-10-25T06:59:31.703Z","level":"info","event":"http","requestId":"046d1a8d-e692-40d0-a4b2-e57513cf3b20","method":"POST","route":"/api/v1/lessons/:id/complete","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:31.706Z","level":"info","event":"http","requestId":"666198e2-9e36-4b34-8b62-6c580b3b4f21","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.709Z","level":"info","event":"http","requestId":"7738eddf-07b0-48b5-9eb9-c1d0f1d26d6c","method":"GET","route":"/api/v1/subscriptions/:id/availability","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.711Z","level":"info","event":"http","requestId":"71f2fe56-a6d2-4433-b6a1-12e45e409456","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:31.719Z","level":"info","event":"http","requestId":"a632dc23-876c-483e-a218-954e6df88bfb","method":"POST","route":"/api/v1/lessons/:id/complete","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:31.722Z","level":"info","event":"http","requestId":"40913bb2-605a-4cf6-8da6-750b5631bd3f","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.725Z","level":"info","event":"http","requestId":"0b456c91-b9c2-4d8c-ba64-853d44003d3b","method":"GET","route":"/api/v1/subscriptions/:id/availability","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.728Z","level":"info","event":"http","requestId":"3cda47e4-2b2e-41dd-9897-38e865e9033c","method":"POST","route":"/api/v1/lessons/:id/complete","status":409,"durationMs":2}
+✔ teacher first completion, retry, manager corrections, salary reversal (64.324483ms)
+{"time":"2026-10-25T06:59:31.732Z","level":"info","event":"http","requestId":"1c639f61-b436-4189-a0ce-4afe5ba4b135","method":"GET","route":"/api/v1/students","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.735Z","level":"info","event":"http","requestId":"34cc4610-0722-448f-9dfd-28ad244cbe55","method":"GET","route":"/api/v1/students","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.739Z","level":"info","event":"http","requestId":"094f8bbe-8bed-4fdb-90a4-0378e97940c3","method":"GET","route":"/api/v1/people","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:31.743Z","level":"info","event":"http","requestId":"172e20b6-e33e-4099-a5fd-275fb5eadff5","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:31.745Z","level":"info","event":"http","requestId":"8305a018-76bb-4480-abe8-2fecfe3ea4c0","method":"GET","route":"/api/v1/accounts/:id/balance","status":404,"durationMs":2}
+{"time":"2026-10-25T06:59:31.747Z","level":"info","event":"http","requestId":"15479da8-e77b-4b64-a71c-84fd53550742","method":"GET","route":"/api/v1/accounts","status":403,"durationMs":2}
+{"time":"2026-10-25T06:59:31.750Z","level":"info","event":"http","requestId":"c6eb695d-8a65-4ded-b4d8-968b01df7984","method":"GET","route":"/api/v1/lessons/:id/attendance","status":200,"durationMs":3}
+✔ payer/student portals expose only linked learning data; no broad finance (21.530989ms)
+{"time":"2026-10-25T06:59:31.756Z","level":"info","event":"http","requestId":"3d1495af-1752-436b-8a23-008553b3a5f3","method":"POST","route":"/api/v1/transactions","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:31.759Z","level":"info","event":"http","requestId":"51ed8867-6e81-4e48-9a1c-522849cc5e9d","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.767Z","level":"info","event":"http","requestId":"f6d80c32-f97a-4b64-9930-1a154d4a25a5","method":"POST","route":"/api/v1/transactions/:id/reverse","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:31.770Z","level":"info","event":"http","requestId":"e78e4baf-8d32-4e68-a421-9630f6a69e65","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.777Z","level":"info","event":"http","requestId":"f2645009-7571-4b0f-8f0b-2e93da2186e7","method":"POST","route":"/api/v1/transactions/:id/reverse","status":409,"durationMs":6}
+{"time":"2026-10-25T06:59:31.780Z","level":"info","event":"http","requestId":"478a0dbf-c632-471f-8290-42e8c5bd3dfa","method":"POST","route":"/api/v1/transactions","status":409,"durationMs":2}
+✔ refund and manual reversal preserve history; excessive cash out rejected (30.124467ms)
+{"time":"2026-10-25T06:59:31.783Z","level":"info","event":"http","requestId":"0e8ce1e6-b115-4fec-b44c-4c908353c4d6","method":"POST","route":"/api/v1/transactions","status":403,"durationMs":2}
+{"time":"2026-10-25T06:59:31.789Z","level":"info","event":"http","requestId":"eb636aaf-00f7-4356-ac7c-de581ae00c82","method":"POST","route":"/api/v1/transactions","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:31.792Z","level":"info","event":"http","requestId":"306430f3-516b-4811-b595-2d66065c71b6","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":2}
+✔ salary payments separate from accrual and manager cannot pay salary (11.802169ms)
+{"time":"2026-10-25T06:59:31.800Z","level":"info","event":"http","requestId":"35653d93-2a99-40b0-8dbb-94cf0bfd899e","method":"POST","route":"/api/v1/lessons/:id/cancel","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:31.804Z","level":"info","event":"http","requestId":"293a9d1c-f981-4931-9196-8320b5176bf7","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:31.807Z","level":"info","event":"http","requestId":"afe1f68f-064e-45fe-8db9-27055004c3b3","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:31.809Z","level":"info","event":"http","requestId":"f34e7333-900a-4a89-93e1-ae36b8a16b19","method":"GET","route":"/api/v1/subscriptions/:id/availability","status":200,"durationMs":2}
+✔ cancel conducted lesson compensates all charges and subscription usage (16.920272ms)
+{"time":"2026-10-25T06:59:31.816Z","level":"info","event":"http","requestId":"e2a12fd1-86ca-4171-91e5-ddb07f3436fe","method":"POST","route":"/api/v1/leads","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:31.823Z","level":"info","event":"http","requestId":"4d6455b0-e2f6-4309-b96a-dfb25a17ea2a","method":"POST","route":"/api/v1/leads","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:31.833Z","level":"info","event":"http","requestId":"adacf4b8-d66c-4058-ae0c-a891bf666866","method":"POST","route":"/api/v1/leads/:id/convert","status":200,"durationMs":9}
+{"time":"2026-10-25T06:59:31.839Z","level":"info","event":"http","requestId":"8c94c83f-c0f7-4bdf-bf47-435b4558969a","method":"POST","route":"/api/v1/leads/:id/convert","status":200,"durationMs":5}
+✔ lead conversion reuses person, payer and student (30.28551ms)
+{"time":"2026-10-25T06:59:31.849Z","level":"info","event":"http","requestId":"765c5a04-aa98-4e2e-bca7-d022337ce099","method":"POST","route":"/api/v1/subscriptions/:id/freeze","status":200,"durationMs":8}
+{"time":"2026-10-25T06:59:31.852Z","level":"info","event":"http","requestId":"7fd1f493-b602-4749-aa30-96a7ae014933","method":"GET","route":"/api/v1/subscriptions/:id/availability","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:31.866Z","level":"info","event":"http","requestId":"3acad8ae-eed3-4bb9-be64-7ffdf43c7707","method":"POST","route":"/api/v1/subscriptions/:id/unfreeze","status":200,"durationMs":11}
+{"time":"2026-10-25T06:59:31.872Z","level":"info","event":"http","requestId":"5897514a-ea09-4424-a8fd-fb9e5ca1a486","method":"GET","route":"/api/v1/subscriptions/:id/availability","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:31.876Z","level":"info","event":"http","requestId":"684e9f56-f0e0-4aad-a1dc-18951e3336f9","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":3}
+✔ subscription freeze extends actual duration; expiry does not change money (36.83625ms)
+{"time":"2026-10-25T06:59:31.957Z","level":"info","event":"http","requestId":"7cdba9e5-b442-4937-919b-7bdd9a979cfb","method":"POST","route":"/api/v1/imports/people","status":400,"durationMs":47}
+{"time":"2026-10-25T06:59:31.965Z","level":"info","event":"http","requestId":"fc75d003-d832-497a-a232-a4b0c00000b0","method":"GET","route":"/api/v1/people","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:31.984Z","level":"info","event":"http","requestId":"4a86791a-0168-4025-b65c-69d80aa34739","method":"POST","route":"/api/v1/imports/people","status":200,"durationMs":12}
+{"time":"2026-10-25T06:59:31.991Z","level":"info","event":"http","requestId":"22fb9116-f5c1-4a7f-bdeb-edadd4afbd63","method":"POST","route":"/api/v1/imports/people","status":200,"durationMs":4}
+✔ XLSX import atomic rollback, child without contacts, retry safety (114.643957ms)
+{"time":"2026-10-25T06:59:31.996Z","level":"info","event":"http","requestId":"c4af6a48-5efb-4092-ad73-d2333a3ddc27","method":"GET","route":"/api/v1/openapi.json","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:32.021Z","level":"info","event":"http","requestId":"c4468100-9af2-4e8f-9dcf-6c4e921b1716","method":"POST","route":"/api/v1/auth/logout","status":200,"durationMs":20}
+{"time":"2026-10-25T06:59:32.023Z","level":"info","event":"http","requestId":"708224e5-3092-42c0-8f19-1b166192cfc6","method":"GET","route":"unmatched","status":401,"durationMs":1}
+✔ OpenAPI generated from actual registered routes and logout revocation (32.249593ms)
+{"time":"2026-10-25T06:59:32.033Z","level":"info","event":"http","requestId":"4a77aab2-99f9-4077-9a9b-3167e3536544","method":"POST","route":"/api/v1/lessons","status":200,"durationMs":8}
+{"time":"2026-10-25T06:59:32.040Z","level":"info","event":"http","requestId":"8f9248ca-33c4-46f7-9e7e-0421053833c9","method":"POST","route":"/api/v1/lessons/:id/complete","status":409,"durationMs":6}
+{"time":"2026-10-25T06:59:32.046Z","level":"info","event":"http","requestId":"6846ab62-7061-446a-b015-fe5b2f30973c","method":"GET","route":"/api/v1/lessons/:id","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:32.050Z","level":"info","event":"http","requestId":"3d49dce8-c301-4751-bc93-120051752588","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":3}
+✔ expired subscription cannot consume unused allowance even for a past lesson (26.303972ms)
+{"time":"2026-10-25T06:59:32.055Z","level":"info","event":"http","requestId":"b54201af-d8a7-4741-bcc0-54f17df2e077","method":"POST","route":"/api/v1/people","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:32.061Z","level":"info","event":"http","requestId":"d3437876-7993-43f7-809e-a3900eec8fd4","method":"POST","route":"/api/v1/staff","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:32.070Z","level":"info","event":"http","requestId":"a978bf68-306d-49c2-8d61-01b9ef77aeac","method":"POST","route":"/api/v1/lessons","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:32.075Z","level":"info","event":"http","requestId":"575ab8e9-d03b-4539-ae18-88420bfc6448","method":"POST","route":"/api/v1/lessons","status":409,"durationMs":3}
+{"time":"2026-10-25T06:59:32.083Z","level":"info","event":"http","requestId":"83ee3d0e-2f2c-4495-a8c0-bd8a9c606b0f","method":"PATCH","route":"/api/v1/lessons/:id","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:32.094Z","level":"info","event":"http","requestId":"53ff6568-829c-478c-a4dc-aa99c2f01b97","method":"POST","route":"/api/v1/lessons","status":200,"durationMs":10}
+{"time":"2026-10-25T06:59:32.098Z","level":"info","event":"http","requestId":"067e4b3e-4f6b-454a-8c92-edefc99c49f8","method":"GET","route":"/api/v1/lessons/:id","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:32.103Z","level":"info","event":"http","requestId":"d48d7621-3404-4aec-8854-c028b558ff30","method":"PATCH","route":"/api/v1/lessons/:id","status":403,"durationMs":4}
+✔ room collision with a different teacher is rejected, rescheduling frees slot (53.680332ms)
+{"time":"2026-10-25T06:59:32.112Z","level":"info","event":"http","requestId":"a4bedfaa-b589-4315-8e84-789d91eede61","method":"POST","route":"/api/v1/announcements","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:32.119Z","level":"info","event":"http","requestId":"e14a0c73-e9c2-4e29-91ff-4efea7fdf095","method":"GET","route":"/api/v1/announcements","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:32.127Z","level":"info","event":"http","requestId":"d2682e8e-84af-4045-b160-a2531cc8448c","method":"POST","route":"/api/v1/tasks","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:32.135Z","level":"info","event":"http","requestId":"0a13331a-ddd7-4bc3-bca8-4e5a29d82a17","method":"POST","route":"/api/v1/comments","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:32.141Z","level":"info","event":"http","requestId":"7beb701c-a37f-4f3c-9596-daeda2c13335","method":"GET","route":"/api/v1/comments","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:32.145Z","level":"info","event":"http","requestId":"04d39903-6ea6-4182-b34b-9b5ad65e3ff6","method":"GET","route":"/api/v1/comments","status":403,"durationMs":2}
+{"time":"2026-10-25T06:59:32.150Z","level":"info","event":"http","requestId":"5fa37e1b-3b13-4621-ba07-06874ba23e73","method":"GET","route":"/api/v1/profile","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:32.157Z","level":"info","event":"http","requestId":"34732df5-3ec8-41a5-98d2-fbce681b2bce","method":"PATCH","route":"/api/v1/profile","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:32.160Z","level":"info","event":"http","requestId":"e1c3998c-a84d-47be-b3f1-e3a618c152b3","method":"GET","route":"/api/v1/profile","status":200,"durationMs":2}
+✔ comments, announcements, tasks, internal notifications and own profile (57.821102ms)
+{"time":"2026-10-25T06:59:32.168Z","level":"info","event":"http","requestId":"6878343e-a814-4709-9d10-4b073e162121","method":"POST","route":"/api/v1/accounts","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:32.176Z","level":"info","event":"http","requestId":"83674c16-f0a3-4f57-90f9-cc0636385181","method":"POST","route":"/api/v1/transactions","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:32.183Z","level":"info","event":"http","requestId":"8133a27d-11a9-4666-829a-c308b88a6e2c","method":"POST","route":"/api/v1/transactions","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:32.185Z","level":"info","event":"http","requestId":"259d7451-700a-4627-9e0a-c55d630d8d75","method":"POST","route":"/api/v1/transactions","status":409,"durationMs":7}
+{"time":"2026-10-25T06:59:32.189Z","level":"info","event":"http","requestId":"1e9e5eed-6e17-440b-b460-0a9722ba9512","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":2}
+✔ concurrent withdrawals cannot overdraw cash (27.567781ms)
+{"time":"2026-10-25T06:59:32.198Z","level":"info","event":"http","requestId":"9e25918a-7065-4515-b135-d019191c3907","method":"POST","route":"/api/v1/subscription-templates","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:32.206Z","level":"info","event":"http","requestId":"25e389fc-b3ce-4544-b055-6c784ad81b68","method":"POST","route":"/api/v1/subscriptions","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:32.218Z","level":"info","event":"http","requestId":"81ffe447-1aac-476b-82ad-34c3e7b6a166","method":"POST","route":"/api/v1/lessons","status":200,"durationMs":11}
+{"time":"2026-10-25T06:59:32.225Z","level":"info","event":"http","requestId":"8e665198-42c6-4dbc-a33c-123f838ba323","method":"POST","route":"/api/v1/lessons","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:32.234Z","level":"info","event":"http","requestId":"3dadd562-d969-4ed3-b074-68e5be9519ea","method":"POST","route":"/api/v1/subscriptions/:id/freeze","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:32.241Z","level":"info","event":"http","requestId":"c6faeceb-bd28-45f8-94dd-098b21360c48","method":"POST","route":"/api/v1/lessons/:id/complete","status":409,"durationMs":5}
+{"time":"2026-10-25T06:59:32.247Z","level":"info","event":"http","requestId":"b094af90-4280-46bf-ae1b-36ef3179569e","method":"POST","route":"/api/v1/subscriptions/:id/unfreeze","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:32.262Z","level":"info","event":"http","requestId":"f8b46eb9-674f-4db3-99dd-c99ce5331722","method":"POST","route":"/api/v1/lessons/:id/complete","status":200,"durationMs":13}
+{"time":"2026-10-25T06:59:32.266Z","level":"info","event":"http","requestId":"a2e071b5-d0e2-4042-9673-4771165eab63","method":"POST","route":"/api/v1/lessons/:id/complete","status":409,"durationMs":17}
+{"time":"2026-10-25T06:59:32.269Z","level":"info","event":"http","requestId":"568d2b5f-0b75-41d1-8f87-cd048c6c76ba","method":"GET","route":"/api/v1/subscriptions/:id/availability","status":200,"durationMs":2}
+✔ frozen and exhausted passes reject new consumption atomically (79.634737ms)
+{"time":"2026-10-25T06:59:32.272Z","level":"info","event":"http","requestId":"4569993c-c4bc-4f3a-af6b-e1bd2f45678b","method":"GET","route":"/api/v1/auth/me","status":200,"durationMs":2}
+{"time":"2026-10-25T06:59:32.276Z","level":"info","event":"http","requestId":"230c2c8b-1870-48d7-8bb3-3b4e1e66f6a1","method":"PATCH","route":"/api/v1/users/:id","status":409,"durationMs":3}
+{"time":"2026-10-25T06:59:32.278Z","level":"info","event":"http","requestId":"2ba1f42e-7582-4574-a759-b109fdf3f494","method":"GET","route":"/api/v1/auth/me","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:32.284Z","level":"info","event":"http","requestId":"b4f9fb92-1445-4946-8974-5b854c66d4c1","method":"PATCH","route":"/api/v1/users/:id","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:32.286Z","level":"info","event":"http","requestId":"fd87d593-06d9-486b-b3ca-2e4cc596e225","method":"GET","route":"unmatched","status":401,"durationMs":1}
+✔ changing permissions revokes active sessions and protects own director account (16.938954ms)
+{"time":"2026-10-25T06:59:32.290Z","level":"info","event":"http","requestId":"80c85d98-0116-431f-85f7-e11aa25e41e2","method":"POST","route":"/api/v1/people","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:32.294Z","level":"info","event":"http","requestId":"df82889a-ba6a-4d97-90c3-bce17cd8a43b","method":"POST","route":"/api/v1/staff","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:32.298Z","level":"info","event":"http","requestId":"a9260f55-6c35-497f-b33e-bf1df9ac757b","method":"POST","route":"/api/v1/payers","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:32.307Z","level":"info","event":"http","requestId":"e0562410-3736-47de-8f3c-fc47c54be76a","method":"POST","route":"/api/v1/people","status":200,"durationMs":8}
+{"time":"2026-10-25T06:59:32.311Z","level":"info","event":"http","requestId":"a1d53824-6d97-49d4-9a0f-447195a6cfa8","method":"POST","route":"/api/v1/students","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:32.653Z","level":"info","event":"http","requestId":"465cadde-efa3-4544-b9b8-a7307ee44175","method":"POST","route":"/api/v1/users","status":200,"durationMs":341}
+{"time":"2026-10-25T06:59:32.655Z","level":"info","event":"http","requestId":"e1a17a63-8b93-4c51-8a7f-34fa0ca1be98","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:33.023Z","level":"info","event":"http","requestId":"3c8b549d-89dc-4992-bfc4-449f9f584614","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":365}
+{"time":"2026-10-25T06:59:33.035Z","level":"info","event":"http","requestId":"9aa3594a-5376-406c-9d40-b4510529eabb","method":"GET","route":"/api/v1/students","status":200,"durationMs":11}
+{"time":"2026-10-25T06:59:33.046Z","level":"info","event":"http","requestId":"68146646-bde9-4bd6-a4bf-caaf41e394c6","method":"GET","route":"/api/v1/students","status":200,"durationMs":10}
+{"time":"2026-10-25T06:59:33.051Z","level":"info","event":"http","requestId":"6bf59a4e-1319-4085-9976-cc41372925fb","method":"GET","route":"/api/v1/accounts/:id/balance","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:33.054Z","level":"info","event":"http","requestId":"7b0c1845-1fa6-494f-b047-5cc854347b17","method":"GET","route":"/api/v1/accounts/:id/balance","status":404,"durationMs":2}
+{"time":"2026-10-25T06:59:33.063Z","level":"info","event":"http","requestId":"2d1a8e45-dd9d-4f56-99bc-862eaad9df86","method":"POST","route":"/api/v1/lessons","status":200,"durationMs":8}
+{"time":"2026-10-25T06:59:33.070Z","level":"info","event":"http","requestId":"1207921f-223f-4b1b-950d-be909db85691","method":"GET","route":"/api/v1/lessons/:id/attendance","status":200,"durationMs":6}
+✔ employee plus payer roles unite scoped work access and own children across branches (784.696469ms)
+{"time":"2026-10-25T06:59:33.081Z","level":"info","event":"http","requestId":"eb12569c-ea7b-4182-8ff9-ee2107e103b2","method":"GET","route":"/api/v1/analytics/overview","status":200,"durationMs":9}
+{"time":"2026-10-25T06:59:33.087Z","level":"info","event":"http","requestId":"49fb62d7-c7d1-4207-b7ea-eaff13f7488b","method":"PATCH","route":"/api/v1/widgets","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:33.092Z","level":"info","event":"http","requestId":"6ed3ef85-d09e-4a3c-8276-582df3d64e1c","method":"GET","route":"/api/v1/widgets","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:33.096Z","level":"info","event":"http","requestId":"dd20227e-3954-45a2-adfb-d78d606fdfce","method":"GET","route":"/api/v1/analytics/overview","status":403,"durationMs":3}
+✔ analytics aggregates four widgets, scopes branches and persists user preferences (24.954607ms)
+{"time":"2026-10-25T06:59:33.937Z","level":"info","event":"http","requestId":"1982ee9b-40c4-4ff3-b8a2-053787f360c4","method":"GET","route":"/health/live","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:33.950Z","level":"info","event":"http","requestId":"52be1bd4-009f-4038-9786-c0946772b50f","method":"GET","route":"/health/ready","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:33.956Z","level":"info","event":"http","requestId":"3305a3db-5ed0-42f5-8c0c-ae5c1f2ae928","method":"POST","route":"unmatched","status":403,"durationMs":3}
+{"time":"2026-10-25T06:59:33.959Z","level":"info","event":"http","requestId":"daf8c308-942f-4a8e-896c-9e2628b96065","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:33.962Z","level":"info","event":"http","requestId":"afee1393-7cbf-4f0c-90c8-5b6fd3b3626d","method":"POST","route":"unmatched","status":403,"durationMs":1}
+{"time":"2026-10-25T06:59:33.964Z","level":"info","event":"http","requestId":"1bf96d3c-670e-4143-a648-1e062178bfa5","method":"POST","route":"unmatched","status":403,"durationMs":0}
+{"time":"2026-10-25T06:59:33.966Z","level":"info","event":"http","requestId":"60d6db78-138f-4548-afb3-b77dc26ff434","method":"GET","route":"/health/live","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:33.968Z","level":"info","event":"http","requestId":"ccc98f30-b19f-4346-b9ff-1cb2a70d309b","method":"POST","route":"unmatched","status":400,"durationMs":1}
+✔ health and CSRF bootstrap: anonymous writes, forged tokens, origins and malformed JSON (72.21751ms)
+{"time":"2026-10-25T06:59:33.971Z","level":"info","event":"http","requestId":"472a6174-33bc-46ab-bf64-beb99e1571d6","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:34.323Z","level":"info","event":"http","requestId":"a1208896-2570-456b-9bbe-5f780f3e23af","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":350}
+{"time":"2026-10-25T06:59:34.325Z","level":"info","event":"http","requestId":"dc3a50e4-6b68-4cc8-a89f-ec3f6f185523","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:34.652Z","level":"info","event":"http","requestId":"340e3ee5-414b-48bf-ab2a-14c6ca656c1a","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":325}
+{"time":"2026-10-25T06:59:34.661Z","level":"info","event":"http","requestId":"fbe3fdb4-69af-4af6-9681-3252384ee35f","method":"GET","route":"/api/v1/profile","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:34.663Z","level":"info","event":"http","requestId":"121eb993-83ea-4098-9acc-8d80fbfbb220","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:34.969Z","level":"info","event":"http","requestId":"caa0428a-e4e0-47cf-8df4-3b4f0c16b5f1","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":305}
+{"time":"2026-10-25T06:59:34.971Z","level":"info","event":"http","requestId":"36676d16-864e-4cb8-af80-a776320ca6b2","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:35.280Z","level":"info","event":"http","requestId":"a42126b9-0d7c-4795-9d77-e14b634a07f7","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":308}
+{"time":"2026-10-25T06:59:35.281Z","level":"info","event":"http","requestId":"f2b50bd0-3565-4a62-acf1-3b156397d23f","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:35.585Z","level":"info","event":"http","requestId":"26d5e939-77b2-47e6-b95f-f15dae80c88c","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":303}
+{"time":"2026-10-25T06:59:35.586Z","level":"info","event":"http","requestId":"30785b54-fbaf-444d-a128-eeab5f9f7d69","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:35.589Z","level":"info","event":"http","requestId":"9957fb8e-c6eb-492b-a0c0-703a525c4d76","method":"POST","route":"/api/v1/auth/register","status":400,"durationMs":2}
+{"time":"2026-10-25T06:59:35.628Z","level":"info","event":"http","requestId":"b9c7a017-d5c4-405a-98a3-d7202d584787","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"level":"error","requestId":"bfc61fe1-5bda-411b-bb2b-64d7e882cce1","code":"ER_CHECK_CONSTRAINT_VIOLATED","message":"Internal dependency failure"}
+{"time":"2026-10-25T06:59:35.953Z","level":"info","event":"http","requestId":"bfc61fe1-5bda-411b-bb2b-64d7e882cce1","method":"POST","route":"/api/v1/auth/register","status":500,"durationMs":324}
+✔ registration creates atomic tenant graph, normalized phone, membership; names and logins reusable across tenants (2003.123864ms)
+{"time":"2026-10-25T06:59:35.975Z","level":"info","event":"http","requestId":"5f7e79b2-d0eb-44e8-9f27-d27fa56ab1da","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:36.301Z","level":"info","event":"http","requestId":"59401083-6d63-41d3-99bb-682e613eceda","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":325}
+{"time":"2026-10-25T06:59:36.303Z","level":"info","event":"http","requestId":"fa5fb54b-2b6a-4027-b2fd-62910f43d117","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:36.615Z","level":"info","event":"http","requestId":"18d9c831-9944-41f1-a618-ccac37f178f6","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":310}
+{"time":"2026-10-25T06:59:36.618Z","level":"info","event":"http","requestId":"2f5a0a21-bbf0-4843-bd0e-d9884110074d","method":"PATCH","route":"unmatched","status":403,"durationMs":1}
+{"time":"2026-10-25T06:59:36.627Z","level":"info","event":"http","requestId":"8f3156fc-ee6c-40da-b9be-19892e392794","method":"POST","route":"/api/v1/auth/sessions/revoke-others","status":200,"durationMs":8}
+{"time":"2026-10-25T06:59:36.629Z","level":"info","event":"http","requestId":"a62c9aa3-993d-4723-8d76-c7230c15b773","method":"GET","route":"unmatched","status":401,"durationMs":1}
+{"time":"2026-10-25T06:59:36.639Z","level":"info","event":"http","requestId":"45ffd4b9-ab6b-4f5b-b4f3-d42f41327998","method":"PATCH","route":"/api/v1/profile","status":200,"durationMs":7}
+{"time":"2026-10-25T06:59:36.644Z","level":"info","event":"http","requestId":"effafab9-6899-4303-b02e-f719a6b2d39e","method":"GET","route":"/api/v1/profile","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:36.646Z","level":"info","event":"http","requestId":"942df7e3-bd50-4539-bf67-98841c38f607","method":"PATCH","route":"/api/v1/profile","status":400,"durationMs":2}
+{"time":"2026-10-25T06:59:36.981Z","level":"info","event":"http","requestId":"2ca48e19-998f-4908-82f2-e74b7b27082b","method":"POST","route":"/api/v1/profile/password","status":403,"durationMs":333}
+{"time":"2026-10-25T06:59:37.629Z","level":"info","event":"http","requestId":"5d0c4208-b4b2-4f8f-9db4-cfa4b2b897a1","method":"POST","route":"/api/v1/profile/password","status":200,"durationMs":646}
+{"time":"2026-10-25T06:59:37.631Z","level":"info","event":"http","requestId":"da726e7a-5e1d-419c-a0cd-03e624d0a00f","method":"GET","route":"unmatched","status":401,"durationMs":1}
+{"time":"2026-10-25T06:59:37.632Z","level":"info","event":"http","requestId":"b18f01fe-cae9-4041-87c2-87505f280eac","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:37.962Z","level":"info","event":"http","requestId":"10a01d18-6e87-40be-92f9-90b2254ee387","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":329}
+{"time":"2026-10-25T06:59:37.964Z","level":"info","event":"http","requestId":"464b586d-557d-4800-9d11-847af1668d14","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:38.325Z","level":"info","event":"http","requestId":"a0ceeaca-fc9f-4eab-805c-b299807e047e","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":351}
+{"time":"2026-10-25T06:59:38.332Z","level":"info","event":"http","requestId":"3789c444-287a-4488-ba52-898f66372105","method":"POST","route":"/api/v1/auth/logout","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:38.335Z","level":"info","event":"http","requestId":"c28148ce-f171-49a4-821b-ccd71e389afc","method":"GET","route":"unmatched","status":401,"durationMs":2}
+✔ session cookies, CSRF, logout, revoke others, profile and password change (2362.739206ms)
+{"time":"2026-10-25T06:59:38.338Z","level":"info","event":"http","requestId":"a4c9dfba-d68f-44ef-8372-c9ef044e801c","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:38.676Z","level":"info","event":"http","requestId":"3a8639b3-8b75-465d-a73a-53871b542dc2","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":337}
+{"time":"2026-10-25T06:59:38.678Z","level":"info","event":"http","requestId":"4f6b004e-4843-44c1-9ea4-c3c5024f8471","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:38.990Z","level":"info","event":"http","requestId":"aeb8deb3-b768-496d-92ff-9ed23c25e4d6","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":311}
+{"time":"2026-10-25T06:59:39.012Z","level":"info","event":"http","requestId":"f5f02ece-cc6d-4fd2-8350-8535efec4263","method":"POST","route":"/api/v1/people","status":200,"durationMs":8}
+{"time":"2026-10-25T06:59:39.018Z","level":"info","event":"http","requestId":"13b9a89d-56e8-46b4-bb38-d2d89f31c35e","method":"POST","route":"/api/v1/people","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:39.022Z","level":"info","event":"http","requestId":"57f09e57-3753-4990-96b3-5122f39d39a9","method":"POST","route":"/api/v1/invitations","status":404,"durationMs":3}
+{"time":"2026-10-25T06:59:39.026Z","level":"info","event":"http","requestId":"52ff7840-ed12-4338-8840-3fe62174c998","method":"POST","route":"/api/v1/invitations","status":404,"durationMs":3}
+{"time":"2026-10-25T06:59:39.033Z","level":"info","event":"http","requestId":"b9a223d5-e7d6-44a3-8f8a-5f628df3ddb1","method":"POST","route":"/api/v1/invitations","status":200,"durationMs":6}
+{"time":"2026-10-25T06:59:39.034Z","level":"info","event":"http","requestId":"59f728a9-e197-49fe-a009-0fe919e29f9e","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:39.035Z","level":"info","event":"http","requestId":"eb382327-6f3c-4837-9c36-800e55f001cf","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:39.341Z","level":"info","event":"http","requestId":"a3f50c72-bd69-4597-8b75-a325d68b0d65","method":"POST","route":"/api/v1/auth/invitations/accept","status":200,"durationMs":304}
+{"time":"2026-10-25T06:59:39.347Z","level":"info","event":"http","requestId":"2d36c791-2823-4a51-b50b-ab546be112cc","method":"POST","route":"/api/v1/auth/invitations/accept","status":400,"durationMs":309}
+{"time":"2026-10-25T06:59:39.351Z","level":"info","event":"http","requestId":"b971b15d-9f36-4386-84bb-77692386271a","method":"POST","route":"/api/v1/invitations","status":403,"durationMs":3}
+{"time":"2026-10-25T06:59:39.351Z","level":"info","event":"http","requestId":"23b6b07b-71d2-4e9a-8b6f-fe755d82e120","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:39.649Z","level":"info","event":"http","requestId":"3d4a1310-ac42-4914-ab6d-cc9a7eb97d68","method":"POST","route":"/api/v1/auth/invitations/accept","status":400,"durationMs":297}
+{"time":"2026-10-25T06:59:39.655Z","level":"info","event":"http","requestId":"96fd75c8-8cfd-4ab8-a8b3-bfdedf7caf99","method":"POST","route":"/api/v1/people","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:39.661Z","level":"info","event":"http","requestId":"4c58b0f3-92da-487f-b34a-14f103d73622","method":"POST","route":"/api/v1/invitations","status":200,"durationMs":5}
+{"time":"2026-10-25T06:59:39.663Z","level":"info","event":"http","requestId":"43adcd1b-e713-46bb-b0b5-f24351694942","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:39.973Z","level":"info","event":"http","requestId":"9b006164-c9e5-4bd8-bb0c-137b0f19d2ca","method":"POST","route":"/api/v1/auth/invitations/accept","status":400,"durationMs":309}
+✔ invitations are atomic, one-use, expiring, tenant and role checked (1638.969311ms)
+{"time":"2026-10-25T06:59:39.977Z","level":"info","event":"http","requestId":"2c567af6-d1a5-4a9e-a898-c27247b16c6d","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:40.283Z","level":"info","event":"http","requestId":"53b22a89-dcb4-4853-a243-3eab07bcf1e0","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":305}
+{"time":"2026-10-25T06:59:40.284Z","level":"info","event":"http","requestId":"90e7dd7b-bedf-47e9-a84a-45aed9f2a230","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:40.590Z","level":"info","event":"http","requestId":"b52451f6-93e4-4490-8510-c55f60ed4cad","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":305}
+{"time":"2026-10-25T06:59:40.595Z","level":"info","event":"http","requestId":"2acae2cc-0688-4f34-8452-eb5b139c65a6","method":"POST","route":"/api/v1/people","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:40.600Z","level":"info","event":"http","requestId":"89a08f62-a9b8-4aaf-8d57-94d252cf7cf1","method":"POST","route":"/api/v1/branches","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:40.605Z","level":"info","event":"http","requestId":"992c218a-873e-4f25-9f2c-87c1e62d1aa0","method":"POST","route":"/api/v1/people","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:40.904Z","level":"info","event":"http","requestId":"196641b4-40b7-4e29-9963-07e8f9634ad6","method":"POST","route":"/api/v1/users","status":200,"durationMs":298}
+{"time":"2026-10-25T06:59:40.906Z","level":"info","event":"http","requestId":"1e86d9bc-3c4c-4568-b782-d21ff6dd1658","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:41.208Z","level":"info","event":"http","requestId":"a1aa6391-53ef-4437-b577-478162e92372","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":301}
+{"time":"2026-10-25T06:59:41.212Z","level":"info","event":"http","requestId":"93c352c6-bb50-4363-b90a-ee40f7d085d6","method":"GET","route":"/api/v1/people/:id","status":404,"durationMs":3}
+{"time":"2026-10-25T06:59:41.215Z","level":"info","event":"http","requestId":"689e5719-c40b-4023-a4a6-a3569f2bbaa8","method":"PATCH","route":"/api/v1/people/:id","status":403,"durationMs":2}
+{"time":"2026-10-25T06:59:41.218Z","level":"info","event":"http","requestId":"2674f79f-ac14-4bb7-a920-bec7ad130f84","method":"GET","route":"/api/v1/people/:id","status":404,"durationMs":2}
+{"time":"2026-10-25T06:59:41.220Z","level":"info","event":"http","requestId":"c3e051fc-1e6c-4723-a35f-942762f5eecc","method":"POST","route":"/api/v1/people","status":404,"durationMs":2}
+{"time":"2026-10-25T06:59:41.223Z","level":"info","event":"http","requestId":"e559080f-da9c-4df4-a079-6ee612c7a578","method":"PATCH","route":"/api/v1/users/:id","status":403,"durationMs":2}
+{"time":"2026-10-25T06:59:41.225Z","level":"info","event":"http","requestId":"deb8abf7-af59-4f79-8b87-61434a351b71","method":"PATCH","route":"/api/v1/users/:id","status":409,"durationMs":2}
+{"time":"2026-10-25T06:59:41.227Z","level":"info","event":"http","requestId":"922ba27a-59b9-436b-a8ae-86d790f0aac9","method":"DELETE","route":"unmatched","status":404,"durationMs":1}
+{"time":"2026-10-25T06:59:41.234Z","level":"info","event":"http","requestId":"de8268bf-7100-49c3-898e-4d40c9c9ec36","method":"PATCH","route":"/api/v1/users/:id","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:41.237Z","level":"info","event":"http","requestId":"6b3bc7dd-c49c-414e-adea-b588970bad9e","method":"GET","route":"unmatched","status":401,"durationMs":1}
+{"time":"2026-10-25T06:59:41.238Z","level":"info","event":"http","requestId":"462be3a9-0baa-4b52-8005-f01e3d4c2eb4","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:41.543Z","level":"info","event":"http","requestId":"237098b3-ffc4-4171-8b27-14743238d2d1","method":"POST","route":"/api/v1/auth/login","status":200,"durationMs":305}
+{"time":"2026-10-25T06:59:41.548Z","level":"info","event":"http","requestId":"98ba149c-3994-4b72-9ffe-ff7026a2bd37","method":"GET","route":"/api/v1/people","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:41.552Z","level":"info","event":"http","requestId":"6d1d584e-505f-4c03-8cea-3c73fd683ecc","method":"PATCH","route":"/api/v1/users/:id","status":200,"durationMs":3}
+{"time":"2026-10-25T06:59:41.554Z","level":"info","event":"http","requestId":"7f9baf1d-c923-4461-94b1-4a43b66961d3","method":"GET","route":"unmatched","status":401,"durationMs":1}
+{"time":"2026-10-25T06:59:41.554Z","level":"info","event":"http","requestId":"00a5c402-aa14-4420-8535-7800479859f6","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:41.873Z","level":"info","event":"http","requestId":"281557b0-2c0c-41b5-8c1e-9c6233efc063","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":318}
+✔ tenant, branch, role boundaries; blocking revokes all sessions; final director protected (1899.303821ms)
+{"time":"2026-10-25T06:59:41.877Z","level":"info","event":"http","requestId":"5090039d-11eb-423a-8cc2-54c63959d0ae","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:42.182Z","level":"info","event":"http","requestId":"af8a7535-2bc0-4d33-b7b4-d1c353f98e18","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":305}
+{"time":"2026-10-25T06:59:42.185Z","level":"info","event":"http","requestId":"774ec2e0-59f7-4932-ae47-8bc27819aaaa","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:42.516Z","level":"info","event":"http","requestId":"07869b29-d154-438f-8469-e98b5ff9c065","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":331}
+{"time":"2026-10-25T06:59:42.517Z","level":"info","event":"http","requestId":"55756c99-3a51-4ae1-b635-077770da346c","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:42.811Z","level":"info","event":"http","requestId":"ae17c6a6-b0a6-422e-9dd1-4b892349a4f0","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":293}
+{"time":"2026-10-25T06:59:42.812Z","level":"info","event":"http","requestId":"d77f17d3-b43e-4162-a667-fbbf0124bf91","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:43.119Z","level":"info","event":"http","requestId":"bc78736b-b150-4854-b911-077cb3182a41","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":306}
+{"time":"2026-10-25T06:59:43.120Z","level":"info","event":"http","requestId":"f90f434d-df5e-4ca8-9c5d-915b44c45bcc","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:43.419Z","level":"info","event":"http","requestId":"3c065ba8-fed3-4340-9196-7b3b4877caf7","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":298}
+{"time":"2026-10-25T06:59:43.421Z","level":"info","event":"http","requestId":"c0df5644-f74d-4c98-9cab-94b2565fd4fd","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:43.744Z","level":"info","event":"http","requestId":"6e5be19c-6661-4791-95a9-eb67c08d27dd","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":323}
+{"time":"2026-10-25T06:59:43.745Z","level":"info","event":"http","requestId":"2a494aef-69cc-4950-a332-5e959f6c1f5b","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:44.046Z","level":"info","event":"http","requestId":"22ab88d6-9204-4fca-b369-7b740f814145","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":300}
+{"time":"2026-10-25T06:59:44.047Z","level":"info","event":"http","requestId":"581a4913-c30a-4725-9f85-1e2c1c904ea2","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:44.368Z","level":"info","event":"http","requestId":"ddcba8eb-aa34-4bdf-a915-5bcbca89b44a","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":320}
+{"time":"2026-10-25T06:59:44.370Z","level":"info","event":"http","requestId":"d4150fbc-1775-4235-9560-435b03581ea7","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:44.666Z","level":"info","event":"http","requestId":"d1b2101d-2b31-4804-be46-6109029230e7","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":296}
+{"time":"2026-10-25T06:59:44.667Z","level":"info","event":"http","requestId":"07fec060-2363-40c3-8a72-020a7257b5f0","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:44.996Z","level":"info","event":"http","requestId":"10d54f91-7a10-4b7e-b0e0-0e77feb5efe9","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":328}
+{"time":"2026-10-25T06:59:44.997Z","level":"info","event":"http","requestId":"3f8c6470-8b56-42c5-ae1b-245637bfbd06","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:45.319Z","level":"info","event":"http","requestId":"9a7ee100-faa9-42a5-a668-db62186f2404","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":322}
+{"time":"2026-10-25T06:59:45.321Z","level":"info","event":"http","requestId":"3ee48138-00e5-4026-9cd4-5b0fd365f212","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:45.638Z","level":"info","event":"http","requestId":"35dbeba5-6acc-498b-bf3d-107c78e42fee","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":317}
+{"time":"2026-10-25T06:59:45.640Z","level":"info","event":"http","requestId":"966cefd5-1ec1-45c4-8530-00a022ec005d","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:45.948Z","level":"info","event":"http","requestId":"7a596876-e0ea-40f6-829e-dfb054b084f0","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":308}
+{"time":"2026-10-25T06:59:45.949Z","level":"info","event":"http","requestId":"4a53f0f5-51be-407f-822c-266d55408a2a","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:46.260Z","level":"info","event":"http","requestId":"6bd22963-12de-4db0-93c3-4b1e51a36e3b","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":310}
+{"time":"2026-10-25T06:59:46.262Z","level":"info","event":"http","requestId":"57a3b82c-b88b-4025-93bf-d41abe5bd9f1","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:46.569Z","level":"info","event":"http","requestId":"497c7cd2-c2e7-442e-ab9e-4dc25a130a59","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":306}
+{"time":"2026-10-25T06:59:46.571Z","level":"info","event":"http","requestId":"a6a316fe-64c5-40af-891d-e96151caf71c","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:46.904Z","level":"info","event":"http","requestId":"d7d7e4f2-7728-41ba-9f0e-2c97248a5ac4","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":332}
+{"time":"2026-10-25T06:59:46.905Z","level":"info","event":"http","requestId":"842d5422-b7d4-4855-bb87-e185e31cde5b","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:47.208Z","level":"info","event":"http","requestId":"e520467b-0298-4ddb-8adb-03ffb3adb3a5","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":302}
+{"time":"2026-10-25T06:59:47.209Z","level":"info","event":"http","requestId":"cb305804-2801-4326-9b48-5e5510d9a3bd","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:47.518Z","level":"info","event":"http","requestId":"bac2a4d6-532d-42fb-805a-50585dcdb757","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":308}
+{"time":"2026-10-25T06:59:47.519Z","level":"info","event":"http","requestId":"5a336494-6e8d-40d2-a94d-b7220c22f197","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:47.838Z","level":"info","event":"http","requestId":"21f4f7fc-4741-4f11-8eae-a92d3cc79833","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":318}
+{"time":"2026-10-25T06:59:47.839Z","level":"info","event":"http","requestId":"6acf1797-10be-486e-8734-ac94192e4575","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:48.171Z","level":"info","event":"http","requestId":"0cda1608-49a2-42ce-a164-23fce6ed5a6c","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":331}
+{"time":"2026-10-25T06:59:48.172Z","level":"info","event":"http","requestId":"4c0998fd-312a-485a-8ebf-53583cf408ae","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:48.480Z","level":"info","event":"http","requestId":"841f1ee5-9cd5-40c4-b37f-d6a8f853e187","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":307}
+{"time":"2026-10-25T06:59:48.482Z","level":"info","event":"http","requestId":"06d28583-2564-428d-91f9-3f329af20c6f","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:48.786Z","level":"info","event":"http","requestId":"ede1141a-dc3f-45f1-951c-0ae6ede470e8","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":303}
+{"time":"2026-10-25T06:59:48.787Z","level":"info","event":"http","requestId":"1614e22e-b71a-4488-9de7-1f30b9ff456a","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:49.088Z","level":"info","event":"http","requestId":"fc4003aa-bd29-44d6-8f60-690a789a8c1a","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":300}
+{"time":"2026-10-25T06:59:49.090Z","level":"info","event":"http","requestId":"1c6f0815-1760-4b81-a61b-fae71f5c7f42","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:49.415Z","level":"info","event":"http","requestId":"d1b863af-b417-4f7a-acad-1e14124a2727","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":324}
+{"time":"2026-10-25T06:59:49.417Z","level":"info","event":"http","requestId":"22b8b412-cdb0-4a00-a712-f6a6d3e0ef1d","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:49.730Z","level":"info","event":"http","requestId":"e56fd8be-5e18-4994-a178-68d9e052ab1b","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":312}
+{"time":"2026-10-25T06:59:49.731Z","level":"info","event":"http","requestId":"af004258-0ac5-4bfa-a828-470944b4bb97","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:50.038Z","level":"info","event":"http","requestId":"116fcca1-ddc6-4c3e-9fcb-1854553027a5","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":306}
+{"time":"2026-10-25T06:59:50.040Z","level":"info","event":"http","requestId":"f8c5160a-39e1-447b-a076-11f18ee764a8","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:50.355Z","level":"info","event":"http","requestId":"f36b0896-e54c-496b-ba26-264f983443e8","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":314}
+{"time":"2026-10-25T06:59:50.356Z","level":"info","event":"http","requestId":"5c366fbf-984c-4c25-9097-377c8486df3e","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:50.679Z","level":"info","event":"http","requestId":"86b2b25c-e0c9-4eec-9ed7-b0bdc13b15b2","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":322}
+{"time":"2026-10-25T06:59:50.680Z","level":"info","event":"http","requestId":"e178303c-01e6-4a40-a7c7-9158d437af1b","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:50.990Z","level":"info","event":"http","requestId":"429c000c-c6b8-4023-9592-5e8847ca289a","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":309}
+{"time":"2026-10-25T06:59:50.992Z","level":"info","event":"http","requestId":"085005d9-a169-4dc9-a891-f8a917f91766","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:51.313Z","level":"info","event":"http","requestId":"d0464754-ed4c-4bae-b598-5efc38750978","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":321}
+{"time":"2026-10-25T06:59:51.315Z","level":"info","event":"http","requestId":"f3916458-6b50-4971-96ce-5b8bd4f774fa","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:51.612Z","level":"info","event":"http","requestId":"2bcf6e9a-3bdd-453e-850d-b5bd87cc3ca9","method":"POST","route":"/api/v1/auth/login","status":401,"durationMs":297}
+{"time":"2026-10-25T06:59:51.614Z","level":"info","event":"http","requestId":"a36ea0ee-1161-4319-af76-6d3644c68163","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:51.618Z","level":"info","event":"http","requestId":"5683ab7c-afe4-43a5-85ee-2bf0bea24ba7","method":"POST","route":"/api/v1/auth/login","status":429,"durationMs":3}
+{"time":"2026-10-25T06:59:51.619Z","level":"info","event":"http","requestId":"5c92675e-23d2-490c-94a3-a6d2e9589899","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:51.622Z","level":"info","event":"http","requestId":"e1badf64-8604-42e9-90f9-f50be2d9ab41","method":"POST","route":"/api/v1/auth/register","status":429,"durationMs":2}
+✔ authentication throttling persists in MySQL (9748.40886ms)
+{"time":"2026-10-25T06:59:51.624Z","level":"info","event":"http","requestId":"6b727d30-c58b-484e-b703-dd9add2089c2","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:51.932Z","level":"info","event":"http","requestId":"170a970e-248e-453d-abde-89c71e62496b","method":"POST","route":"/api/v1/auth/register","status":200,"durationMs":307}
+{"time":"2026-10-25T06:59:51.938Z","level":"info","event":"http","requestId":"85800491-073d-488d-b544-1753b97bee45","method":"POST","route":"/api/v1/people","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:51.944Z","level":"info","event":"http","requestId":"3a525b5e-1889-463c-9e06-392af8102b99","method":"POST","route":"/api/v1/invitations","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:51.949Z","level":"info","event":"http","requestId":"5d16aad7-44bf-4a4e-8994-2efd31d2d512","method":"POST","route":"/api/v1/invitations","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:51.950Z","level":"info","event":"http","requestId":"9b2b205c-e204-4eb0-90ea-b18607b3a03f","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":1}
+{"time":"2026-10-25T06:59:52.261Z","level":"info","event":"http","requestId":"31f683b2-f55b-44e9-95ab-a0d760a11241","method":"POST","route":"/api/v1/auth/invitations/accept","status":400,"durationMs":311}
+{"time":"2026-10-25T06:59:52.262Z","level":"info","event":"http","requestId":"84c33adf-25c2-45b8-a0ff-73f928db0ce8","method":"GET","route":"/api/v1/auth/csrf","status":200,"durationMs":0}
+{"time":"2026-10-25T06:59:52.596Z","level":"info","event":"http","requestId":"0cdc0410-82e9-41e9-b473-674130051db5","method":"POST","route":"/api/v1/auth/invitations/accept","status":200,"durationMs":333}
+{"time":"2026-10-25T06:59:52.602Z","level":"info","event":"http","requestId":"a8454311-68b8-4505-9ab1-0d70fd617ade","method":"PATCH","route":"/api/v1/users/:id","status":200,"durationMs":4}
+{"time":"2026-10-25T06:59:52.603Z","level":"info","event":"http","requestId":"cec8dedb-a321-491a-8add-0939e271e978","method":"PATCH","route":"/api/v1/users/:id","status":401,"durationMs":5}
+{"time":"2026-10-25T06:59:52.606Z","level":"info","event":"http","requestId":"47a4276b-32d5-4751-99ba-1472b52f5594","method":"GET","route":"unmatched","status":401,"durationMs":1}
+✔ expired sessions, replaced invitations and concurrent director blocking (984.002411ms)
+{"level":"error","requestId":"88b8113d-17f1-4f3b-ac93-ad217077e479","code":"NOT_READY","message":"Database unavailable or migrations required"}
+{"time":"2026-10-25T06:59:52.609Z","level":"info","event":"http","requestId":"88b8113d-17f1-4f3b-ac93-ad217077e479","method":"GET","route":"/health/ready","status":503,"durationMs":0}
+{"time":"2026-10-25T06:59:52.610Z","level":"info","event":"http","requestId":"75fe51af-5951-492f-9a65-40d9cc733210","method":"GET","route":"/health/live","status":200,"durationMs":0}
+✔ readiness fails when required migration is missing while liveness remains available (5.715907ms)
+✔ production cookies, HTTP lifecycle and graceful SIGTERM (759.767856ms)
+✔ invalid environment and unavailable MySQL prevent startup (1092.372181ms)
+ℹ tests 33
 ℹ suites 0
-ℹ pass 23
+ℹ pass 33
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 6873.176223
+ℹ duration_ms 27498.718441

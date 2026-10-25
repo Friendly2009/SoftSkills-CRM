@@ -262,10 +262,11 @@ export function financeRoutes(app: Express) {
     { summary: "Scoped totals: students, upcoming lessons and payer debt" },
     async (c) => {
       permit(c.actor, "director", "manager");
-      const filter =
-        has(c.actor, "director") || !c.actor.branches.length
-          ? ""
-          : ` AND branch_id IN(${c.actor.branches.map(() => "?").join(",")})`;
+      const filter = has(c.actor, "director")
+        ? ""
+        : c.actor.branches.length
+          ? ` AND branch_id IN(${c.actor.branches.map(() => "?").join(",")})`
+          : " AND FALSE";
       const args = [c.actor.org, ...(filter ? c.actor.branches : [])];
       const students = (
         await rows(

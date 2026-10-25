@@ -12,7 +12,7 @@ process.env.NODE_ENV = "test";
 process.env.COOKIE_SECURE = "false";
 const { createApp } = await import("../../src/app.js");
 const { pool } = await import("../../src/core/db.js");
-let server: any, base: string;
+let server: any, base: string, companySlug: string;
 type Session = { cookie: string; csrf: string };
 let director: Session,
   teacher: Session,
@@ -42,6 +42,14 @@ async function request(
   session?: Session,
   key?: string,
 ) {
+  if (path === "/auth/login") body = { companySlug, ...body };
+  if (["/auth/register", "/auth/login"].includes(path)) {
+    const boot = await fetch(base + "/api/v1/auth/csrf");
+    session = {
+      cookie: boot.headers.get("set-cookie")!.split(";")[0]!,
+      csrf: (await boot.json()).data.csrfToken,
+    };
+  }
   const res = await fetch(base + "/api/v1" + path, {
     method,
     headers: {
@@ -83,7 +91,7 @@ async function user(personId: string, role: string, branches: string[] = []) {
     login,
     password: pass,
     roles: [role],
-    branchIds: branches,
+    branchIds: branches.length ? branches : [branchId],
   });
   const loginRes = await request("POST", "/auth/login", {
     login,
@@ -108,12 +116,13 @@ function lesson(overrides: any = {}) {
   };
 }
 before(async () => {
+  await pool.execute("DELETE FROM crm_auth_limits");
   server = createApp().listen(0, "127.0.0.1");
   await new Promise<void>((r) => server.once("listening", r));
   base = "http://127.0.0.1:" + server.address().port;
   const reg = await request("POST", "/auth/register", {
-    organization: "Center " + suffix,
-    name: "Director",
+    companyName: "Center " + suffix,
+    fullName: "Director",
     login: "director-" + suffix,
     email: "owner-" + suffix + "@example.com",
     password: pass,
@@ -121,9 +130,10 @@ before(async () => {
   assert.equal(reg.status, 200, JSON.stringify(reg));
   director = { cookie: reg.cookie, csrf: reg.data.csrfToken };
   branchId = reg.data.branchId;
+  companySlug = reg.data.companySlug;
   const reg2 = await request("POST", "/auth/register", {
-    organization: "Other " + suffix,
-    name: "Other",
+    companyName: "Other " + suffix,
+    fullName: "Other",
     login: "other-" + suffix,
     email: "other-" + suffix + "@example.com",
     password: pass,
@@ -883,7 +893,10 @@ test("comments, announcements, tasks, internal notifications and own profile", a
   await ok(
     "PATCH",
     "/profile",
-    { name: "Parent renamed", contacts: [] },
+    {
+      fullName: "Parent renamed",
+      email: "parent-renamed-" + suffix + "@example.com",
+    },
     payer,
   );
   assert.equal(

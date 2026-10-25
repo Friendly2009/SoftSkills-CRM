@@ -1,0 +1,17 @@
+services:
+  mysql-test:
+    image: mysql:8.0
+    ports:
+      - "127.0.0.1:3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: local-root-test-password
+      MYSQL_DATABASE: crm_auth_test
+      MYSQL_USER: crm_test
+      MYSQL_PASSWORD: local-test-password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 2s
+      timeout: 3s
+      retries: 40
+    tmpfs:
+      - /var/lib/mysql

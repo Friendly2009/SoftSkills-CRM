@@ -11,15 +11,39 @@ import { json } from "./validation.js";
 const scrypt = promisify(scryptCallback);
 export async function hashPassword(value: string) {
   const salt = randomBytes(16).toString("hex");
-  const key = (await scrypt(value, salt, 64)) as Buffer;
-  return `${salt}:${key.toString("hex")}`;
+  const key = await new Promise<Buffer>((resolve, reject) =>
+    scryptCallback(
+      value,
+      salt,
+      64,
+      { N: 131072, r: 8, p: 1, maxmem: 256 * 1024 * 1024 },
+      (err, key) => (err ? reject(err) : resolve(key)),
+    ),
+  );
+
+  return `scrypt$131072$${salt}$${key.toString("hex")}`;
 }
 export async function verifyPassword(value: string, stored: string) {
-  const [salt, hex] = stored.split(":");
-  const key = (await scrypt(value, salt!, 64)) as Buffer;
-  const expected = Buffer.from(hex!, "hex");
+  const modern = stored.startsWith("scrypt$");
+  const parts = stored.split(modern ? "$" : ":");
+  const salt = modern ? parts[2] : parts[0];
+  const hex = modern ? parts[3] : parts[1];
+  if (!salt || !hex || !/^[a-f0-9]{128}$/.test(hex)) return false;
+  const key = modern
+    ? await new Promise<Buffer>((resolve, reject) =>
+        scryptCallback(
+          value,
+          salt,
+          64,
+          { N: 131072, r: 8, p: 1, maxmem: 256 * 1024 * 1024 },
+          (err, key) => (err ? reject(err) : resolve(key)),
+        ),
+      )
+    : ((await scrypt(value, salt, 64)) as Buffer);
+  const expected = Buffer.from(hex, "hex");
   return key.length === expected.length && timingSafeEqual(key, expected);
 }
+
 export function token() {
   return randomBytes(32).toString("hex");
 }
@@ -50,7 +74,7 @@ export function permit(a: Actor, ...roles: string[]) {
 }
 export function branch(a: Actor, id: string) {
   assert(
-    has(a, "director") || a.branches.length === 0 || a.branches.includes(id),
+    has(a, "director") || a.branches.includes(id),
     403,
     "BRANCH_FORBIDDEN",
     "Branch access denied",

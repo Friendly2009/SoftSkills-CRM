@@ -175,8 +175,103 @@ for (const [name, properties] of Object.entries(recordSchemas))
     additionalProperties: false,
   };
 export function responseData(method: string, path: string): any {
+  const object = (
+    properties: Record<string, any>,
+    required = Object.keys(properties),
+  ) => ({ type: "object", properties, required, additionalProperties: false });
+  if (path === "/auth/csrf") return object({ csrfToken: string });
+  if (
+    [
+      "/auth/register",
+      "/auth/login",
+      "/auth/invitations/accept",
+      "/auth/me",
+    ].includes(path)
+  )
+    return object({
+      id: uuid,
+      org: uuid,
+      personId: uuid,
+      roles: { type: "array", items: string },
+      branches: { type: "array", items: uuid },
+      companySlug: string,
+      csrfToken: string,
+      ...(path === "/auth/register" ? { branchId: uuid } : {}),
+    });
+  if (path === "/invitations")
+    return object({
+      id: uuid,
+      token: {
+        type: "string",
+        description:
+          "Returned once; deliver privately. Never log or put in a URL query.",
+      },
+      expiresInHours: integer,
+    });
+  if (["/auth/logout", "/auth/sessions/revoke-others"].includes(path))
+    return object({ revoked: boolean });
+  if (path === "/profile/password")
+    return object({ changed: boolean, signInRequired: boolean });
+  if (path === "/profile")
+    return method === "get"
+      ? object({
+          person: object({
+            id: uuid,
+            name: string,
+            fullName: string,
+            birthday: nullable(string),
+          }),
+          contacts: {
+            type: "array",
+            items: object({
+              kind: { enum: ["email", "phone"] },
+              value: string,
+            }),
+          },
+        })
+      : object({ id: uuid });
   const parts = path.split("/").filter(Boolean);
-  const record = parts[0] ? recordSchemas[parts[0]] : undefined;
+  const baseRecord = parts[0] ? recordSchemas[parts[0]] : undefined;
+  const portalColumns: Record<string, string[]> = {
+    people: ["id", "name", "birthday", "active"],
+    payers: ["id", "person_id"],
+    students: ["id", "person_id", "branch_id", "active"],
+    groups: ["id", "name", "subject", "status", "start_date", "end_date"],
+    lessons: [
+      "id",
+      "name",
+      "starts_at",
+      "ends_at",
+      "status",
+      "group_id",
+      "room_id",
+    ],
+    subscriptions: [
+      "id",
+      "student_id",
+      "starts_at",
+      "ends_at",
+      "allowance",
+      "frozen_at",
+    ],
+    accounts: ["id", "name", "kind"],
+    ledger: ["id", "account_id", "amount", "kind", "created_at"],
+  };
+  const columns = portalColumns[parts[0] ?? ""];
+  const record =
+    baseRecord && columns
+      ? {
+          anyOf: [
+            baseRecord,
+            object(
+              Object.fromEntries(
+                columns.map((k) => [k, baseRecord.properties[k] ?? string]),
+              ),
+              ["id"],
+            ),
+          ],
+        }
+      : baseRecord;
   if (method === "get" && record && parts.length === 1)
     return {
       type: "object",
