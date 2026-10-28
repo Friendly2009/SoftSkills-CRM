@@ -3,8 +3,9 @@ import { API_BASE_URL } from "./data/runtime";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./components/index";
 
-import { LoginForm } from "./components/Aauthorization";
-import { RegisterForm } from "./components/registration";
+import { PublicInfo } from "./real/PublicInfo";
+import { Auth } from "./real/Auth";
+const Workspace = lazy(() => import("./real/Workspace").then(m => ({default:m.Workspace})));
 import { PricingSection } from "./components/Price";
 import { PricePage } from "./components/Prices/PricePage";
 import { PrivacyPolicy } from "./components/Privacy";
@@ -20,8 +21,8 @@ import { TransferFilesPage } from "./components/TransferFilesPage";
 import { FaqPage } from "./components/FaqPage";
 function App() {
   // One source of truth for the new CRM: true = local demo, false = HTTP API.
-  const [isMock, setIsMock] = useState(true);
-  const isDebug = false;
+  const [isMock, setIsMock] = useState(import.meta.env.VITE_IS_MOCK === "true");
+
   return (
     <DataModeProvider isMock={isMock} setIsMock={setIsMock}>
     <BrowserRouter key={String(isMock)}>
@@ -29,30 +30,31 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route
           path="/authorization"
-          element={<LoginForm isDebug={isDebug} />}
+          element={<Auth mode="login" />}
         />
         <Route
           path="/registration"
-          element={<RegisterForm isDebug={isDebug} />}
+          element={<Auth mode="register" />}
         />
+        <Route path="/invitation" element={<Auth mode="invitations/accept" />} />
         <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
-        <Route path="/transfer_page" element={<TransferFilesPage />} />
-        <Route path="/faq" element={<FaqPage />} />
+        <Route path="/transfer_page" element={isMock?<TransferFilesPage />:<Navigate to="/dashboard/imports" replace/>} />
+        <Route path="/faq" element={isMock?<FaqPage />:<PublicInfo page="faq"/>} />
         <Route
           path="/dashboard/*"
           element={
             <Suspense fallback={<div role="status">Загрузка CRM…</div>}>
-              <CrmApp isMock={isMock} apiBaseUrl={API_BASE_URL} />
+              {isMock ? <CrmApp isMock apiBaseUrl={API_BASE_URL} /> : <Workspace />}
             </Suspense>
           }
         />
-        <Route path="/price" element={<PricingSection />} />
-        <Route path="/tarid-details/:tariffId" element={<PricePage />} />
+        <Route path="/price" element={isMock?<PricingSection />:<PublicInfo page="price"/>} />
+        <Route path="/tarid-details/:tariffId" element={isMock?<PricePage />:<PublicInfo page="price"/>} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/Contact" element={<ContactsPage />} />
-        <Route path="/Feedback" element={<ReviewsPage />} />
+        <Route path="/Feedback" element={isMock?<ReviewsPage />:<PublicInfo page="reviews"/>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

@@ -1,0 +1,113 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 test
+> node --import tsx --test test/*.test.ts
+
+TAP version 13
+# Subtest: exact money and discount at integer precision boundary
+ok 1 - exact money and discount at integer precision boundary
+  ---
+  duration_ms: 4.300124
+  type: 'test'
+  ...
+# Subtest: contact normalization and real calendar validation
+ok 2 - contact normalization and real calendar validation
+  ---
+  duration_ms: 3.653525
+  type: 'test'
+  ...
+# Subtest: password hashes salted, verified without storing plaintext
+ok 3 - password hashes salted, verified without storing plaintext
+  ---
+  duration_ms: 2429.334492
+  type: 'test'
+  ...
+# Subtest: roles and explicit branch restrictions fail closed
+ok 4 - roles and explicit branch restrictions fail closed
+  ---
+  duration_ms: 0.820937
+  type: 'test'
+  ...
+# Subtest: xlsx parser accepts values and rejects formulas and ZIP bombs
+ok 5 - xlsx parser accepts values and rejects formulas and ZIP bombs
+  ---
+  duration_ms: 160.459832
+  type: 'test'
+  ...
+# Subtest: percentage rounds final payable half up using integer arithmetic
+ok 6 - percentage rounds final payable half up using integer arithmetic
+  ---
+  duration_ms: 1.324166
+  type: 'test'
+  ...
+# Subtest: lesson validates timezone, exact intervals and mutually exclusive discounts
+ok 7 - lesson validates timezone, exact intervals and mutually exclusive discounts
+  ---
+  duration_ms: 49.378498
+  type: 'test'
+  ...
+# Subtest: subscription scope requires both selected group and subject
+ok 8 - subscription scope requires both selected group and subject
+  ---
+  duration_ms: 3.222563
+  type: 'test'
+  ...
+# {"time":"2026-10-28T05:10:49.004Z","level":"info","event":"http","requestId":"60f9bcd4-059f-46ec-8685-5712a962960e","method":"POST","route":"unmatched","status":415,"durationMs":9}
+# {"time":"2026-10-28T05:10:49.017Z","level":"info","event":"http","requestId":"c28f0ed2-d890-45ef-8538-15e250beb89e","method":"POST","route":"unmatched","status":415,"durationMs":2}
+# Subtest: unsupported charset and encoding are client errors, not server failures
+ok 9 - unsupported charset and encoding are client errors, not server failures
+  ---
+  duration_ms: 209.042934
+  type: 'test'
+  ...
+# Subtest: OpenAPI covers every registered route with concrete responses, security and headers
+ok 10 - OpenAPI covers every registered route with concrete responses, security and headers
+  ---
+  duration_ms: 169.07941
+  type: 'test'
+  ...
+# Subtest: membership sweep handles adjacent periods, gaps and open ends
+ok 11 - membership sweep handles adjacent periods, gaps and open ends
+  ---
+  duration_ms: 6.248227
+  type: 'test'
+  ...
+# Subtest: contacts normalize before validation and reject duplicate normalized inputs
+ok 12 - contacts normalize before validation and reject duplicate normalized inputs
+  ---
+  duration_ms: 7.558123
+  type: 'test'
+  ...
+# Subtest: version contract covers edits, archive, conversion, exit and profile
+ok 13 - version contract covers edits, archive, conversion, exit and profile
+  ---
+  duration_ms: 1.039519
+  type: 'test'
+  ...
+# Subtest: environment fails closed without leaking secret values
+ok 14 - environment fails closed without leaking secret values
+  ---
+  duration_ms: 16.091355
+  type: 'test'
+  ...
+# Subtest: recursive secret redaction and portal DTO allowlists
+ok 15 - recursive secret redaction and portal DTO allowlists
+  ---
+  duration_ms: 0.697793
+  type: 'test'
+  ...
+# Subtest: empty staff branch list grants no branch access
+ok 16 - empty staff branch list grants no branch access
+  ---
+  duration_ms: 0.516589
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4771.331846

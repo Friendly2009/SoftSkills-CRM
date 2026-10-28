@@ -1,0 +1,12 @@
+NGINX production TLS/proxy configuration enabled
+PASS public pages without obsolete API calls
+PASS registration, session, HTTPS Secure/HttpOnly cookies
+PASS branches, rooms, staff/users, people, lead conversion {"leadId":"d5ca12dc-3b34-4af5-9d9a-0baaba0b6bd7","payerId":"02f51a32-427c-465d-acc5-943e8dfa2b48","studentId":"1b9efd1e-0aa3-42ab-bf15-16720284d72d","version":2}
+PASS enrollment, subscription, lesson, payment, completion and exact balances
+PASS correction, compensation and linked partial refund
+PASS lost payment response: same key, one posting
+PASS XLSX preview and confirmation
+PASS all director navigation screens
+PASS versioned person edit and contacts
+PASS manager/teacher/payer/student role boundaries, logout, zero browser exceptions
+PASS browser end-to-end complete

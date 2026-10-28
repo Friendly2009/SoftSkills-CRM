@@ -90,7 +90,7 @@ export const Expenses: React.FC = () => {
                                 paddingAngle={4}
                                 dataKey="value"
                             >
-                                {analyticsData.map((entry, index) => (
+                                {analyticsData.map((_, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} style={{ outline: 'none' }} />
                                 ))}
                             </Pie>

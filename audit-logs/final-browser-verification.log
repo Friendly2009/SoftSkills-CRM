@@ -1,0 +1,147 @@
+VERSION()
+8.0.46-0ubuntu0.24.04.3
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 migrate:prod
+> node dist/migrate.js
+
+Applied 001_core.sql
+Applied 002_collaboration.sql
+Applied 003_preferences.sql
+Applied 004_identity.sql
+Applied 005_resources.sql
+Applied 006_education.sql
+Applied 007_finance.sql
+Applied 008_import_preview.sql
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 migrate:prod
+> node dist/migrate.js
+
+# {"time":"2026-10-28T05:12:26.870Z","level":"info","event":"http","requestId":"5df2602a-d511-4f6f-acd1-6f85bbb62f40","method":"GET","route":"/api/v1/payers/:id/history","status":200,"durationMs":6}
+# {"time":"2026-10-28T05:12:26.878Z","level":"info","event":"http","requestId":"fbbe9efc-db81-4621-b6d1-07581eb55599","method":"GET","route":"/api/v1/payers/:id","status":200,"durationMs":3}
+# {"time":"2026-10-28T05:12:26.898Z","level":"info","event":"http","requestId":"f91d05da-5fc7-4365-8b8a-fc66985abda8","method":"POST","route":"/api/v1/payers/:id/archive","status":200,"durationMs":14}
+# {"time":"2026-10-28T05:12:26.903Z","level":"info","event":"http","requestId":"ffa97641-edfc-4401-ab93-14428607d0e1","method":"GET","route":"/api/v1/payers/:id","status":200,"durationMs":2}
+# {"time":"2026-10-28T05:12:26.912Z","level":"info","event":"http","requestId":"a430abfa-21cc-4424-9211-2e36b89d1d54","method":"POST","route":"/api/v1/students/:id/comments","status":200,"durationMs":7}
+# {"time":"2026-10-28T05:12:26.920Z","level":"info","event":"http","requestId":"09055043-8e96-49d5-bf5c-d5d314d2e8eb","method":"GET","route":"/api/v1/students/:id/comments","status":200,"durationMs":4}
+# {"time":"2026-10-28T05:12:26.927Z","level":"info","event":"http","requestId":"6e5037f0-8b8a-4cb7-bfac-7e367be48d7b","method":"GET","route":"/api/v1/students/:id/history","status":200,"durationMs":3}
+# {"time":"2026-10-28T05:12:26.935Z","level":"info","event":"http","requestId":"870bd367-8099-4bd4-bc1f-5da806bdaf44","method":"GET","route":"/api/v1/students/:id","status":200,"durationMs":3}
+# {"time":"2026-10-28T05:12:26.955Z","level":"info","event":"http","requestId":"2a720e46-b13c-478a-9d44-50c98ae96cf5","method":"POST","route":"/api/v1/students/:id/archive","status":200,"durationMs":17}
+# {"time":"2026-10-28T05:12:26.962Z","level":"info","event":"http","requestId":"2203a155-c65a-4ad2-a2d6-4071ec608363","method":"GET","route":"/api/v1/students/:id","status":200,"durationMs":4}
+# {"time":"2026-10-28T05:12:26.971Z","level":"info","event":"http","requestId":"3f103465-79bc-435f-9c5c-4de5ef544db9","method":"POST","route":"/api/v1/branches/:id/archive","status":200,"durationMs":7}
+# {"time":"2026-10-28T05:12:26.979Z","level":"info","event":"http","requestId":"122408d7-b240-404c-af27-cfc36fd497c4","method":"POST","route":"/api/v1/rooms","status":409,"durationMs":3}
+# {"time":"2026-10-28T05:12:26.983Z","level":"info","event":"http","requestId":"e587988e-be33-4179-9a25-1e7f1bb586ef","method":"GET","route":"/api/v1/lead-stages","status":200,"durationMs":3}
+# {"time":"2026-10-28T05:12:26.990Z","level":"info","event":"http","requestId":"c632e1b2-f5bf-4352-ad58-2edaf5c0d4f3","method":"GET","route":"/api/v1/pipeline","status":200,"durationMs":4}
+# Subtest: resource cards support editing, comments, history and archival
+ok 54 - resource cards support editing, comments, history and archival
+  ---
+  duration_ms: 433.125992
+  type: 'test'
+  ...
+# {"time":"2026-10-28T05:12:27.003Z","level":"info","event":"http","requestId":"ea3f863c-60ff-4d08-ba99-816e8ff243da","method":"POST","route":"/api/v1/people","status":200,"durationMs":7}
+# {"time":"2026-10-28T05:12:27.014Z","level":"info","event":"http","requestId":"25570646-016d-4ecb-b581-398d528c8250","method":"POST","route":"/api/v1/leads","status":200,"durationMs":8}
+# {"time":"2026-10-28T05:12:27.037Z","level":"info","event":"http","requestId":"1d222c52-9a35-45c1-97b1-f17546cd79aa","method":"PATCH","route":"/api/v1/people/:id","status":200,"durationMs":21}
+# {"time":"2026-10-28T05:12:27.043Z","level":"info","event":"http","requestId":"67a11a2e-2316-4f87-8845-67c1e90bdb0c","method":"GET","route":"/api/v1/people/:id/contacts","status":200,"durationMs":3}
+# {"time":"2026-10-28T05:12:27.049Z","level":"info","event":"http","requestId":"49aae7fc-41f6-466a-b4c9-a07a37f75cf7","method":"GET","route":"/api/v1/leads/:id","status":200,"durationMs":4}
+# {"time":"2026-10-28T05:12:27.054Z","level":"info","event":"http","requestId":"0db5092a-468a-4199-80a0-58b731d95f5f","method":"GET","route":"/api/v1/leads/:id/history","status":200,"durationMs":4}
+# Subtest: name-only patch preserves normalized contacts and increments derived card versions
+ok 55 - name-only patch preserves normalized contacts and increments derived card versions
+  ---
+  duration_ms: 60.893451
+  type: 'test'
+  ...
+# {"time":"2026-10-28T05:12:27.070Z","level":"info","event":"http","requestId":"d66147f5-297d-44c1-a362-ee7ca383bc4f","method":"POST","route":"/api/v1/people","status":200,"durationMs":13}
+# {"time":"2026-10-28T05:12:27.082Z","level":"info","event":"http","requestId":"f714fee8-cba5-4f52-a194-dd759af915a0","method":"POST","route":"/api/v1/staff","status":200,"durationMs":10}
+# {"time":"2026-10-28T05:12:27.106Z","level":"info","event":"http","requestId":"695f4edb-5c81-45f2-8ee4-3f06271e7ca2","method":"POST","route":"/api/v1/groups","status":200,"durationMs":19}
+# {"time":"2026-10-28T05:12:27.120Z","level":"info","event":"http","requestId":"aeb57aed-f5fb-45a1-858a-ed276a29d4c7","method":"POST","route":"/api/v1/people","status":200,"durationMs":13}
+# {"time":"2026-10-28T05:12:27.133Z","level":"info","event":"http","requestId":"aba2f574-6566-44e4-a2e6-c6718b1c4de8","method":"POST","route":"/api/v1/payers","status":200,"durationMs":12}
+# {"time":"2026-10-28T05:12:27.145Z","level":"info","event":"http","requestId":"6f45d7d2-85e1-4cb8-a24e-985dcf6dec1d","method":"POST","route":"/api/v1/students","status":200,"durationMs":10}
+# {"time":"2026-10-28T05:12:27.155Z","level":"info","event":"http","requestId":"e233138d-4cb8-436a-87ed-c0d557be915c","method":"POST","route":"/api/v1/people","status":200,"durationMs":8}
+# {"time":"2026-10-28T05:12:27.165Z","level":"info","event":"http","requestId":"eef62c09-fe6d-440f-b3e4-e2954e725e2c","method":"POST","route":"/api/v1/payers","status":200,"durationMs":8}
+# {"time":"2026-10-28T05:12:27.189Z","level":"info","event":"http","requestId":"45a82b59-12cb-42a0-af7b-71ee403cf2f7","method":"POST","route":"/api/v1/students","status":200,"durationMs":16}
+# {"time":"2026-10-28T05:12:27.200Z","level":"info","event":"http","requestId":"16fb100b-1b09-4c76-a592-ca5bf6935003","method":"POST","route":"/api/v1/groups/:id/members","status":200,"durationMs":9}
+# {"time":"2026-10-28T05:12:27.203Z","level":"info","event":"http","requestId":"c04aa7cf-da9c-4f70-89da-57515b584420","method":"GET","route":"/api/v1/groups/:id","status":200,"durationMs":2}
+# {"time":"2026-10-28T05:12:27.217Z","level":"info","event":"http","requestId":"9d8bb02d-25af-44e5-9769-a53eae5249de","method":"POST","route":"/api/v1/groups/:id/members","status":200,"durationMs":11}
+# {"time":"2026-10-28T05:12:27.220Z","level":"info","event":"http","requestId":"71a746ab-ed7c-4d16-94af-7db86f7fa132","method":"PATCH","route":"/api/v1/groups/:id","status":409,"durationMs":15}
+# {"time":"2026-10-28T05:12:27.224Z","level":"info","event":"http","requestId":"68995c9e-823f-4c4b-8712-6fc340bfb426","method":"GET","route":"/api/v1/groups/:id","status":200,"durationMs":3}
+# {"time":"2026-10-28T05:12:27.229Z","level":"info","event":"http","requestId":"cb499944-e5ae-457f-87bc-162d51330038","method":"GET","route":"/api/v1/groups/:id/members","status":200,"durationMs":3}
+# Subtest: capacity reduction races enrollment without exceeding the final capacity
+ok 56 - capacity reduction races enrollment without exceeding the final capacity
+  ---
+  duration_ms: 174.26796
+  type: 'test'
+  ...
+# {"time":"2026-10-28T05:12:27.236Z","level":"info","event":"http","requestId":"718fe0c0-75e0-4fce-b680-1e7983628724","method":"GET","route":"/api/v1/organization","status":200,"durationMs":5}
+# {"time":"2026-10-28T05:12:27.267Z","level":"info","event":"http","requestId":"be82d408-0c96-4574-8c37-4683588ce4ed","method":"PATCH","route":"/api/v1/organization","status":200,"durationMs":27}
+# {"time":"2026-10-28T05:12:27.274Z","level":"info","event":"http","requestId":"2d5ff683-0490-4247-90aa-1542f53ec4f2","method":"PATCH","route":"/api/v1/organization","status":409,"durationMs":4}
+# {"time":"2026-10-28T05:12:27.288Z","level":"info","event":"http","requestId":"4777ea74-34dc-465c-83ae-573d2349042f","method":"POST","route":"/api/v1/organization/comments","status":200,"durationMs":13}
+# {"time":"2026-10-28T05:12:27.302Z","level":"info","event":"http","requestId":"b420271c-4a9f-4cd1-908f-9ccc89d16741","method":"POST","route":"/api/v1/organization/archive","status":200,"durationMs":11}
+# {"time":"2026-10-28T05:12:27.309Z","level":"info","event":"http","requestId":"b4f59350-63d4-40fb-821a-19ef5bf40c55","method":"GET","route":"/api/v1/organization/history","status":200,"durationMs":4}
+# {"time":"2026-10-28T05:12:27.318Z","level":"info","event":"http","requestId":"b9cd315c-0f3f-42c0-b482-4f72ca593b9d","method":"POST","route":"/api/v1/people","status":409,"durationMs":3}
+# Subtest: organization settings are versioned and archive makes tenant read-only
+ok 57 - organization settings are versioned and archive makes tenant read-only
+  ---
+  duration_ms: 88.852568
+  type: 'test'
+  ...
+1..57
+# tests 57
+# suites 0
+# pass 57
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 57879.699288
+NGINX production TLS/proxy configuration enabled
+PASS public pages without obsolete API calls
+PASS registration, session, HTTPS Secure/HttpOnly cookies
+PASS branches, rooms, staff/users, people, lead conversion {"leadId":"d5ca12dc-3b34-4af5-9d9a-0baaba0b6bd7","payerId":"02f51a32-427c-465d-acc5-943e8dfa2b48","studentId":"1b9efd1e-0aa3-42ab-bf15-16720284d72d","version":2}
+PASS enrollment, subscription, lesson, payment, completion and exact balances
+PASS correction, compensation and linked partial refund
+PASS lost payment response: same key, one posting
+PASS XLSX preview and confirmation
+PASS all director navigation screens
+PASS versioned person edit and contacts
+PASS manager/teacher/payer/student role boundaries, logout, zero browser exceptions
+PASS browser end-to-end complete
+PASS: restored semantic schema and every value match: 39 tables, 130 rows.
+crm_restore_test.crm_accounts                      OK
+crm_restore_test.crm_announcements                 OK
+crm_restore_test.crm_attendees                     OK
+crm_restore_test.crm_audit                         OK
+crm_restore_test.crm_auth_limits                   OK
+crm_restore_test.crm_branches                      OK
+crm_restore_test.crm_comments                      OK
+crm_restore_test.crm_companies                     OK
+crm_restore_test.crm_contacts                      OK
+crm_restore_test.crm_dictionaries                  OK
+crm_restore_test.crm_freezes                       OK
+crm_restore_test.crm_groups                        OK
+crm_restore_test.crm_idempotency                   OK
+crm_restore_test.crm_import_previews               OK
+crm_restore_test.crm_invitations                   OK
+crm_restore_test.crm_leads                         OK
+crm_restore_test.crm_ledger                        OK
+crm_restore_test.crm_lesson_versions               OK
+crm_restore_test.crm_lessons                       OK
+crm_restore_test.crm_members                       OK
+crm_restore_test.crm_memberships                   OK
+crm_restore_test.crm_migrations                    OK
+crm_restore_test.crm_notifications                 OK
+crm_restore_test.crm_organizations                 OK
+crm_restore_test.crm_payer_students                OK
+crm_restore_test.crm_payers                        OK
+crm_restore_test.crm_people                        OK
+crm_restore_test.crm_preferences                   OK
+crm_restore_test.crm_record_history                OK
+crm_restore_test.crm_refunds                       OK
+crm_restore_test.crm_rooms                         OK
+crm_restore_test.crm_sessions                      OK
+crm_restore_test.crm_staff                         OK
+crm_restore_test.crm_students                      OK
+crm_restore_test.crm_subscription_templates        OK
+crm_restore_test.crm_subscription_usage            OK
+crm_restore_test.crm_subscriptions                 OK
+crm_restore_test.crm_tasks                         OK
+crm_restore_test.crm_users                         OK

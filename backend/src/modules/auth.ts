@@ -1,4 +1,4 @@
-import type { Express, Response } from "express";
+import type { Express } from "express";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { transaction, rows } from "../core/db.js";
@@ -318,10 +318,21 @@ export function authRoutes(app: Express) {
         )
       )[0];
       assert(inv, 400, "INVALID_INVITATION", "Invitation invalid or expired");
+      const organization = (await rows(db,
+        "SELECT archived_at FROM crm_organizations WHERE id=?", [inv.org_id]))[0];
+      assert(organization && !organization.archived_at, 400,
+        "INVALID_INVITATION", "Invitation invalid or expired");
+      for (const branchId of json(inv.branches)) {
+        const branch = (await rows(db,
+          "SELECT active,archived_at FROM crm_branches WHERE org_id=? AND id=?",
+          [inv.org_id, branchId]))[0];
+        assert(branch?.active && !branch.archived_at, 400,
+          "INVALID_INVITATION", "Invitation invalid or expired");
+      }
       const person = (
         await rows(
           db,
-          "SELECT id FROM crm_people WHERE org_id=? AND id=? AND active=TRUE",
+          "SELECT id FROM crm_people WHERE org_id=? AND id=? AND active=TRUE AND archived_at IS NULL",
           [inv.org_id, inv.person_id],
         )
       )[0];

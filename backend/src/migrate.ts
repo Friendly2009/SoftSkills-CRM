@@ -27,7 +27,8 @@ try {
         throw new Error(`Applied migration changed: ${name}`);
       continue;
     }
-    // MySQL DDL commits implicitly. Each statement is restart-safe; never reset existing data.
+    // MySQL DDL commits implicitly. A partially applied file requires operator recovery;
+    // do not mark it applied or reset data after a failure. See docs/operations.md.
     for (const statement of sql
       .split(";")
       .map((v) => v.trim())

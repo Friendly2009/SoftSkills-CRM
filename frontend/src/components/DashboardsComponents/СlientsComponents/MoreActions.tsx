@@ -38,7 +38,7 @@ const menuStyles = {
     }
 };
 
-export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose, onTopUp, onEdit, onOpenProfile }) => {
+export const MoreAction: React.FC<MoreActionProps> = ({ x, y, client, isOpen, onDelete, onClose, onTopUp, onEdit }) => {
     if (!isOpen) return null;
     const navigate = useNavigate();
     const isNearRightEdge = x > window.innerWidth - 180;

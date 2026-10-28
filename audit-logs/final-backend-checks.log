@@ -1,0 +1,26 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 typecheck
+> tsc --noEmit
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 typecheck:tests
+> tsc --noEmit -p tsconfig.test.json
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 lint
+> eslint src test
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 build
+> tsc
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 openapi
+> node --import tsx src/openapi.ts
+
+Wrote docs/openapi.json

@@ -1,162 +1,103 @@
-# SoftSkills CRM — backend: сессии и организации
+# SoftSkills CRM — frontend + backend
 
-Модульный монолит TypeScript + Express + MySQL для бесплатной беты учебных центров.
-API: `/api/v1`. Рабочий исходный код — `backend/src`, новый интерфейс — `frontend/src/crm`.
-Основная интеграция интерфейса с новым API **не выполнена по условию задачи**: frontend сохраняет свой режим моков.
-ИИ убран из нового интерфейса и backend. Старые backend, бот, встроенные пароли и устаревшие маршруты удалены.
+Реальный интерфейс подключён к API `/api/v1`: регистрация и сессии, роли, учебные
+ресурсы, внутренний финансовый учёт, кабинеты и двухэтапный Excel-импорт.
+По умолчанию mock-режим выключен. Старый демоинтерфейс доступен только при явной
+сборке с `VITE_IS_MOCK=true`; его нельзя использовать для рабочих данных.
 
-## Быстрый запуск
+Инструкции для VPS: [DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Результаты проверки и границы готовности: [READINESS.md](docs/READINESS.md).
+UI использует новый ресурсный интерфейс в `frontend/src/real`, а не старый snapshot API.
 
-Нужны Node.js 22+ (LTS), npm, MySQL 8.0.16+ с InnoDB. Проверено на MySQL 8.0.46.
+## Быстрый локальный запуск (Windows и Ubuntu)
 
-Создайте отдельную базу и пользователя через MySQL под администратором. Вставьте собственный случайный пароль:
+Нужны Node.js >=22 и Docker с Compose v2 (`docker compose version`). Образы зафиксированы:
+`node:22.18.0-bookworm-slim`, `mysql:8.0.46`, `nginx:1.28.0-alpine`. На Windows использовать Docker Desktop
+с Linux containers/WSL2; команды ниже одинаковы в PowerShell и bash, из корня проекта.
+На Ubuntu предварительно установить Docker Engine и Compose plugin по документации Docker.
 
-```sql
-CREATE DATABASE softskills_v1 CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
-CREATE USER 'softskills'@'127.0.0.1' IDENTIFIED BY 'REPLACE_WITH_RANDOM_DB_PASSWORD';
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES
-ON softskills_v1.* TO 'softskills'@'127.0.0.1';
+```sh
+node scripts/init-local.mjs
+docker compose up -d --build
+docker compose ps
+docker compose logs migrate backend
+curl http://localhost:3000/health/ready
 ```
 
-```bash
+Открыть http://localhost:5173/registration и создать организацию.
+
+PowerShell: вместо curl можно `Invoke-RestMethod http://localhost:3000/health/ready`.
+Скрипт создаёт `.env` с уникальными случайными секретами и не перезаписывает существующий файл.
+Для ручной настройки — `env.example`. MySQL не публикует порт, backend слушает на localhost:3000.
+Миграции запускаются отдельным одноразовым сервисом до backend. Пустая база не содержит демоданных.
+Для остановки: `docker compose down`; **не добавлять `-v` к рабочей базе**, это удаляет данные.
+
+## Воспроизводимая чистая проверка
+
+```sh
+docker compose --profile test rm -sf mysql-test verify
+docker compose --profile test up --build --abort-on-container-exit --exit-code-from verify verify
+docker compose --profile test rm -sf mysql-test verify
+```
+
+Изолированная MySQL в tmpfs, БД `crm_readiness_test`. Проверяются lint, unit, typecheck,
+production build (при сборке образа), типы тестов, миграции дважды и все интеграционные тесты.
+`readiness.test.ts` запускает `dist/server.js` с NODE_ENV=production и проверяет весь сценарий.
+Тесты нельзя запускать на рабочей БД: они требуют суффикс `_test`, создают организации и очищают
+таблицу ограничений входа. tmpfs удаляется при пересоздании тестового контейнера.
+
+## Без Docker: Node.js и установленная MySQL 8
+
+Создать БД utf8mb4 и отдельного пользователя с правами только на неё. В backend скопировать
+`.env.example` в `.env` (PowerShell `Copy-Item .env.example .env`, bash `cp .env.example .env`),
+указать DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, SESSION_SECRET.
+Секрет: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+
+```sh
 cd backend
 npm ci
-cp .env.example .env
-openssl rand -hex 32
-# В .env укажите DB_*, APP_ORIGIN и сгенерированный SESSION_SECRET.
-npm run migrate
 npm run typecheck
+npm run typecheck:tests
+npm run lint
 npm test
 npm run build
+npm run migrate:prod
 npm start
 ```
 
-Проверка готовности: `curl --fail http://127.0.0.1:3000/health/ready`.
-Контракт API: `http://127.0.0.1:3000/api/v1/openapi.json` и `docs/openapi.json`.
-Разработка: `npm run dev`. Обновление OpenAPI: `npm run openapi` из `backend`.
+Для интеграционных тестов отдельный backend/.env с DB_NAME, оканчивающимся на `_test`:
+`npm run migrate:prod`, затем `npm run test:integration`.
+`npm run test:e2e` — только основной сквозной сценарий, требует предварительного build.
+`npm run openapi` обновляет docs/openapi.json без подключения к БД.
+Разработка: `npm run dev`; NODE_ENV=development. Установку npm ci выполнять именно в backend.
 
-**Миграции не запускаются автоматически при старте сервера, не удаляют данные и не сбрасывают БД.**
-Повторный `npm run migrate` пропускает применённые версии и проверяет контрольные суммы.
-Новая схема использует префикс `crm_`; старые таблицы автоматически не переносятся.
-Для существующей рабочей базы сначала нужен отдельный план переноса и резервная копия.
+Для автоматической проверки на чистой нативной MySQL в Ubuntu: из корня
+`bash scripts/verify-native.sh` после установки зависимостей и build. Скрипт запускает
+одноразовый datadir на свободном порту 3307, тесты и полную проверку dump/restore.
+`MYSQL_BASE` позволяет указать каталог установленной MySQL (по умолчанию `/usr`).
 
-## Проверки
+## Первый пользователь и явные dev-данные
 
-Модульные тесты не требуют БД:
+Использовать `GET /api/v1/auth/csrf`, затем `POST /api/v1/auth/register` с cookies и CSRF.
+Поля companyName/fullName/login/email/password, phone необязателен. Сохранить возвращённый
+companySlug: он нужен для входа. Пароль минимум 12 символов. Регистрация создаёт первый филиал
+и директора транзакционно. Далее директор создаёт филиалы, сотрудников и доступы.
 
-```bash
-cd backend
-npm run typecheck
-npm test
-npm run build
+Только для разработки можно явно создать демоорганизацию:
+
+```sh
+# bash, в backend при уже запущенном локальном сервере
+NODE_ENV=development ALLOW_DEV_SEED=true npm run dev:seed
 ```
 
-Интеграционные тесты работают с настоящей MySQL, запускают HTTP-сервер на свободном localhost-порту.
-**Используйте отдельную БД с именем, заканчивающимся на `_test`.** Тесты создают новые организации и оставляют фикстуры, очищают только auth rate-limit buckets.
-На время проверки отката добавляют и удаляют CHECK-ограничение; на время проверки readiness
-переименовывают запись миграции. Не используйте общую с приложением или параллельными тестами БД. Доступ пользователя к этой базе настраивается отдельно.
+PowerShell: `$env:NODE_ENV='development'; $env:ALLOW_DEV_SEED='true'; npm run dev:seed`.
+Команда печатает одноразово сгенерированные учётные данные. Нет фиксированного пароля,
+startup/migrate/build никогда не запускают seed. Это минимальная демоорганизация;
+полный набор учебных данных создают только интеграционные тесты в тестовой БД.
 
-```sql
-CREATE DATABASE softskills_test CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES
-ON softskills_test.* TO 'softskills'@'127.0.0.1';
-```
+## Сервер и обновления
 
-```bash
-cd backend
-DB_NAME=softskills_test npm run migrate
-DB_NAME=softskills_test npm run test:integration
-```
-
-Набор выполняется последовательно, только на MySQL 8; SQLite и MariaDB не подменяют интеграционную проверку.
-
-Frontend (из корня проекта):
-
-```bash
-cd frontend
-npm ci
-npm run typecheck:crm
-npm run test:crm
-npm run build
-```
-
-## Windows PowerShell
-
-```powershell
-cd backend
-npm ci
-Copy-Item .env.example .env
-node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
-# Заполните .env: DB_*, SESSION_SECRET. Не оставляйте replace-*.
-npm run migrate
-npm run build
-npm start
-```
-
-Тесты в отдельной базе после выдачи ей прав:
-```powershell
-$env:DB_NAME = "softskills_test"
-npm run migrate
-npm run test:integration
-Remove-Item Env:DB_NAME
-```
-
-Альтернатива для тестов с Docker из корня: `docker compose -f compose.mysql-test.yml up -d --wait`.
-В отдельном терминале backend задайте DB_PORT=3307, DB_USER=crm_test,
-DB_PASSWORD=local-test-password, DB_NAME=crm_auth_test, затем migrate и test:integration.
-Локальные реквизиты в compose предназначены исключительно для тестовой базы.
-
-## Обновление предыдущей версии
-
-Сохраните свою `.env`, установите зависимости и выполните `npm run migrate`.
-Миграции 001–003 неизменны; 004 добавляет companySlug и членство существующим аккаунтам,
-заменяет глобальный UNIQUE(login) на UNIQUE(org_id,login), создаёт приглашения.
-DDL 004 проверяет metadata перед ALTER и допускает повторный запуск после прерывания.
-До изменения рабочей БД сделайте резервную копию. Slug существующей компании можно
-получить запросом `SELECT id,name,company_slug FROM crm_organizations`.
-Новые поля регистрации и обязательный companySlug при входе меняют контракт API.
-Сотрудникам с пустым `branchIds` директор должен назначить конкретные филиалы.
-Старые scrypt-хеши проверяются и автоматически усиливаются после успешного входа;
-новые используют scrypt N=131072, r=8, p=1 и случайную соль 16 байт.
-
-Логи JSON содержат requestId, метод, шаблон маршрута, статус и длительность, без body,
-query string, cookies и заголовков авторизации. Аудит рекурсивно скрывает секретные поля.
-`/health/live` проверяет процесс, `/health/ready` — доступ к MySQL и миграцию 004.
-При SIGINT/SIGTERM сервер прекращает принимать запросы, ждёт текущие, закрывает пул;
-через 10 секунд завершает процесс принудительно. Ошибка подключения к БД при старте завершает процесс.
-
-## Документация
-
-- `docs/API.md` — регистрация, cookies/CSRF, ресурсы, точные примеры запросов.
-- `docs/DESIGN.md` — модель данных, права, транзакции, деньги, абонементы, ограничения.
-- `docs/VERIFICATION.md` — фактически выполненные проверки и границы готовности.
-- `deploy/` — пример systemd и фрагмент nginx для Ubuntu.
-
-## Ubuntu / HTTPS
-
-Установите Node.js и MySQL, разместите проект в `/opt/softskills`, создайте системного пользователя
-`softskills`. Выполните миграции отдельной учётной записью мигратора, соберите backend.
-Для рабочего пользователя БД после миграций достаточно SELECT/INSERT/UPDATE/DELETE на схему;
-не выдавайте ему DROP/ALTER/CREATE. Пароли задаются снаружи архива.
-
-Рабочая конфигурация `/etc/softskills/backend.env` должна содержать:
-
-```dotenv
-NODE_ENV=production
-HOST=127.0.0.1
-PORT=3000
-APP_ORIGIN=https://crm.example.com
-COOKIE_SECURE=true
-TRUST_PROXY=1
-# DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, SESSION_SECRET — реальные локальные значения
-```
-
-Права файла: `root:softskills`, `0640`. Укажите фактический путь Node.js в `deploy/softskills.service`.
-Скопируйте unit в `/etc/systemd/system/`, выполните `sudo systemctl daemon-reload` и
-`sudo systemctl enable --now softskills`. Добавьте nginx-конфигурацию в HTTPS virtual host,
-проверьте `sudo nginx -t`, затем `sudo systemctl reload nginx`.
-
-Не открывайте порт 3000 наружу: `TRUST_PROXY=1` рассчитан на один доверенный локальный nginx.
-Сервер требует secure cookies и HTTPS origin в production. Секрет сессий не хранится в git.
-Резервные копии MySQL и проверка восстановления, TLS, мониторинг и реальные пользовательские
-сценарии на целевом сервере остаются обязательными эксплуатационными работами.
+Для текущей связки используйте [DEPLOYMENT.md](docs/DEPLOYMENT.md) и
+`compose.production.yml`. TLS-сертификат предоставляет администратор хостинга.
+Платёжных/SMS/email-провайдеров в проекте нет; оплаты в CRM — внутренние записи учёта.
+Общие сведения об API и резервном копировании: [operations.md](docs/operations.md).

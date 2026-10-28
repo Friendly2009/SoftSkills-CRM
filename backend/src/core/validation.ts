@@ -31,10 +31,7 @@ export const roles = z
   .max(5)
   .refine((v) => new Set(v).size === v.length);
 export const password = z.string().min(12).max(128);
-export const email = z
-  .email()
-  .max(254)
-  .transform((v) => v.trim().toLowerCase());
+export const email = z.string().trim().toLowerCase().max(254).pipe(z.email());
 export function normalizePhone(raw: string) {
   const value = raw.replace(/[\s()\-]/g, "");
   if (/^8\d{10}$/.test(value)) return "+7" + value.slice(1);
@@ -61,12 +58,40 @@ export const contacts = z
     ]),
   )
   .max(10)
+  .refine(
+    (v) => new Set(v.map((c) => c.kind + ":" + c.value)).size === v.length,
+    "Duplicate normalized contacts",
+  )
   .default([]);
 export const pageQuery = z
   .object({
     page: z.coerce.number().int().min(1).max(100000).default(1),
     pageSize: z.coerce.number().int().min(1).max(100).default(25),
     q: z.string().max(100).optional(),
+    sortBy: z
+      .enum([
+        "id",
+        "name",
+        "status",
+        "date",
+        "capacity",
+        "version",
+        "created_at",
+        "starts_at",
+        "ends_at",
+        "priority",
+      ])
+      .default("id"),
+    sortOrder: z.enum(["asc", "desc"]).default("asc"),
+    archived: z.enum(["exclude", "only", "all"]).default("exclude"),
+    personId: id.optional(),
+    payerId: id.optional(),
+    studentId: id.optional(),
+    groupId: id.optional(),
+    responsibleId: id.optional(),
+    teacherId: id.optional(),
+    roomId: id.optional(),
+    priority: z.enum(["Обычный", "Высокий", "Низкий"]).optional(),
     branchId: id.optional(),
     status: z.string().max(60).optional(),
     from: instant.optional(),

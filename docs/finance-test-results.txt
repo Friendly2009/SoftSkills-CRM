@@ -1,0 +1,86 @@
+UNIT
+✔ exact money and discount at integer precision boundary (1.164852ms)
+✔ contact normalization and real calendar validation (2.419198ms)
+✔ password hashes salted, verified without storing plaintext (1242.596584ms)
+✔ roles and explicit branch restrictions fail closed (0.519298ms)
+✔ xlsx parser accepts values and rejects formulas and ZIP bombs (56.699986ms)
+✔ percentage rounds final payable half up using integer arithmetic (7.009097ms)
+✔ lesson validates timezone, exact intervals and mutually exclusive discounts (31.330959ms)
+✔ subscription scope requires both selected group and subject (0.251011ms)
+✔ membership sweep handles adjacent periods, gaps and open ends (1.012267ms)
+✔ contacts normalize before validation and reject duplicate normalized inputs (3.043672ms)
+✔ version contract covers edits, archive, conversion, exit and profile (0.224422ms)
+✔ environment fails closed without leaking secret values (11.078657ms)
+✔ recursive secret redaction and portal DTO allowlists (0.401944ms)
+✔ empty staff branch list grants no branch access (0.207306ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2066.549372
+INTEGRATION (MySQL 8.0.46)
+✔ health, CSRF, bad origin, input errors and legacy routes (3393.643635ms)
+✔ tenant and branch isolation, user management authorization (62.171436ms)
+✔ concurrent normalized contacts cannot create duplicate people (23.204041ms)
+✔ concurrent enrollments respect capacity; students can join multiple groups (31.363288ms)
+✔ concurrent scheduling prevents overlaps; adjacent times accepted (48.697041ms)
+✔ payments are atomic, exact and idempotent across concurrent requests (27.435133ms)
+✔ teacher first completion, retry, manager corrections, salary reversal (87.148518ms)
+✔ payer/student portals expose only linked learning data; no broad finance (24.714043ms)
+✔ refund and manual reversal preserve history; excessive cash out rejected (34.822044ms)
+✔ salary payments separate from accrual and manager cannot pay salary (12.872369ms)
+✔ cancel conducted lesson compensates all charges and subscription usage (16.709905ms)
+✔ lead conversion reuses person, payer and student (43.638369ms)
+✔ subscription freeze extends actual duration; expiry does not change money (36.208019ms)
+✔ XLSX import atomic rollback, child without contacts, retry safety (96.635746ms)
+✔ OpenAPI generated from actual registered routes and logout revocation (20.755338ms)
+✔ expired subscription cannot consume unused allowance even for a past lesson (18.963373ms)
+✔ room collision with a different teacher is rejected, rescheduling frees slot (47.987041ms)
+✔ comments, announcements, tasks, internal notifications and own profile (46.021364ms)
+✔ concurrent withdrawals cannot overdraw cash (24.513473ms)
+✔ frozen and exhausted passes reject new consumption atomically (59.881018ms)
+✔ education pricing, schedule filters, payer selection, null room limit and atomic correction (409.510503ms)
+✔ reschedules serialize, cancelled slots free time and teacher branch must match (72.569185ms)
+✔ issued subscription snapshots, applicability, selected pass, usage returns and boundary expiry (121.652326ms)
+✔ subscription starts inclusive and historical freeze ends exclusive (58.122737ms)
+✔ financial failure rolls attendance, allowance and status back (37.564621ms)
+✔ changing permissions revokes active sessions and protects own director account (14.851296ms)
+✔ employee plus payer roles unite scoped work access and own children across branches (688.95881ms)
+✔ analytics aggregates four widgets, scopes branches and persists user preferences (18.509437ms)
+✔ finance: partial refunds, concurrent retry, cap and compensation (67.80993ms)
+✔ finance: concurrent completion and correction, immutable snapshots, teacher replacement and cancellation (67.538224ms)
+✔ finance: report result excludes advances, transfers and paid salary; scoped history (810.589345ms)
+✔ finance: unlinked legacy refunds block new refunds until compensated (22.253384ms)
+✔ health and CSRF bootstrap: anonymous writes, forged tokens, origins and malformed JSON (68.313716ms)
+✔ registration creates atomic tenant graph, normalized phone, membership; names and logins reusable across tenants (1987.251601ms)
+✔ session cookies, CSRF, logout, revoke others, profile and password change (2253.486274ms)
+✔ invitations are atomic, one-use, expiring, tenant and role checked (1655.602049ms)
+✔ tenant, branch, role boundaries; blocking revokes all sessions; final director protected (1986.33725ms)
+✔ authentication throttling persists in MySQL (10462.871006ms)
+✔ expired sessions, replaced invitations and concurrent director blocking (1037.443984ms)
+✔ readiness fails when required migration is missing while liveness remains available (8.148832ms)
+✔ production cookies, HTTP lifecycle and graceful SIGTERM (864.748564ms)
+✔ invalid environment and unavailable MySQL prevent startup (1081.63484ms)
+✔ contacts conflict atomically; explicit person gains multiple roles (834.887562ms)
+✔ parallel edits use compare-and-swap and failed edit adds no history (45.150806ms)
+✔ concurrent last-seat enrollment, leave and re-enroll retain periods (128.419647ms)
+✔ nonoverlapping future periods share a seat and overlap cannot bypass capacity (66.545938ms)
+✔ lead selection, stage history, explicit repeat-safe conversion and no fake payment (49.484165ms)
+✔ cross-tenant links are rejected in API and composite foreign keys (77.792832ms)
+✔ lists limit pagination, allowlisted sort/filter, archive and legal entity uniqueness (37.461034ms)
+✔ task assignee and linked objects obey branch and teacher visibility (396.35456ms)
+✔ resource cards support editing, comments, history and archival (157.040652ms)
+✔ name-only patch preserves normalized contacts and increments derived card versions (23.18238ms)
+✔ capacity reduction races enrollment without exceeding the final capacity (71.509584ms)
+✔ organization settings are versioned and archive makes tenant read-only (35.347106ms)
+ℹ tests 54
+ℹ suites 0
+ℹ pass 54
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32264.796622

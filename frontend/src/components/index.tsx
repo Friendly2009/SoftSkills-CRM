@@ -54,7 +54,7 @@ const Index = () => {
                     <div className={style['icon-wrapper']}>
                       <img src="/img/index/benefits/benefit-6-1024.png" alt="" />
                     </div>
-                    <p>Онлайн оплата по QR коду</p>
+                    <p>Учёт оплат и возвратов</p>
                   </div>
                 </div>
 
@@ -71,7 +71,7 @@ const Index = () => {
               <div className={style['details-grid']}>
                 <div className={style['detail-card']}>
                   <h3>Аналитика финансов</h3>
-                  <p>Наблюдайте за деньгами в системе. Красивые графики и листы с отчетами</p>
+                  <p>Наблюдайте за деньгами в системе. Начисления, оплаты и финансовые отчёты</p>
                 </div>
                 <div className={style['detail-card']}>
                   <h3>Учет посещаемости</h3>
@@ -79,71 +79,16 @@ const Index = () => {
                 </div>
                 <div className={style['detail-card']}>
                   <h3>CRM и база клиентов</h3>
-                  <p>Ведущая история общения с родителями и учениками. Напоминания об оплатах и днях рождения.</p>
+                  <p>История работы с родителями и учениками. Задачи, комментарии и внутренние уведомления.</p>
                 </div>
               </div>
             </div>
           </section>
 
           <section id="pricing" className={style['pricing-section']}>
-            <div className={style['container']}>
-              <h2 className={style['section-title']}>Гибкие тарифы под ваш масштаб</h2>
-              <div className={style['pricing-wrapper']}>
-                <div className={style['pricing-header']}>
-                  <span className={style['pricing-label']}>Тарифы</span>
-                </div>
-
-                <div className={style['pricing-grid']}>
-                  <div className={style['price-card']}>
-                    <div className={style['price-level']}>Пробный период</div>
-                    <div className={style['price-value']}>0 ₽</div>
-                    <p className={style['price-period']}>Доступ на 14 дней</p>
-                    <ul className={style['price-features']}>
-                      <li>Весь функционал</li>
-                      <li>До 300 активных учеников</li>
-                      <li>Помощь с переносом базы</li>
-                    </ul>
-                    <button className={style['price-btn']} onClick={() => navigate('/registration')}>
-                      Попробовать бесплатно
-                    </button>
-                  </div>
-
-                  <div className={style['price-card']}>
-                    <div className={style['price-level']}>Базовый месяц</div>
-                    <div className={style['price-value']}>1 999 ₽<span> / мес</span></div>
-                    <p className={style['price-period']}>Гибкая оплата без обязательств</p>
-                    <ul className={style['price-features']}>
-                      <li>Весь функционал</li>
-                      <li>До 300 active учеников</li>
-                      <li>Техподдержка в чате</li>
-                    </ul>
-                    <button className={style['price-btn']} onClick={() => navigate('/price-base-month')}>
-                      Выбрать Базовый
-                    </button>
-                  </div>
-
-                  <div className={`${style['price-card']} ${style['price-card-popular']}`}>
-                    <div className={style['badge-popular']}>Выгода ~60%</div>
-                    <div className={style['price-level']}>Годовой безлимит</div>
-                    <div className={style['price-value']}>9 999 ₽<span> / год</span></div>
-                    <p className={style['price-period']}>Всего 833 ₽ в месяц</p>
-                    <ul className={style['price-features']}>
-                      <li>Весь функционал</li>
-                      <li><strong>Безлимит</strong> по ученикам</li>
-                      <li>Приоритетная поддержка</li>
-                    </ul>
-                    <button className={style['price-btn-primary']} onClick={() => navigate('/price-year-prime')}>
-                      Купить на год
-                    </button>
-                  </div>
-                </div>
-
-                <div className={style['pricing-footer']}>
-                  <button className={style['price-more-btn']} onClick={() => navigate('/price')}>
-                    Подробнее о тарифах здесь
-                  </button>
-                </div>
-              </div>
+            <div className={style['container']}><h2 className={style['section-title']}>Бесплатная бета</h2>
+              <p>Расписание, клиенты, абонементы и внутренний финансовый учёт в одном месте.</p>
+              <button className={style['hero-cta-btn']} onClick={() => navigate('/registration')}>Создать организацию</button>
             </div>
           </section>
 
@@ -152,8 +97,8 @@ const Index = () => {
               <h2 className={style['section-title']}>Часто задаваемые вопросы</h2>
               <div className={style['faq-list']}>
                 <div className={style['faq-item']}>
-                  <h4>Как долго длится тестовый период?</h4>
-                  <p>Вы получаете полный доступ ко всем функциям системы на 14 дней абсолютно бесплатно после регистрации.</p>
+                  <h4>Нужно ли оплачивать подписку?</h4>
+                  <p>Текущая версия доступна бесплатно. Платные тарифы и онлайн-приём платежей не подключены.</p>
                 </div>
                 <div className={style['faq-item']}>
                   <h4>Нужно ли устанавливать программу на компьютер?</h4>

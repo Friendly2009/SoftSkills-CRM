@@ -1,0 +1,22 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> soft-skills-crm-frontend@1.0.0 build
+> npm run typecheck && vite build && node scripts/copy-spa-fallback.mjs
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> soft-skills-crm-frontend@1.0.0 typecheck
+> tsc --noEmit
+
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 2551 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                      0.46 kB │ gzip:   0.34 kB
+dist/assets/CrmApp-CtbEVejq.css     12.94 kB │ gzip:   3.36 kB
+dist/assets/index-C8QNEMqy.css      66.15 kB │ gzip:  12.61 kB
+dist/assets/Workspace-BSdewJRR.js  191.11 kB │ gzip:  19.87 kB
+dist/assets/index-BAcKfgxF.js      337.32 kB │ gzip:  98.99 kB
+dist/assets/CrmApp-DiJq6DGF.js     449.24 kB │ gzip: 133.82 kB
+✓ built in 5.04s

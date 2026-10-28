@@ -1,0 +1,16 @@
+
+> softskills-crm-backend@2.0.0 migrate:prod
+> node dist/migrate.js
+
+Applied 001_core.sql
+Applied 002_collaboration.sql
+Applied 003_preferences.sql
+Applied 004_identity.sql
+Applied 005_resources.sql
+Applied 006_education.sql
+Applied 007_finance.sql
+Applied 008_import_preview.sql
+
+> softskills-crm-backend@2.0.0 migrate:prod
+> node dist/migrate.js
+

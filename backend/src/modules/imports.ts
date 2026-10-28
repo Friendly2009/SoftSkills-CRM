@@ -1,5 +1,10 @@
 import type { Express } from "express";
 import ExcelJS from "exceljs";
+import { randomUUID } from "node:crypto";
+import { rows } from "../core/db.js";
+import { scoped, branch } from "../core/security.js";
+import { json } from "../core/validation.js";
+import type { Context } from "../core/api.js";
 import { inflateRawSync } from "node:zlib";
 import { z } from "zod";
 import { route } from "../core/api.js";
@@ -163,7 +168,79 @@ export async function parseWorkbook(encoded: string) {
   }
   return output;
 }
+const importSchema = z.object({
+  branchId: id, kind: z.enum(["people", "payers", "students"]),
+  payerId: id.optional(), fileBase64: z.string().min(1).max(700000).regex(/^[A-Za-z0-9+/]*={0,2}$/),
+}).strict();
+async function applyImport(c: Context, b: z.infer<typeof importSchema>, input: Record<string,string>[]) {
+  permit(c.actor, "director", "manager");
+  assert(b.kind === "students" ? !!b.payerId : !b.payerId, 400, "IMPORT_PAYER", "Student import requires payerId; other kinds must omit it");
+      const result = [];
+      for (const [i, row] of input.entries()) {
+        try {
+          const p = personSchema.parse({
+            branchId: b.branchId,
+            name: row.name,
+            birthday: row.birthday || null,
+            comment: row.comment ?? "",
+            contacts: [
+              ...(row.email ? [{ kind: "email", value: row.email }] : []),
+              ...(row.phone ? [{ kind: "phone", value: row.phone }] : []),
+            ],
+          });
+          const person = await createPerson(c, p);
+          const roleId =
+            b.kind === "payers"
+              ? await ensurePayer(c, person.id)
+              : b.kind === "students"
+                ? await ensureStudent(c, person.id, b.payerId!)
+                : undefined;
+          result.push({
+            row: i + 2,
+            personId: person.id,
+            reused: person.reused,
+            ...(roleId ? { roleId } : {}),
+          });
+        } catch (e) {
+          if (e instanceof AppError) e.details = { row: i + 2 };
+          throw e;
+        }
+      }
+      return { rows: result };
+}
 export function importRoutes(app: Express) {
+  route(app, "post", "/imports/people/preview", {
+    body: importSchema, idem: true, summary: "Validate XLSX without importing; save immutable preview for 24 hours",
+  }, async (c,b) => {
+    permit(c.actor, "director", "manager");
+    const input = await parseWorkbook(b.fileBase64);
+    // Exercise the exact confirm validations, including database conflicts, then undo every domain write.
+    await c.db.query("SAVEPOINT import_preview");
+    await applyImport(c,b,input);
+    await c.db.query("ROLLBACK TO SAVEPOINT import_preview");
+    await c.db.query("RELEASE SAVEPOINT import_preview");
+    const importId = randomUUID();
+    await c.db.execute("INSERT INTO crm_import_previews(id,org_id,user_id,branch_id,payload,expires_at) VALUES(?,?,?,?,?,DATE_ADD(UTC_TIMESTAMP(3),INTERVAL 24 HOUR))",
+      [importId,c.actor.org,c.actor.id,b.branchId,JSON.stringify({ ...b, fileBase64: undefined, input })]);
+    return { id: importId, rowCount: input.length, rows: input.map((r,i) => ({ row: i+2, ...r })), expiresInHours: 24 };
+  });
+  route(app, "post", "/imports/:id/confirm", {
+    body: z.object({}).strict(), idem: true, summary: "Confirm saved preview atomically; repeated confirmations return original result",
+  }, async (c) => {
+    permit(c.actor, "director", "manager");
+    const preview = (await rows(c.db,"SELECT *,expires_at>UTC_TIMESTAMP(3) AS valid FROM crm_import_previews WHERE org_id=? AND id=? AND user_id=? FOR UPDATE",[c.actor.org,c.req.params.id,c.actor.id]))[0];
+    assert(preview,404,"NOT_FOUND","Preview not found");
+    await scoped(c.db,c.actor,"branches",preview.branch_id);
+    // branches have no branch_id column; check permission explicitly, including after revocation.
+    branch(c.actor,preview.branch_id);
+    if (preview.result) return json(preview.result);
+    assert(Number(preview.valid) === 1,409,"IMPORT_EXPIRED","Create a new preview");
+    const payload = json(preview.payload);
+    const result = await applyImport(c,payload,payload.input);
+    await c.db.execute("UPDATE crm_import_previews SET result=?,confirmed_at=UTC_TIMESTAMP(3) WHERE org_id=? AND id=?",[JSON.stringify(result),c.actor.org,preview.id]);
+    return result;
+  });
+
   route(
     app,
     "post",
@@ -193,38 +270,7 @@ export function importRoutes(app: Express) {
         "Student import requires payerId; other kinds must omit it",
       );
       const input = await parseWorkbook(b.fileBase64);
-      const result = [];
-      for (const [i, row] of input.entries()) {
-        try {
-          const p = personSchema.parse({
-            branchId: b.branchId,
-            name: row.name,
-            birthday: row.birthday || null,
-            comment: row.comment ?? "",
-            contacts: [
-              ...(row.email ? [{ kind: "email", value: row.email }] : []),
-              ...(row.phone ? [{ kind: "phone", value: row.phone }] : []),
-            ],
-          });
-          const person = await createPerson(c, p, true);
-          const roleId =
-            b.kind === "payers"
-              ? await ensurePayer(c, person.id)
-              : b.kind === "students"
-                ? await ensureStudent(c, person.id, b.payerId)
-                : undefined;
-          result.push({
-            row: i + 2,
-            personId: person.id,
-            reused: person.reused,
-            ...(roleId ? { roleId } : {}),
-          });
-        } catch (e) {
-          if (e instanceof AppError) e.details = { row: i + 2 };
-          throw e;
-        }
-      }
-      return { rows: result };
+      return applyImport(c, b, input);
     },
   );
 }

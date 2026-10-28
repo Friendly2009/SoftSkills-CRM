@@ -1,3 +1,6 @@
+import { portalFields } from "../core/portalFields.js";
+export { portalFields } from "../core/portalFields.js";
+import { recordTables } from "../core/records.js";
 import type { Express } from "express";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -7,12 +10,11 @@ import { has, permit, branch, get, scoped } from "../core/security.js";
 import { assert } from "../core/errors.js";
 import {
   pageQuery,
+  instant,
   id,
   text,
-  date,
-  note,
   money,
-  json,
+  phone,
 } from "../core/validation.js";
 export const resources: Record<
   string,
@@ -24,6 +26,8 @@ export const resources: Record<
     roles?: string[];
   }
 > = {
+  enrollments: { table: "members", branch: true },
+  "payer-students": { table: "payer_students", branch: true },
   announcements: {
     table: "announcements",
     search: "name",
@@ -105,7 +109,7 @@ function studentVisibility(c: Context, alias: string, args: unknown[]): string {
   }
   if (has(c.actor, "payer")) {
     clauses.push(
-      `${alias}.payer_id IN(SELECT p.id FROM crm_payers p WHERE p.org_id=r.org_id AND p.person_id=?)`,
+      `${alias}.id IN(SELECT ps.student_id FROM crm_payer_students ps JOIN crm_payers p ON p.org_id=ps.org_id AND p.id=ps.payer_id WHERE ps.org_id=r.org_id AND p.person_id=? AND ps.archived_at IS NULL AND p.archived_at IS NULL)`,
     );
     args.push(c.actor.personId);
   }
@@ -180,6 +184,17 @@ function visibilityBase(c: Context, name: string) {
         );
       }
       break;
+    case "enrollments":
+      where.push(
+        `r.student_id IN(SELECT s.id FROM crm_students s WHERE s.org_id=r.org_id AND ${studentVisibility(c, "s", args)})`,
+      );
+      break;
+    case "payer-students":
+      permit(c.actor, "payer", "student");
+      where.push(
+        `r.student_id IN(SELECT s.id FROM crm_students s WHERE s.org_id=r.org_id AND ${studentVisibility(c, "s", args)})`,
+      );
+      break;
     case "students":
       where.push(studentVisibility(c, "r", args));
       break;
@@ -217,6 +232,14 @@ function visibilityBase(c: Context, name: string) {
         "r.responsible_id IN(SELECT t.id FROM crm_staff t WHERE t.org_id=r.org_id AND t.person_id=?)",
       );
       args.push(c.actor.personId);
+      where.push("r.payer_id IS NULL");
+      where.push(
+        `(r.student_id IS NULL OR r.student_id IN(SELECT s.id FROM crm_students s WHERE s.org_id=r.org_id AND ${studentVisibility(c, "s", args)}))`,
+      );
+      where.push(
+        `(r.person_id IS NULL OR r.person_id IN(SELECT s.person_id FROM crm_students s WHERE s.org_id=r.org_id AND ${studentVisibility(c, "s", args)}) OR r.person_id=?)`,
+      );
+      args.push(c.actor.personId);
       break;
     case "accounts":
       permit(c.actor, "payer");
@@ -244,6 +267,8 @@ export function visibility(c: Context, name: string) {
   );
   const portalResources = [
     "people",
+    "enrollments",
+    "payer-students",
     "payers",
     "students",
     "groups",
@@ -314,12 +339,28 @@ export function resourceRoutes(app: Express) {
       app,
       "get",
       "/" + name,
-      { query: pageQuery, summary: `List ${name}, scoped and paginated` },
+      {
+        query:
+          name === "lessons"
+            ? pageQuery.extend({ from: instant, to: instant })
+            : pageQuery,
+        summary:
+          name === "lessons"
+            ? "Schedule overlapping [from,to), maximum 93 days, scoped and paginated"
+            : `List ${name}, scoped and paginated`,
+      },
       async (c, _, q) => {
         const { where, args } = visibility(c, name);
         if (q.q) {
-          assert(def.search, 400, "FILTER_UNSUPPORTED", "Search unsupported");
-          where.push(`r.${def.search} LIKE ? ESCAPE '='`);
+          const search = def.search
+            ? `r.${def.search}`
+            : ["payers", "students"].includes(name)
+              ? "(SELECT p.name FROM crm_people p WHERE p.org_id=r.org_id AND p.id=r.person_id)"
+              : ["enrollments", "payer-students"].includes(name)
+                ? "(SELECT p.name FROM crm_students s JOIN crm_people p ON p.org_id=s.org_id AND p.id=s.person_id WHERE s.org_id=r.org_id AND s.id=r.student_id)"
+                : undefined;
+          assert(search, 400, "FILTER_UNSUPPORTED", "Search unsupported");
+          where.push(`${search} LIKE ? ESCAPE '='`);
           args.push("%" + q.q.replace(/[=%_]/g, (v: string) => "=" + v) + "%");
         }
         if (q.branchId) {
@@ -332,15 +373,127 @@ export function resourceRoutes(app: Express) {
           where.push(name === "branches" ? "r.id=?" : "r.branch_id=?");
           args.push(q.branchId);
         }
-        if (q.status) {
+        if (recordTables[name]) {
+          if (q.archived !== "all" && q.status !== "archived")
+            where.push(
+              `r.archived_at IS ${q.archived === "only" ? "NOT " : ""}NULL`,
+            );
+        } else
           assert(
-            def.status,
+            q.archived === "exclude",
             400,
             "FILTER_UNSUPPORTED",
-            "Status filter unsupported",
+            "Archive filter unsupported",
           );
-          where.push("r.status=?");
-          args.push(q.status);
+        if (q.status) {
+          if (
+            name === "enrollments" &&
+            ["active", "ended", "future"].includes(q.status)
+          ) {
+            where.push(
+              q.status === "active"
+                ? "r.starts_at<=UTC_TIMESTAMP(3) AND (r.ends_at IS NULL OR r.ends_at>UTC_TIMESTAMP(3))"
+                : q.status === "future"
+                  ? "r.starts_at>UTC_TIMESTAMP(3)"
+                  : "r.ends_at<=UTC_TIMESTAMP(3)",
+            );
+          } else if (def.status) {
+            where.push("r.status=?");
+            args.push(q.status);
+          } else if (["branches", "people", "students"].includes(name)) {
+            assert(
+              ["active", "inactive"].includes(q.status),
+              400,
+              "INVALID_STATUS",
+              "Use active or inactive",
+            );
+            where.push("r.active=?");
+            args.push(q.status === "active");
+          } else {
+            assert(
+              recordTables[name] && ["active", "archived"].includes(q.status),
+              400,
+              "FILTER_UNSUPPORTED",
+              "Use active or archived",
+            );
+            where.push(
+              `r.archived_at IS ${q.status === "archived" ? "NOT " : ""}NULL`,
+            );
+          }
+        }
+        const filters: Record<string, string[]> = {
+          personId: ["payers", "students", "staff", "leads", "tasks"],
+          payerId: ["students", "payer-students", "tasks", "leads"],
+          studentId: [
+            "enrollments",
+            "payer-students",
+            "tasks",
+            "leads",
+            "lessons",
+            "subscriptions",
+          ],
+          roomId: ["lessons"],
+          groupId: ["enrollments", "lessons"],
+          responsibleId: ["tasks", "leads"],
+          teacherId: ["groups", "lessons"],
+          priority: ["tasks"],
+        };
+        for (const [field, allowed] of Object.entries(filters))
+          if (q[field]) {
+            assert(
+              allowed.includes(name),
+              400,
+              "FILTER_UNSUPPORTED",
+              `Unsupported filter: ${field}`,
+            );
+            if (field === "studentId" && name === "lessons") {
+              where.push(
+                "EXISTS(SELECT 1 FROM crm_attendees a WHERE a.org_id=r.org_id AND a.lesson_id=r.id AND a.student_id=?)",
+              );
+              args.push(q[field]);
+              continue;
+            }
+            where.push(
+              `r.${field.replace(/[A-Z]/g, (c) => "_" + c.toLowerCase())}=?`,
+            );
+            args.push(q[field]);
+          }
+        const sort = [
+          "id",
+          ...(def.search
+            ? [def.search]
+            : ["payers", "students", "enrollments", "payer-students"].includes(
+                  name,
+                )
+              ? ["name"]
+              : []),
+          ...(def.status ? ["status"] : []),
+          ...(recordTables[name] ? ["version"] : []),
+          ...(["groups", "rooms"].includes(name) ? ["capacity"] : []),
+          ...(name === "tasks" ? ["date", "priority"] : []),
+          ...(["audit", "ledger", "announcements"].includes(name)
+            ? ["created_at"]
+            : []),
+          ...(["lessons", "enrollments"].includes(name)
+            ? ["starts_at", "ends_at"]
+            : []),
+        ];
+        assert(
+          sort.includes(q.sortBy),
+          400,
+          "SORT_UNSUPPORTED",
+          "Unsupported sort field for resource",
+        );
+        if (name === "lessons") {
+          assert(
+            q.from &&
+              q.to &&
+              Date.parse(q.to) > Date.parse(q.from) &&
+              Date.parse(q.to) - Date.parse(q.from) <= 93 * 86400000,
+            400,
+            "SCHEDULE_PERIOD",
+            "Provide from/to, with a positive period of at most 93 days",
+          );
         }
         for (const key of ["from", "to"])
           if (q[key]) {
@@ -351,12 +504,18 @@ export function resourceRoutes(app: Express) {
               "Time filter unsupported",
             );
             where.push(
-              `r.${name === "lessons" ? "starts_at" : "created_at"} ${key === "from" ? ">=" : "<"} ?`,
+              `r.${name === "lessons" ? (key === "from" ? "ends_at" : "starts_at") : "created_at"} ${key === "from" ? (name === "lessons" ? ">" : ">=") : "<"} ?`,
             );
             args.push(
               new Date(q[key]).toISOString().slice(0, 23).replace("T", " "),
             );
           }
+        const sortExpression =
+          q.sortBy === "name" && !def.search
+            ? ["payers", "students"].includes(name)
+              ? "(SELECT p.name FROM crm_people p WHERE p.org_id=r.org_id AND p.id=r.person_id)"
+              : "(SELECT p.name FROM crm_students s JOIN crm_people p ON p.org_id=s.org_id AND p.id=s.person_id WHERE s.org_id=r.org_id AND s.id=r.student_id)"
+            : `r.${q.sortBy}`;
         const filter = where.join(" AND ");
         const count = (
           await rows(
@@ -367,7 +526,7 @@ export function resourceRoutes(app: Express) {
         )[0];
         const items = await rows(
           c.db,
-          `SELECT r.* FROM crm_${def.table} r WHERE ${filter} ORDER BY r.id LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
+          `SELECT r.* FROM crm_${def.table} r WHERE ${filter} ORDER BY ${sortExpression} ${q.sortOrder},r.id ${q.sortOrder} LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
           args,
         );
         return {
@@ -405,23 +564,33 @@ export function resourceRoutes(app: Express) {
     app,
     "get",
     "/groups/:id/members",
-    { query: pageQuery, summary: "List visible group members" },
+    {
+      query: pageQuery.pick({ page: true, pageSize: true }),
+      summary: "List visible membership periods, including history",
+    },
     async (c, _, q) => {
       await visible(c, "groups", String(c.req.params.id));
       const { where, args } = visibility(c, "students");
-      where.push(
-        "r.id IN(SELECT student_id FROM crm_members WHERE org_id=? AND group_id=?)",
-      );
-      args.push(c.actor.org, c.req.params.id);
+      where.push("x.group_id=?");
+      args.push(c.req.params.id);
+      const filter = where.join(" AND ");
+      const count = (
+        await rows(
+          c.db,
+          `SELECT COUNT(*) n FROM crm_members x JOIN crm_students r ON r.org_id=x.org_id AND r.id=x.student_id WHERE ${filter}`,
+          args,
+        )
+      )[0]!;
       const list = await rows(
         c.db,
-        `SELECT r.* FROM crm_students r WHERE ${where.join(" AND ")} ORDER BY r.id LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
+        `SELECT x.* FROM crm_members x JOIN crm_students r ON r.org_id=x.org_id AND r.id=x.student_id WHERE ${filter} ORDER BY x.starts_at DESC,x.id LIMIT ${q.pageSize} OFFSET ${(q.page - 1) * q.pageSize}`,
         args,
       );
       return {
-        items: list.map((v) => redact(c, "students", v)),
+        items: list.map((v) => redact(c, "enrollments", v)),
         page: q.page,
         pageSize: q.pageSize,
+        total: Number(count.n),
       };
     },
   );
@@ -458,6 +627,7 @@ export function resourceRoutes(app: Express) {
           ) {
             delete v.price;
             delete v.discount;
+            delete v.discount_percent;
             delete v.payer_id;
           }
           return !has(c.actor, "director", "manager", "teacher")
@@ -480,7 +650,7 @@ export function resourceRoutes(app: Express) {
     .object({
       branchId: id,
       name: text,
-      capacity: z.number().int().min(1).max(10000),
+      capacity: z.number().int().min(1).max(10000).nullable(),
     })
     .strict();
   simple(
@@ -503,6 +673,7 @@ export function resourceRoutes(app: Express) {
         branchId: id,
         name: text,
         subject: text,
+        groupId: id.nullable().default(null),
         lessons: z.number().int().min(1).max(10000),
         days: z.number().int().min(1).max(3650),
         price: money,
@@ -513,6 +684,7 @@ export function resourceRoutes(app: Express) {
     {
       branchId: "branch_id",
       subject: "subject",
+      groupId: "group_id",
       lessons: "lessons",
       days: "days",
       price: "price",
@@ -533,7 +705,7 @@ export function resourceRoutes(app: Express) {
           .default(""),
         address: z.string().max(255).default(""),
         contact: z.string().max(255).default(""),
-        phone: z.string().max(40).default(""),
+        phone: z.union([z.literal(""), phone]).default(""),
         account: z.string().max(40).default(""),
         bank: z.string().max(255).default(""),
         status: z.enum(["Активна", "Архив"]).default("Активна"),
@@ -705,7 +877,19 @@ function simple(
             );
           }
         }
-        if (name === "rooms" && method === "patch") {
+        if (name === "subscription-templates" && b.groupId) {
+          const g = await scoped(c.db, c.actor, "groups", b.groupId);
+          assert(
+            g.branch_id === b.branchId &&
+              !g.archived_at &&
+              g.status !== "Архив" &&
+              g.subject === b.subject,
+            409,
+            "TEMPLATE_GROUP",
+            "Template group must be active in the same branch and subject",
+          );
+        }
+        if (name === "rooms" && method === "patch" && b.capacity !== null) {
           const planned = await rows(
             c.db,
             "SELECT l.id FROM crm_lessons l JOIN crm_attendees a ON a.org_id=l.org_id AND a.lesson_id=l.id WHERE l.org_id=? AND l.room_id=? AND l.status='scheduled' GROUP BY l.id HAVING COUNT(*)>? LIMIT 1",
@@ -739,41 +923,13 @@ function simple(
     );
 }
 
-export const portalFields: Record<string, string[]> = {
-  people: ["id", "name", "birthday", "active"],
-  payers: ["id", "person_id"],
-  students: ["id", "person_id", "branch_id", "active"],
-  groups: ["id", "name", "subject", "status", "start_date", "end_date"],
-  lessons: [
-    "id",
-    "name",
-    "starts_at",
-    "ends_at",
-    "status",
-    "group_id",
-    "room_id",
-  ],
-  subscriptions: [
-    "id",
-    "student_id",
-    "starts_at",
-    "ends_at",
-    "allowance",
-    "frozen_at",
-  ],
-  accounts: ["id", "name", "kind"],
-  ledger: ["id", "account_id", "amount", "kind", "created_at"],
-  attendance: [
-    "id",
-    "lesson_id",
-    "student_id",
-    "attendance",
-    "price",
-    "discount",
-  ],
-};
 export function portalDTO(name: string, row: Record<string, unknown>) {
   return Object.fromEntries(
-    (portalFields[name] ?? []).filter((k) => k in row).map((k) => [k, row[k]]),
+    [
+      ...(portalFields[name] ?? []),
+      ...(recordTables[name] ? ["version", "archived_at"] : []),
+    ]
+      .filter((k) => k in row)
+      .map((k) => [k, row[k]]),
   );
 }

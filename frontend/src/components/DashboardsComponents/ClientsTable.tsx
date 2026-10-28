@@ -155,17 +155,6 @@ export const ClientTable: React.FC = () => {
         return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(amount);
     };
 
-    const renderStatus = (status: number) => {
-        switch (status) {
-            case 1:
-                return <span className={`${style.badge} ${style['badge-active']}`}>Активен</span>;
-            case 0:
-                return <span className={`${style.badge} ${style['badge-inactive']}`}>Заморожен</span>;
-            default:
-                return <span className={style['text-muted']}>—</span>;
-        }
-    };
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 

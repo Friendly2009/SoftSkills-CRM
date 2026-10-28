@@ -1,0 +1,11 @@
+import {randomBytes} from 'node:crypto';
+import {writeFileSync} from 'node:fs';
+import {isAbsolute} from 'node:path';
+const [origin,certDir]=process.argv.slice(2);
+if(!origin||!certDir)throw new Error('Usage: node scripts/init-production.mjs https://crm.example.com /absolute/path/to/certificates');
+const url=new URL(origin);
+if(url.protocol!=='https:'||url.origin!==origin||url.username||url.password)throw new Error('Use an exact HTTPS origin, without path or trailing slash.');
+if(!isAbsolute(certDir)||/[\r\n$"'\\]/.test(certDir))throw new Error('Use an absolute certificate directory without quotes or shell substitutions.');
+const secret=()=>randomBytes(32).toString('hex');
+writeFileSync('.env.production',`DB_NAME=crm_production\nDB_USER=crm\nDB_PASSWORD=${secret()}\nMYSQL_ROOT_PASSWORD=${secret()}\nSESSION_SECRET=${secret()}\nAPP_ORIGIN=${origin}\nTLS_CERT_DIR="${certDir}"\n`,{flag:'wx',mode:0o600});
+console.log('Created .env.production with random secrets. Existing files are never overwritten.');

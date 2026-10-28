@@ -1,3 +1,4 @@
+import { secondaryHistory } from "../core/records.js";
 import { randomUUID } from "node:crypto";
 import type { Express } from "express";
 import { z } from "zod";
@@ -8,7 +9,6 @@ import {
   scoped,
   get,
   branch,
-  has,
   hashPassword,
 } from "../core/security.js";
 import { assert } from "../core/errors.js";
@@ -34,10 +34,15 @@ export const personSchema = z
 export async function createPerson(
   c: Context,
   b: z.infer<typeof personSchema>,
-  reuse = false,
 ) {
   branch(c.actor, b.branchId);
-  await get(c.db, c.actor, "branches", b.branchId);
+  const br = await get(c.db, c.actor, "branches", b.branchId);
+  assert(
+    br.active && !br.archived_at,
+    409,
+    "BRANCH_INACTIVE",
+    "Branch is inactive",
+  );
   const matches = new Set<string>();
   for (const contact of b.contacts) {
     const row = (
@@ -55,31 +60,12 @@ export async function createPerson(
     "CONTACT_CONFLICT",
     "Contacts belong to different people",
   );
-  if (matches.size) {
-    const personId = [...matches][0]!;
-    assert(
-      reuse,
-      409,
-      "CONTACT_EXISTS",
-      "A contact already belongs to a person",
-    );
-    await scoped(c.db, c.actor, "people", personId);
-    for (const contact of b.contacts) {
-      const exists = (
-        await rows(
-          c.db,
-          "SELECT id FROM crm_contacts WHERE org_id=? AND kind=? AND value=?",
-          [c.actor.org, contact.kind, contact.value],
-        )
-      )[0];
-      if (!exists)
-        await c.db.execute(
-          "INSERT INTO crm_contacts(id,org_id,person_id,kind,value) VALUES(?,?,?,?,?)",
-          [randomUUID(), c.actor.org, personId, contact.kind, contact.value],
-        );
-    }
-    return { id: personId, reused: true };
-  }
+  assert(
+    !matches.size,
+    409,
+    "CONTACT_EXISTS",
+    "A normalized contact already belongs to another person. Select that person explicitly.",
+  );
   const personId = randomUUID();
   await c.db.execute(
     "INSERT INTO crm_people(id,org_id,branch_id,name,birthday,comment) VALUES(?,?,?,?,?,?)",
@@ -90,18 +76,29 @@ export async function createPerson(
       "INSERT INTO crm_contacts(id,org_id,person_id,kind,value) VALUES(?,?,?,?,?)",
       [randomUUID(), c.actor.org, personId, v.kind, v.value],
     );
+  if (c.req.route.path !== "/api/v1/people")
+    await secondaryHistory(c, "people", personId);
   return { id: personId, reused: false };
 }
 export async function ensurePayer(c: Context, personId: string) {
   const p = await scoped(c.db, c.actor, "people", personId);
+  assert(
+    p.active && !p.archived_at,
+    409,
+    "PERSON_INACTIVE",
+    "Person is inactive",
+  );
   const old = (
     await rows(
       c.db,
-      "SELECT id FROM crm_payers WHERE org_id=? AND person_id=?",
+      "SELECT * FROM crm_payers WHERE org_id=? AND person_id=?",
       [c.actor.org, personId],
     )
   )[0];
-  if (old) return old.id as string;
+  if (old) {
+    assert(!old.archived_at, 409, "PAYER_ARCHIVED", "Payer is archived");
+    return old.id as string;
+  }
   const payerId = randomUUID();
   await c.db.execute(
     "INSERT INTO crm_payers(id,org_id,person_id,branch_id) VALUES(?,?,?,?)",
@@ -111,6 +108,8 @@ export async function ensurePayer(c: Context, personId: string) {
     "INSERT INTO crm_accounts(id,org_id,kind,branch_id,person_id,name) VALUES(?,?,'payer',?,?,?)",
     [payerId, c.actor.org, p.branch_id, personId, p.name],
   );
+  if (c.req.route.path !== "/api/v1/payers")
+    await secondaryHistory(c, "payers", payerId);
   return payerId;
 }
 export async function ensureStudent(
@@ -119,7 +118,14 @@ export async function ensureStudent(
   payerId: string,
 ) {
   const p = await scoped(c.db, c.actor, "people", personId);
-  await scoped(c.db, c.actor, "payers", payerId);
+  assert(
+    p.active && !p.archived_at,
+    409,
+    "PERSON_INACTIVE",
+    "Person is inactive",
+  );
+  const payer = await scoped(c.db, c.actor, "payers", payerId);
+  assert(!payer.archived_at, 409, "PAYER_INVALID", "Payer must be active");
   const old = (
     await rows(
       c.db,
@@ -128,6 +134,12 @@ export async function ensureStudent(
     )
   )[0];
   if (old) {
+    assert(
+      old.active && !old.archived_at,
+      409,
+      "STUDENT_INACTIVE",
+      "Student is inactive",
+    );
     assert(
       old.payer_id === payerId,
       409,
@@ -141,6 +153,14 @@ export async function ensureStudent(
     "INSERT INTO crm_students(id,org_id,person_id,branch_id,payer_id) VALUES(?,?,?,?,?)",
     [studentId, c.actor.org, personId, p.branch_id, payerId],
   );
+  const linkId = randomUUID();
+  await c.db.execute(
+    "INSERT INTO crm_payer_students(id,org_id,branch_id,payer_id,student_id) VALUES(?,?,?,?,?)",
+    [linkId, c.actor.org, p.branch_id, payerId, studentId],
+  );
+  await secondaryHistory(c, "payer-students", linkId);
+  if (c.req.route.path !== "/api/v1/students")
+    await secondaryHistory(c, "students", studentId);
   return studentId;
 }
 export function peopleRoutes(app: Express) {
@@ -162,16 +182,43 @@ export function peopleRoutes(app: Express) {
     "patch",
     "/people/:id",
     {
-      body: personSchema.omit({ branchId: true }),
+      body: z
+        .object({
+          name: text.optional(),
+          birthday: date.nullable().optional(),
+          comment: z.string().trim().max(4000).optional(),
+          contacts: contacts.removeDefault().optional(),
+        })
+        .strict(),
       summary: "Update person and replace contacts",
     },
     async (c, b) => {
       permit(c.actor, "director", "manager");
-      await scoped(c.db, c.actor, "people", String(c.req.params.id));
+      const old = await scoped(
+        c.db,
+        c.actor,
+        "people",
+        String(c.req.params.id),
+      );
+      b = {
+        ...b,
+        name: b.name ?? old.name,
+        birthday: b.birthday === undefined ? old.birthday : b.birthday,
+        comment: b.comment ?? old.comment,
+        contacts:
+          b.contacts ??
+          (await rows(
+            c.db,
+            "SELECT kind,value FROM crm_contacts WHERE org_id=? AND person_id=?",
+            [c.actor.org, old.id],
+          )),
+      };
+      await checkContacts(c, String(c.req.params.id), b.contacts);
       await c.db.execute(
         "UPDATE crm_people SET name=?,birthday=?,comment=? WHERE org_id=? AND id=?",
         [b.name, b.birthday, b.comment, c.actor.org, c.req.params.id],
       );
+      await syncPersonNames(c, String(c.req.params.id), b.name);
       await c.db.execute(
         "DELETE FROM crm_contacts WHERE org_id=? AND person_id=?",
         [c.actor.org, c.req.params.id],
@@ -391,4 +438,59 @@ export async function validateRoleLinks(
         "ROLE_LINK_REQUIRED",
         `Create ${role} profile first`,
       );
+}
+
+export async function checkContacts(
+  c: Context,
+  personId: string,
+  list: { kind: string; value: string }[],
+) {
+  for (const contact of list) {
+    const existing = await rows(
+      c.db,
+      "SELECT id FROM crm_contacts WHERE org_id=? AND kind=? AND value=? AND person_id<>?",
+      [c.actor.org, contact.kind, contact.value, personId],
+    );
+    assert(
+      !existing.length,
+      409,
+      "CONTACT_EXISTS",
+      "A normalized contact already belongs to another person. Select that person explicitly.",
+    );
+  }
+}
+
+export async function syncPersonNames(
+  c: Context,
+  personId: string,
+  name: string,
+) {
+  for (const resource of ["staff", "leads"]) {
+    const links = await rows(
+      c.db,
+      `SELECT * FROM crm_${resource} WHERE org_id=? AND person_id=?`,
+      [c.actor.org, personId],
+    );
+    for (const before of links) {
+      if (before.name === name) continue;
+      await c.db.execute(
+        `UPDATE crm_${resource} SET name=?,version=version+1 WHERE org_id=? AND id=?`,
+        [name, c.actor.org, before.id],
+      );
+      // History is written without broadening the current actor's read permissions.
+      const after = { ...before, name, version: before.version + 1 };
+      await c.db.execute(
+        "INSERT INTO crm_record_history(id,org_id,resource,resource_id,author_id,action,before_data,after_data) VALUES(UUID(),?,?,?,?,?,?,?)",
+        [
+          c.actor.org,
+          resource,
+          before.id,
+          c.actor.id,
+          "person-name-change",
+          JSON.stringify(before),
+          JSON.stringify(after),
+        ],
+      );
+    }
+  }
 }

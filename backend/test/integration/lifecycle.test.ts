@@ -14,7 +14,7 @@ async function freePort() {
   return port;
 }
 function start(env: Record<string, string>) {
-  const child = spawn(process.execPath, ["--import", "tsx", "src/server.ts"], {
+  const child = spawn(process.execPath, ["dist/server.js"], {
     env: {
       ...process.env,
       NODE_ENV: "test",

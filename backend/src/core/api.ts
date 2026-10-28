@@ -1,5 +1,6 @@
+import { beforeWrite, afterWrite, needsVersion } from "./records.js";
 import { redactSecrets } from "./logger.js";
-import type { Express, Request, Response } from "express";
+import type { Express, Request } from "express";
 import { z } from "zod";
 import { randomUUID, createHash } from "node:crypto";
 import { transaction, rows, type DB } from "./db.js";
@@ -33,7 +34,12 @@ export function document(
   if (query) {
     const s = z.toJSONSchema(query, { io: "input" }) as any;
     for (const [name, value] of Object.entries(s.properties ?? {}))
-      parameters.push({ in: "query", name, schema: value });
+      parameters.push({
+        in: "query",
+        name,
+        required: (s.required ?? []).includes(name),
+        schema: value,
+      });
   }
   if ((auth || path.startsWith("/auth/")) && method !== "get")
     parameters.push({
@@ -42,12 +48,21 @@ export function document(
       required: true,
       schema: { type: "string" },
     });
+  if (needsVersion(method, path))
+    parameters.push({
+      in: "header",
+      name: "If-Match",
+      required: true,
+      schema: { type: "string", pattern: '^"[1-9][0-9]*"$' },
+      description:
+        "Current card version in double quotes. Stale versions return 409.",
+    });
   if (idem)
     parameters.push({
       in: "header",
       name: "Idempotency-Key",
       required: true,
-      schema: { type: "string", minLength: 8, maxLength: 128 },
+      schema: { type: "string", minLength: 8, maxLength: 128, pattern: "^[\\w.:-]+$" },
     });
   definitions[openPath] ??= {};
   definitions[openPath][method] = {
@@ -73,6 +88,7 @@ export function document(
     responses: {
       "200": {
         description: "Success",
+        ...(path.startsWith("/auth/") || path === "/profile/password" ? {headers: {"Set-Cookie": {description: "HttpOnly crm_session or crm_precsrf; Path=/api/v1, SameSite from config; Secure required in production. Logout/password change clears the session cookie.",schema:{type:"string"}}}} : {}),
         content: {
           "application/json": {
             schema: {
@@ -177,11 +193,31 @@ export function route(
           return json(cached.response);
         }
       }
-      const output = await handler(
-        { db, actor: a, requestId: res.locals.requestId, req },
-        body,
-        query,
-      );
+      const context = { db, actor: a, requestId: res.locals.requestId, req };
+      if (method !== "get" && !["/auth/logout", "/auth/sessions/revoke-others", "/profile/password"].includes(path)) {
+        const org = (
+          await rows(
+            db,
+            "SELECT archived_at FROM crm_organizations WHERE id=?",
+            [a.org],
+          )
+        )[0];
+        assert(
+          !org?.archived_at,
+          409,
+          "ORGANIZATION_ARCHIVED",
+          "Organization is archived",
+        );
+      }
+      const lessonMutation =
+        method !== "get" && path.startsWith("/lessons") && path !== "/lessons";
+      if (lessonMutation)
+        await saveLessonVersion(context, String(req.params.id));
+      const state = await beforeWrite(context, method, path);
+      let output = await handler(context, body, query);
+      output = await afterWrite(context, path, state, output);
+      if (method !== "get" && path.startsWith("/lessons"))
+        await saveLessonVersion(context, String(output.id));
       if (method !== "get") {
         const safe = body
           ? Object.fromEntries(
@@ -219,6 +255,17 @@ export function openapi() {
     info: { title: "SoftSkills CRM API", version: "1.0.0" },
     paths: {
       ...definitions,
+      "/api/v1/openapi.json": {
+        get: {
+          summary: "Public OpenAPI contract", security: [],
+          responses: { "200": { description: "OpenAPI 3.1 document", content: {
+            "application/json": { schema: {
+              type: "object", required: ["openapi", "info", "paths", "components"],
+              properties: { openapi: {type:"string"}, info: {type:"object"}, paths: {type:"object"}, components: {type:"object"} }
+            } }
+          } } }
+        }
+      },
       ...Object.fromEntries(
         ["live", "ready"].map((name) => [
           "/health/" + name,
@@ -246,7 +293,7 @@ export function openapi() {
                   },
                 },
                 ...(name === "ready"
-                  ? { "503": { description: "Database or schema unavailable" } }
+                  ? { "503": { description: "Database or schema unavailable", content: {"application/json":{schema:{$ref:"#/components/schemas/Error"}}} } }
                   : {}),
               },
             },
@@ -279,4 +326,29 @@ export function openapi() {
       },
     },
   };
+}
+
+async function saveLessonVersion(c: Context, lessonId: string) {
+  const lesson = (
+    await rows(c.db, "SELECT * FROM crm_lessons WHERE org_id=? AND id=?", [
+      c.actor.org,
+      lessonId,
+    ])
+  )[0];
+  if (!lesson) return;
+  const attendees = await rows(
+    c.db,
+    "SELECT * FROM crm_attendees WHERE org_id=? AND lesson_id=? ORDER BY student_id",
+    [c.actor.org, lessonId],
+  );
+  await c.db.execute(
+    "INSERT IGNORE INTO crm_lesson_versions(id,org_id,lesson_id,revision,snapshot) VALUES(?,?,?,?,?)",
+    [
+      randomUUID(),
+      c.actor.org,
+      lessonId,
+      lesson.revision,
+      JSON.stringify({ lesson, attendees }),
+    ],
+  );
 }

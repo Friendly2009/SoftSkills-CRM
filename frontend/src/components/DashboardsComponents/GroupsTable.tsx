@@ -124,11 +124,6 @@ export const GroupTable: React.FC = () => {
             schedules: [...prev.schedules, { day_of_week: 'Понедельник', start_time: '', end_time: '' }]
         }));
     };
-    const getStatusLabel = (status: number) => {
-        if (status === 1) return 'Набор';
-        if (status === 2) return 'Активна';
-        return 'Архив';
-    };
     const addUpdateSheduleField = () => {
         setUpdateFormData(prev => ({
             ...prev,

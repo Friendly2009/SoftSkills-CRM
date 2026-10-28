@@ -19,10 +19,25 @@ async function call(
   session?: Session,
   extra: Record<string, string> = {},
 ) {
+  const versionHeaders: Record<string, string> = {};
+  const { needsVersion } = await import("../../src/core/records.js");
+  const relative = path.replace("/api/v1", "");
+  if (session && needsVersion(method.toLowerCase(), relative)) {
+    const target =
+      relative === "/profile" || relative.startsWith("/organization")
+        ? (relative.startsWith("/organization") ? "/organization" : relative)
+        : "/" + relative.split("/").slice(1, 3).join("/");
+    const current = await call("GET", "/api/v1" + target, undefined, session);
+    if (current.status === 200)
+      versionHeaders["If-Match"] = JSON.stringify(
+        String(current.data.version ?? current.data.person?.version),
+      );
+  }
   const res = await fetch(base + path, {
     method,
     headers: {
       "Content-Type": "application/json",
+      ...versionHeaders,
       ...(session
         ? { Cookie: session.cookie, "X-CSRF-Token": session.csrf }
         : {}),
@@ -31,6 +46,7 @@ async function call(
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
   const payload = await res.json();
+  if(res.status===200 && path.startsWith("/api/v1/") && !path.endsWith("openapi.json")) (await import("../contracts.js")).checkResponse(method,relative,payload);
   return {
     ...payload,
     status: res.status,
@@ -431,7 +447,7 @@ test("tenant, branch, role boundaries; blocking revokes all sessions; final dire
         m,
       )
     ).status,
-    403,
+    404,
   );
   assert.equal(
     (await call("GET", "/api/v1/people/" + b.data.personId, undefined, m))
@@ -623,4 +639,36 @@ test("readiness fails when required migration is missing while liveness remains 
       "UPDATE crm_migrations SET name='004_identity.sql' WHERE name='004_temporarily_hidden'",
     );
   }
+});
+
+
+test("archived organizations reject invitations and still allow session logout", async () => {
+  const a = await register();
+  const inv = await ok("POST", "/invitations", {
+    personId: await person(a), roles: ["manager"], branchIds: [a.data.branchId],
+  }, a);
+  await ok("POST", "/organization/archive", {}, a);
+  const accepted = await publicPost("/auth/invitations/accept", {
+    token: inv.token, login: "archived-invite", password,
+  });
+  assert.equal(accepted.status, 400);
+  assert.equal(accepted.error.code, "INVALID_INVITATION");
+  const [users]: any = await pool.execute("SELECT id FROM crm_users WHERE org_id=?", [a.data.org]);
+  assert.equal(users.length, 1);
+  await ok("POST", "/auth/logout", {}, a);
+  assert.equal((await call("GET", "/api/v1/auth/me", undefined, a)).status, 401);
+});
+
+test("invitation cannot grant access to a branch archived after issue", async () => {
+  const a = await register();
+  const br = await ok("POST", "/branches", {name: "Closing branch"}, a);
+  const inv = await ok("POST", "/invitations", {
+    personId: await person(a), roles: ["manager"], branchIds: [br.id],
+  }, a);
+  await ok("POST", `/branches/${br.id}/archive`, {}, a);
+  const accepted = await publicPost("/auth/invitations/accept", {
+    token: inv.token, login: "closed-branch-invite", password,
+  });
+  assert.equal(accepted.status, 400);
+  assert.equal(accepted.error.code, "INVALID_INVITATION");
 });

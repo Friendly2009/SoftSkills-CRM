@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { PriceCard } from '@/components/Prices/PriceCard';
 

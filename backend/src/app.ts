@@ -1,3 +1,5 @@
+import { financeReportRoutes } from "./modules/financeReports.js";
+import { cardRoutes } from "./modules/cards.js";
 import { log } from "./core/logger.js";
 import express from "express";
 import { randomUUID } from "node:crypto";
@@ -53,7 +55,7 @@ export function createApp() {
         Vary: "Origin",
         "Access-Control-Allow-Methods": "GET,POST,PATCH,DELETE,OPTIONS",
         "Access-Control-Allow-Headers":
-          "Content-Type,X-CSRF-Token,Idempotency-Key",
+          "Content-Type,X-CSRF-Token,Idempotency-Key,If-Match",
       });
     }
     if (req.method === "OPTIONS") {
@@ -78,11 +80,24 @@ export function createApp() {
     try {
       await transaction(null, async (db) => {
         const migration = (
-          await rows(db, "SELECT name FROM crm_migrations WHERE name=?", [
-            "004_identity.sql",
-          ])
+          await rows(
+            db,
+            "SELECT COUNT(*) AS n FROM crm_migrations WHERE name IN (?,?,?,?,?)",
+            [
+              "004_identity.sql",
+              "005_resources.sql",
+              "006_education.sql",
+              "007_finance.sql",
+              "008_import_preview.sql",
+            ],
+          )
         )[0];
-        assert(migration, 503, "MIGRATIONS_REQUIRED", "Run migrations");
+        assert(
+          Number(migration?.n) === 5,
+          503,
+          "MIGRATIONS_REQUIRED",
+          "Run migrations",
+        );
       });
     } catch {
       throw new AppError(
@@ -158,8 +173,10 @@ export function createApp() {
   authRoutes(app);
   peopleRoutes(app);
   resourceRoutes(app);
+  cardRoutes(app);
   educationRoutes(app);
   financeRoutes(app);
+  financeReportRoutes(app);
   salesRoutes(app);
   importRoutes(app);
   collaborationRoutes(app);
@@ -188,6 +205,10 @@ export function createApp() {
         code = "VALIDATION";
         message = "Invalid input";
         details = err.issues.map((i) => ({ path: i.path, message: i.message }));
+      } else if (["charset.unsupported", "encoding.unsupported"].includes(err.type)) {
+        status = 415;
+        code = "CONTENT_TYPE";
+        message = "Unsupported request charset or content encoding";
       } else if (err.type === "entity.too.large") {
         status = 413;
         code = "BODY_TOO_LARGE";

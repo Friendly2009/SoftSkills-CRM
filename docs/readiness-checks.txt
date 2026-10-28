@@ -1,0 +1,63 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated fstream@1.0.12: This package is no longer supported.
+npm warn deprecated eslint@9.39.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+
+added 372 packages in 3s
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 typecheck
+> tsc --noEmit
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 typecheck:tests
+> tsc --noEmit -p tsconfig.test.json
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 lint
+> eslint src test
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 test
+> node --import tsx --test test/*.test.ts
+
+✔ exact money and discount at integer precision boundary (1.600153ms)
+✔ contact normalization and real calendar validation (3.40153ms)
+✔ password hashes salted, verified without storing plaintext (1266.959097ms)
+✔ roles and explicit branch restrictions fail closed (0.542058ms)
+✔ xlsx parser accepts values and rejects formulas and ZIP bombs (54.813975ms)
+✔ percentage rounds final payable half up using integer arithmetic (2.786393ms)
+✔ lesson validates timezone, exact intervals and mutually exclusive discounts (18.244047ms)
+✔ subscription scope requires both selected group and subject (0.249637ms)
+✔ OpenAPI covers every registered route with concrete responses, security and headers (56.929075ms)
+✔ membership sweep handles adjacent periods, gaps and open ends (1.391809ms)
+✔ contacts normalize before validation and reject duplicate normalized inputs (4.244282ms)
+✔ version contract covers edits, archive, conversion, exit and profile (0.297368ms)
+✔ environment fails closed without leaking secret values (15.269145ms)
+✔ recursive secret redaction and portal DTO allowlists (0.646115ms)
+✔ empty staff branch list grants no branch access (0.209306ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2179.493526
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 build
+> tsc
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> softskills-crm-backend@2.0.0 openapi
+> node --import tsx src/openapi.ts
+
+Wrote docs/openapi.json

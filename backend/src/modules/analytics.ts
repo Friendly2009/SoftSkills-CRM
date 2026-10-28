@@ -60,7 +60,7 @@ export function analyticsRoutes(app: Express) {
       const finance = (
         await rows(
           c.db,
-          `SELECT CAST(COALESCE(SUM(IF(COALESCE(original.amount,l.amount)>0,l.amount,0)),0) AS CHAR) AS income,CAST(COALESCE(-SUM(IF(COALESCE(original.amount,l.amount)<0,l.amount,0)),0) AS CHAR) AS expense,CAST(COALESCE(SUM(l.amount),0) AS CHAR) AS net FROM crm_ledger l JOIN crm_accounts r ON r.org_id=l.org_id AND r.id=l.account_id LEFT JOIN crm_ledger original ON original.org_id=l.org_id AND original.id=l.reversal_of WHERE ${accounts.where.join(" AND ")} AND r.kind='cash' AND l.created_at>=? AND l.created_at<?`,
+          `SELECT CAST(COALESCE(SUM(IF(COALESCE(original.kind,l.kind)<>'transfer' AND COALESCE(original.amount,l.amount)>0,l.amount,0)),0) AS CHAR) AS income,CAST(COALESCE(-SUM(IF(COALESCE(original.kind,l.kind)<>'transfer' AND COALESCE(original.amount,l.amount)<0,l.amount,0)),0) AS CHAR) AS expense,CAST(COALESCE(SUM(l.amount),0) AS CHAR) AS net,CAST(COALESCE(SUM(IF(COALESCE(original.kind,l.kind)='transfer',l.amount,0)),0) AS CHAR) AS transfersNet FROM crm_ledger l JOIN crm_accounts r ON r.org_id=l.org_id AND r.id=l.account_id LEFT JOIN crm_ledger original ON original.org_id=l.org_id AND original.id=l.reversal_of WHERE ${accounts.where.join(" AND ")} AND r.kind='cash' AND l.created_at>=? AND l.created_at<?`,
           [...accounts.args, sqlTime(q.from), sqlTime(q.to)],
         )
       )[0];

@@ -1,16 +1,7 @@
 {
-  "name": "soft-skills CRM Backend",
+  "name": "softskills-crm-backend",
   "version": "2.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "node --test tests/*.test.cjs",
-    "dev": "tsx server.ts",
-    "typecheck": "tsc --noEmit"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "private": true,
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -22,8 +13,13 @@
     "typecheck": "tsc --noEmit",
     "migrate": "node --import tsx src/migrate.ts",
     "test": "node --import tsx --test test/*.test.ts",
-    "test:integration": "node --import tsx --test --test-concurrency=1 test/integration/*.test.ts",
-    "openapi": "node --import tsx src/openapi.ts"
+    "test:integration": "node --import tsx --test --test-timeout=180000 --test-concurrency=1 test/integration/*.test.ts",
+    "openapi": "node --import tsx src/openapi.ts",
+    "lint": "eslint src test",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json",
+    "migrate:prod": "node dist/migrate.js",
+    "test:e2e": "node --import tsx --test test/integration/readiness.test.ts",
+    "dev:seed": "node --import tsx src/devSeed.ts"
   },
   "dependencies": {
     "dotenv": "16.6.1",
@@ -35,8 +31,12 @@
   "devDependencies": {
     "@types/express": "5.0.3",
     "@types/node": "22.18.10",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "eslint": "9.39.1",
     "tsx": "4.20.6",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.48.1"
   },
   "overrides": {
     "uuid": "11.1.1"

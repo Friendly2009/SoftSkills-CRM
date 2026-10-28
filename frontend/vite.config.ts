@@ -10,8 +10,8 @@ export default defineConfig(({ mode }) => {
     server: { proxy: { '/api': {
       target: env.API_PROXY_TARGET || 'http://127.0.0.1:3000',
       changeOrigin: true,
-      // The supplied legacy backend registers routes at /, not /api.
-      rewrite: (url: string) => url.replace(/^\/api/, ''),
+      // API v1 owns its prefix; retain rewriting only for legacy routes.
+      rewrite: (url: string) => /^\/api\/v1(?:\/|$)/.test(url) ? url : url.replace(/^\/api/, ''),
     } } },
   };
 });

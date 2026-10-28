@@ -1,0 +1,48 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> soft-skills-crm-frontend@1.0.0 test:crm
+> vitest run --config vitest.crm.config.ts --reporter=verbose
+
+
+ RUN  v4.1.12 /workspace/scratch/e07be902e488/alpha_crm_open_source/frontend
+
+ ✓ tests/crm-operations.test.ts > CRM mock business operations > credits once for an identical payment key 4ms
+ ✓ tests/crm-operations.test.ts > CRM mock business operations > rejects invalid payments without changing balance 2ms
+ ✓ tests/crm-operations.test.ts > CRM mock business operations > closes attendance once, debits only attendees and records teacher pay once 2ms
+ ✓ tests/crm-operations.test.ts > CRM mock business operations > rejects an unrelated student before any charge 0ms
+ ✓ tests/crm-operations.test.ts > CRM mock business operations > converts a lead into a single linked client across stage changes 1ms
+ ✓ tests/crm-operations.test.ts > CRM mock business operations > reconciles client balance when editing a payment 1ms
+ ✓ tests/crm-operations.test.ts > CRM mock business operations > validates forms and removes credentials from mock storage 1ms
+ ✓ tests/crm-operations.test.ts > CRM mock business operations > parses escaped quotes and line breaks in CSV 1ms
+ ✓ tests/crm-v1.test.ts > API v1 form contracts > converts money exactly without floating point rounding 5ms
+ ✓ tests/crm-v1.test.ts > API v1 form contracts > loads SQL fields, version and contacts into editable values 2ms
+ ✓ tests/crm-v1.test.ts > API v1 form contracts > omits unused inline lead person and preserves selected existing person 1ms
+ ✓ tests/crm-v1.test.ts > API v1 form contracts > supports contact discriminator and nullable values 2ms
+ ✓ tests/crm-v1.test.ts > API v1 form contracts > uses If-Match and idempotency exactly where required 0ms
+ ✓ tests/crm-v1.test.ts > HTTP transport > uses bootstrap token then authenticated CSRF, cookies and version header 5ms
+ ✓ tests/crm-v1.test.ts > HTTP transport > does not turn failures into mock success or retry writes automatically 2ms
+ ✓ tests/crm-v1.test.ts > HTTP transport > clears identity and notifies UI when the session expires 2ms
+ ✓ tests/crm-v1.test.ts > HTTP transport > survives non-JSON reverse proxy failures 2ms
+ ✓ tests/crm-v1.test.ts > reuses an idempotency key after a lost response, then clears it on success 8ms
+ ✓ tests/crm-v1-forms.test.tsx > allows an open-ended enrollment while requiring its start 65ms
+ ✓ tests/crm-v1-forms.test.tsx > preserves a percentage discount without resubmitting its calculated fixed amount 1ms
+ ✓ tests/crm-data-mode.test.tsx > mock mode loads and saves locally without any HTTP request 112ms
+ ✓ tests/crm-data-mode.test.tsx > real mode uses server snapshots and never reads or overwrites mock persistence 31ms
+ ✓ tests/crm-data-mode.test.tsx > failed writes retain server state and report the error 20ms
+ ✓ tests/crm-data-mode.test.tsx > missing API shows an error without substituting demo records 147ms
+ ✓ tests/crm-data-mode.test.tsx > switching modes aborts pending bootstrap and ignores its late result 12ms
+ ✓ tests/crm-data-mode.test.tsx > rejects malformed snapshots and preserves HTTP authentication errors 3ms
+ ✓ tests/crm-data-mode.test.tsx > public-page requests follow the same mode and configured API prefix 3ms
+ ✓ tests/crm-ui.test.tsx > interactive CRM > creates a client, filters the list and persists across remount 1122ms
+ ✓ tests/crm-ui.test.tsx > interactive CRM > payment updates card, transaction list and survives reload 191ms
+ ✓ tests/crm-ui.test.tsx > interactive CRM > moves leads using the accessible selector 80ms
+ ✓ tests/crm-ui.test.tsx > interactive CRM > support is a dismissible placeholder and excluded navigation is absent 236ms
+ ✓ tests/crm-ui.test.tsx > interactive CRM > malformed persisted state falls back to demo fixtures 70ms
+ ✓ tests/crm-ui.test.tsx > interactive CRM > settings update the header organization name 179ms
+ ✓ tests/crm-ui.test.tsx > interactive CRM > calendar controls switch the period and open a lesson form 196ms
+
+ Test Files  5 passed (5)
+      Tests  34 passed (34)
+   Start at  14:12:03
+   Duration  4.65s (transform 1.16s, setup 0ms, import 2.62s, tests 2.53s, environment 5.94s)
+

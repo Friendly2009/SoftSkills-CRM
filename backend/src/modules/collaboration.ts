@@ -1,3 +1,4 @@
+import { checkContacts, syncPersonNames } from "./people.js";
 import type { Express } from "express";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -8,7 +9,6 @@ import { assert } from "../core/errors.js";
 import {
   id,
   text,
-  contacts,
   password,
   pageQuery,
   email,
@@ -45,6 +45,7 @@ export function collaborationRoutes(app: Express) {
         name: p.name,
         fullName: p.name,
         birthday: p.birthday,
+        version: p.version,
       }))(await get(c.db, c.actor, "people", c.actor.personId)),
       contacts: await rows(
         c.db,
@@ -64,14 +65,15 @@ export function collaborationRoutes(app: Express) {
       summary: "Update own name and contacts without changing permissions",
     },
     async (c, b) => {
+      await checkContacts(c, c.actor.personId, [
+        { kind: "email", value: b.email },
+        ...(b.phone ? [{ kind: "phone", value: b.phone }] : []),
+      ]);
       await c.db.execute(
         "UPDATE crm_people SET name=? WHERE org_id=? AND id=?",
         [b.fullName, c.actor.org, c.actor.personId],
       );
-      await c.db.execute(
-        "UPDATE crm_staff SET name=? WHERE org_id=? AND person_id=?",
-        [b.fullName, c.actor.org, c.actor.personId],
-      );
+      await syncPersonNames(c, c.actor.personId, b.fullName);
       await c.db.execute(
         "DELETE FROM crm_contacts WHERE org_id=? AND person_id=?",
         [c.actor.org, c.actor.personId],
